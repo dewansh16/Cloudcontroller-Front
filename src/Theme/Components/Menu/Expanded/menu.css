@@ -1,0 +1,105 @@
+.expanded-menu {
+  max-width: 250px;
+  width: 100%;
+
+}
+
+.expanded-menu .menu-scroll-container {
+  width: 100%;
+  height: calc(100vh - 3rem);
+  overflow-y: scroll;
+  background: rgba(255, 255, 255, 1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+.expanded-menu .menu-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.expanded-menu .menu-scroll-container .menu-items {
+  width: 100%;
+}
+
+.expanded-menu .menu-scroll-container .menu-items .menu-subgroup {
+  width: 100%;
+  padding-top: 1rem;
+  border-top: solid 1px rgba(0, 0, 0, 0.15);
+}
+.expanded-menu .menu-scroll-container .menu-items .menu-subgroup:nth-child(1) {
+  width: 100%;
+  padding-top: 1rem;
+  border: none;
+}
+
+.expanded-menu .menu-scroll-container .menu-items .menu-subgroup .menu-subgroup-header {
+  width: 100%;
+  display: flex;
+
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+
+  color: #494949;
+  padding: 1rem 0rem 1rem 1.5rem;
+}
+
+.expanded-menu .menu-scroll-container .menu-items .menu-subgroup ul {
+  padding: 0;
+}
+
+.expanded-menu .menu-scroll-container .menu-items .menu-subgroup ul li{
+  padding: 0;
+  display: flex;
+  cursor: pointer;
+  /* display: grid;
+  grid-template-areas: "icon title";
+  grid-template-columns: 4rem auto; */
+}
+
+.expanded-menu .menu-scroll-container .menu-items .menu-subgroup ul li > .icon {
+  grid-area: icon;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  opacity: 0.3;
+  width: 4rem;
+  transition: opacity 0.2s ease-in;
+  /* padding-left: 3rem; */
+}
+
+.expanded-menu .menu-scroll-container .menu-items .menu-subgroup ul li > .title {
+  grid-area: title;
+  display: flex;
+  align-items: center;
+  height: 3.1rem;
+  color: #1d1d1d;
+  transition: opacity 0.2s ease-in;
+  padding-left: 1rem;
+  font-family: Lexend Deca;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+  opacity: 0.3;
+}
+
+@media only screen and (max-width: 768px) {
+  .expanded-menu .menu-scroll-container .menu-items .menu-subgroup ul li > .title {
+    height: 2rem;
+  }
+}
+
+
+.expanded-menu .menu-scroll-container .menu-items .menu-subgroup ul li.selected > .icon ,
+.expanded-menu .menu-scroll-container .menu-items .menu-subgroup ul li.selected > .title {
+  opacity: 1;
+}
+
+.expanded-menu .menu-scroll-container .menu-items .menu-subgroup ul li.selected {
+  border-right: solid 6px rgba(29, 29, 29, 0.8);
+}

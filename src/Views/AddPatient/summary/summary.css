@@ -1,0 +1,6 @@
+.add-patient-summary > .ant-result-content {
+  background: white;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}

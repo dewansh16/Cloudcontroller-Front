@@ -1,0 +1,50 @@
+.panel-content-container{
+    display: flex;
+    margin-left: 1%;
+    width: 95%;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    padding: 2% 0%;
+}
+
+.panel-icon-number-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 15%;
+}
+
+.panel-patient-details-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 55%;
+}
+
+.panel-dosage{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.panel-number-container{
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.panel-patient-name{
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.panel-patient-id{
+    font-weight: 500;
+    font-size: 15px;
+    color: rgba(0, 0, 0, 0.3);
+}
+
+.panel-dosage{
+    font-weight: 600;
+    font-size: 15px;
+    color: #006CFF;
+}

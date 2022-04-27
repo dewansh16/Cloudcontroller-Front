@@ -1,0 +1,65 @@
+.report-header {
+  display: flex;
+  width: 100%;
+  margin: auto;
+  align-items: center;
+  justify-content: center;
+  border-bottom: rgba(0, 0, 0, 0.2) solid 3px;
+  border-radius: 0px;
+  margin-top: 16px;
+  padding-bottom: 5px;
+}
+
+.header-logo {
+  /* width: 25%; */
+  text-align: center;
+  height: 64px;
+  width: 57px;
+  width: 10%;
+}
+.header-logo img {
+  height: 64px;
+  width: 64px;
+}
+
+.heart-logo {
+  text-align: center;
+  width: 10%;
+}
+.heart-logo img {
+  padding-top: 10px;
+  width: 44px;
+  height: 56px;
+}
+
+.powered-by {
+  width: 20%;
+  height: 25px;
+  color: rgba(0, 0, 0, 0.5);
+  border-radius: nullpx;
+  font-family: Lexend;
+  font-size: 25px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 25px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  /* padding-right: 80px; */
+}
+/* powered-by p{
+    text-align: center;
+} */
+
+.site-link {
+  text-align: center;
+  width: 20%;
+  height: 25px;
+  /* width: 25%; */
+  font-family: Lexend;
+  font-size: 25px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 25px;
+  letter-spacing: 0.02em;
+  text-align: left;
+}

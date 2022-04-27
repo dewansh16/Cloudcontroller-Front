@@ -1,0 +1,44 @@
+#table-wrapper {
+  overflow: auto;
+}
+.ewsTable {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.ewsTable .ewsContent > td {
+  text-align: center;
+  border-bottom: 1px solid #f7f7f7;
+  border-collapse: collapse;
+  height: 3rem;
+  width: 6em;
+}
+.ewsTable .ewsHeader > th {
+  width: 6em;
+  font-weight: 600;
+  background: #f7f7f7;
+  color: rgba(0, 0, 0, 0.5);
+  padding: 1em;
+  text-transform: uppercase;
+}
+
+@media (min-height: 700px) {
+  #table-wrapper {
+    height: 20rem;
+  }
+}
+@media (min-height: 936px) {
+  #table-wrapper {
+    height: 30rem;
+  }
+}
+@media (min-height: 1024px) {
+  #table-wrapper {
+    height: 40rem;
+  }
+}
+@media (min-height: 1366px) {
+  #table-wrapper {
+    height: 61rem;
+  }
+}

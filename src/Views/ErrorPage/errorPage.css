@@ -1,0 +1,39 @@
+.need-error {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.need-error-container {
+  box-shadow: 0px 24px 94px 5px rgba(143, 143, 143, 0.12);
+  border-radius: 6px;
+  height: 80%;
+  width: 69%;
+  gap: 1rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.need-error-header {
+  font-size: 60px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.need-error-subheader {
+  font-size: 25px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.need-error-number {
+  font-weight: 600;
+  font-size: 200px;
+  font-family: "Teko", sans-serif;
+  color: rgba(0, 0, 0, 0.1);
+  height: 40%;
+  text-shadow: 1px 1px 5px white, -1px -1px rgba(176, 176, 176, 1);
+}

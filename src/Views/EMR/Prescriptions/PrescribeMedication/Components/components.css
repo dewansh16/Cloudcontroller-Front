@@ -1,0 +1,92 @@
+.li-item {
+  height: 56px;
+  width: 80%;
+  color: #444444;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.5rem 0;
+  padding: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.li-item.selected {
+  background: #444444;
+  color: #fff;
+}
+
+.li-item.valid {
+  border: solid 1px #1bc114;
+}
+
+.li-item.valid.selected {
+  border: none;
+}
+
+.li-item.unupdated {
+  border: solid 1px orange;
+}
+
+.li-item.unupdated.selected {
+  border: none;
+}
+
+.li-item.invalid {
+  border: solid 1px #eb1348;
+}
+
+.li-item.invalid.selected {
+  border: none;
+}
+
+
+/* medicine search styping */
+.med-search-list-header {
+  height: 53px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 0;
+  background: #f7f7f7;
+  border-radius: 6px;
+}
+
+.med-search-list-header span {
+  margin: 0;
+  padding: 0;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #727272;
+  font-size: 14px;
+}
+
+.med-search-li-item {
+  height: 69px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #444444;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+  padding: 0.5rem 1rem;
+  font-family: Lexend;
+  cursor: pointer;
+  background: linear-gradient(
+    90.07deg,
+    #f7f7f7 1.62%,
+    rgba(247, 247, 247, 0) 99.93%
+  );
+  transition: all 0.2s ease-in-out;
+}
+
+.med-search-li-item.selected {
+  background: #444444;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #fff;
+}

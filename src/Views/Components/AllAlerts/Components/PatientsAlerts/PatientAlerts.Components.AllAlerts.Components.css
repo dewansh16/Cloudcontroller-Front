@@ -1,0 +1,21 @@
+.patients-alert-list .ant-collapse-borderless > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+    padding-top: 0px;
+}
+
+
+.patients-alert-list .ant-collapse-content > .ant-collapse-content-box {
+    padding: 0px;
+    margin-top: 22px;
+    margin-left: 4%;
+    padding-left: 5%;
+    margin-bottom: 22px;
+    border-left: 2px solid #00000010;
+}
+
+.patients-alerts-list-body .all-patients-alert .in-patient-alerts  .ant-collapse-icon-position-right > .ant-collapse-item > .ant-collapse-header {
+    padding: 5px 8px;
+    padding-right: 50px;
+    border: none;
+    box-shadow: none;
+    border-radius: none;
+}

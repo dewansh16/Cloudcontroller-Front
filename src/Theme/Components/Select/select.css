@@ -1,0 +1,45 @@
+.form-select.ant-select {
+  height: 2.7rem;
+  box-sizing: border-box;
+  /* box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05); */
+}
+
+.ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+  background: #fafafa;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+
+.form-select.ant-select .ant-select-selector {
+  height: 2.7rem !important;
+}
+
+.form-select.ant-select .ant-select-selector .ant-select-selection-search {
+  height: 2.7rem;
+}
+
+.form-select.ant-select
+  .ant-select-selector
+  .ant-select-selection-search
+  input {
+  height: 2.7rem;
+}
+
+.form-select.ant-select
+  .ant-select-selector
+  .ant-select-selection-item
+  {
+  margin-left: 0;
+}
+
+.form-select.ant-select .ant-select-selector .ant-select-selection-item {
+  height: 2.7rem;
+  display: flex;
+  align-items: center;
+}
+
+.form-select.ant-select .ant-select-selector .ant-select-selection-placeholder {
+  height: 2.7rem;
+  display: flex;
+  align-items: center;
+  font-weight: 500 !important;
+}

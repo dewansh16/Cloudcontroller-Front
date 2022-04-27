@@ -1,0 +1,140 @@
+#patientDetailsTab.ant-tabs-top > .ant-tabs-nav::before,
+.ant-tabs-bottom > .ant-tabs-nav::before,
+.ant-tabs-top > div > .ant-tabs-nav::before,
+.ant-tabs-bottom > div > .ant-tabs-nav::before {
+  border: none !important;
+}
+
+#patientDetailsTab.ant-tabs-tab .ant-tabs-tab-active > p {
+  font-weight: 600;
+  opacity: 1;
+}
+
+.header-buttons {
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  margin-right: 3%;
+}
+
+.back-buttons {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.patient-name-box {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(251, 88, 27, 0.7);
+  border-radius: 7px;
+  padding: 0.7rem;
+}
+
+.patient-name-box h1 {
+  margin-bottom: 0px;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 25px;
+}
+
+.patient-name-box p {
+  margin-bottom: 0px;
+  margin-bottom: 0px;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0.1em;
+  color: #a8a8a8;
+  text-align: left;
+}
+
+.patient-details-header-first-column {
+  width: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.patient-details-header-second-column {
+  width: 100%;
+}
+
+.infobox-drawer {
+  z-index: 2 !important;
+}
+
+.infobox-drawer .ant-drawer-content-wrapper {
+  width: 256px;
+  height: 500px !important;
+  box-shadow: none !important;
+}
+
+.patient-location-details {
+  height: 100%;
+}
+
+.patient-location-details h1 {
+  margin-bottom: 0px;
+  color: #f85b18;
+}
+
+.patient-location-details p {
+  margin-bottom: 0px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.patient-location-details .patient-location-details-parts {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.patient-location-details-parts-wardName {
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.patient-location-details-parts-location {
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: #878787;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.patient-state-box h1 {
+  margin-bottom: 0px;
+  text-align: center;
+  text-decoration-line: underline;
+}
+
+.empty-step-div {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+}
+
+.empty-step-div p {
+  margin-bottom: 0px;
+  font-size: 2rem;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0em;
+  height: 65px;
+  opacity: 15%;
+  text-align: center;
+}
+
+.patient-state-box {
+  width: 20%;
+}

@@ -1,0 +1,109 @@
+.patient-panel-header-heading{
+    height: 23px;
+font-size: 18px;
+line-height: 23px;
+letter-spacing: 0em;
+text-align: left;
+}
+
+.patient-panel-header-time{
+    margin-top: 1px;
+font-size: 14px;
+line-height: 18px;
+letter-spacing: 0em;
+text-align: left;
+opacity: 0.5;
+}
+
+
+.patient-panel-header{
+    width: 46%;
+    margin-left: 6%;
+    margin-top: 10px ;
+}
+
+.patient-panel-header-info{
+    width: 40%;
+    margin-top: 10px ;
+}
+
+
+.patients-alerts-list-body .ant-btn {
+    line-height: 1.5715;
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+    text-align: center;
+    background-image: none;
+    border: 1px solid transparent;
+    box-shadow: 0 2px 0 rgb(0 0 0 / 2%);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    height: 41px;
+    padding: 5px 15px;
+    font-size: 14px;
+    border-radius: 8px;
+    color: rgba(0, 0, 0, 0.85);
+    background: #fff;
+    border-color: #d9d9d9;
+    margin: 10px;
+}
+
+
+.patients-alerts-list-body .all-patients-alert .ant-collapse-icon-position-right > .ant-collapse-item > .ant-collapse-header {
+    padding: 5px 8px;
+    padding-right: 50px;
+    border: 1px solid #C7C7C7;
+    box-shadow: 0px 0px 20px 3px #6F6C6C0D;
+    border-radius: 6px !important;
+}
+
+
+.patients-alerts-list-body .ant-collapse-icon-position-right > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
+    right: 24px;
+    left: auto;
+    font-size: 24px;
+    padding-top: 0px;
+    color: #1479FF;
+}
+
+.header-number{
+    font-family: Teko;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0em;
+    max-height: 40%;
+    text-align: center;
+}
+
+.header-total-number{
+    height: 40%;
+    font-family: Teko;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 29px;
+    letter-spacing: 0em;
+    text-align: center;
+    opacity: 0.2;
+}
+
+.header-number-box{
+    width: 5%;
+    margin-left: 2%;
+    display: flex;
+    flex-direction: column;
+    height:64px;
+}
+
+.header-number-box .ant-divider-horizontal {
+    display: flex;
+    clear: both;
+    width: 100%;
+    min-width: 100%;
+    margin: 5px 0;
+}

@@ -1,0 +1,45 @@
+.addUser-head {
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 48px;
+  line-height: 60px;
+  /* identical to box height */
+  color: #143765;
+  padding: 3% 0 0 7%;
+}
+
+.submit-button {
+  border: 1px solid #161edd !important;
+  height: 50px !important;
+  box-sizing: border-box !important;
+  border-radius: 22px !important;
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: bold !important;
+  font-size: 16px !important;
+  line-height: 22px !important;
+  color: #161edd !important;
+}
+
+.formScrollContainer
+  .ant-select-show-search.ant-select:not(.ant-select-customize-input)
+  .ant-select-selector {
+  cursor: text;
+  height: 48px;
+}
+
+.formScrollContainer
+  .edit-modal
+  .addPatientDetailsModal
+  > .ant-form-item-label
+  > label {
+  font-style: normal;
+  font-weight: 600;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0.07em;
+  text-align: left;
+  color: #9c9c9c !important;
+}

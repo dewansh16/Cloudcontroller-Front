@@ -1,0 +1,203 @@
+.user-table .ant-table-thead {
+  height: 80px;
+  font-size: 18px;
+  background-color: white;
+  opacity: 0.5;
+}
+
+.table-body-text {
+  color: #6c6c6c;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.userinventory-body
+  Row
+  .user-table
+  .ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-content
+  > table
+  > thead
+  > tr
+  > th,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-header
+  > table
+  > thead
+  > tr
+  > th,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-body
+  > table
+  > thead
+  > tr
+  > th,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-summary
+  > table
+  > thead
+  > tr
+  > th,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-content
+  > table
+  > tbody
+  > tr
+  > td,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-header
+  > table
+  > tbody
+  > tr
+  > td,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-body
+  > table
+  > tbody
+  > tr
+  > td,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-summary
+  > table
+  > tbody
+  > tr
+  > td,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-content
+  > table
+  > tfoot
+  > tr
+  > th,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-header
+  > table
+  > tfoot
+  > tr
+  > th,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-body
+  > table
+  > tfoot
+  > tr
+  > th,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-summary
+  > table
+  > tfoot
+  > tr
+  > th,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-content
+  > table
+  > tfoot
+  > tr
+  > td,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-header
+  > table
+  > tfoot
+  > tr
+  > td,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-body
+  > table
+  > tfoot
+  > tr
+  > td,
+.ant-table.ant-table-bordered
+  > .ant-table-container
+  > .ant-table-summary
+  > table
+  > tfoot
+  > tr
+  > td {
+  border-right: 2px solid #f0f0f0;
+  padding: 20px;
+}
+
+.active-text {
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  color: #06a400;
+}
+
+.inactive-text {
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  color: #dd4a34;
+}
+
+.user-header-heading {
+  /* line-height: 37px; */
+  color: #000000;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  padding-left: 0px !important;
+  margin-left: 16%;
+}
+
+.user-header-heading p {
+  font-weight: 600 !important;
+  font-size: 18px;
+  margin-bottom: 0px;
+}
+
+.addUser-button {
+  background: #fbfbfb !important;
+  border: 1px solid #ff7529 !important;
+  box-sizing: border-box !important;
+  font-weight: 500 !important;
+  font-size: 15px !important;
+  line-height: 20px !important;
+  color: #ff7529 !important;
+  border-radius: 6px !important;
+  width: 140px !important;
+  padding-left: 4px !important;
+  height: 50px !important;
+  box-shadow: 0px 10px 20px 0px #ff75291a !important;
+}
+
+.edit-button {
+  border-radius: 6px !important ;
+  width: fit-content;
+  padding: 2px !important ;
+  margin-left: 5px !important ;
+  border: 2px solid #d5f0ff !important ;
+  color: #1479ff !important ;
+}
+
+.phone-number-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-table .ant-table-pagination.ant-pagination {
+  margin: 16px 0;
+  display: none;
+}
+
+.list-user-dropdown-select {
+  max-height: calc(100vh - 175px);
+  overflow-y: auto;
+}

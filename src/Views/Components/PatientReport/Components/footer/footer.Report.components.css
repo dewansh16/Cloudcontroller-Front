@@ -1,0 +1,17 @@
+.footer-data
+{
+    width: 80%;
+    margin: auto;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0px 5px;
+}
+
+.footer-uppertext p{
+    margin-bottom: 3px;
+}
+
+.page-no span{
+font-size: 26px;
+}

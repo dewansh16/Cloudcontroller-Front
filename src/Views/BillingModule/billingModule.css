@@ -1,0 +1,255 @@
+.bm-container{
+    height: 100%;
+    width: 100%;
+}
+
+.bm-notenroll-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 89%;
+}
+
+.bm-enroll-container{
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+
+.bm-sidebar{
+    height: 100%;
+    width: 25%;
+    background-color: rgb(255 200 153 / 22%);
+    padding: 2%;
+}
+
+.bm-cptcode-header{
+    display: flex;
+    align-items: center;
+}
+
+.bm-cptcode-b-header{
+    display: flex;
+}
+
+.bm-header-dot{
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    background: #C4C4C4;
+    margin-right: 6%;
+}
+
+.bm-header-line{
+    height: 60px;
+    width: 2px;
+    background: #C4C4C4;
+    margin-left: 2.5%;
+    margin-right: 9%;
+}
+
+.bm-header-number-active{
+    font-size: 1.1rem;
+}
+
+.bm-header-number{
+    font-size: 1.1rem;
+    color: #878787;
+}
+
+.bm-header-below{
+    font-size: 0.8rem;
+    color: #878787;
+}
+
+.bm-cptcode-container{
+    position: relative;
+}
+
+.bm-selected{
+    position: absolute;
+    height: 65%;
+    width: 100%;
+    cursor: pointer;
+    left: 9%;
+}
+
+.bm-selected-active{
+    position: absolute;
+    height: 65%;
+    width: 100%;
+    cursor: pointer;
+    left: 9%;
+    background: #02ff0273;
+    opacity: 0.4;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+}
+
+.bm-selected:hover{
+    background: #02ff0273;
+    opacity: 0.4;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+}
+
+.bm-cptcodes-container{
+    margin-top: 15%;
+}
+
+.bm-right-container{
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.bm-date-month-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 5%;
+    height: 100%;
+    padding-top: 1%;
+}
+
+.bm-month-container{
+    background: rgb(255 200 153 / 22%);
+    border-radius: 6px;
+    width: 100%;
+    font-size: 1.6rem;
+    height: 70%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bm-month-sensor-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 5%;
+    width: 25%;
+    height: 100%;
+}
+
+.bm-sensor-mid{
+    width: 90%;
+    height: 14%;
+    margin: 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bm-sensor-monitored-bar{
+    background-color: rgba(196, 196, 196, 0.38);
+    position: relative;
+    height: 10px;
+    width: 100%;
+    border-radius: 30px;
+}
+
+.bm-sensor-monitored-bar-two{
+    background-color: #24db24;
+    left: 0;
+    top: 0;
+    position: absolute;
+    height: 10px;
+    width: 0%;
+    border-radius: 30px;
+}
+
+.bm-sensor-bottom-container{
+    height: 59%;
+    width: 90%;
+    margin: 0% 5%;
+}
+
+.bm-sensor-bottom-header{
+    background: #ffa000a1;
+    height: 10%;
+    font-size: 1.3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    width: 30%;
+}
+
+.bm-sensor-bottom-table-header{
+    font-size: 1.1rem;
+    display: flex;
+    width: 100%;
+    height: 20%;
+    align-items: center;
+    padding: 0% 5%;
+    background: #ffc30042;
+    border-top-right-radius: 30px;
+}
+
+.bm-twenty-bottom-container{
+    position: relative;
+    background: #ff9e001f;
+    margin: 0% 5%;
+    height: 59%;
+    width: 90%;
+    border-radius: 10px;
+}
+
+.bm-bottom-add-btn{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: right;
+    margin-bottom: 0.4%;
+    padding: 0% 5%;
+}
+
+.bm-twenty-header{
+    position: relative;
+    font-size: 1.4rem;
+    display: flex;
+    border-bottom: 1px solid #00000026;
+    justify-content: center;
+    align-items: center;
+    height: 15%;
+}
+
+.bm-add-task-container{
+    position: absolute;
+    top: 17%;
+    left: 14%;
+    height: 70%;
+    width: 70%;
+    border-radius: 10px;
+    z-index: 1;
+    background-color: white;
+    padding: 0% 5%;
+    padding-bottom: 2%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.bm-last-month-date{
+    height: 100%;
+    width: 30%;
+    margin-right: 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bm-stage-btn-inactive{
+    background: #ffa00066;
+}
+
+.bm-stage-btn-inactive:hover{
+    cursor: pointer;
+    background: #ffa20077;
+}

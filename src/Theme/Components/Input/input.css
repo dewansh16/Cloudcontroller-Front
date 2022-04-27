@@ -1,0 +1,131 @@
+/* if suffix is not used */
+.form-input.ant-input {
+  height: 2.7rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  border-radius: 6px;
+  /* box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -webkit-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -moz-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05); */
+
+  /* text styling */
+  font-family: Lexend;
+  font-style: normal;
+  font-size: 1rem;
+  color: #000000;
+}
+
+.form-input.ant-input:hover {
+  background: #fafafa;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.form-input.ant-input:focus {
+  outline: none;
+  background: #ffffff;
+  border: 1px solid #1479ff;
+  box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -webkit-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -moz-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+}
+
+.form-input.ant-input[disabled] {
+  background: #f7f7f7;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* if suffix is used */
+.ant-input-affix-wrapper.form-input {
+  height: 2.7rem;
+  font-size: 1rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  border-radius: 6px;
+  box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -webkit-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -moz-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+}
+.ant-input-affix-wrapper.form-input {
+  font-size: 1rem;
+}
+
+.form-input.ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
+  background: #fafafa;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.form-input.ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover
+  > .ant-input {
+  background: #fafafa;
+}
+
+.form-input.ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled)
+  .ant-input:focus {
+  outline: none;
+  background: #ffffff;
+  border: 1px solid #1479ff;
+  box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -webkit-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -moz-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+}
+
+.form-search.ant-input-search {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  border-radius: 6px;
+}
+
+.form-search.ant-input-search .ant-input-wrapper.ant-input-group input {
+  border: none;
+}
+
+.form-search.ant-input-search .ant-input-group-addon button {
+  border: none;
+}
+
+/* inputnumber */
+
+.ant-input-number.form-input-number {
+  height: 2.7rem;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  border-radius: 6px;
+  box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -webkit-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -moz-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+}
+
+.ant-input-number.form-input-number:hover {
+  background: #fafafa;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+
+.ant-input-number.form-input-number:focus {
+  background: #ffffff;
+  border: solid 2px #1479ff !important;
+  box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -webkit-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+  -moz-box-shadow: 0px 7px 20px rgba(105, 105, 105, 0.05);
+}
+
+.ant-input-number.form-input-number .ant-input-number-input-wrap {
+  width: 100%;
+}
+.ant-input-number.form-input-number .ant-input-number-input-wrap input {
+  width: 100%;
+  font-size: 1rem;
+}
+
+.ant-input-number.form-input-number
+  .ant-input-number-input-wrap
+  input::placeholder {
+  font-size: 1rem;
+}

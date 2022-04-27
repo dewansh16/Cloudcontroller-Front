@@ -1,0 +1,80 @@
+.ptp-body {
+  width: 100%;
+  height: 90%;
+}
+
+.ptp-upper-Row {
+  width: 100%;
+  height: 40%;
+}
+
+.ptp-upper-Col {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.ptp-upper-Col-box {
+  height: 80%;
+  width: 80%;
+  border: 1.5px solid #c4c4c4;
+  border-radius: 5px;
+}
+
+.ptp-upper-Col-box-header {
+  height: 30%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ptp-upper-Col-box-header h1 {
+  color: #878787;
+  font-size: 1rem;
+  margin-bottom: 0px;
+}
+
+.ptp-upper-Col-box-body {
+  height: 70%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ptp-upper-Col-box-body p {
+  margin-bottom: 0px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.ptp-lower-Row {
+  width: 100%;
+  height: 60%;
+}
+
+.ptp-lower-Col {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.ptp-lower-Col-box {
+  height: 80%;
+  width: 80%;
+  border: 1.5px solid #c4c4c4;
+  border-radius: 5px;
+}
+
+.ptp-lower-Col-box-header {
+  position: relative;
+  top: -14px;
+  left: 5px;
+  font-size: 0.9rem;
+  margin: 0 0 -1rem 0;
+  letter-spacing: 1px;
+  background: white;
+  width: max-content;
+  padding: 0 1rem;
+}

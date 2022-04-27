@@ -1,0 +1,49 @@
+.serial-box{
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.serial-box p{
+    margin-bottom: 0px;
+    margin-bottom: 0px;
+    color: #131516;
+    opacity: 0.6;
+    font-weight: normal;
+    font-size: 18px;
+    line-height: 22px;
+}
+
+.test-button-box{
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.device-management-chart{
+    margin: 3em 0px 1em;
+    width: 100%;
+}
+
+.device-info p{
+    margin-bottom: 0px;
+color: #000000;
+opacity: 1;
+font-weight: normal;
+font-size: 16px;
+line-height: 20px;
+}
+
+.device-info p span{
+opacity: 0.5;
+}
+
+.device-info-box{
+    margin: 20px 0px;
+
+}
+
+.device-info {
+    display: flex;
+    align-items: center;
+}

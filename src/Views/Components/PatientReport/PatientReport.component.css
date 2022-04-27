@@ -1,0 +1,103 @@
+.report-body {
+  background-color: white;
+  width: 80%;
+  margin: auto;
+}
+
+.report-body-0 {
+  width: 80%;
+  margin: auto;
+  background-color: white;
+}
+
+.charts {
+  width: 93%;
+  margin: auto;
+  margin-bottom: 60px;
+}
+
+.no-report-div p {
+  margin-bottom: 0px;
+  font-size: 4rem;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0em;
+  height: 65px;
+  opacity: 15%;
+  text-align: center;
+}
+
+.change::-webkit-input-placeholder {
+  /* WebKit, Blink, Edge */
+
+  font-size: 150px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 65px;
+  letter-spacing: 0em;
+  height: 65px;
+  opacity: 15%;
+
+  transform: translate(-50%, -50%);
+  position: absolute;
+  top: 35%;
+  left: 25%;
+}
+
+.change:-moz-placeholder {
+  /* Mozilla Firefox 4 to 18 */
+
+  font-size: 150px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 65px;
+  letter-spacing: 0em;
+  height: 65px;
+  opacity: 15%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+.change::-moz-placeholder {
+  /* Mozilla Firefox 19+ */
+  line-height: 40px;
+  height: 40px;
+  text-align: center;
+
+  font-size: 150px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 65px;
+  letter-spacing: 0em;
+  height: 65px;
+  opacity: 15%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+.change:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  /* /* color: #909; */
+
+  font-size: 150px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 65px;
+  letter-spacing: 0em;
+  height: 65px;
+  opacity: 15%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  top: 35%;
+  left: 25%;
+}
+
+.second-affix-box .ant-affix {
+  z-index: 100;
+}
+
+.first-affix-box .ant-affix {
+  z-index: 200;
+}

@@ -1,0 +1,14 @@
+.ant-dropdown {
+  top: 74px !important;
+}
+
+.ant-descriptions-item-label {
+  font-weight: bold;
+}
+.ant-dropdown-menu-item:hover,
+.ant-dropdown-menu-submenu-title:hover {
+  border-radius: 8px;
+  margin: 5px;
+  padding: 0;
+  transition: 10ms ease-in !important;
+}

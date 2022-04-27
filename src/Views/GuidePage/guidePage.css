@@ -1,0 +1,96 @@
+.gp-container{
+    height: 100%;
+    width: 100%;
+}
+
+.gp-navbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    height: 10%;
+    padding: 0% 3%;
+}
+
+.gp-title{
+    font-size: 30px;
+    font-family: Lexend;
+    font-weight: 600;
+    margin-left: 5%;
+}
+
+.gp-lower-container{
+    height: 90%;
+    width: 100%;
+    display: flex;
+}
+
+.gp-lower-left-container{
+    height: 100%;
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.gp-video-header{
+    font-weight: 600;
+    font-size: 20px;
+    /* background: linear-gradient(90deg, rgba(255, 117, 41, 0.11) -1.85%, rgba(255, 117, 41, 0) 100%); */
+    background: linear-gradient(90deg, rgba(255, 117, 41, 0.11) 100%, rgba(255, 117, 41, 0) 100%);
+    border-radius: 6px;
+    margin: 2% 0%;
+    padding: 1% 10%;
+}
+
+.gp-lower-right-container{
+    height: 100%;
+    width: 30%;
+    padding: 2%;
+}
+
+.gp-action-container{
+    height: 100%;
+    width: 100%;
+    box-shadow: 0px 10px 30px 2px rgba(228, 143, 90, 0.2);
+    display: flex;
+    flex-direction: column;
+    padding: 0% 3%;
+}
+
+.gp-drop-btns{
+    font-size: 20px;
+}
+
+[data-theme='compact'] .site-collapse-custom-collapse .site-collapse-custom-panel,
+.site-collapse-custom-collapse .site-collapse-custom-panel {
+  margin-bottom: 24px;
+  overflow: hidden;
+  background: #f7f7f7;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 6px;
+}
+
+.gp-drop-options{
+    font-size: 1rem;
+    margin: 4% 0%;
+    cursor: pointer;
+    padding: 1% 6%;
+    border-radius: 6px;
+}
+
+.gp-drop-options:hover{
+    color: #FF7529;
+    background: linear-gradient(90deg, rgba(255, 117, 41, 0.11) -1.85%, rgba(255, 117, 41, 0) 100%);
+}
+
+.gp-active-option{
+    color: #FF7529;
+    background: linear-gradient(90deg, rgba(255, 117, 41, 0.11) -1.85%, rgba(255, 117, 41, 0) 100%);
+}
+
+.gp-action-header{
+    font-size: 1.7rem;
+    text-align: center;
+    margin: 5%;
+}

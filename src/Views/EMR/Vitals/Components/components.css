@@ -1,0 +1,47 @@
+.record-type-selector {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border: solid 1px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  overflow-x: scroll;
+  /* TODO: do something for this */
+  /* max-width: 435px; */
+}
+
+.record-type-selector::-webkit-scrollbar {
+  display: none;
+}
+
+.record-type-selector .selector-item {
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: 6px;
+  min-width: 95px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.5rem;
+  background: rgba(234, 234, 234, 0.21);
+  padding: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  text-transform: capitalize;
+}
+
+.record-type-selector .selector-item p {
+  margin: 0;
+  padding: 0;
+}
+
+.record-type-selector .selector-item.selected {
+  background: #ff7529;
+  color: #fff;
+  position: sticky;
+  right: 0.5rem;
+  left: 0.5rem;
+  z-index: 1;
+  box-shadow: 25px 0px 10px rgba(255, 255, 255, 0.9),
+    -25px 0px 10px rgba(255, 255, 255, 0.9);
+}

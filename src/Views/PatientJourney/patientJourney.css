@@ -1,0 +1,123 @@
+.patient-info-box p {
+  margin-bottom: 0px;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0.1em;
+  color: #a8a8a8;
+}
+
+.top-info-div {
+  margin-bottom: 6px;
+}
+
+.navbar-buttons-div {
+  display: flex;
+  width: 400px;
+  justify-content: space-between;
+}
+
+.patient-journey-main-body {
+  width: 100vw;
+  height: 75vh;
+  display: flex;
+  margin: 0% 0% 2% 0%;
+}
+
+.steps-table {
+  /* width: 30%; */
+  height: 500px;
+  z-index: 3;
+  display: flex !important;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.steps-table-body {
+  width: 90%;
+  height: 100%;
+  background: #ffffff;
+  padding: 3% 0% 3%;
+  box-shadow: 0px 0px 18.43px rgb(0 0 0 / 5%);
+  border-radius: 5.52899px;
+}
+
+.journey-step-box {
+  display: flex;
+  width: 88%;
+  margin-right: auto;
+  height: 90px;
+}
+
+.step-left-box {
+  width: 25%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-left-box div {
+  margin-right: 15%;
+}
+
+.step-left-box p {
+  margin-bottom: 0px;
+  font-size: 0.8rem;
+  line-height: 20px;
+  letter-spacing: 0.1em;
+  text-align: right;
+  color: #878787;
+}
+
+.step-right-box {
+  width: 75%;
+  position: relative;
+  border-left: 1px solid #000000;
+}
+.step-right-box p {
+  margin-bottom: 0px;
+  font-size: 0.8rem;
+  line-height: 20px;
+  letter-spacing: 0.1em;
+  text-align: left;
+  color: #878787;
+}
+
+.step-right-box h1 {
+  margin-bottom: 0px;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.step-right-box-content {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.dot-icon-box {
+  position: absolute;
+  z-index: 1;
+  top: 16%;
+  left: -15px;
+}
+
+.steps-info {
+  /* width: 70%; */
+  height: 100%;
+  display: flex !important;
+  align-items: center;
+  padding-top: 2%;
+}
+
+.insteps-patches-info {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 10%;
+}
+
+.insteps-patches-info p {
+  margin-bottom: 0px;
+  font-size: 1rem;
+  color: #878787;
+}

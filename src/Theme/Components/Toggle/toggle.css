@@ -1,0 +1,49 @@
+.toggle-container {
+    display: flex;
+    align-items: center;
+    background: #eaeaea;
+    border-radius: 6px;
+    position: relative;
+    height: 57px;
+  }
+  
+  .toggle-option {
+    height: 41px;
+    width: 50%;
+    color: rgba(0, 0, 0, 0.4);
+    margin: 8px;
+    border-radius: 6px;
+    padding: 8px;
+    z-index: 2;
+    cursor: pointer;
+  
+    font-family: Lexend;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 18px;
+    text-align: center;
+  }
+  
+  .toggle-option.selected {
+    color: rgba(0, 0, 0, 1);
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .toggle-slider {
+    position: absolute;
+    z-index: 1;
+    height: calc(100% - 1rem);
+    width: calc(50% - 1rem);
+    background: #fff;
+    margin: 8px;
+    border-radius: 6px;
+  }
+  
+  .toggle-slider.left {
+    left: 0;
+  }
+  
+  .toggle-slider.right {
+    right: 0;
+  }
+  

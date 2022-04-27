@@ -1,0 +1,48 @@
+.dashboard-nav {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  max-width: 100%;
+  justify-content: space-around;
+  min-height: 88px;
+  overflow: hidden;
+  top: 0;
+  position: relative;
+  padding: 1rem 1rem;
+}
+
+.dashboard-nav-start {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 1rem;
+}
+.dashboard-nav-center {
+  display: flex;
+  align-items: center;
+  justify-self: center;
+  gap: 1rem;
+}
+.dashboard-nav-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.hamburger {
+  display: flex;
+  align-items: center;
+}
+.hamburger-content {
+  width: 100%;
+  background: white;
+  position: relative;
+  padding: 2em 1em;
+  /* margin-bottom: 2rem; */
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  overflow: hidden;
+  flex-wrap: wrap;
+}

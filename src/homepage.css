@@ -1,0 +1,71 @@
+.mainContainer {
+  background-image: url("./Assets/Images/landingBackground.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100vh;
+  position: fixed;
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100vw;
+  padding: 40px;
+  /* -webkit-filter: blur(8px); */
+}
+.authContainer {
+  display: flex;
+  justify-content: center;
+  /* align-items: center; */
+  width: 473px;
+  height: 554px;
+  background: rgba(255, 255, 255, 0.5);
+  /* padding: 5em 0; */
+  border-radius: 6px;
+}
+
+.form {
+  max-width: 100%;
+  margin: 2em;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.form h2 {
+  font-weight: 600;
+  font-size: 48px;
+  /* identical to box height */
+  background: linear-gradient(to right, #1c1a19, #a7a6a6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2; /* it's required when text breaks in two lines  */
+  opacity: 0.5;
+}
+
+.branding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heroBrand {
+  display: inline-flex !important;
+  justify-content: center;
+  align-items: center;
+}
+.poweredby {
+  color: black;
+  opacity: 0.6;
+  font-weight: 600;
+  font-size: 1.5em;
+  margin: 1em;
+}
+.live247 {
+  color: black;
+  opacity: 1;
+  margin: 1em;
+  font-size: 2em;
+  margin: 0.25em;
+  font-weight: 500;
+}

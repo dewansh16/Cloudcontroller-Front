@@ -1,0 +1,26 @@
+.steps-info-body {
+  height: 100%;
+  width: 100%;
+}
+
+.wardDetails-info-box {
+  border: 2px solid rgba(255, 117, 41, 0.71);
+  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  margin: auto;
+}
+
+.factors-heading {
+  height: 10%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  color: #ffffff;
+}
+
+.summary-modal {
+  height: 90vh;
+  top: 0px !important;
+  margin-top: 5vh !important;
+}

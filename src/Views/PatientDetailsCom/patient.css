@@ -1,0 +1,109 @@
+/* .patientParticularMain::before {
+  position: relative;
+  right: -1000px;
+} */
+
+.patientParticularMain {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-around; */
+  gap: 1rem;
+  align-items: stretch;
+  height: 100%;
+  overflow: hidden;
+}
+
+.PatientName {
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.563rem;
+  color: #000000;
+  margin-bottom: 0.2em;
+}
+
+.PatientMR {
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  line-height: 1.438rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.PatientDescription {
+  /* font-family: Lexend; */
+  font-style: normal;
+  font-weight: normal;
+  font-size: 1rem;
+  line-height: 160.3%;
+  color: #000000;
+  opacity: 0.6;
+}
+
+.patientbuttonCol {
+  display: flex !important;
+  justify-content: center;
+  margin-bottom: 3%;
+}
+
+/* .anamoliesbutton{
+    
+background: #F1F1F1 !important;
+border-radius: 12px !important;
+font-family: Lexend;
+font-style: normal;
+font-weight: normal !important;
+font-size: 18px !important;
+line-height: 22px !important;
+identical to box height
+
+
+color: #000000;
+
+} */
+
+.patientMenu {
+  font-weight: 600;
+  font-size: 1rem !important;
+  line-height: 3rem !important;
+  margin-bottom: 3% !important;
+  /* identical to box height */
+
+  color: #000000;
+}
+.patientscoreHead {
+  display: flex !important;
+  justify-content: center !important;
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.25rem;
+  text-align: center;
+  color: rgba(255, 117, 41, 1);
+  opacity: 0.5;
+}
+
+.patientscoredata {
+  text-align: center;
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 1.875rem;
+  line-height: 2.313rem;
+  /* identical to box height */
+
+  color: rgba(255, 117, 41, 1);
+}
+
+.patientDivider {
+  opacity: 0.3;
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 0.75rem;
+  line-height: 0.938rem;
+  /* identical to box height */
+}

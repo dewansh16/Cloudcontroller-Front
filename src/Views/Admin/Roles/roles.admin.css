@@ -1,0 +1,18 @@
+.add-newRole-div {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+}
+
+.add-newRole-div h1 {
+  margin-bottom: 0px;
+  font-size: 4rem;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0em;
+  height: 65px;
+  opacity: 15%;
+  text-align: center;
+}

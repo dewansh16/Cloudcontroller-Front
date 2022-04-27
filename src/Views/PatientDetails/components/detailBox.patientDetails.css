@@ -1,0 +1,29 @@
+.patient-detail-closebox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 10%;
+}
+
+.patient-detailbox {
+  height: 90%;
+}
+
+.patient-detailbox-cols {
+  height: 40px;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  color: #878787;
+  font-weight: normal;
+  font-size: 1rem;
+}
+
+.patient-detailbox-col-icon {
+  margin-right: 5px;
+  height: 40px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

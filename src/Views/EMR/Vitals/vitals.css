@@ -1,0 +1,189 @@
+.vitals-menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.vitals-menu .vitals-menu-item {
+    list-style-type: disc;
+    margin: 0 1rem 0 1rem;
+    padding: 0.5rem;
+
+    font-family: Lexend;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+}
+
+.vitals-menu .vitals-menu-item:hover{
+    color: rgba(0, 0, 0, 1);
+}
+
+.vitals-menu .vitals-menu-item.selected{
+    color: red;
+    border-bottom: solid 4px rgba(0, 0, 0, 1);
+    color: rgba(0, 0, 0, 1);
+}
+
+/* vitals add */
+.vitals-add-container {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 250px auto;
+    grid-template-areas: "vitalsaddmenu vitalsaddform";
+    gap: 1rem;
+}
+
+.vitals-add-menu {
+    grid-area: vitalsaddmenu;
+}
+
+.vitals-add-form {
+    grid-area: vitalsaddform;
+    padding: 0 2rem 2rem 2rem;
+}
+
+
+/* vitals view */
+.vitals-view-container {
+    height: 100%;
+    width: 100%;
+}
+
+
+.vitals-view-display {
+    height: 100%;
+    width: 100%;
+}
+
+.vitals-view-list {
+    padding: 2rem;
+    overflow-y: scroll;
+    max-height: 500px;
+}
+
+.vitals-view-list-item {
+    width: 100%;
+    margin: 0.5rem 0 0.5rem 0;
+    background: #4D4D4D;
+    border: 1px solid #C7C7C7;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 20px 3px rgba(111, 108, 108, 0.05);
+    border-radius: 6px;
+
+    display: grid;
+    grid-template-areas: "date data"
+                        "user data";
+    grid-template-columns: 200px auto;
+    grid-template-rows: 1fr 1fr;
+    gap: 1rem;
+}
+
+.vitals-view-list-item .user{
+    grid-area: user;
+    color: #fff;
+}
+
+.vitals-view-list-item .data{
+    grid-area: data;
+    color: #fff;
+}
+
+.vitals-view-list-item .date{
+    grid-area: date;
+    color: #fff;
+}
+
+/* list view */
+
+.vitals-list-collapse {
+    border: none !important;
+}
+
+.vitals-list-collapse::-webkit-scrollbar-thumb {
+    border-radius: 0;
+    width: 6px;
+    background-color: rgba(29, 29, 29, 0.8);
+}
+
+.vitals-list-collapse .collapse-panel {
+    background: #4d4d4d;
+    border: 1px solid #4d4d4d;
+    box-sizing: border-box;
+    /* box-shadow: 0px 10px 40px 5px rgba(117, 117, 117, 0.1); */
+    border-radius: 6px;
+    margin: 1rem 0 1rem 0;
+}
+
+.vitals-list-collapse .collapse-panel .ant-collapse-content{
+    background: #4d4d4d;
+}
+
+.vitals-list-item-tr{
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 5px;
+}
+
+.vitals-list-item-tr:nth-child(1){
+    border: none;
+}
+
+.vitals-list-item-tr .vitals-list-item-td{
+    font-family: Lexend;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 18px;
+    color: rgba(253, 252, 251, 1);
+}
+
+.vitals-list-item {
+    display: grid;
+    grid-template-columns: 1.5fr 3fr;
+    grid-template-areas: "vitalinfo vitaldetails";
+    gap: 1rem;
+}
+
+.vitals-list-item .vital-info {
+    padding-left: 1rem;
+    grid-area: vitalinfo;
+    display: grid;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.vitals-list-item .vital-info p{
+    font-family: Lexend;
+    font-style: normal;
+    font-size: 18px;
+    color: rgba(253, 252, 251, 1);
+    margin: 0;
+    padding: 0;
+}
+
+.vitals-list-item .vital-details {
+    grid-area: vitaldetails;
+}
+
+.vitals-list-item .vital-details ul{
+    margin: 0;
+    padding: 1rem;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.vitals-list-item .vital-details ul li{
+    margin: 0 1rem;
+    font-family: Lexend;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 18px;
+    color: rgba(253, 252, 251, 1);
+}
+
+

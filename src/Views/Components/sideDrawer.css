@@ -1,0 +1,119 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: white;
+  color: black;
+  /* Special hack to fit 100vh height in iPads (safari browsers) */
+  min-height: -webkit-fill-available;
+}
+.menu-item-name {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+}
+
+.subMenu {
+  list-style: none;
+  padding: 0;
+  text-align: start;
+  width: 100%;
+  margin: 0rem 0rem 2rem 0rem;
+  overflow: hidden;
+  background-color: #f6f6f6;
+}
+.subMenu li {
+  font-weight: 500;
+  padding: 0.6rem;
+  display: flex;
+  gap: 1rem;
+  /* border-radius: 8px; */
+}
+
+.logo-details {
+  width: 240px;
+}
+.nav-links {
+  position: relative;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 240px;
+  overflow: auto;
+  max-height: calc(100vh - 76.4px - 64px);
+}
+
+.submenu-list {
+  color: black;
+  font-weight: 500;
+  /* border-radius: 6px; */
+}
+.submenu-list li {
+  margin: 0.6rem 0rem;
+}
+.submenu-list.sidedrawer-active li,
+.submenu-list li:hover {
+  color: var(--primary);
+  border-left: 3px solid var(--primary);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 117, 41, 0.11) 35%,
+    rgba(255, 117, 41, 0) 90%
+  );
+}
+
+.logout-icon-container {
+  display: flex;
+  height: 4rem;
+  width: 240px;
+  color: #eb1348;
+  justify-content: flex-start;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  cursor: pointer;
+  position: relative;
+}
+
+@media (min-width: 1366px) {
+  .logout-icon-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+}
+
+.logout-icon-container:hover {
+  background: #eb1348;
+  color: white;
+}
+
+.logout-icon {
+  padding: 0.8rem;
+}
+
+/* .logout-icon {
+  color: #eb1348;
+  padding: 0.8rem;
+}
+.logout-icon:hover {
+  color: #ffffff;
+} */
+.logout-text {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}

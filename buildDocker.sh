@@ -1,0 +1,1 @@
+sudo docker build -t react-web-app:8.21.21.1 .

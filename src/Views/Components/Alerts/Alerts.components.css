@@ -1,0 +1,16 @@
+.no-alerts-div{
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8rem;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 65px;
+    letter-spacing: 0em;
+    height: 65px;
+    opacity: 15%;
+    width: 100%;
+    text-align: center;
+}

@@ -1,0 +1,36 @@
+.heading{
+    margin-bottom: 48px;
+}
+
+.heading h1{
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 45px;
+    letter-spacing: 0em;
+    text-align: left;
+    margin: 0px;
+    color: #1479FF;
+}
+
+.menu-box{
+    padding-right: 4em;
+}
+
+.menu-item{
+padding-left: 0px;
+}
+
+.menu-box .ant-menu-inline.ant-menu-root .ant-menu-item, .ant-menu-inline.ant-menu-root .ant-menu-submenu-title {
+    display: flex;
+    align-items: center;
+    transition: border-color 0.3s, background 0.3s, padding 0.1s cubic-bezier(0.215, 0.61, 0.355, 1);
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 22px;
+    padding-left: 0px !important;
+    background: white;
+}
+/* 
+.data-container{
+
+} */

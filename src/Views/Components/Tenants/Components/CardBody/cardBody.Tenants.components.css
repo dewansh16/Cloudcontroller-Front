@@ -1,0 +1,151 @@
+.card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 1);
+  border-radius: 6px;
+}
+
+.card-header {
+  font-size: 36px;
+  /* background: -webkit-linear-gradient(
+    360deg,
+    #474ccb 0%,
+    rgba(20, 121, 255, 0.41) 73%
+  ); */
+  /* -webkit-background-clip: text; */
+  /* -webkit-text-fill-color: transparent; */
+  color: #1479FF;
+  text-align: left;
+  height: 50px;
+  width: auto;
+  font-family: Lexend;
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 50px;
+  letter-spacing: 0em;
+  margin-bottom: 30px;
+}
+
+.card-header p {
+  text-align: left;
+  margin-left: 68px
+}
+/* 
+.card-body-box {
+  width: 70%;
+  margin: auto;
+} */
+
+.card-body-box p {
+  font-family: Lexend;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 23px;
+  letter-spacing: 0em;
+}
+
+/* .additional-setup-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffffe5;
+  height: 130px;
+  border-radius: 6px;
+  margin-bottom: 50px;
+}
+
+.aditional-setup-box-text {
+  width: 80%;
+
+  opacity: 50%;
+}
+
+.aditional-setup-box-text p {
+  margin-bottom: 0;
+  font-family: Lexend;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 25px;
+  letter-spacing: 0em;
+  text-align: left;
+} */
+
+.card-body-box .ant-tabs-tab {
+  border-bottom: none !important;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 0;
+  font-size: 18px !important;
+  background: transparent;
+  border: 0;
+  outline: none;
+  cursor: pointer;
+  opacity: 50% !important;
+  color: black !important;
+}
+
+.card-body-box .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  opacity: 100%;
+  color: black;
+  text-shadow: 0 0 0.25px currentColor;
+}
+
+.card-body-box .ant-tabs-ink-bar {
+  position: absolute;
+  background: black;
+  pointer-events: none;
+}
+
+.switch-box {
+  display: flex;
+    margin-top: 30px;
+    justify-content: space-evenly;
+    margin-bottom: 100px;
+}
+
+.tab-one-content{
+  width: 460px;
+}
+
+.tab-three-content{
+  height: 563px;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: start;
+}
+
+.slider-tables{
+  width: 30%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.slider-header{
+  display: flex;
+  justify-content: space-between;
+  padding: 0px 40px;
+  align-items: center;
+  height: 90px;
+  flex-direction: column;
+}
+
+
+.slider-header p{
+  margin-bottom: 0;
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.buttons-box{
+  height:84.1%;
+  overflow-y: auto;
+}

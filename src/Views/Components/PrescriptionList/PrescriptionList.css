@@ -1,0 +1,86 @@
+@import url("https://fonts.googleapis.com/css2?family=Abel&family=Lexend:wght@100;300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lexend+Deca&display=swap");
+
+.prescription-list {
+  padding: 1em;
+
+  display: grid;
+  max-width: 100%;
+  grid-template-columns: 1fr 2fr auto;
+  grid-template-areas: "prescriptionDetails prescriptionMedicines popup";
+  border: 1px solid #cbcbcb;
+  box-sizing: border-box;
+  box-shadow: 0px 10px 40px 5px rgba(117, 117, 117, 0.1);
+  border-radius: 6px;
+}
+
+.prescription-list:hover > .pop-up {
+  opacity: 1;
+}
+
+.prescription-list .pop-up {
+  grid-area: popup;
+  opacity: 0;
+  z-index: 5;
+  transition: all 0.2s ease-in;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prescriptionDetails {
+  grid-area: prescriptionDetails;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.prescriptionDetails .detailsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.prescriptionDetails .detailsContainer .prescriptionHeading {
+  font-family: Lexend Deca;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  color: #030303;
+  margin: 0;
+}
+
+.prescriptionDetails .detailsContainer span {
+  font-family: Lexend Deca;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  color: #030303;
+  opacity: 0.4;
+  margin-top: 5px;
+}
+
+.prescriptionMedicines {
+  display: flex;
+  align-items: center;
+  grid-area: prescriptionMedicines;
+}
+
+.prescriptionMedicines ul {
+  border-left: solid 1px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.prescriptionMedicines ul li {
+  font-family: Abel;
+  padding-right: 2em;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: 22px;
+  color: #030303;
+}

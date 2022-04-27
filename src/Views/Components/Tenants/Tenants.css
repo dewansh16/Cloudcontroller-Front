@@ -1,0 +1,16 @@
+.main-body{
+    height: 100vh;
+    position: relative;
+    overflow: auto;
+}
+
+.tenant-modal .ant-modal-content{
+    position: relative;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 0;
+    background: transparent;
+    border-radius: 0.3em;
+    box-shadow: 0 0 0 0 black;
+    pointer-events: auto;
+}

@@ -1,0 +1,51 @@
+.loginForm .ant-form-item .ant-form-item-label .ant-form-item-required::before{
+   display: none;
+}
+
+/* for username input */
+.loginForm .ant-form-item .ant-form-item-control .ant-form-item-control-input .ant-form-item-control-input-content input{
+   height: 54px;
+   padding-left: 20px;
+}
+
+
+/* for password input */
+.loginForm .ant-form-item .ant-form-item-control .ant-form-item-control-input .ant-form-item-control-input-content .ant-input-affix-wrapper{
+   padding: 0;
+}
+
+/* fix icon of eye in password input */
+.loginForm .ant-form-item .ant-form-item-control .ant-form-item-control-input .ant-form-item-control-input-content .ant-input-affix-wrapper .ant-input-suffix{
+   margin-right: 20px;
+   transform: scale(1.1);
+}
+
+.loginForm .ant-form-item .ant-form-item-control .ant-form-item-control-input .ant-form-item-control-input-content input::before{
+   display: none;
+}
+
+.loginForm .ant-form-item .ant-form-item-control .ant-form-item-control-input .ant-form-item-control-input-content .ant-btn-primary {
+   padding: 16px 59px;
+   background: #FF7529;
+   color: white;
+   font-weight: 600;
+   width: auto;
+   height: auto;
+   border: none;
+   margin-top: 20px;
+}
+
+.loginForm .ant-form-item .ant-form-item-control .ant-form-item-control-input .ant-form-item-control-input-content .ant-btn-primary:not(:disabled):hover {
+   transform: translateY(-2px) scale(1.01);
+   box-shadow: 0px 20px 30px -10px rgba(255, 117, 41, 0.4);
+}
+
+.loginForm .ant-form-item .ant-form-item-control .ant-form-item-control-input .ant-form-item-control-input-content .ant-btn-primary:not(:disabled):active {
+   transform: translateY(0px) scale(0.9);
+   box-shadow: none;
+   transition: 0.1s ease-in-out all;
+}
+
+.loginForm .ant-form-item .ant-form-item-control .ant-form-item-control-input .ant-form-item-control-input-content .ant-btn-primary[disabled] {
+   opacity: 0.3;
+}

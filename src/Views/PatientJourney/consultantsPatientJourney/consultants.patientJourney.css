@@ -1,0 +1,69 @@
+.consultants-patient-journey {
+  height: 90%;
+  width: 100%;
+}
+
+.consultants-info-box-row {
+  height: 50%;
+  width: 100%;
+  display: flex;
+}
+
+.consultants-info-box-col {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.consultant-internal-box {
+  height: 90%;
+  width: 80%;
+  border: 1.5px solid #c4c4c4;
+  border-radius: 5px;
+}
+
+.consultants-heading {
+  height: 30%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.consultants-heading h1 {
+  text-align: center;
+  color: #878787;
+  margin-bottom: 0px;
+}
+
+.consultants-body {
+  height: 70%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.consultant-info {
+  width: 100%;
+  display: flex;
+}
+
+.consultant-name {
+  width: 60%;
+  display: flex;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 30px;
+}
+
+.consultant-time {
+  width: 40%;
+  display: flex;
+  justify-content: center;
+  color: #878787;
+  font-size: 1rem;
+  line-height: 30px;
+}

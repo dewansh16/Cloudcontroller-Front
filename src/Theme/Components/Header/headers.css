@@ -1,0 +1,25 @@
+.global-dashboard-grid {
+    display: grid;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    grid-gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 380px));
+    min-height: 88px;
+  }
+  
+  .global-select-location {
+    display: flex;
+    align-items: center;
+  }
+  .global-utility-group {
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    gap: 1rem;
+  }
+  .global-list-controllers {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+  

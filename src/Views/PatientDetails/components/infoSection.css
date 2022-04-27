@@ -1,0 +1,27 @@
+.patient-detail-div{
+    display: flex;
+    width: 90%;
+    margin: auto;
+    justify-content: space-between;
+    margin-bottom: 2em;
+}
+
+.patient-detail-div p{
+    color: #A8A8A8;
+    font-size: 16px;
+    line-height: 20px;
+    margin-bottom: 0px;
+}
+
+.patient-detail-div svg{
+    position: relative;
+    top: 3px;
+}
+
+.popup-divs{
+    width: 80%;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

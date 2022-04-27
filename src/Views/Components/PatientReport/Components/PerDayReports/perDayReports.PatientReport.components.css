@@ -1,0 +1,40 @@
+.perday-report-body{
+    background-color: white;
+    width: 80%;
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.report-head{
+    padding: 20px 0px;
+    width: 90%;
+    margin:auto;
+}
+
+.report-head p{
+font-size: 52px;
+font-style: normal;
+font-weight: 700;
+line-height: 65px;
+letter-spacing: 0em;
+text-align: left;
+opacity: 10%;
+margin-bottom: 0;
+display: inline;
+}
+.report-charts{
+    width: 93%;
+    margin: auto;
+}
+
+.report-head-date{
+    display: inline;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 65px;
+    letter-spacing: 0em;
+    text-align: left;
+    opacity: 80%;
+}

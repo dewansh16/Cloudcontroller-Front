@@ -1,0 +1,119 @@
+.prescriptions-list {
+    padding: 0;
+    width: 100%;
+    list-style-type: none;
+    /* overflow-y: scroll; */
+}
+
+.prescriptions-list-item {
+
+    display: grid;
+    grid-template-areas: "prescriptionheading medicines duplicate";
+    grid-template-columns: 1.5fr 2fr auto;
+    gap: 0.5rem;
+    cursor: pointer;
+    margin: 0;
+    position: relative;
+}
+
+.prescriptions-list-item .prescription-heading {
+    grid-area: prescriptionheading;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border-right: solid 1px rgba(0, 0, 0, 0.2);
+}
+
+.prescriptions-list-item .prescription-heading span{
+    font-family: Lexend Deca;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 18px;
+    color: rgba(3, 3, 3, 0.4);
+}
+
+.prescriptions-list-item .medicines ul{
+    margin: 0;
+    padding: 1rem;
+    list-style: disc;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.prescriptions-list-item .medicines ul li{ 
+    margin: 0 1rem;
+    font-family: Lexend;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    color: #1F1F1F;
+}
+
+
+.prescriptions-list-item .medicines {
+    grid-area: medicines;
+    display: grid;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.prescriptions-list-item .duplicate {
+    grid-area: duplicate;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.2s ease-in;
+}
+
+.prescriptions-list-item .duplicate .pop-up{
+    position: absolute;
+}
+
+.prescriptions-list-item:hover > .duplicate{
+    opacity: 1;
+}
+
+.prescription-list-collapse {
+    border: none !important;
+}
+
+/* TODO: remove this later */
+.prescription-list-collapse::-webkit-scrollbar-thumb {
+    border-radius: 0;
+    width: 6px;
+    background-color: rgba(29, 29, 29, 0.8);
+}
+
+.prescription-list-collapse .collapse-panel {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #CBCBCB;
+    box-sizing: border-box;
+    /* box-shadow: 0px 10px 40px 5px rgba(117, 117, 117, 0.1); */
+    border-radius: 6px;
+    margin: 1rem 0 1rem 0;
+}
+
+.prescription-list-collapse .collapse-panel .ant-collapse-content{
+    background: #F3F3F3;
+}
+
+.tr{
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 5px;
+}
+
+.tr:nth-child(1){
+    border: none;
+}
+
+.tr .td{
+    font-family: Lexend;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 18px;
+    color: rgba(82, 81, 81, 0.5);
+}

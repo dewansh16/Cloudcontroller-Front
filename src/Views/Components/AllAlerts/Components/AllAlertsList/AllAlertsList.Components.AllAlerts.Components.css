@@ -1,0 +1,21 @@
+.alerts-date {
+  width: 14%;
+  margin: auto;
+  height: 54px;
+  text-align: center;
+  border-radius: 18px;
+  box-shadow: 0px 12px 19px 1px #0000000d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.patients-alert-list {
+  width: 90%;
+  margin: 0 auto;
+  padding-top: 20px;
+  padding-bottom: 1px;
+}

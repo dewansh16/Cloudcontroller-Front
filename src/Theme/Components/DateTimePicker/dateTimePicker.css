@@ -1,0 +1,129 @@
+.ant-picker-range {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.ant-picker-range .ant-picker-active-bar {
+  width: 3px;
+  background-color: rgba(34, 34, 34, 1);
+}
+
+.ant-picker-range .ant-picker-input input {
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.5);
+  width: 100px;
+}
+
+.ant-picker-range .ant-picker-input.ant-picker-input-active input {
+  color: #222222;
+}
+/* 
+.ant-picker-range.ant-picker-focused {
+}
+
+.ant-picker-dropdown-range {
+} */
+
+.ant-picker-header .ant-picker-header-view,
+.ant-picker-header .ant-picker-header-view button {
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  color: #252525;
+}
+
+.ant-picker-cell {
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-range-start:not(.ant-picker-cell-range-start-single):not(.ant-picker-cell-range-end)
+  .ant-picker-cell-inner {
+  outline: none !important;
+  background-color: rgba(0, 0, 0, 1) !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-range-start:not(.ant-picker-cell-range-start-single)::before,
+.ant-picker-cell-in-view.ant-picker-cell-range-end:not(.ant-picker-cell-range-end-single)::before {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-range-end:not(.ant-picker-cell-range-end-single):not(.ant-picker-cell-range-start)
+  .ant-picker-cell-inner {
+  background-color: rgba(0, 0, 0, 1) !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-in-range::before {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-range-start:not(.ant-picker-cell-range-start-single)::before,
+.ant-picker-cell-in-view.ant-picker-cell-range-end:not(.ant-picker-cell-range-end-single)::before {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner,
+.ant-picker-cell-in-view.ant-picker-cell-range-start .ant-picker-cell-inner,
+.ant-picker-cell-in-view.ant-picker-cell-range-end .ant-picker-cell-inner {
+  color: #fff !important;
+  background: rgba(0, 0, 0, 1) !important;
+  border-radius: 6px !important;
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner::before {
+  border: none !important;
+}
+
+.ant-picker-cell .ant-picker-cell-inner {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.ant-picker-time-panel-column {
+  padding: 0;
+}
+
+.ant-picker-time-panel-column
+  > li.ant-picker-time-panel-cell
+  .ant-picker-time-panel-cell-inner {
+  text-align: center;
+  padding: 0 !important;
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.ant-picker-time-panel-column
+  > li.ant-picker-time-panel-cell-selected
+  .ant-picker-time-panel-cell-inner {
+  color: rgba(0, 0, 0, 1) !important;
+}
+
+.ant-picker .ant-picker-input input {
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.5);
+  width: 100px;
+}
+
+.ant-picker.ant-picker-focused .ant-picker-input input {
+  color: rgba(0, 0, 0, 01);
+}

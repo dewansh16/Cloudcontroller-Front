@@ -1,0 +1,56 @@
+.tertiary-menu {
+  width: 100%;
+  max-width: 300px;
+}
+
+.tertiary-menu .menu-scroll-container {
+  width: 100%;
+  overflow-y: scroll;
+  max-height: 65vh;
+  background: rgba(255, 255, 255, 1);
+  border: none;
+  box-sizing: border-box;
+  box-shadow: none;
+  padding-bottom: 1rem;
+  border-radius: 6px 0 0 0;
+}
+
+.tertiary-menu .menu-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.tertiary-menu .menu-scroll-container .menu-items {
+  width: 100%;
+  padding-top: 1rem;
+}
+
+.tertiary-menu .menu-scroll-container .menu-items ul {
+  padding: 0;
+}
+
+.tertiary-menu .menu-scroll-container .menu-items ul li {
+  width: 100%;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  padding-left: 3rem;
+  height: 56px;
+  color: rgba(168, 167, 167, 0.8);
+  font-family: Lexend Deca;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  border-radius: 0px 6px 6px 0px;
+  cursor: pointer;
+  transition: all 0.2s ease-in;
+  margin: 0.5px 0 0.5px 0;
+  transform: scale(0.9);
+}
+
+.tertiary-menu .menu-scroll-container .menu-items ul li:hover,
+.tertiary-menu .menu-scroll-container .menu-items ul li.selected {
+  transform: scale(1);
+  color: rgba(254, 251, 247, 1);
+  background-color: rgba(255, 117, 41, 0.8);
+  box-shadow: 0px 25px 15px -15px rgba(255, 117, 41, 0.25);
+}
