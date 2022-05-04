@@ -12,6 +12,7 @@ const axiosInstance = axios.create({
     baseURL: `${domain}/api`,
 });
 
+
 axiosInstance.interceptors.request.use((config) => {
     const { isLogin } = config;
 
