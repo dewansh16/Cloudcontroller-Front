@@ -2,10 +2,12 @@ import axios from 'axios';
 
 import { UserStore } from '../Stores/userStore';
 import storage from '../Controllers/storage';
-// import Config from '../Lib/config';
+import Config from '../Lib/config';
 
-// const domain = process.env.NODE_ENV === "development" ? Config.DEV_API_URL : Config.PRODUCTION_API_URL;
-const domain = 'http://20.230.234.202:7124'
+console.log("process.env", process.env);
+
+const domain = process.env.NODE_ENV === "development" ? Config.DEV_API_URL : Config.PRODUCTION_API_URL;
+// const domain = 'http://20.230.234.202:7124'
 // const domain = 'http://localhost:7124'
 
 const axiosInstance = axios.create({

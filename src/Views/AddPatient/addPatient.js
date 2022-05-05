@@ -58,7 +58,7 @@ function AddPatient() {
     const [patientLocationUUID, setPatientLocationUUID] = React.useState(null);
     const [isButtonLoading, setButtonLoading] = React.useState(false);
     const [isPatientDataLoading, setPatientDataLoading] = React.useState(false);
-    const [activePanel, setActivePanel] = React.useState("1");
+    const [activePanel, setActivePanel] = React.useState("2");
     const [deboardButtonLoading, setDeboardButtonLoading] = React.useState(false);
     const [isDeboarded, setDeboarded] = React.useState(false);
     const [practitioners, setPractitioners] = React.useState({
@@ -745,46 +745,35 @@ function AddPatient() {
                 payload.push(bundleData.gateway);
             }
         } else {
+            Object.keys(patchData).forEach(patch => {
+                console.log('patch', patch);
+            })
+
             if (patchData.ecg !== null) {
-                // patchData.ecg.tenant_id = tenantId;
-                // patchData.ecg.pid = patientId;
                 patchData.ecg.config = {};
                 payload.push(patchData.ecg);
             }
             if (patchData.spo2 !== null) {
-                // patchData.spo2.tenant_id = tenantId;
-                // patchData.spo2.pid = patientId;
                 patchData.spo2.config = {};
                 payload.push(patchData.spo2);
             }
             if (patchData.temperature !== null) {
-                // patchData.temperature.tenant_id = tenantId;
-                // patchData.temperature.pid = patientId;
                 patchData.temperature.config = {};
                 payload.push(patchData.temperature);
             }
             if (patchData.gateway !== null) {
-                // patchData.gateway.tenant_id = tenantId;
-                // patchData.gateway.pid = patientId;
                 patchData.gateway.config = {};
                 payload.push(patchData.gateway);
             }
             if (patchData.alphamed !== null) {
-                // patchData.gateway.tenant_id = tenantId;
-                // patchData.gateway.pid = patientId;
                 patchData.alphamed.config = {};
                 payload.push(patchData.alphamed);
             }
             if (patchData.ihealth !== null) {
-                // patchData.gateway.tenant_id = tenantId;
-                // patchData.gateway.pid = patientId;
                 patchData.ihealth.config = {};
                 payload.push(patchData.ihealth);
             }
             if (patchData.digital !== null) {
-                console.log('--------------', patchData);
-                // patchData.gateway.tenant_id = tenantId;
-                // patchData.gateway.pid = patientId;
                 patchData.digital.config = {};
                 payload.push(patchData.digital);
             }
@@ -795,6 +784,8 @@ function AddPatient() {
             pid: patientId,
             list: payload
         }
+
+        console.log('list', dataBody.list);
         patientApi
             .associatePatchToPatient(patientId, dataBody)
             .then((res) => {
