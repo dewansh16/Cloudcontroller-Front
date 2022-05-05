@@ -52,7 +52,7 @@ function MedicineReminderPage() {
 
     const [medicationArray, setMedicationArray] = useState([])
 
-    const [loadingMedication, setLoadingMedication] = useState(true)
+    const [loadingMedication, setLoadingMedication] = useState(false)
 
     const [currentPeriod, setcurrentPeriod] = useState("morning")
 
@@ -84,31 +84,30 @@ function MedicineReminderPage() {
         </Menu>
     );
 
-
     function getTimedMedication(timing, from, to) {
-        medicationApi.getMedications(timing, from, to)
-            .then(res => {
-                console.log("RESPONSE-----", res.data?.response.schedule)
-                if (Object.keys(res.data?.response.schedule).length === 0) {
-                    setErrorState(true)
-                    notification.error({
-                        message: 'Could not fetch Medicines',
-                    });
-                }
-                else {
-                    setMedication(res.data?.response.schedule);
-                    setMedicationArray(Object.values(res.data?.response.schedule));
-                    populateFutureMedication(Object.values(res.data?.response.schedule), res.data?.response.schedule);
-                    // getParticularPatients(Object.values(res.data?.response.schedule), res.data?.response.schedule)
-                    setLoadingMedication(false);
-                }
-            })
-            .catch(err => {
-                console.log(err)
-                notification.error({
-                    message: 'Could not fetch medicines',
-                });
-            })
+        // medicationApi.getMedications(timing, from, to)
+            // .then(res => {
+            //     console.log("RESPONSE-----", res.data?.response.schedule)
+            //     if (Object.keys(res.data?.response.schedule).length === 0) {
+            //         setErrorState(true)
+            //         notification.error({
+            //             message: 'Could not fetch Medicines',
+            //         });
+            //     }
+            //     else {
+            //         setMedication(res.data?.response.schedule);
+            //         setMedicationArray(Object.values(res.data?.response.schedule));
+            //         populateFutureMedication(Object.values(res.data?.response.schedule), res.data?.response.schedule);
+            //         // getParticularPatients(Object.values(res.data?.response.schedule), res.data?.response.schedule)
+            //         setLoadingMedication(false);
+            //     }
+            // })
+            // .catch(err => {
+            //     console.log(err)
+            //     notification.error({
+            //         message: 'Could not fetch medicines',
+            //     });
+            // })
     }
 
     function getTimedMedicationRefreshed(timing, from, to) {
@@ -139,9 +138,9 @@ function MedicineReminderPage() {
 
     const time_menu = (
         <Menu>
-            <Menu.Item onClick={() => { setLoadingMedication(true); setcurrentPeriod("morning"); getTimedMedication("morning", currentSelectedDate, currentSelectedDate) }} key="1">Morning</Menu.Item>
-            <Menu.Item onClick={() => { setLoadingMedication(true); setcurrentPeriod("noon"); getTimedMedication("noon", currentSelectedDate, currentSelectedDate) }} key="2">Noon</Menu.Item>
-            <Menu.Item onClick={() => { setLoadingMedication(true); setcurrentPeriod("evening"); getTimedMedication("evening", currentSelectedDate, currentSelectedDate) }} key="3">Evening</Menu.Item>
+            <Menu.Item onClick={() => { setLoadingMedication(false); setcurrentPeriod("morning"); getTimedMedication("morning", currentSelectedDate, currentSelectedDate) }} key="1">Morning</Menu.Item>
+            <Menu.Item onClick={() => { setLoadingMedication(false); setcurrentPeriod("noon"); getTimedMedication("noon", currentSelectedDate, currentSelectedDate) }} key="2">Noon</Menu.Item>
+            <Menu.Item onClick={() => { setLoadingMedication(false); setcurrentPeriod("evening"); getTimedMedication("evening", currentSelectedDate, currentSelectedDate) }} key="3">Evening</Menu.Item>
         </Menu>
     );
 
@@ -401,35 +400,35 @@ function MedicineReminderPage() {
     }
 
     function markAllMeds() {
-        var temp3 = []
-        medicationArray[activeItem].drugs.map((med) => {
-            if (!med.hasOwnProperty(`today_administered_${currentPeriod}`)) {
-                temp3 = [...temp3, med.prsc_id]
-            }
-        })
-        setSelectedMeds([...temp3])
+        // var temp3 = []
+        // medicationArray[activeItem].drugs.map((med) => {
+        //     if (!med.hasOwnProperty(`today_administered_${currentPeriod}`)) {
+        //         temp3 = [...temp3, med.prsc_id]
+        //     }
+        // })
+        // setSelectedMeds([...temp3])
     }
 
     function markSelectedMeds() {
-        setLoadingMedication(true)
-        medicationApi.markMedicines({
-            "prsc_id": selectedMeds,
-        })
-            .then(res => {
-                console.log(res)
-                notification.success({
-                    message: 'Marked!',
-                    description: 'Selected Meds Have Been Marked'
-                });
-                getTimedMedicationRefreshed(currentPeriod)
-            })
-            .catch(err => {
-                console.log(err)
-                notification.error({
-                    message: 'Error',
-                    description: `${err}`
-                });
-            })
+        // setLoadingMedication(true)
+        // medicationApi.markMedicines({
+        //     "prsc_id": selectedMeds,
+        // })
+        //     .then(res => {
+        //         console.log(res)
+        //         notification.success({
+        //             message: 'Marked!',
+        //             description: 'Selected Meds Have Been Marked'
+        //         });
+        //         getTimedMedicationRefreshed(currentPeriod)
+        //     })
+        //     .catch(err => {
+        //         console.log(err)
+        //         notification.error({
+        //             message: 'Error',
+        //             description: `${err}`
+        //         });
+        //     })
         // getTimedMedication(currentPeriod)
     }
 
@@ -440,25 +439,28 @@ function MedicineReminderPage() {
     const dateFormat = 'YYYY/MM/DD';
     var date = new Date()
 
+    const [errorState, setErrorState] = useState(false)
+    const [initialDateState, setInitialDateState] = useState('')
+    const [currentSelectedDate, setCurrentSelectedDate] = useState(new Date())
 
     useEffect(() => {
         var tempPeriod
         var tempDate = new Date()
         var tempMonth = tempDate.getMonth() + 1
         if (tempMonth < 10) {
-            setCurrentSelectedDate(`${tempDate.getFullYear()}-0${tempMonth}-${tempDate.getDate()}`)
+            setCurrentSelectedDate(`${tempDate.getFullYear()}/0${tempMonth}/${tempDate.getDate()}`)
         }
         else {
-            setCurrentSelectedDate(`${tempDate.getFullYear()}-${tempMonth}-${tempDate.getDate()}`)
+            setCurrentSelectedDate(`${tempDate.getFullYear()}/${tempMonth}/${tempDate.getDate()}`)
         }
         if (tempMonth < 10) {
-            setInitialDateState(`${tempDate.getFullYear()}-0${tempMonth}-${tempDate.getDate()}`)
+            setInitialDateState(`${tempDate.getFullYear()}/0${tempMonth}/${tempDate.getDate()}`)
         }
         else {
-            setInitialDateState(`${tempDate.getFullYear()}-${tempMonth}-${tempDate.getDate()}`)
+            setInitialDateState(`${tempDate.getFullYear()}/${tempMonth}/${tempDate.getDate()}`)
         }
-        var from = `${tempDate.getFullYear()}-${tempDate.getMonth() + 1}-${tempDate.getDate()}`
-        var to = `${tempDate.getFullYear()}-${tempDate.getMonth() + 1}-${tempDate.getDate()}`
+        var from = `${tempDate.getFullYear()}/${tempDate.getMonth() + 1}/${tempDate.getDate()}`
+        var to = `${tempDate.getFullYear()}/${tempDate.getMonth() + 1}/${tempDate.getDate()}`
         if (tempDate.getHours() >= 0 && tempDate.getHours() < 12) {
             tempPeriod = "morning"
             setcurrentPeriod("morning")
@@ -472,43 +474,39 @@ function MedicineReminderPage() {
             setcurrentPeriod("evening")
         }
 
-        medicationApi.getMedications(tempPeriod, from, to)
-            .then(res => {
-                console.log(res.data)
-                if (Object.keys(res.data?.response.schedule).length === 0) {
-                    setErrorState(true)
-                    notification.error({
-                        message: 'Could not fetch Medicines',
-                    });
-                }
-                else {
-                    setMedication(res.data?.response.schedule);
-                    // setTotalToBeMedicated(Object.keys(res.data?.response.schedule).length)
-                    setMedicationArray(Object.values(res.data?.response.schedule));
-                    populateFutureMedication(Object.values(res.data?.response.schedule), res.data?.response.schedule);
-                    // getParticularPatients(Object.values(res.data?.response.schedule), res.data?.response.schedule)
-                    setLoadingMedication(false);
-                }
-                console.log(res.data?.response.schedule);
-                console.log(Object.values(res.data?.response.schedule));
-            })
-            .catch(err => {
-                console.log(err)
-                notification.error({
-                    message: 'Error',
-                    description: `${err}`
-                });
-            })
+        // medicationApi.getMedications(tempPeriod, from, to)
+        //     .then(res => {
+        //         console.log(res.data)
+        //         if (Object.keys(res.data?.response.schedule).length === 0) {
+        //             setErrorState(true)
+        //             notification.error({
+        //                 message: 'Could not fetch Medicines',
+        //             });
+        //         }
+        //         else {
+        //             setMedication(res.data?.response.schedule);
+        //             // setTotalToBeMedicated(Object.keys(res.data?.response.schedule).length)
+        //             setMedicationArray(Object.values(res.data?.response.schedule));
+        //             populateFutureMedication(Object.values(res.data?.response.schedule), res.data?.response.schedule);
+        //             // getParticularPatients(Object.values(res.data?.response.schedule), res.data?.response.schedule)
+        //             setLoadingMedication(false);
+        //         }
+        //         console.log(res.data?.response.schedule);
+        //         console.log(Object.values(res.data?.response.schedule));
+        //     })
+        //     .catch(err => {
+        //         console.log(err)
+        //         notification.error({
+        //             message: 'Error',
+        //             description: `${err}`
+        //         });
+        //     })
     }, [])
 
-    const [errorState, setErrorState] = useState(false)
-    const [initialDateState, setInitialDateState] = useState('')
-    const [currentSelectedDate, setCurrentSelectedDate] = useState('')
-
     function onChangeDatePicker(date, dateString) {
-        var tempDateString = dateString.replace(/\//g, "-")
+        var tempDateString = dateString.replace(/\//g, "/")
         setCurrentSelectedDate(tempDateString)
-        setLoadingMedication(true)
+        // setLoadingMedication(true)
         getTimedMedication(currentPeriod, tempDateString, tempDateString)
     }
 
@@ -566,7 +564,7 @@ function MedicineReminderPage() {
                         <div className="medicine-category-bar">
                             {changeui ? (
                                 <div className="number-container">
-                                    <div className="medicine-number">{getToBeMedicated(medication)}</div>
+                                    <div className="medicine-number" style={{ marginRight: "4px" }}>{getToBeMedicated(medication)}</div>
                                     <div className="medicine-number-info">
                                         Patients Yet to be Medicated
                                     </div>
@@ -657,6 +655,7 @@ function MedicineReminderPage() {
                                             >
                                                 {currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)}
                                             </Button>
+
                                             <div className="medicine-search-input">
                                                 <SearchOutlined style={{ fontSize: "20px" }} />
                                                 <input
@@ -667,6 +666,7 @@ function MedicineReminderPage() {
                                                 ></input>
                                                 <CloseOutlined style={{ fontSize: "20px" }} />
                                             </div>
+                                            
                                             <Button
                                                 style={{
                                                     padding: "25px 60px",
@@ -699,7 +699,7 @@ function MedicineReminderPage() {
                                                     <div className="patient-bed-detail">
                                                         <div className="patient-name">
                                                             {
-                                                                medicationArray[activeItem].pName
+                                                                medicationArray?.[activeItem]?.pName
                                                             }
                                                         </div>
                                                         <div className="patient-id">MR2021F8969</div>
@@ -723,18 +723,18 @@ function MedicineReminderPage() {
                                                 {
                                                     searchInputData === ""
                                                         ?
-                                                        medicationArray[activeItem].drugs.map((med) => (
+                                                        medicationArray?.[activeItem]?.drugs?.map((med) => (
                                                             <div
                                                                 onClick={() => {
-                                                                    if (checkSelectedMed(med.prsc_id)) {
+                                                                    if (checkSelectedMed(med?.prsc_id)) {
                                                                         var temp2 = selectedMeds
-                                                                        const index = temp2.indexOf(med.prsc_id)
+                                                                        const index = temp2?.indexOf(med?.prsc_id)
                                                                         temp2.splice(index, 1)
                                                                         setSelectedMeds([...temp2])
                                                                     }
                                                                     else {
                                                                         var temp = selectedMeds
-                                                                        temp = [...temp, med.prsc_id]
+                                                                        temp = [...temp, med?.prsc_id]
                                                                         setSelectedMeds(temp)
                                                                     }
                                                                 }}
@@ -743,11 +743,11 @@ function MedicineReminderPage() {
                                                                     med.hasOwnProperty(`today_administered_${currentPeriod}`) || checkSelectedMed(med.prsc_id) ? { backgroundColor: "#C8FFC6" } : null
                                                                 }
                                                             >
-                                                                <div className="medicine-name">{med.drugName}</div>
+                                                                <div className="medicine-name">{med?.drugName}</div>
                                                                 <div className="medicine-details">
                                                                     <div className="medicine-dosage">
                                                                         <PillIcon />
-                                                                        {med.dosage} dosage
+                                                                        {med?.dosage} dosage
                                                                     </div>
                                                                     <div className="medicine-time">{currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)}</div>
                                                                     {med.hasOwnProperty(`today_administered_${currentPeriod}`) ? <GreenTick /> : null}
@@ -755,20 +755,20 @@ function MedicineReminderPage() {
                                                             </div>
                                                         ))
                                                         :
-                                                        medicationArray[activeItem].drugs.map((med) => (
+                                                        medicationArray?.[activeItem]?.drugs?.map((med) => (
                                                             med.drugName.includes(searchInputData)
                                                                 ?
                                                                 <div
                                                                     onClick={() => {
-                                                                        if (checkSelectedMed(med.prsc_id)) {
+                                                                        if (checkSelectedMed(med?.prsc_id)) {
                                                                             var temp2 = selectedMeds
-                                                                            const index = temp2.indexOf(med.prsc_id)
+                                                                            const index = temp2?.indexOf(med?.prsc_id)
                                                                             temp2.splice(index, 1)
                                                                             setSelectedMeds([...temp2])
                                                                         }
                                                                         else {
                                                                             var temp = selectedMeds
-                                                                            temp = [...temp, med.prsc_id]
+                                                                            temp = [...temp, med?.prsc_id]
                                                                             setSelectedMeds(temp)
                                                                         }
                                                                     }}
@@ -777,14 +777,14 @@ function MedicineReminderPage() {
                                                                         med.hasOwnProperty(`today_administered_${currentPeriod}`) || checkSelectedMed(med.prsc_id) ? { backgroundColor: "#C8FFC6" } : null
                                                                     }
                                                                 >
-                                                                    <div className="medicine-name">{med.drugName}</div>
+                                                                    <div className="medicine-name">{med?.drugName}</div>
                                                                     <div className="medicine-details">
                                                                         <div className="medicine-dosage">
                                                                             <PillIcon />
-                                                                            {med.dosage} dosage
+                                                                            {med?.dosage} dosage
                                                                         </div>
                                                                         <div className="medicine-time">{currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)}</div>
-                                                                        {med.hasOwnProperty(`today_administered_${currentPeriod}`) ? <GreenTick /> : null}
+                                                                        {med?.hasOwnProperty(`today_administered_${currentPeriod}`) ? <GreenTick /> : null}
                                                                     </div>
                                                                 </div>
                                                                 :

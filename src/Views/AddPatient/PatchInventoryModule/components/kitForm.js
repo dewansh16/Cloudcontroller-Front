@@ -43,7 +43,6 @@ const PatchListItem = ({ index, serial, type }) => {
 };
 
 const KitForm = (props) => {
-    console.log('props', props);
     const [patchList, setPatchList] = useState([]);
     const [patchFetched, setPatchFetched] = useState(false);
     // set associated patches when bundle category is selected

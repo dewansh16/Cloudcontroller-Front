@@ -60,7 +60,7 @@ function Vitals({ activeStep, wardArray, patient }) {
                         color: "#727272",
                     }}
                 >
-                    Vitals abc
+                    Vitals
                 </div>
             ),
             dataIndex: "name",
@@ -471,12 +471,23 @@ function Vitals({ activeStep, wardArray, patient }) {
                 icon: Icons.bpIcon({
                     Style: { color: Colors.darkPurple, fontSize: "24px" },
                 }),
-                val: "108",
-                // parseInt(props.data.ews_map?.rr) === -1
-                //   ? "NA"
-                //   : props.data.ews_map?.rr,
+                val:
+                parseInt(patient.ews_map?.rr) === -1
+                  ? "NA"
+                  : patient.ews_map?.rr,
                 trendData: dummyBPData,
                 color: Colors.darkPurple,
+            },
+            {
+                name: "Weight",
+                icon: Icons.bpIcon({
+                    Style: { color: Colors.yellow, fontSize: "24px" },
+                }),
+                val:
+                parseInt(patient.ews_map?.rr) === -1
+                  ? "NA"
+                  : patient.ews_map?.rr,
+                color: Colors.yellow,
             },
         ]);
     }, []);

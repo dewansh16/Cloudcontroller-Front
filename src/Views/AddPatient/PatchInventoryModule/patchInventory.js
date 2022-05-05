@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import Icons from '../../../Utils/iconMap';
 import { notification, Menu, Switch } from 'antd';
+
+import Icons from '../../../Utils/iconMap';
 import KitForm from './components/kitForm';
+
 import './patchInventory.css';
 
 export default function PatchInventoryModal(props) {
@@ -46,6 +48,12 @@ export default function PatchInventoryModal(props) {
             case 'gateway': return (
                 'Gateway'
             );
+            case 'digital': return (
+                'Digital Scale'
+            );
+            case 'bps': return (
+                'BP'
+            );
             default: return null
         }
     }
@@ -71,14 +79,16 @@ export default function PatchInventoryModal(props) {
                     </Menu.Item>}
                 </Menu>
             </div>
+
             <div className="form-container">
-                <div style={{ width: "100%", display: "flex", justifyContent: "flex-end", margin: "1rem" }}>
+                {/* <div style={{ width: "100%", display: "flex", justifyContent: "flex-end", margin: "1rem" }}>
                     <Switch checkedChildren="Individual"
                         disabled={(props.bundleData.ecg === null && props.bundleData.spo2 === null && props.bundleData.temperature === null && props.bundleData.gateway === null &&
-                            props.patchData.ecg === null && props.patchData.spo2 === null && props.patchData.temperature === null && props.patchData.gateway === null
+                            props.patchData.ecg === null && props.patchData.spo2 === null && props.patchData.temperature === null && props.patchData.gateway === null && props.patchData.alphamed === null && props.patchData.ihealth === null && props.patchData.digitial === null
                         ) ? false : true}
                         unCheckedChildren="Bundle" defaultChecked={checkWhatFilled} onChange={handleCheckedState} />
-                </div>
+                </div> */}
+
                 {isIndividualPatchChecked ? <div className="scroll-container">
                     {props.patchClass.list.map((Item) =>
                         menuState === Item.class && <Item.Component

@@ -52,8 +52,6 @@ export default function UserInventory() {
             });
     }, []);
 
-    console.log('tenantList', tenantList);
-
     const showUserModal = () => {
         setUserModal(true);
     };

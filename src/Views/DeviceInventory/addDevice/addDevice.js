@@ -17,6 +17,8 @@ import tempImg from "../../../Assets/Images/temp1.png";
 import watchImg from "../../../Assets/Images/watch.jpg";
 import spo2Img from "../../../Assets/Images/spo2.jpg";
 import bpImg from "../../../Assets/Images/BP-sensor.png";
+import digitalScale from "../../../Assets/Images/DigitalScale.png";
+
 import deviceApi from "../../../Apis/deviceApis";
 import { Button } from "../../../Theme/Components/Button/button";
 
@@ -30,9 +32,12 @@ const PatchForm = (props) => {
         style: { marginLeft: "1em" },
     });
 
+    const [isBpSensor, setIsBpSensor] = useState(false);
+
     const handleimg = (value) => {
         switch (value) {
             case "temperature":
+                setIsBpSensor(false);
                 return setDeviceimg({
                     patchImage: tempImg,
                     patchHead: "Temp Sensor",
@@ -40,6 +45,7 @@ const PatchForm = (props) => {
                     style: { marginLeft: "1em" },
                 });
             case "ecg":
+                setIsBpSensor(false);
                 return setDeviceimg({
                     patchImage: ecgImg,
                     patchHead: "ECG Sensor",
@@ -47,6 +53,7 @@ const PatchForm = (props) => {
                     style: { marginLeft: "1em" },
                 });
             case "spo2":
+                setIsBpSensor(false);
                 return setDeviceimg({
                     patchImage: spo2Img,
                     patchHead: "SpO2 Sensor",
@@ -54,16 +61,42 @@ const PatchForm = (props) => {
                     style: { marginLeft: "-2.4em" },
                 });
             case "gateway":
+                setIsBpSensor(false);
                 return setDeviceimg({
                     patchImage: watchImg,
                     patchHead: "Watch Sensor",
                     width: "47%",
                     style: { marginLeft: "1em" },
                 });
-            case "bp":
+            case "digital":
+                setIsBpSensor(false);
+                return setDeviceimg({
+                    patchImage: digitalScale,
+                    patchHead: "Digital Scale",
+                    width: "47%",
+                    style: { marginLeft: "1em" },
+                });
+            case "bps":
+                setIsBpSensor(true);
                 return setDeviceimg({
                     patchImage: bpImg,
-                    patchHead: "BP Sensor",
+                    patchHead: "Alphamed",
+                    width: "47%",
+                    style: { marginLeft: "1em" },
+                });
+            case "alphamed":
+                setIsBpSensor(true);
+                return setDeviceimg({
+                    patchImage: bpImg,
+                    patchHead: "Alphamed",
+                    width: "47%",
+                    style: { marginLeft: "1em" },
+                });
+            case "ihealth":
+                setIsBpSensor(true);
+                return setDeviceimg({
+                    patchImage: bpImg,
+                    patchHead: "iHealth",
                     width: "47%",
                     style: { marginLeft: "1em" },
                 });
@@ -81,7 +114,7 @@ const PatchForm = (props) => {
         newList[props.menuState].error = false;
         newList[[props.menuState]].delete = false;
         newList[[props.menuState]].added = true;
-        newList[[props.menuState]].patchType = values.patchType;
+        newList[[props.menuState]].patchType = values.patchType !== "bps" ? values.patchType : values.bpType;
         newList[[props.menuState]].patchserial = values.serialNumber;
 
         props.setClass({ list: [...newList] });
@@ -91,7 +124,7 @@ const PatchForm = (props) => {
         const dataBody = {
             data: [
                 {
-                    patch_type: values.patchType,
+                    patch_type: values.patchType !== "bps" ? values.patchType : values.bpType,
                     patch_status: "Active",
                     patch_serial: values.serialNumber,
                     tenant_id: tenantUser.tenant,
@@ -160,13 +193,14 @@ const PatchForm = (props) => {
                         >
                             <Option value="temperature">Temperature Sensor</Option>
                             <Option value="gateway">Gateway Sensor (EV-04)</Option>
-                            <Option value="spo2">SpO2 Sensor (Aeon)</Option>
+                            <Option value="spo2">SpO2 (Aeon)</Option>
                             <Option value="ecg">ECG Sensor</Option>
-                            <Option value="bp">BP Sensor</Option>
+                            <Option value="digital">Digital Scale</Option>
+                            <Option value="bps">BP Sensor</Option>
                         </Select>
                     </Form.Item>
 
-                    {/* {deviceImg.patchHead === "BP Sensor" && (
+                    {isBpSensor && (
                         <Form.Item
                             required={!props.required}
                             label="BP type"
@@ -174,7 +208,7 @@ const PatchForm = (props) => {
                             rules={[
                                 {
                                     required: props.required,
-                                    message: "Select one device type!",
+                                    message: "Select one bp type!",
                                 },
                             ]}
                             className="addPatchFormItem"
@@ -186,13 +220,13 @@ const PatchForm = (props) => {
                                 optionFilterProp="children"
                                 // filterOption={true}
                                 // defaultValue="temperature"
-                                // onChange={handleimg}
+                                onChange={handleimg}
                             >
                                 <Option value="alphamed">Alphamed</Option>
                                 <Option value="ihealth">iHealth</Option>
                             </Select>
                         </Form.Item>
-                    )} */}
+                    )}
                     
                     <Form.Item
                         required={!props.required}
@@ -265,12 +299,19 @@ const toProperName = (itemType) => {
             return "SpO2 Sensor";
         case "gateway":
             return "Gateway Sensor";
+        case "digital":
+            return "Digital Scale";
+        case "alphamed":
+            return "Alphamed";
+        case "ihealth":
+            return "iHealth";
         default:
             return null;
     }
 };
 
 const PatchDisplay = (props) => {
+    console.log('props.patientClass.list', props.patientClass.list);
     return (
         <Descriptions title="Device Info" layout="vertical" bordered>
             <Descriptions.Item

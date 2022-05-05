@@ -71,6 +71,9 @@ function AddPatient() {
         spo2: null,
         temperature: null,
         gateway: null,
+        alphamed: null,
+        ihealth: null,
+        digital: null
     });
 
     const [bundleData, setBundleData] = React.useState({
@@ -142,13 +145,25 @@ function AddPatient() {
                 Component: PatchForm,
             },
             {
+                class: "gateway",
+                error: false,
+                added: false,
+                Component: PatchForm,
+            },
+            {
                 class: "temperature",
                 error: false,
                 added: false,
                 Component: PatchForm,
             },
             {
-                class: "gateway",
+                class: "digital",
+                error: false,
+                added: false,
+                Component: PatchForm,
+            },
+            {
+                class: "bps",
                 error: false,
                 added: false,
                 Component: PatchForm,
@@ -166,8 +181,6 @@ function AddPatient() {
             ...values,
         });
     };
-
-    // React.useEffect(() => { }, [patientBiographicData])
 
     const savePatchDetails = (values) => {
         setPatchData({ ...patchData, ...values });
@@ -419,6 +432,8 @@ function AddPatient() {
                     spo2: null,
                     temperature: null,
                     gateway: null,
+                    alphamed: null,
+                    ihealth: null
                 });
                 setBundleData({
                     ecg: null,
@@ -452,28 +467,6 @@ function AddPatient() {
     const addPatient = () => {
         setButtonLoading(true);
         try {
-            const fname = addPatientForm.getFieldValue('fname');
-            const lname = addPatientForm.getFieldValue('lname');
-
-            const regex = /^[a-zA-Z]+$/;
-            if (!regex.test(fname)) {
-                setButtonLoading(false);
-                return notification.warn({
-                    message: "Fill mandatory values",
-                    description: "First name must not exit number.",
-                    placement: "topRight",
-                });
-            };
-
-            if (!regex.test(lname)) {
-                setButtonLoading(false);
-                return notification.warn({
-                    message: "Fill mandatory values",
-                    description: "Last name must not exit number.",
-                    placement: "topRight",
-                });
-            };
-
             addPatientForm.submit();
 
             let list = patientClass.list;
@@ -649,11 +642,12 @@ function AddPatient() {
                     // }
                 })
                 .catch((err) => {
+                    const isExist = err.error.isExist || false;
                     setButtonLoading(false);
                     setSummary({
                         isVisible: true,
                         status: "error",
-                        title: "Couldnt add details of patient",
+                        title: isExist ? `Medical record ${payload.demographic_map.med_record} already exists` : "Couldnt add details of patient",
                     });
                     const key = "addPatientApiErrorNotif";
                     const btn = (
@@ -714,7 +708,6 @@ function AddPatient() {
     };
 
     const addPatch = () => {
-        console.log('vo------------------------------ addPatch');
         setButtonLoading(true);
 
         let userData = UserStore.getUser();
@@ -776,9 +769,27 @@ function AddPatient() {
                 patchData.gateway.config = {};
                 payload.push(patchData.gateway);
             }
+            if (patchData.alphamed !== null) {
+                // patchData.gateway.tenant_id = tenantId;
+                // patchData.gateway.pid = patientId;
+                patchData.alphamed.config = {};
+                payload.push(patchData.alphamed);
+            }
+            if (patchData.ihealth !== null) {
+                // patchData.gateway.tenant_id = tenantId;
+                // patchData.gateway.pid = patientId;
+                patchData.ihealth.config = {};
+                payload.push(patchData.ihealth);
+            }
+            if (patchData.digital !== null) {
+                console.log('--------------', patchData);
+                // patchData.gateway.tenant_id = tenantId;
+                // patchData.gateway.pid = patientId;
+                patchData.digital.config = {};
+                payload.push(patchData.digital);
+            }
         }
 
-        console.log('--------------------------------------', payload);
         const dataBody = {
             tenantId,
             pid: patientId,
@@ -830,6 +841,8 @@ function AddPatient() {
                 spo2: null,
                 temperature: null,
                 gateway: null,
+                alphamed: null,
+                ihealth: null
             })
         } else {
             setBundleData({
@@ -1043,7 +1056,10 @@ function AddPatient() {
                                             patchData.ecg === null &&
                                             patchData.spo2 === null &&
                                             patchData.temperature === null &&
-                                            patchData.gateway === null
+                                            patchData.gateway === null &&
+                                            patchData.alphamed === null &&
+                                            patchData.ihealth === null &&
+                                            patchData.digital === null
                                             ? true
                                             : false
                                         }
