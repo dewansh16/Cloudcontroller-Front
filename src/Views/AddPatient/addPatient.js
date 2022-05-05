@@ -796,17 +796,6 @@ function AddPatient() {
             list: payload
         }
 
-        setButtonLoading(false);
-        let newTitle = "Sensor successfully associated to ";
-        setSummary({
-            ...summary,
-            isVisible: true,
-            status: "success",
-            title: newTitle + summary.name,
-            // response: res.data.response?.patient_data?.demographic_map
-        });
-        resetDataSelected('patch');
-
         patientApi
             .associatePatchToPatient(patientId, dataBody)
             .then((res) => {
