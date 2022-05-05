@@ -195,6 +195,24 @@ function Vitals({ activeStep, wardArray, patient }) {
                 </div>
             ),
         },
+        {
+            key: "16",
+            name: (
+                <div className="vital-tables-row-name">
+                    <p>Weight</p>
+                </div>
+            ),
+            prevWard: (
+                <div className="vital-table-values">
+                    {/* <p>{stepArray[activeStep]?.deviceData?.rr}</p> */}
+                </div>
+            ),
+            nextWard: (
+                <div className="vital-table-values">
+                    {/* <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p> */}
+                </div>
+            ),
+        },
     ]);
 
     useEffect(() => {
@@ -286,6 +304,24 @@ function Vitals({ activeStep, wardArray, patient }) {
                 nextWard: (
                     <div className="vital-table-values">
                         <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p>
+                    </div>
+                ),
+            },
+            {
+                key: "16",
+                name: (
+                    <div className="vital-tables-row-name">
+                        <p>Weight</p>
+                    </div>
+                ),
+                prevWard: (
+                    <div className="vital-table-values">
+                        {/* <p>{stepArray[activeStep]?.deviceData?.rr}</p> */}
+                    </div>
+                ),
+                nextWard: (
+                    <div className="vital-table-values">
+                        {/* <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p> */}
                     </div>
                 ),
             },

@@ -58,7 +58,7 @@ const PatchForm = (props) => {
                     patchImage: spo2Img,
                     patchHead: "SpO2 Sensor",
                     width: "90%",
-                    style: { marginLeft: "-2.4em" },
+                    style: { marginLeft: "-1.4em" },
                 });
             case "gateway":
                 setIsBpSensor(false);
@@ -311,7 +311,6 @@ const toProperName = (itemType) => {
 };
 
 const PatchDisplay = (props) => {
-    console.log('props.patientClass.list', props.patientClass.list);
     return (
         <Descriptions title="Device Info" layout="vertical" bordered>
             <Descriptions.Item

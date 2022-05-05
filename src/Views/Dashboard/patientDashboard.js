@@ -322,7 +322,7 @@ export default function PatientDashboard(props) {
             EWS: filters.ews,
             spo2LevelsL: filters.spo2,
             respirationRate: filters.rr,
-            offset: Number(currentPageVal - 1), limit: pageSize,
+            offset: Number(currentPageVal), limit: pageSize,
         };
 
         Object.keys(searchOptions).forEach(search => {

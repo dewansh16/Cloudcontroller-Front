@@ -58,7 +58,7 @@ function AddPatient() {
     const [patientLocationUUID, setPatientLocationUUID] = React.useState(null);
     const [isButtonLoading, setButtonLoading] = React.useState(false);
     const [isPatientDataLoading, setPatientDataLoading] = React.useState(false);
-    const [activePanel, setActivePanel] = React.useState("2");
+    const [activePanel, setActivePanel] = React.useState("1");
     const [deboardButtonLoading, setDeboardButtonLoading] = React.useState(false);
     const [isDeboarded, setDeboarded] = React.useState(false);
     const [practitioners, setPractitioners] = React.useState({
@@ -807,29 +807,28 @@ function AddPatient() {
         });
         resetDataSelected('patch');
 
-        // patientApi
-        //     .associatePatchToPatient(patientId, dataBody)
-        //     .then((res) => {
-        //         // console.log(res.data.response);
-        //         setButtonLoading(false);
-        //         let newTitle = "Sensor successfully associated to ";
-        //         setSummary({
-        //             ...summary,
-        //             isVisible: true,
-        //             status: "success",
-        //             title: newTitle + summary.name,
-        //             // response: res.data.response?.patient_data?.demographic_map
-        //         });
-        //         resetDataSelected('patch');
-        //     })
-        //     .catch((err) => {
-        //         setButtonLoading(false);
-        //         setSummary({
-        //             isVisible: true,
-        //             status: "error",
-        //             title: `Couldn't associate Sensor`,
-        //         });
-        //     });
+        patientApi
+            .associatePatchToPatient(patientId, dataBody)
+            .then((res) => {
+                setButtonLoading(false);
+                let newTitle = "Sensor successfully associated to ";
+                setSummary({
+                    ...summary,
+                    isVisible: true,
+                    status: "success",
+                    title: newTitle + summary.name,
+                    // response: res.data.response?.patient_data?.demographic_map
+                });
+                resetDataSelected('patch');
+            })
+            .catch((err) => {
+                setButtonLoading(false);
+                setSummary({
+                    isVisible: true,
+                    status: "error",
+                    title: `Couldn't associate Sensor`,
+                });
+            });
 
         // patientApi.associatePatchToPatient()
     };
@@ -979,7 +978,11 @@ function AddPatient() {
                             }
                             size="large"
                         >
-                            <TabPane tab={patientId ? "Edit Patient" : "Add Patient"} key="1">
+                            <TabPane 
+                                tab={patientId ? "Edit Patient" : "Add Patient"} 
+                                key="1"
+                                disabled={!!patientId}
+                            >
                                 <AddPatientModal
                                     patientData={patientData}
                                     patientClass={patientClass}
