@@ -433,7 +433,8 @@ function AddPatient() {
                     temperature: null,
                     gateway: null,
                     alphamed: null,
-                    ihealth: null
+                    ihealth: null,
+                    digital: null
                 });
                 setBundleData({
                     ecg: null,
@@ -720,63 +721,73 @@ function AddPatient() {
             bundleData.temperature !== null ||
             bundleData.gateway !== null
         ) {
-            if (bundleData.ecg !== null) {
-                // bundleData.ecg.tenant_id = tenantId;
-                // bundleData.ecg.pid = patientId;
-                bundleData.ecg.config = {};
-                payload.push(bundleData.ecg);
-            }
-            if (bundleData.spo2 !== null) {
-                // bundleData.spo2.tenant_id = tenantId;
-                // bundleData.spo2.pid = patientId;
-                bundleData.spo2.config = {};
-                payload.push(bundleData.spo2);
-            }
-            if (bundleData.temperature !== null) {
-                // bundleData.temperature.tenant_id = tenantId;
-                // bundleData.temperature.pid = patientId;
-                bundleData.temperature.config = {};
-                payload.push(bundleData.temperature);
-            }
-            if (bundleData.gateway !== null) {
-                // bundleData.gateway.tenant_id = tenantId;
-                // bundleData.gateway.pid = patientId;
-                bundleData.gateway.config = {};
-                payload.push(bundleData.gateway);
-            }
-        } else {
-            Object.keys(patchData).forEach(patch => {
-                console.log('patch', patch);
+            Object.keys(bundleData).forEach(patch => {
+                if (bundleData?.[patch] !== null) {
+                    bundleData[patch].config = {};
+                    payload.push(bundleData[patch]);
+                }
             })
 
-            if (patchData.ecg !== null) {
-                patchData.ecg.config = {};
-                payload.push(patchData.ecg);
-            }
-            if (patchData.spo2 !== null) {
-                patchData.spo2.config = {};
-                payload.push(patchData.spo2);
-            }
-            if (patchData.temperature !== null) {
-                patchData.temperature.config = {};
-                payload.push(patchData.temperature);
-            }
-            if (patchData.gateway !== null) {
-                patchData.gateway.config = {};
-                payload.push(patchData.gateway);
-            }
-            if (patchData.alphamed !== null) {
-                patchData.alphamed.config = {};
-                payload.push(patchData.alphamed);
-            }
-            if (patchData.ihealth !== null) {
-                patchData.ihealth.config = {};
-                payload.push(patchData.ihealth);
-            }
-            if (patchData.digital !== null) {
-                patchData.digital.config = {};
-                payload.push(patchData.digital);
-            }
+            // if (bundleData.ecg !== null) {
+            //     // bundleData.ecg.tenant_id = tenantId;
+            //     // bundleData.ecg.pid = patientId;
+            //     bundleData.ecg.config = {};
+            //     payload.push(bundleData.ecg);
+            // }
+            // if (bundleData.spo2 !== null) {
+            //     // bundleData.spo2.tenant_id = tenantId;
+            //     // bundleData.spo2.pid = patientId;
+            //     bundleData.spo2.config = {};
+            //     payload.push(bundleData.spo2);
+            // }
+            // if (bundleData.temperature !== null) {
+            //     // bundleData.temperature.tenant_id = tenantId;
+            //     // bundleData.temperature.pid = patientId;
+            //     bundleData.temperature.config = {};
+            //     payload.push(bundleData.temperature);
+            // }
+            // if (bundleData.gateway !== null) {
+            //     // bundleData.gateway.tenant_id = tenantId;
+            //     // bundleData.gateway.pid = patientId;
+            //     bundleData.gateway.config = {};
+            //     payload.push(bundleData.gateway);
+            // }
+        } else {
+            Object.keys(patchData).forEach(patch => {
+                if (patchData?.[patch] !== null) {
+                    patchData[patch].config = {};
+                    payload.push(patchData[patch]);
+                }
+            })
+
+            // if (patchData.ecg !== null) {
+            //     patchData.ecg.config = {};
+            //     payload.push(patchData.ecg);
+            // }
+            // if (patchData.spo2 !== null) {
+            //     patchData.spo2.config = {};
+            //     payload.push(patchData.spo2);
+            // }
+            // if (patchData.temperature !== null) {
+            //     patchData.temperature.config = {};
+            //     payload.push(patchData.temperature);
+            // }
+            // if (patchData.gateway !== null) {
+            //     patchData.gateway.config = {};
+            //     payload.push(patchData.gateway);
+            // }
+            // if (patchData.alphamed !== null) {
+            //     patchData.alphamed.config = {};
+            //     payload.push(patchData.alphamed);
+            // }
+            // if (patchData.ihealth !== null) {
+            //     patchData.ihealth.config = {};
+            //     payload.push(patchData.ihealth);
+            // }
+            // if (patchData.digital !== null) {
+            //     patchData.digital.config = {};
+            //     payload.push(patchData.digital);
+            // }
         }
 
         const dataBody = {
@@ -785,29 +796,40 @@ function AddPatient() {
             list: payload
         }
 
-        console.log('list', dataBody.list);
-        patientApi
-            .associatePatchToPatient(patientId, dataBody)
-            .then((res) => {
-                // console.log(res.data.response);
-                setButtonLoading(false);
-                let newTitle = "Sensor successfully associated to ";
-                setSummary({
-                    ...summary,
-                    isVisible: true,
-                    status: "success",
-                    title: newTitle + summary.name,
-                    // response: res.data.response?.patient_data?.demographic_map
-                });
-            })
-            .catch((err) => {
-                setButtonLoading(false);
-                setSummary({
-                    isVisible: true,
-                    status: "error",
-                    title: `Couldn't associate Sensor`,
-                });
-            });
+        setButtonLoading(false);
+        let newTitle = "Sensor successfully associated to ";
+        setSummary({
+            ...summary,
+            isVisible: true,
+            status: "success",
+            title: newTitle + summary.name,
+            // response: res.data.response?.patient_data?.demographic_map
+        });
+        resetDataSelected('patch');
+
+        // patientApi
+        //     .associatePatchToPatient(patientId, dataBody)
+        //     .then((res) => {
+        //         // console.log(res.data.response);
+        //         setButtonLoading(false);
+        //         let newTitle = "Sensor successfully associated to ";
+        //         setSummary({
+        //             ...summary,
+        //             isVisible: true,
+        //             status: "success",
+        //             title: newTitle + summary.name,
+        //             // response: res.data.response?.patient_data?.demographic_map
+        //         });
+        //         resetDataSelected('patch');
+        //     })
+        //     .catch((err) => {
+        //         setButtonLoading(false);
+        //         setSummary({
+        //             isVisible: true,
+        //             status: "error",
+        //             title: `Couldn't associate Sensor`,
+        //         });
+        //     });
 
         // patientApi.associatePatchToPatient()
     };
@@ -827,13 +849,14 @@ function AddPatient() {
     const resetDataSelected = (typeReset) => {
         if (typeReset === 'patch') {
             setPatchData({
-                patchData,
+                ...patchData,
                 ecg: null,
                 spo2: null,
                 temperature: null,
                 gateway: null,
                 alphamed: null,
-                ihealth: null
+                ihealth: null,
+                digital: null
             })
         } else {
             setBundleData({

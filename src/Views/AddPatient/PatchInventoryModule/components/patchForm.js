@@ -36,7 +36,19 @@ const PatchForm = (props) => {
         if (props.type !== 'bps') {
             fetchPatchesData(props.type);
         }
+
+        resetValueForm();
     }, [props.type]);
+
+    const resetValueForm = () => {
+        let type = props.type;
+        if (props.type === 'bps') {
+            type = valueBpType;
+        } 
+
+        props.form.setFieldsValue({ [`${type}_patch_serial`]: null });
+        props.form.setFieldsValue({ [`${type}_duration`]: null });
+    }
 
     const disAllocatePatch = (patchData) => {
         let userData = UserStore.getUser();
@@ -144,8 +156,6 @@ const PatchForm = (props) => {
                     [`${type}_patch_serial`]: selectedPatch[0].patch_serial,
                 };
 
-                console.log('payload', payload);
-
                 props.savePatchDetails(payload);
                 break;
             }
@@ -245,7 +255,7 @@ const PatchForm = (props) => {
                                 <Form.Item
                                     required={props.required}
                                     label="BP type"
-                                    name={`bp-type`}
+                                    name="bp-type"
                                     rules={[
                                         {
                                             required: props.required,

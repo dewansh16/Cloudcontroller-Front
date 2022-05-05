@@ -18,6 +18,7 @@ export default function PatchInventoryModal(props) {
 
     const handleMenuState = ({ item, key }) => {
         setMenuState(key);
+        props.resetDataSelect(isIndividualPatchChecked ? 'patch' : 'bundle');
     }
 
     const [isIndividualPatchChecked, setChecked] = React.useState((props.bundleData.ecg !== null || props.bundleData.spo2 !== null || props.bundleData.temperature !== null || props.bundleData.gateway !== null) ? false : true);
