@@ -36,9 +36,11 @@ function FetchDetails(pid) {
 
     useEffect(() => {
         patientApi.getPatientData(pid).then((res) => {
-            setResponse(res.data.response.patients[0])
+            console.log('res', res);
+            setResponse(res.data.response.patient)
             setLoading(false);
         }).catch((err) => {
+            console.log('vo catch');
             if (err) {
                 notification.error({
                     message: 'Error',
@@ -187,12 +189,8 @@ export default function EMR() {
 
     let query = useQuery();
 
-
-
-
     const [emrView, setEmrView] = useState(null)
     const [padding, setPadding] = useState("3rem")
-
 
     useEffect(() => {
         // setEmrView(<EmrView pid={pid} setEmrView={setEmrView} setPadding={setPadding} defaultState={query.get("pos")} />)
