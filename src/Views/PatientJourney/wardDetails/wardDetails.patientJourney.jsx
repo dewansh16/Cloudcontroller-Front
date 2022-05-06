@@ -95,13 +95,15 @@ function WardDetails({
                     if (item.class === activeFactor) {
                         if (item.component)
                             return (
-                                <item.component
-                                    activeStep={activeStep}
-                                    heading={item.heading}
-                                    stepArray={stepArray}
-                                    wardArray={stepArray}
-                                    patient={patient}
-                                />
+                                <React.Fragment key={index}>
+                                    <item.component
+                                        activeStep={activeStep}
+                                        heading={item.heading}
+                                        stepArray={stepArray}
+                                        wardArray={stepArray}
+                                        patient={patient}
+                                    />
+                                </React.Fragment>
                             );
                         else return null;
                     }

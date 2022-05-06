@@ -73,69 +73,6 @@ const PatientListItem = (props) => {
     const [isChartSectionVisible, setChartSectionVisibility] = React.useState(false);
 
     React.useEffect(() => {
-        // const dummyBPData = props.data.trend_map[1]?.temp.map((item) => {
-        //     return {
-        //         date: item.date,
-        //         value: 10 + Math.floor(Math.random() * 10),
-        //         // value: item.value,
-        //     };
-        // });
-
-        // setChartBlockData([
-        //     {
-        //         name: "Temperature",
-        //         icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
-        //         val:
-        //         parseInt(props.data.ews_map?.temp) === -1
-        //             ? "NA"
-        //             : props.data.ews_map?.temp,
-        //         trendData: props.data.trend_map[1]?.temp?.reverse(),
-        //         color: Colors.purple,
-        //     },
-        //     {
-        //         name: "SPO2",
-        //         icon: Icons.o2({ Style: { color: Colors.green } }),
-        //         val:
-        //         parseInt(props.data.ews_map?.spo2) === -1
-        //             ? "NA"
-        //             : props.data.ews_map?.spo2,
-        //         trendData: props.data.trend_map[0]?.spo2?.reverse(),
-        //         color: Colors.green,
-        //     },
-        //     {
-        //         name: "Heart Rate",
-        //         icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
-        //         val:
-        //         parseInt(props.data.ews_map?.hr) === -1
-        //             ? "NA"
-        //             : props.data.ews_map?.hr,
-        //         trendData: props.data.trend_map[3]?.hr?.reverse(),
-        //         color: Colors.darkPink,
-        //     },
-        //     {
-        //         name: "Respiration Rate",
-        //         icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
-        //         val:
-        //         parseInt(props.data.ews_map?.rr) === -1
-        //             ? "NA"
-        //             : props.data.ews_map?.rr,
-        //         trendData: props.data.trend_map[2]?.rr?.reverse(),
-        //         color: Colors.orange,
-        //     },
-        //     {
-        //         name: "Blood Pressure",
-        //         icon: Icons.bpIcon({
-        //         Style: { color: Colors.darkPurple, fontSize: "24px" },
-        //         }),
-        //         val: "108",
-        //         // parseInt(props.data.ews_map?.rr) === -1
-        //         //   ? "NA"
-        //         //   : props.data.ews_map?.rr,
-        //         trendData: dummyBPData,
-        //         color: Colors.darkPurple,
-        //     },
-        // ]);
-
         setChartBlockData([
             {
                 name: "Temperature",
@@ -146,7 +83,7 @@ const PatientListItem = (props) => {
                 // parseInt(props.data.ews_map?.temp) === -1
                 //     ? "NA"
                 //     : props.data.ews_map?.temp,
-                // trendData: props.data.trend_map[1]?.temp?.reverse(),
+                trendData: []
             },
             {
                 name: "SPO2",
@@ -157,7 +94,7 @@ const PatientListItem = (props) => {
                 // parseInt(props.data.ews_map?.spo2) === -1
                 //     ? "NA"
                 //     : props.data.ews_map?.spo2,
-                // trendData: props.data.trend_map[0]?.spo2?.reverse(),
+                trendData: []
             },
             {
                 name: "Heart Rate",
@@ -168,7 +105,7 @@ const PatientListItem = (props) => {
                 // parseInt(props.data.ews_map?.hr) === -1
                 //     ? "NA"
                 //     : props.data.ews_map?.hr,
-                // trendData: props.data.trend_map[3]?.hr?.reverse(),
+                trendData: []
             },
             {
                 name: "Respiration Rate",
@@ -179,7 +116,7 @@ const PatientListItem = (props) => {
                 // parseInt(props.data.ews_map?.rr) === -1
                 //     ? "NA"
                 //     : props.data.ews_map?.rr,
-                // trendData: props.data.trend_map[2]?.rr?.reverse(),
+                trendData: []
             },
             {
                 name: "Blood Pressure",
@@ -192,14 +129,21 @@ const PatientListItem = (props) => {
                 // parseInt(props.data.ews_map?.rr) === -1
                 //   ? "NA"
                 //   : props.data.ews_map?.rr,
-                // trendData: dummyBPData,
+                trendData: []
+            },
+            {
+                name: "Weight",
+                icon: Icons.bpIcon({
+                    Style: { color: Colors.yellow, fontSize: "24px" },
+                }),
+                val: 0,
+                color: Colors.yellow,
             },
         ]);
     }, [props.data.ews_map, props.data.trend_map]);
 
     const pushToPatientDetails = () => {
         props.parentProps.history.push(`/dashboard/patient/details/${props.pid}`);
-        // console.log(props);
     };
 
     const pushToEdit = () => {
@@ -388,7 +332,7 @@ const PatientListItem = (props) => {
                 <BedDetailsSection width="10%" />
                 <CustomDivider />
                 <NameSection width="10%" />
-                <CustomDivider />
+                {/* <CustomDivider />
                 <div
                     style={{
                         width: "20%",
@@ -400,7 +344,7 @@ const PatientListItem = (props) => {
                     <Button onClick={pushToEdit} type="secondary">
                         Edit Patient
                     </Button>
-                </div>
+                </div> */}
                 <CustomDivider />
                 <div
                     style={{

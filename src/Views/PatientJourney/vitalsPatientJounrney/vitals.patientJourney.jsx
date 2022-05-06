@@ -60,7 +60,7 @@ function Vitals({ activeStep, wardArray, patient }) {
                         color: "#727272",
                     }}
                 >
-                    Vitals abc
+                    Vitals
                 </div>
             ),
             dataIndex: "name",
@@ -195,6 +195,24 @@ function Vitals({ activeStep, wardArray, patient }) {
                 </div>
             ),
         },
+        {
+            key: "16",
+            name: (
+                <div className="vital-tables-row-name">
+                    <p>Weight</p>
+                </div>
+            ),
+            prevWard: (
+                <div className="vital-table-values">
+                    {/* <p>{stepArray[activeStep]?.deviceData?.rr}</p> */}
+                </div>
+            ),
+            nextWard: (
+                <div className="vital-table-values">
+                    {/* <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p> */}
+                </div>
+            ),
+        },
     ]);
 
     useEffect(() => {
@@ -286,6 +304,24 @@ function Vitals({ activeStep, wardArray, patient }) {
                 nextWard: (
                     <div className="vital-table-values">
                         <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p>
+                    </div>
+                ),
+            },
+            {
+                key: "16",
+                name: (
+                    <div className="vital-tables-row-name">
+                        <p>Weight</p>
+                    </div>
+                ),
+                prevWard: (
+                    <div className="vital-table-values">
+                        {/* <p>{stepArray[activeStep]?.deviceData?.rr}</p> */}
+                    </div>
+                ),
+                nextWard: (
+                    <div className="vital-table-values">
+                        {/* <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p> */}
                     </div>
                 ),
             },
@@ -471,12 +507,23 @@ function Vitals({ activeStep, wardArray, patient }) {
                 icon: Icons.bpIcon({
                     Style: { color: Colors.darkPurple, fontSize: "24px" },
                 }),
-                val: "108",
-                // parseInt(props.data.ews_map?.rr) === -1
-                //   ? "NA"
-                //   : props.data.ews_map?.rr,
+                val:
+                parseInt(patient.ews_map?.rr) === -1
+                  ? "NA"
+                  : patient.ews_map?.rr,
                 trendData: dummyBPData,
                 color: Colors.darkPurple,
+            },
+            {
+                name: "Weight",
+                icon: Icons.bpIcon({
+                    Style: { color: Colors.yellow, fontSize: "24px" },
+                }),
+                val:
+                parseInt(patient.ews_map?.rr) === -1
+                  ? "NA"
+                  : patient.ews_map?.rr,
+                color: Colors.yellow,
             },
         ]);
     }, []);
