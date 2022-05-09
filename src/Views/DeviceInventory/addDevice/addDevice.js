@@ -386,19 +386,27 @@ export default function PatchInventoryModal(props) {
         message.info("At least one Device should be added");
     };
 
-    const deletePatch = (index) => {
+    const deletePatch = (event, index) => {
+        event.stopPropagation();
+
         if (patientClass.list.length === 1) {
             info();
         } else {
             let newList = patientClass.list.filter((el, id) => id !== index);
+            newList.forEach((item, index) => {
+                item.class = `Device ${index + 1}`
+            });
+
             setClass({ list: newList });
-            // setMenuState(index-1);
+
+            if (Number(menuState) === Number(index)) {
+                setMenuState(Number(index - 1));
+            }
         }
     };
 
-    const handleMenuState = ({ item, key, keyPath }) => {
-        setMenuState(parseInt(key));
-        console.log(item, key, keyPath);
+    const handleMenuState = ({ key }) => {
+        setMenuState(Number(key));
     };
 
     return (
@@ -409,7 +417,8 @@ export default function PatchInventoryModal(props) {
                         <Col className="addPatientDetailsMenu" xs={24} lg={8}>
                             <Menu
                                 onClick={handleMenuState}
-                                defaultSelectedKeys={[patientClass.list[0].class]}
+                                // defaultSelectedKeys={[patientClass.list[0].class]}
+                                selectedKeys={menuState.toString()}
                                 mode="inline"
                             >
                                 {patientClass.list.map((listItem, index) => (
@@ -418,15 +427,18 @@ export default function PatchInventoryModal(props) {
                                             <Col span={18}>
                                                 <span>{listItem.class}</span>
                                             </Col>
+                                            
                                             <Col span={6}>
                                                 {listItem.error
                                                     ? Icons.exclamationCircleOutlined({})
                                                     : ""}
+
                                                 {listItem.added ? Icons.checkCircleFilled({}) : ""}
+
                                                 {listItem.delete ? (
                                                     <div
-                                                        onClick={() => {
-                                                            deletePatch(index);
+                                                        onClick={(e) => {
+                                                            deletePatch(e, index);
                                                         }}
                                                     >
                                                         {Icons.CloseCircleOutlined({})}
@@ -444,6 +456,7 @@ export default function PatchInventoryModal(props) {
                                 {Icons.addIcon({ style: { paddingLeft: "1em" } })}
                             </div>
                         </Col>
+
                         <Col
                             style={{ padding: "2em", maxWidth: "65em" }}
                             sm={24}

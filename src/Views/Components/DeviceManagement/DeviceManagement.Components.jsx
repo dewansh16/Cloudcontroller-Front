@@ -35,35 +35,36 @@ function DeviceManagement({ pid }) {
         list: [],
     });
     const [menuState, setMenuState] = useState();
+    
     const handleMenuState = ({ item, key }) => {
         setMenuState(key);
     };
 
     function theMenuItemSort(list) {
-        let temp = null;
-        list.map((item, idx) => {
-            if (item.patches[0]["patch_type"] === "gateway") {
-                temp = list[0];
-                list[0] = list[idx];
-                list[idx] = temp;
-            }
-        });
+        // let temp = null;
+        // list.map((item, idx) => {
+        //     if (item.patches[0]["patch_type"] === "gateway") {
+        //         temp = list[0];
+        //         list[0] = list[idx];
+        //         list[idx] = temp;
+        //     }
+        // });
         return list;
     }
 
     useEffect(() => {
         patientApi
-            .getPatientPatches(pid)
+            .getDeviceManegement(pid)
             .then((res) => {
-                setClass({
-                    list: theMenuItemSort(res.data?.response.patch_patient_map),
-                    isLoading: false,
-                });
-                if (res.data?.response.patch_patient_map.length > 0) {
-                    setMenuState(
-                        res.data?.response.patch_patient_map[0].patches[0]["patch_type"]
-                    );
-                }
+                // setClass({
+                //     list: theMenuItemSort(res.data?.response.patch_patient_map),
+                //     isLoading: false,
+                // });
+                // if (res.data?.response.patch_patient_map.length > 0) {
+                //     setMenuState(
+                //         res.data?.response.patch_patient_map[0].patches[0]["patch_type"]
+                //     );
+                // }
             })
             .catch((err) => {
                 if (err) {
@@ -75,6 +76,8 @@ function DeviceManagement({ pid }) {
                 }
             });
     }, [pid]);
+
+    console.log("deviceClass", deviceClass);
 
     function menuItemName(device) {
         switch (device) {
@@ -116,25 +119,28 @@ function DeviceManagement({ pid }) {
                                 selectedKeys={[menuState]}
                                 mode="inline"
                             >
-                                {deviceClass.list.map((listItem) => (
-                                    <Menu.Item
-                                        key={listItem.patches[0]["patch_type"]}
-                                        className="menu-item"
-                                    >
-                                        {menuItemName(listItem.patches[0]["patch_type"])}
-                                    </Menu.Item>
-                                ))}
+                                {deviceClass.list.map((listItem) => {
+                                    console.log('listItem', listItem?.patches?.patch_type);
+                                    return  (
+                                        <Menu.Item
+                                            key={listItem?.patches?.patch_type}
+                                            className="menu-item"
+                                        >
+                                            {menuItemName(listItem?.patches?.patch_type)}
+                                        </Menu.Item>
+                                    )
+                                })}
                             </Menu>
                         </div>
                     </Col>
-                    <Col span={18}>
+                    {/* <Col span={18}>
                         <div className="data-container">
                             {deviceClass.list.map(
                                 (Item) =>
-                                    menuState === Item.patches[0]["patch_type"] && (
+                                    menuState === Item.patches["patch_type"] && (
                                         <DeviceDetails
-                                            serial={Item.patches[0]["patch_serial"]}
-                                            key={Item.patches[0]["patch_type"]}
+                                            serial={Item.patches["patch_serial"]}
+                                            key={Item.patches["patch_type"]}
                                             uuid={Item["patch_uuid"]}
                                             duration={Item["duration"]}
                                             pid={pid}
@@ -143,7 +149,7 @@ function DeviceManagement({ pid }) {
                                     )
                             )}
                         </div>
-                    </Col>
+                    </Col> */}
                 </Row>
             )}
             {deviceClass.list.length === 0 && (

@@ -43,9 +43,11 @@ function FetchDetails(pid) {
 
     useEffect(() => {
         patientApi.getPatientData(pid).then((res) => {
-            setResponse(res.data.response.patients[0])
+            console.log('res', res);
+            setResponse(res.data.response.patient)
             setLoading(false);
         }).catch((err) => {
+            console.log('vo catch');
             if (err) {
                 notification.error({
                     message: 'Error',
@@ -59,7 +61,6 @@ function FetchDetails(pid) {
 }
 
 export function EmrView({ pid, setEmrView, setPadding, defaultState = "subgroup-2-element-2" }) {
-
     const [patient, isLoading] = FetchDetails(pid);
 
     const menuData = [
@@ -139,16 +140,54 @@ export function EmrView({ pid, setEmrView, setPadding, defaultState = "subgroup-
     const [componentSupportContent, setComponentSupportContent] = useState(null);
 
     const componentList = {
-        "subgroup-1-element-1": <MedicalHistory pid={pid} setComponentSupportContent={setComponentSupportContent} setPadding={setPadding} setEmrView={setEmrView} />,
-        "subgroup-1-element-2": <Vitals pid={pid} setComponentSupportContent={setComponentSupportContent} setEmrView={setEmrView} patient={patient} />,
-        "subgroup-1-element-3": <Allergy pid={pid} setComponentSupportContent={setComponentSupportContent} setPadding={setPadding} setEmrView={setEmrView} />,
-        "subgroup-1-element-4": <Reports pid={pid} pdata={FetchDetails(pid)[0]} setComponentSupportContent={setComponentSupportContent} setPadding={setPadding} setEmrView={setEmrView} />,
+        "subgroup-1-element-1": 
+            <MedicalHistory 
+                pid={pid} 
+                setPadding={setPadding} 
+                setEmrView={setEmrView} 
+                setComponentSupportContent={setComponentSupportContent} 
+            />,
+        "subgroup-1-element-2": 
+            <Vitals 
+                pid={pid} 
+                patient={patient} 
+                setEmrView={setEmrView} 
+                setComponentSupportContent={setComponentSupportContent} 
+            />,
+        "subgroup-1-element-3": 
+            <Allergy 
+                pid={pid} 
+                setPadding={setPadding} 
+                setEmrView={setEmrView} 
+                setComponentSupportContent={setComponentSupportContent} 
+            />,
+        "subgroup-1-element-4": 
+            <Reports 
+                pid={pid} 
+                setPadding={setPadding} 
+                setEmrView={setEmrView} 
+                pdata={FetchDetails(pid)[0]} 
+                setComponentSupportContent={setComponentSupportContent} 
+            />,
         "subgroup-1-element-5": ContactAdmin(),
         "subgroup-1-element-6": ContactAdmin(),
         "subgroup-2-element-1": ContactAdmin(),
-        "subgroup-2-element-2": <Procedure pid={pid} setComponentSupportContent={setComponentSupportContent} setPadding={setPadding} setEmrView={setEmrView} />,
+        "subgroup-2-element-2": 
+            <Procedure 
+                pid={pid} 
+                setPadding={setPadding} 
+                setEmrView={setEmrView} 
+                setComponentSupportContent={setComponentSupportContent} 
+            />,
         "subgroup-2-element-3": ContactAdmin(),
-        "subgroup-3-element-1": <Prescriptions pid={pid} setComponentSupportContent={setComponentSupportContent} setEmrView={setEmrView} setPadding={setPadding} patient={patient} />,
+        "subgroup-3-element-1": 
+            <Prescriptions 
+                pid={pid} 
+                patient={patient}
+                setEmrView={setEmrView} 
+                setPadding={setPadding} 
+                setComponentSupportContent={setComponentSupportContent} 
+            />,
         "subgroup-3-element-2": ContactAdmin(),
         "subgroup-3-element-3": ContactAdmin(),
     }
@@ -160,7 +199,13 @@ export function EmrView({ pid, setEmrView, setPadding, defaultState = "subgroup-
     return (
         patient === null ? <Spin /> : (
             <div className="emr-container">
-                <ExpandedMenu defaultState={defaultState} setCurrentState={setCurrentState} menuData={menuData} className="emr-menu" />
+                <ExpandedMenu 
+                    defaultState={defaultState} 
+                    setCurrentState={setCurrentState} 
+                    menuData={menuData} 
+                    className="emr-menu"
+                />
+               
                 <div className="emr-header">
                     <div className="user-info">
                         <h1>
@@ -176,10 +221,10 @@ export function EmrView({ pid, setEmrView, setPadding, defaultState = "subgroup-
                     */}
                     <div className="body-support-content">{componentSupportContent}</div>
                 </div>
+
                 <div className="emr-body" >
                     {componentList[currentState]}
                 </div>
-
             </div>
         )
 
@@ -194,12 +239,8 @@ export default function EMR() {
 
     let query = useQuery();
 
-
-
-
     const [emrView, setEmrView] = useState(null)
     const [padding, setPadding] = useState("3rem")
-
 
     useEffect(() => {
         // setEmrView(<EmrView pid={pid} setEmrView={setEmrView} setPadding={setPadding} defaultState={query.get("pos")} />)
