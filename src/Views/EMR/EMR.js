@@ -23,9 +23,16 @@ export function createName(title, firstName, middleName, lastName) {
 
 function ContactAdmin() {
     return (
-        <div style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-            <h1 style={{ fontSize: "6rem", opacity: "0.1", margin: "0", padding: "0" }}>Feature Disabled</h1>
-            <p style={{ fontSize: "2rem", margin: "0", padding: "0" }}>Contact admin to enable this feature</p>
+        <div style={{ 
+            height: "100%", width: "100%", 
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" 
+        }}>
+            <h1 style={{ fontSize: "6rem", opacity: "0.1", margin: "0", padding: "0" }}>
+                Feature Disabled
+            </h1>
+            <p style={{ fontSize: "2rem", margin: "0", padding: "0" }}>
+                Contact admin to enable this feature
+            </p>
         </div>
     )
 }

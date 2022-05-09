@@ -74,16 +74,6 @@ function DeviceManagement({ pid }) {
                     setClass({ list: [], isLoading: false });
                 }
             });
-        // .catch((err) => {
-        //     if (err) {
-        //         const error = err.response.data?.result;
-        //         notification.error({
-        //             message: 'Error',
-        //             description: `${error}` || ""
-        //         })
-        //         setClass({ list: [], isLoading: false });
-        //     }
-        // })
     }, [pid]);
 
     function menuItemName(device) {

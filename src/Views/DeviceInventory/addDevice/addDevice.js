@@ -439,7 +439,7 @@ export default function PatchInventoryModal(props) {
                                     </Menu.Item>
                                 ))}
                             </Menu>
-                            <div onClick={addPatch} style={{ padding: "1em" }}>
+                            <div onClick={addPatch} style={{ padding: "1em", cursor: "pointer" }}>
                                 Add Another Device{" "}
                                 {Icons.addIcon({ style: { paddingLeft: "1em" } })}
                             </div>
