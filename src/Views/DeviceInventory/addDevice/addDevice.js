@@ -235,7 +235,7 @@ const PatchForm = (props) => {
                         rules={[
                             {
                                 required: props.required,
-                                message: "serial number is required",
+                                message: "Serial number is required",
                             },
                         ]}
                         className="addPatientDetailsModal"
@@ -246,12 +246,12 @@ const PatchForm = (props) => {
                         required={!props.required}
                         label="MAC address"
                         name="macAddress"
-                        rules={[
-                            {
-                                required: props.required,
-                                message: "serial number is required",
-                            },
-                        ]}
+                        // rules={[
+                        //     {
+                        //         required: props.required,
+                        //         message: "serial number is required",
+                        //     },
+                        // ]}
                         className="addPatientDetailsModal"
                     >
                         <Input placeholder="Enter Mac address" />

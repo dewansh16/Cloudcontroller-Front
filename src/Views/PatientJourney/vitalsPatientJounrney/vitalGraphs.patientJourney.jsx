@@ -57,7 +57,7 @@ function VitalGraphs({ item }) {
                                     textAlign: "center",
                                 }}
                             >
-                                70
+                                NA
                             </h3>
                         </div>
                     ) : (
