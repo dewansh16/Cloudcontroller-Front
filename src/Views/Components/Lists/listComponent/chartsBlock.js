@@ -63,7 +63,7 @@ export default function ChartsBlock({
                                     textAlign: "center",
                                 }}
                             >
-                                70
+                                0
                             </h3>
                         </div>
                     ) : (

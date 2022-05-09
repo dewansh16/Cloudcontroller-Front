@@ -206,7 +206,14 @@ const Alerts = (props) => {
     return (
         <div style={{ width: '100%', margin: '0 auto', position: 'relative' }}>
             <div className='alerts-header'>
-                <SortingHeader pid={pid} toPatientDetails={toPatientDetails} goBack={goBack} isLoading={isLoading} setUserType={setUserType} setIsAttended={setIsAttended} />
+                <SortingHeader 
+                    pid={pid} 
+                    goBack={goBack} 
+                    isLoading={isLoading} 
+                    setUserType={setUserType} 
+                    setIsAttended={setIsAttended}
+                    toPatientDetails={toPatientDetails} 
+                />
             </div>
 
             <div style={{ position: 'relative', height: '100vh' }}>
@@ -214,6 +221,7 @@ const Alerts = (props) => {
                     <div className='no-alerts-div'>
                         <h1 style={{ fontSize: "60px" }}>No Alerts</h1>
                     </div>}
+                    
                 {!isLoading && data !== null && data !== undefined && data.length !== 0 &&
                     data.map(item => (
                         item.length > 0 ?

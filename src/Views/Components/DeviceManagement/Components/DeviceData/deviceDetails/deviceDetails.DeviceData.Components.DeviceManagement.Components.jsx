@@ -28,36 +28,37 @@ function getCurrentDate(dateTime) {
 
 function CreateGraphData(pid, deviceType) {
     const [response, setResponse] = useState(null)
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [data, setData] = useState([])
     const today = new Date();
 
     useEffect(() => {
-        // patientApi.getTrends(pid, today).then((res) => {
-        //     console.log(res)
-        //     const batType = res.data.response.trend_map.trend_map[deviceTypeMap[deviceType][1]][deviceTypeMap[deviceType][0]];
-        //     const batMax = batType.length
-        //     //TODO: add a limit if required const batMax = batType.length > 10 ? 10 : batType.length
-        //     for (let i = 0; i < batMax; i++) {
-        //         let date = getCurrentDate(batType[i]["date"])
-        //         let tempData = {}
-        //         tempData["time"] = date
-        //         tempData["value"] = parseInt(batType[i]["value"])
-        //         data.push(tempData)
-        //     }
-        //     setData([...data.reverse()]);
-        //     setLoading(false);
-        //     setResponse(res)
-        // }).catch((err) => {
-        //     if (err) {
-        //         console.log(err)
-        //         notification.error({
-        //             message: 'Error',
-        //             description: "Some thing went wrong"
-        //         })
-        //         setLoading(false);
-        //     }
-        // })
+        patientApi
+            .getTrends(pid, today)
+            .then((res) => {
+                const batType = res.data.response.trend_map.trend_map[deviceTypeMap[deviceType][1]][deviceTypeMap[deviceType][0]];
+                const batMax = batType.length
+                //TODO: add a limit if required const batMax = batType.length > 10 ? 10 : batType.length
+                for (let i = 0; i < batMax; i++) {
+                    let date = getCurrentDate(batType[i]["date"])
+                    let tempData = {}
+                    tempData["time"] = date
+                    tempData["value"] = parseInt(batType[i]["value"])
+                    data.push(tempData)
+                }
+                setData([...data.reverse()]);
+                setLoading(false);
+                setResponse(res)
+            }).catch((err) => {
+                if (err) {
+                    console.log(err)
+                    notification.error({
+                        message: 'Error',
+                        description: "Some thing went wrong"
+                    })
+                    setLoading(false);
+                }
+            })
     }, [pid])
     return [data, loading]
 }
@@ -78,10 +79,9 @@ function GetPatientOTP(pid, setOtp, setOtpLoading, callback = () => { }) {
     })
 }
 
-
-
 function DeviceDetails({ serial, pid, uuid, duration, deviceType }) {
     const [data, isLoading] = CreateGraphData(pid, deviceType);
+
     const config = {
         data,
         height: 200,
@@ -188,7 +188,8 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType }) {
     const [keepAliveHistory, setKeepAliveHistory] = useState("")
     const fetchKeepAliveHistrory = () => {
         patientApi.getPatientPatches(pid).then((res) => {
-            setKeepAliveHistory(JSON.stringify(res.data?.response.patch_patient_map[0].keepaliveHistory) || "--No history found--")
+            const { keepaliveHistory = "" } = res.data?.response.patch_patient_map[0];
+            setKeepAliveHistory(keepaliveHistory ? JSON.stringify(keepaliveHistory) : "--No history found--");
         }).catch((err) => {
             if (err) {
                 console.log(err)
@@ -199,17 +200,20 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType }) {
             }
         })
     }
-    const onFinishFailed = (values) => {
-    }
+
+    const onFinishFailed = (values) => {};
+
     const [otp, setOtp] = useState(null);
     const [otpLoading, setOtpLoading] = useState(null);
-    const [otpVisibility, setOtpVisibility] = useState(false)
+    const [otpVisibility, setOtpVisibility] = useState(false);
+
     const viewOtp = () => {
         setOtpVisibility(true);
         setTimeout(() => setOtpVisibility(false), 30000);
     }
+
     const getOtp = () => {
-        GetPatientOTP(pid, setOtp, setOtpLoading, viewOtp)
+        GetPatientOTP(pid, setOtp, setOtpLoading, viewOtp);
     }
     // useEffect(() => {
     //     return () => {
@@ -244,12 +248,13 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType }) {
                         <Col className='device-info' span={12}>
                             <p><span>Current Status :</span> {data[data.length - 1]?.value === -1 ? "Inactive" : "Active"}</p>
                         </Col>
-                        <Col className='device-info' span={12}>
+                        {/* <Col className='device-info' span={12}>
                             <p><span>Last Fetched :</span> {data[data.length - 1]?.value === -1 ? "NA" : data[data.length - 1].time}</p>
-                        </Col>
+                        </Col> */}
                     </Row>
                 </div>
-            </div> :
+            </div> 
+            :
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "332px" }}>
                 <Spin />
             </div>

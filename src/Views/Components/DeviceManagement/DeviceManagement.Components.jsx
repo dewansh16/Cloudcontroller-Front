@@ -35,6 +35,7 @@ function DeviceManagement({ pid }) {
         list: [],
     });
     const [menuState, setMenuState] = useState();
+    
     const handleMenuState = ({ item, key }) => {
         setMenuState(key);
     };
@@ -42,7 +43,7 @@ function DeviceManagement({ pid }) {
     function theMenuItemSort(list) {
         let temp = null;
         list.map((item, idx) => {
-            if (item.patches[0]["patch_type"] === "gateway") {
+            if (item["patches.patch_type"] === "gateway") {
                 temp = list[0];
                 list[0] = list[idx];
                 list[idx] = temp;
@@ -61,7 +62,7 @@ function DeviceManagement({ pid }) {
                 });
                 if (res.data?.response.patch_patient_map.length > 0) {
                     setMenuState(
-                        res.data?.response.patch_patient_map[0].patches[0]["patch_type"]
+                        `${res.data?.response.patch_patient_map[0]["patches.patch_type"]}-0`
                     );
                 }
             })
@@ -74,16 +75,6 @@ function DeviceManagement({ pid }) {
                     setClass({ list: [], isLoading: false });
                 }
             });
-        // .catch((err) => {
-        //     if (err) {
-        //         const error = err.response.data?.result;
-        //         notification.error({
-        //             message: 'Error',
-        //             description: `${error}` || ""
-        //         })
-        //         setClass({ list: [], isLoading: false });
-        //     }
-        // })
     }, [pid]);
 
     function menuItemName(device) {
@@ -126,29 +117,31 @@ function DeviceManagement({ pid }) {
                                 selectedKeys={[menuState]}
                                 mode="inline"
                             >
-                                {deviceClass.list.map((listItem) => (
-                                    <Menu.Item
-                                        key={listItem.patches[0]["patch_type"]}
-                                        className="menu-item"
-                                    >
-                                        {menuItemName(listItem.patches[0]["patch_type"])}
-                                    </Menu.Item>
-                                ))}
+                                {deviceClass.list.map((listItem, index) => {
+                                    return  (
+                                        <Menu.Item
+                                            key={`${listItem?.["patches.patch_type"]}-${index}`}
+                                            className="menu-item"
+                                        >
+                                            {menuItemName(listItem?.["patches.patch_type"])}
+                                        </Menu.Item>
+                                    )
+                                })}
                             </Menu>
                         </div>
                     </Col>
                     <Col span={18}>
                         <div className="data-container">
                             {deviceClass.list.map(
-                                (Item) =>
-                                    menuState === Item.patches[0]["patch_type"] && (
+                                (Item, index) =>
+                                    menuState === `${Item["patches.patch_type"]}-${index}` && (
                                         <DeviceDetails
-                                            serial={Item.patches[0]["patch_serial"]}
-                                            key={Item.patches[0]["patch_type"]}
-                                            uuid={Item["patch_uuid"]}
+                                            serial={Item["patches.patch_serial"]}
+                                            key={`${Item["patches.patch_type"]}-${index}`}
+                                            uuid={Item["patches.patch_uuid"]}
                                             duration={Item["duration"]}
                                             pid={pid}
-                                            deviceType={menuState}
+                                            deviceType={Item["patches.patch_type"]}
                                         />
                                     )
                             )}
@@ -156,6 +149,7 @@ function DeviceManagement({ pid }) {
                     </Col>
                 </Row>
             )}
+
             {deviceClass.list.length === 0 && (
                 <div
                     style={{
