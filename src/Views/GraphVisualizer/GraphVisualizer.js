@@ -115,13 +115,153 @@ function GraphVisualizer() {
     const [activeTrendsArray, setActiveTrendsArray] = useState([])
     const [graphLoading, setGraphLoading] = useState(false)
 
-    const [spo2_data, setSpo2_data] = useState([])
-    const [bp_data, setBp_data] = useState([])
-    const [rr_data, setRr_data] = useState([])
-    const [temp_data, setTemp_data] = useState([])
-    const [ews_data, setEws_data] = useState([])
+    const [spo2_data, setSpo2_data] = useState([
+        {
+            value: 31
+        },
+        {
+            value: 45
+        },
+        {
+            value: 37
+        },
+        {
+            value: 40
+        },
+        {
+            value: 43
+        },
+        {
+            value: 39
+        },
+        {
+            value: 25
+        },
+        {
+            value: 27
+        },
+        {
+            value: 31
+        },
+    ])
+    const [bp_data, setBp_data] = useState([
+        {
+            value: 50
+        },
+        {
+            value: 19
+        },
+        {
+            value: 21
+        },
+        {
+            value: 37
+        },
+        {
+            value: 15
+        },
+        {
+            value: 43
+        },
+        {
+            value: 25
+        },
+        {
+            value: 34
+        },
+        {
+            value: 16
+        },
+    ])
+    const [rr_data, setRr_data] = useState([
+        {
+            value: 31
+        },
+        {
+            value: 45
+        },
+        {
+            value: 50
+        },
+        {
+            value: 40
+        },
+        {
+            value: 43
+        },
+        {
+            value: 20
+        },
+        {
+            value: 35
+        },
+        {
+            value: 39
+        },
+        {
+            value: 29
+        },
+    ])
+    const [temp_data, setTemp_data] = useState([
+        {
+            value: 15
+        },
+        {
+            value: 45
+        },
+        {
+            value: 12
+        },
+        {
+            value: 19
+        },
+        {
+            value: 22
+        },
+        {
+            value: 19
+        },
+        {
+            value: 25
+        },
+        {
+            value: 31
+        },
+        {
+            value: 25
+        },
+    ])
+    const [ews_data, setEws_data] = useState([
+        {
+            value: 31
+        },
+        {
+            value: 45
+        },
+        {
+            value: 37
+        },
+        {
+            value: 40
+        },
+        {
+            value: 43
+        },
+        {
+            value: 39
+        },
+        {
+            value: 25
+        },
+        {
+            value: 27
+        },
+        {
+            value: 31
+        },
+    ])
 
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(false)
 
     const [alertState, setAlertState] = useState(true)
     const [medState, setMedState] = useState(false)
@@ -183,10 +323,9 @@ function GraphVisualizer() {
         return year + " " + month + " " + date_num + " " + hours
     }
 
-
-    const [medMorningLoading, setMedMorningLoading] = useState(true)
-    const [medNoonLoading, setMedNoonLoading] = useState(true)
-    const [medEveningLoading, setMedEveningLoading] = useState(true)
+    const [medMorningLoading, setMedMorningLoading] = useState(false)
+    const [medNoonLoading, setMedNoonLoading] = useState(false)
+    const [medEveningLoading, setMedEveningLoading] = useState(false)
 
     const [medMorningData, setMedMorningData] = useState([])
     const [medNoonData, setMedNoonData] = useState([])
@@ -194,14 +333,15 @@ function GraphVisualizer() {
 
     const [completeMedData, setCompleteMedData] = useState([])
 
-    const [alertsLoading, setAlertsLoading] = useState(true)
+    const [alertsLoading, setAlertsLoading] = useState(false)
     const [alertsApiData, setAlertsApiData] = useState()
 
-    const [trendsLoading, setTrendsLoading] = useState(true)
+    const [trendsLoading, setTrendsLoading] = useState(false)
     const [trendsApiData, setTrendsApiData] = useState()
 
 
     useEffect(() => {
+        return null;
 
         if (!medMorningLoading && !medNoonLoading && !medEveningLoading) {
             var local_data = []
@@ -769,7 +909,6 @@ function GraphVisualizer() {
 
     }, [medMorningLoading, medNoonLoading, medEveningLoading, alertsLoading, trendsLoading])
 
-
     function getDataEfficiently(current_date_string) {
         callMedMorning(current_date_string)
         callMedNoon(current_date_string)
@@ -786,77 +925,84 @@ function GraphVisualizer() {
     function callTrends(pid, current_date_string) {
         console.log("Trends Called")
         var apiStart = new Date()
-        patientApi.getTrends(pid, current_date_string, 10, 0, current_date_string)
-            .then(res => {
-                setTrendsApiData(res)
-                setTrendsLoading(false)
-                var apiEnd = new Date()
-                console.log("Trends Time: ", (apiEnd.getTime() - apiStart.getTime()) / 1000)
-            })
-            .catch(err => { console.log(err) })
+        // patientApi.getTrends(pid, current_date_string, 10, 0, current_date_string)
+        //     .then(res => {
+        //         setTrendsApiData(res)
+        //         setTrendsLoading(false)
+        //         var apiEnd = new Date()
+        //         console.log("Trends Time: ", (apiEnd.getTime() - apiStart.getTime()) / 1000)
+        //     })
+        //     .catch(err => { console.log(err) })
+        setTrendsLoading(false)
     }
 
     function callAlerts(pid, from, to) {
         console.log("Alerts Called")
         var apiStart = new Date()
-        patientApi.getOpenAlerts(pid, from, to)
-            .then(res => {
-                // var alerts_data = res.data.response.alerts[0].alerts
-                setAlertsApiData(res.data.response.alerts[0].alerts)
-                setAlertsLoading(false)
-                var apiEnd = new Date()
-                console.log("Alerts Time: ", (apiEnd.getTime() - apiStart.getTime()) / 1000)
-            })
-            .catch(err => { console.log(err) })
+        // patientApi.getOpenAlerts(pid, from, to)
+        //     .then(res => {
+        //         // var alerts_data = res.data.response.alerts[0].alerts
+        //         setAlertsApiData(res.data.response.alerts[0].alerts)
+        //         setAlertsLoading(false)
+        //         var apiEnd = new Date()
+        //         console.log("Alerts Time: ", (apiEnd.getTime() - apiStart.getTime()) / 1000)
+        //     })
+        //     .catch(err => { console.log(err) })
+        setAlertsLoading(false)
     }
 
     function callMedMorning(str) {
         console.log("Morning Called")
         var apiStart = new Date()
         var local_data = []
-        medicationApi.getMedications("morning", str, str)
-            .then(res => {
-                res.data?.response.schedule[pid]?.drugs.map(item => {
-                    local_data.push(item)
-                })
-                setMedMorningData(local_data)
-                setMedMorningLoading(false)
-                var apiEnd = new Date()
-                console.log("Morning Time: ", (apiEnd.getTime() - apiStart.getTime()) / 1000)
-            })
-            .catch(err => { console.log(err) })
+        // medicationApi.getMedications("morning", str, str)
+        //     .then(res => {
+        //         res.data?.response.schedule[pid]?.drugs.map(item => {
+        //             local_data.push(item)
+        //         })
+        //         setMedMorningData(local_data)
+        //         setMedMorningLoading(false)
+        //         var apiEnd = new Date()
+        //         console.log("Morning Time: ", (apiEnd.getTime() - apiStart.getTime()) / 1000)
+        //     })
+        //     .catch(err => { console.log(err) })
+        setMedMorningLoading(false)
     }
+
     function callMedNoon(str) {
         console.log("Noon Called")
         var apiStart = new Date()
         var local_data = []
-        medicationApi.getMedications("noon", str, str)
-            .then(res => {
-                res.data?.response.schedule[pid]?.drugs.map(item => {
-                    local_data.push(item)
-                })
-                setMedNoonData(local_data)
-                setMedNoonLoading(false)
-                var apiEnd = new Date()
-                console.log("Noon Time: ", (apiEnd.getTime() - apiStart.getTime()) / 1000)
-            })
-            .catch(err => { console.log(err) })
+        // medicationApi.getMedications("noon", str, str)
+        //     .then(res => {
+        //         res.data?.response.schedule[pid]?.drugs.map(item => {
+        //             local_data.push(item)
+        //         })
+        //         setMedNoonData(local_data)
+        //         setMedNoonLoading(false)
+        //         var apiEnd = new Date()
+        //         console.log("Noon Time: ", (apiEnd.getTime() - apiStart.getTime()) / 1000)
+        //     })
+        //     .catch(err => { console.log(err) })
+        setMedNoonLoading(false)
     }
+
     function callMedEvening(str) {
         console.log("Evening Called")
         var apiStart = new Date()
         var local_data = []
-        medicationApi.getMedications("evening", str, str)
-            .then(res => {
-                res.data?.response.schedule[pid]?.drugs.map(item => {
-                    local_data.push(item)
-                })
-                setMedEveningData(local_data)
-                setMedEveningLoading(false)
-                var apiEnd = new Date()
-                console.log("Evening Time: ", (apiEnd.getTime() - apiStart.getTime()) / 1000)
-            })
-            .catch(err => { console.log(err) })
+        // medicationApi.getMedications("evening", str, str)
+        //     .then(res => {
+        //         res.data?.response.schedule[pid]?.drugs.map(item => {
+        //             local_data.push(item)
+        //         })
+        //         setMedEveningData(local_data)
+        //         setMedEveningLoading(false)
+        //         var apiEnd = new Date()
+        //         console.log("Evening Time: ", (apiEnd.getTime() - apiStart.getTime()) / 1000)
+        //     })
+        //     .catch(err => { console.log(err) })
+        setMedEveningLoading(false)
     }
 
 
@@ -865,612 +1011,612 @@ function GraphVisualizer() {
         var temp_med_data = []
 
 
-        medicationApi.getMedications("morning", current_date_string, current_date_string)
-            .then(res => {
-                res.data?.response.schedule[pid]?.drugs.map(item => {
-                    temp_med_data.push(item)
-                })
-                medicationApi.getMedications("noon", current_date_string, current_date_string)
-                    .then(res => {
-                        res.data?.response.schedule[pid]?.drugs.map(item => {
-                            temp_med_data.push(item)
-                        })
-                        medicationApi.getMedications("evening", current_date_string, current_date_string)
-                            .then(res => {
-                                res.data?.response.schedule[pid]?.drugs.map(item => {
-                                    temp_med_data.push(item)
-                                })
-                                console.log("MEDICINE DATA : ", temp_med_data)
+        // medicationApi.getMedications("morning", current_date_string, current_date_string)
+        //     .then(res => {
+        //         res.data?.response.schedule[pid]?.drugs.map(item => {
+        //             temp_med_data.push(item)
+        //         })
+        //         medicationApi.getMedications("noon", current_date_string, current_date_string)
+        //             .then(res => {
+        //                 res.data?.response.schedule[pid]?.drugs.map(item => {
+        //                     temp_med_data.push(item)
+        //                 })
+        //                 medicationApi.getMedications("evening", current_date_string, current_date_string)
+        //                     .then(res => {
+        //                         res.data?.response.schedule[pid]?.drugs.map(item => {
+        //                             temp_med_data.push(item)
+        //                         })
+        //                         console.log("MEDICINE DATA : ", temp_med_data)
 
-                                var date = new Date()
-                                var from = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T00:00:00.000Z`
-                                var to = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T23:59:59.000Z`
-                                // var from = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T18:30:00.000Z`
-                                // var to = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T18:29:59.000Z`
+        //                         var date = new Date()
+        //                         var from = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T00:00:00.000Z`
+        //                         var to = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T23:59:59.000Z`
+        //                         // var from = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T18:30:00.000Z`
+        //                         // var to = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T18:29:59.000Z`
 
-                                patientApi.getOpenAlerts(pid, from, to)
-                                    .then(res => {
-                                        console.log("ALERTS --- ", res.data.response.alerts[0].alerts)
-                                        var alerts_data = res.data.response.alerts[0].alerts
+        //                         patientApi.getOpenAlerts(pid, from, to)
+        //                             .then(res => {
+        //                                 console.log("ALERTS --- ", res.data.response.alerts[0].alerts)
+        //                                 var alerts_data = res.data.response.alerts[0].alerts
 
 
-                                        patientApi.getTrends(pid, current_date_string, 10, 0, current_date_string)
-                                            .then(res => {
-                                                console.log("TRENDS - RESPONSE : ", res)
-                                                console.log(res.data?.response)
-                                                var temp_spo2 = []
-                                                var temp_bp = []
-                                                var temp_rr = []
-                                                var temp_temp = []
-                                                var temp_ews = []
+        //                                 patientApi.getTrends(pid, current_date_string, 10, 0, current_date_string)
+        //                                     .then(res => {
+        //                                         console.log("TRENDS - RESPONSE : ", res)
+        //                                         console.log(res.data?.response)
+        //                                         var temp_spo2 = []
+        //                                         var temp_bp = []
+        //                                         var temp_rr = []
+        //                                         var temp_temp = []
+        //                                         var temp_ews = []
 
-                                                Spo2MaxVal = res.data.response.trend_map.trend_map[0].spo2[0].value
-                                                Spo2MinVal = res.data.response.trend_map.trend_map[0].spo2[0].value
+        //                                         Spo2MaxVal = res.data.response.trend_map.trend_map[0].spo2[0].value
+        //                                         Spo2MinVal = res.data.response.trend_map.trend_map[0].spo2[0].value
 
-                                                BpMaxVal = res.data.response.trend_map.trend_map[3].hr[0].value
-                                                BpMinVal = res.data.response.trend_map.trend_map[3].hr[0].value
+        //                                         BpMaxVal = res.data.response.trend_map.trend_map[3].hr[0].value
+        //                                         BpMinVal = res.data.response.trend_map.trend_map[3].hr[0].value
 
-                                                RrMaxVal = res.data.response.trend_map.trend_map[2].rr[0].value
-                                                RrMinVal = res.data.response.trend_map.trend_map[2].rr[0].value
+        //                                         RrMaxVal = res.data.response.trend_map.trend_map[2].rr[0].value
+        //                                         RrMinVal = res.data.response.trend_map.trend_map[2].rr[0].value
 
-                                                TempMaxVal = res.data.response.trend_map.trend_map[1].temp[0].value
-                                                TempMinVal = res.data.response.trend_map.trend_map[1].temp[0].value
+        //                                         TempMaxVal = res.data.response.trend_map.trend_map[1].temp[0].value
+        //                                         TempMinVal = res.data.response.trend_map.trend_map[1].temp[0].value
 
-                                                EwsMaxVal = res.data.response.trend_map.trend_map[4].ews[0].value
-                                                EwsMinVal = res.data.response.trend_map.trend_map[4].ews[0].value
+        //                                         EwsMaxVal = res.data.response.trend_map.trend_map[4].ews[0].value
+        //                                         EwsMinVal = res.data.response.trend_map.trend_map[4].ews[0].value
 
-                                                //SPO2
+        //                                         //SPO2
 
-                                                res.data.response.trend_map.trend_map[0].spo2.reverse().map(item => {
-                                                    if (parseInt(item.value) < Spo2MinVal) {
-                                                        Spo2MinVal = parseInt(item.value)
-                                                        console.log("Item Value: ", Spo2MinVal)
-                                                    }
-                                                    if (parseInt(item.value) > Spo2MaxVal) {
-                                                        Spo2MaxVal = parseInt(item.value)
-                                                    }
-                                                    const indate = to12HourFormat(item.date);
-                                                    // const date_val = getDateVal(item.date)
-                                                    var meds_added = []
-                                                    temp_med_data.map(item => {
-                                                        var temp_med_adm_date
-                                                        if (item.hasOwnProperty('today_administered_morning')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_morning)
+        //                                         res.data.response.trend_map.trend_map[0].spo2.reverse().map(item => {
+        //                                             if (parseInt(item.value) < Spo2MinVal) {
+        //                                                 Spo2MinVal = parseInt(item.value)
+        //                                                 console.log("Item Value: ", Spo2MinVal)
+        //                                             }
+        //                                             if (parseInt(item.value) > Spo2MaxVal) {
+        //                                                 Spo2MaxVal = parseInt(item.value)
+        //                                             }
+        //                                             const indate = to12HourFormat(item.date);
+        //                                             // const date_val = getDateVal(item.date)
+        //                                             var meds_added = []
+        //                                             temp_med_data.map(item => {
+        //                                                 var temp_med_adm_date
+        //                                                 if (item.hasOwnProperty('today_administered_morning')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_morning)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_morning,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                        else if (item.hasOwnProperty('today_administered_noon')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_noon)
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_morning,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                                 else if (item.hasOwnProperty('today_administered_noon')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_noon)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_afternoon,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                        else if (item.hasOwnProperty('today_administered_evening')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_evening)
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_afternoon,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                                 else if (item.hasOwnProperty('today_administered_evening')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_evening)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_evening,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                    })
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_evening,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                             })
 
-                                                    if (meds_added.length === 0) {
-                                                        temp_spo2.push(
-                                                            {
-                                                                "date": indate,
-                                                                "value": parseInt(item.value),
-                                                                // "med": true,
-                                                            }
-                                                        )
-                                                    }
-                                                    else {
-                                                        temp_spo2.push(
-                                                            {
-                                                                "date": indate,
-                                                                "value": parseInt(item.value),
-                                                                "med": true,
-                                                                "medData": meds_added,
-                                                            }
-                                                        )
-                                                    }
+        //                                             if (meds_added.length === 0) {
+        //                                                 temp_spo2.push(
+        //                                                     {
+        //                                                         "date": indate,
+        //                                                         "value": parseInt(item.value),
+        //                                                         // "med": true,
+        //                                                     }
+        //                                                 )
+        //                                             }
+        //                                             else {
+        //                                                 temp_spo2.push(
+        //                                                     {
+        //                                                         "date": indate,
+        //                                                         "value": parseInt(item.value),
+        //                                                         "med": true,
+        //                                                         "medData": meds_added,
+        //                                                     }
+        //                                                 )
+        //                                             }
 
-                                                })
+        //                                         })
 
-                                                //BP
+        //                                         //BP
 
-                                                res.data.response.trend_map.trend_map[3].hr.reverse().map(item => {
-                                                    if (parseInt(item.value) < BpMinVal) {
-                                                        BpMinVal = parseInt(item.value)
-                                                    }
-                                                    if (parseInt(item.value) > BpMaxVal) {
-                                                        BpMaxVal = parseInt(item.value)
-                                                    }
-                                                    const indate = to12HourFormat(item.date);
-                                                    // const date_val = getDateVal(item.date)
-                                                    var meds_added = []
-                                                    temp_med_data.map(item => {
-                                                        var temp_med_adm_date
-                                                        if (item.hasOwnProperty('today_administered_morning')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_morning)
+        //                                         res.data.response.trend_map.trend_map[3].hr.reverse().map(item => {
+        //                                             if (parseInt(item.value) < BpMinVal) {
+        //                                                 BpMinVal = parseInt(item.value)
+        //                                             }
+        //                                             if (parseInt(item.value) > BpMaxVal) {
+        //                                                 BpMaxVal = parseInt(item.value)
+        //                                             }
+        //                                             const indate = to12HourFormat(item.date);
+        //                                             // const date_val = getDateVal(item.date)
+        //                                             var meds_added = []
+        //                                             temp_med_data.map(item => {
+        //                                                 var temp_med_adm_date
+        //                                                 if (item.hasOwnProperty('today_administered_morning')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_morning)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_morning,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                        else if (item.hasOwnProperty('today_administered_noon')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_noon)
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_morning,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                                 else if (item.hasOwnProperty('today_administered_noon')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_noon)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_afternoon,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                        else if (item.hasOwnProperty('today_administered_evening')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_evening)
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_afternoon,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                                 else if (item.hasOwnProperty('today_administered_evening')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_evening)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_evening,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                    })
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_evening,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                             })
 
-                                                    if (meds_added.length === 0) {
-                                                        temp_bp.push(
-                                                            {
-                                                                "date": indate,
-                                                                "value": parseInt(item.value),
-                                                                // "med": true,
-                                                            }
-                                                        )
-                                                    }
-                                                    else {
-                                                        temp_bp.push(
-                                                            {
-                                                                "date": indate,
-                                                                "value": parseInt(item.value),
-                                                                "med": true,
-                                                                "medData": meds_added,
-                                                            }
-                                                        )
-                                                    }
-                                                })
+        //                                             if (meds_added.length === 0) {
+        //                                                 temp_bp.push(
+        //                                                     {
+        //                                                         "date": indate,
+        //                                                         "value": parseInt(item.value),
+        //                                                         // "med": true,
+        //                                                     }
+        //                                                 )
+        //                                             }
+        //                                             else {
+        //                                                 temp_bp.push(
+        //                                                     {
+        //                                                         "date": indate,
+        //                                                         "value": parseInt(item.value),
+        //                                                         "med": true,
+        //                                                         "medData": meds_added,
+        //                                                     }
+        //                                                 )
+        //                                             }
+        //                                         })
 
-                                                //RR
+        //                                         //RR
 
-                                                res.data.response.trend_map.trend_map[2].rr.reverse().map(item => {
-                                                    if (parseInt(item.value) < RrMinVal) {
-                                                        RrMinVal = parseInt(item.value)
-                                                    }
-                                                    if (parseInt(item.value) > RrMaxVal) {
-                                                        RrMaxVal = parseInt(item.value)
-                                                    }
-                                                    const indate = to12HourFormat(item.date);
-                                                    // const date_val = getDateVal(item.date)
-                                                    var meds_added = []
-                                                    temp_med_data.map(item => {
-                                                        var temp_med_adm_date
-                                                        if (item.hasOwnProperty('today_administered_morning')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_morning)
+        //                                         res.data.response.trend_map.trend_map[2].rr.reverse().map(item => {
+        //                                             if (parseInt(item.value) < RrMinVal) {
+        //                                                 RrMinVal = parseInt(item.value)
+        //                                             }
+        //                                             if (parseInt(item.value) > RrMaxVal) {
+        //                                                 RrMaxVal = parseInt(item.value)
+        //                                             }
+        //                                             const indate = to12HourFormat(item.date);
+        //                                             // const date_val = getDateVal(item.date)
+        //                                             var meds_added = []
+        //                                             temp_med_data.map(item => {
+        //                                                 var temp_med_adm_date
+        //                                                 if (item.hasOwnProperty('today_administered_morning')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_morning)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_morning,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                        else if (item.hasOwnProperty('today_administered_noon')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_noon)
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_morning,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                                 else if (item.hasOwnProperty('today_administered_noon')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_noon)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_afternoon,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                        else if (item.hasOwnProperty('today_administered_evening')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_evening)
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_afternoon,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                                 else if (item.hasOwnProperty('today_administered_evening')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_evening)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_evening,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                    })
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_evening,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                             })
 
-                                                    if (meds_added.length === 0) {
-                                                        temp_rr.push(
-                                                            {
-                                                                "date": indate,
-                                                                "value": parseInt(item.value),
-                                                                // "med": true,
-                                                            }
-                                                        )
-                                                    }
-                                                    else {
-                                                        temp_rr.push(
-                                                            {
-                                                                "date": indate,
-                                                                "value": parseInt(item.value),
-                                                                "med": true,
-                                                                "medData": meds_added,
-                                                            }
-                                                        )
-                                                    }
-                                                })
+        //                                             if (meds_added.length === 0) {
+        //                                                 temp_rr.push(
+        //                                                     {
+        //                                                         "date": indate,
+        //                                                         "value": parseInt(item.value),
+        //                                                         // "med": true,
+        //                                                     }
+        //                                                 )
+        //                                             }
+        //                                             else {
+        //                                                 temp_rr.push(
+        //                                                     {
+        //                                                         "date": indate,
+        //                                                         "value": parseInt(item.value),
+        //                                                         "med": true,
+        //                                                         "medData": meds_added,
+        //                                                     }
+        //                                                 )
+        //                                             }
+        //                                         })
 
-                                                //TEMP
+        //                                         //TEMP
 
-                                                res.data.response.trend_map.trend_map[1].temp.reverse().map(item => {
-                                                    if (parseInt(item.value) < TempMinVal) {
+        //                                         res.data.response.trend_map.trend_map[1].temp.reverse().map(item => {
+        //                                             if (parseInt(item.value) < TempMinVal) {
 
-                                                        TempMinVal = parseInt(item.value)
-                                                    }
-                                                    if (parseInt(item.value) > TempMaxVal) {
-                                                        TempMaxVal = parseInt(item.value)
-                                                    }
-                                                    const indate = to12HourFormat(item.date);
-                                                    // const date_val = getDateVal(item.date)
-                                                    var meds_added = []
-                                                    temp_med_data.map(item => {
-                                                        var temp_med_adm_date
-                                                        if (item.hasOwnProperty('today_administered_morning')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_morning)
+        //                                                 TempMinVal = parseInt(item.value)
+        //                                             }
+        //                                             if (parseInt(item.value) > TempMaxVal) {
+        //                                                 TempMaxVal = parseInt(item.value)
+        //                                             }
+        //                                             const indate = to12HourFormat(item.date);
+        //                                             // const date_val = getDateVal(item.date)
+        //                                             var meds_added = []
+        //                                             temp_med_data.map(item => {
+        //                                                 var temp_med_adm_date
+        //                                                 if (item.hasOwnProperty('today_administered_morning')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_morning)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_morning,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                        else if (item.hasOwnProperty('today_administered_noon')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_noon)
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_morning,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                                 else if (item.hasOwnProperty('today_administered_noon')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_noon)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_afternoon,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                        else if (item.hasOwnProperty('today_administered_evening')) {
-                                                            temp_med_adm_date = to12HourFormat(item.today_administered_evening)
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_afternoon,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                                 else if (item.hasOwnProperty('today_administered_evening')) {
+        //                                                     temp_med_adm_date = to12HourFormat(item.today_administered_evening)
 
-                                                            if (temp_med_adm_date === indate) {
-                                                                meds_added.push(
-                                                                    {
-                                                                        [item.drugName]: item.dosage_evening,
-                                                                    },
-                                                                )
-                                                            }
-                                                        }
-                                                    })
+        //                                                     if (temp_med_adm_date === indate) {
+        //                                                         meds_added.push(
+        //                                                             {
+        //                                                                 [item.drugName]: item.dosage_evening,
+        //                                                             },
+        //                                                         )
+        //                                                     }
+        //                                                 }
+        //                                             })
 
-                                                    if (meds_added.length === 0) {
-                                                        temp_temp.push(
-                                                            {
-                                                                "date": indate,
-                                                                "value": parseInt(item.value),
-                                                                // "med": true,
-                                                            }
-                                                        )
-                                                    }
-                                                    else {
-                                                        temp_temp.push(
-                                                            {
-                                                                "date": indate,
-                                                                "value": parseInt(item.value),
-                                                                "med": true,
-                                                                "medData": meds_added,
-                                                            }
-                                                        )
-                                                    }
-                                                })
+        //                                             if (meds_added.length === 0) {
+        //                                                 temp_temp.push(
+        //                                                     {
+        //                                                         "date": indate,
+        //                                                         "value": parseInt(item.value),
+        //                                                         // "med": true,
+        //                                                     }
+        //                                                 )
+        //                                             }
+        //                                             else {
+        //                                                 temp_temp.push(
+        //                                                     {
+        //                                                         "date": indate,
+        //                                                         "value": parseInt(item.value),
+        //                                                         "med": true,
+        //                                                         "medData": meds_added,
+        //                                                     }
+        //                                                 )
+        //                                             }
+        //                                         })
 
-                                                //EWS
+        //                                         //EWS
 
-                                                // res.data.response.trend_map.trend_map[4].ews.reverse().map(item => {
-                                                //     if (parseInt(item.value) < EwsMinVal) {
-                                                //         EwsMinVal = parseInt(item.value)
-                                                //     }
-                                                //     if (parseInt(item.value) > EwsMaxVal) {
-                                                //         EwsMaxVal = parseInt(item.value)
-                                                //     }
-                                                //     const indate = to12HourFormat(item.date);
-                                                //     // const date_val = getDateVal(item.date)
-                                                //     var meds_added = []
-                                                //     temp_med_data.map(item => {
-                                                //         var temp_med_adm_date
-                                                //         if (item.hasOwnProperty('today_administered_morning')) {
-                                                //             temp_med_adm_date = to12HourFormat(item.today_administered_morning)
+        //                                         // res.data.response.trend_map.trend_map[4].ews.reverse().map(item => {
+        //                                         //     if (parseInt(item.value) < EwsMinVal) {
+        //                                         //         EwsMinVal = parseInt(item.value)
+        //                                         //     }
+        //                                         //     if (parseInt(item.value) > EwsMaxVal) {
+        //                                         //         EwsMaxVal = parseInt(item.value)
+        //                                         //     }
+        //                                         //     const indate = to12HourFormat(item.date);
+        //                                         //     // const date_val = getDateVal(item.date)
+        //                                         //     var meds_added = []
+        //                                         //     temp_med_data.map(item => {
+        //                                         //         var temp_med_adm_date
+        //                                         //         if (item.hasOwnProperty('today_administered_morning')) {
+        //                                         //             temp_med_adm_date = to12HourFormat(item.today_administered_morning)
 
-                                                //             if (temp_med_adm_date === indate) {
-                                                //                 meds_added.push(
-                                                //                     {
-                                                //                         [item.drugName]: item.dosage_morning,
-                                                //                     },
-                                                //                 )
-                                                //             }
-                                                //         }
-                                                //         else if (item.hasOwnProperty('today_administered_noon')) {
-                                                //             temp_med_adm_date = to12HourFormat(item.today_administered_noon)
+        //                                         //             if (temp_med_adm_date === indate) {
+        //                                         //                 meds_added.push(
+        //                                         //                     {
+        //                                         //                         [item.drugName]: item.dosage_morning,
+        //                                         //                     },
+        //                                         //                 )
+        //                                         //             }
+        //                                         //         }
+        //                                         //         else if (item.hasOwnProperty('today_administered_noon')) {
+        //                                         //             temp_med_adm_date = to12HourFormat(item.today_administered_noon)
 
-                                                //             if (temp_med_adm_date === indate) {
-                                                //                 meds_added.push(
-                                                //                     {
-                                                //                         [item.drugName]: item.dosage_afternoon,
-                                                //                     },
-                                                //                 )
-                                                //             }
-                                                //         }
-                                                //         else if (item.hasOwnProperty('today_administered_evening')) {
-                                                //             temp_med_adm_date = to12HourFormat(item.today_administered_evening)
+        //                                         //             if (temp_med_adm_date === indate) {
+        //                                         //                 meds_added.push(
+        //                                         //                     {
+        //                                         //                         [item.drugName]: item.dosage_afternoon,
+        //                                         //                     },
+        //                                         //                 )
+        //                                         //             }
+        //                                         //         }
+        //                                         //         else if (item.hasOwnProperty('today_administered_evening')) {
+        //                                         //             temp_med_adm_date = to12HourFormat(item.today_administered_evening)
 
-                                                //             if (temp_med_adm_date === indate) {
-                                                //                 meds_added.push(
-                                                //                     {
-                                                //                         [item.drugName]: item.dosage_evening,
-                                                //                     },
-                                                //                 )
-                                                //             }
-                                                //         }
-                                                //     })
+        //                                         //             if (temp_med_adm_date === indate) {
+        //                                         //                 meds_added.push(
+        //                                         //                     {
+        //                                         //                         [item.drugName]: item.dosage_evening,
+        //                                         //                     },
+        //                                         //                 )
+        //                                         //             }
+        //                                         //         }
+        //                                         //     })
 
-                                                //     if (meds_added.length === 0) {
-                                                //         temp_ews.push(
-                                                //             {
-                                                //                 "date": indate,
-                                                //                 "value": parseInt(item.value),
-                                                //                 // "med": true,
-                                                //             }
-                                                //         )
-                                                //     }
-                                                //     else {
-                                                //         temp_ews.push(
-                                                //             {
-                                                //                 "date": indate,
-                                                //                 "value": parseInt(item.value),
-                                                //                 "med": true,
-                                                //                 "medData": meds_added,
-                                                //             }
-                                                //         )
-                                                //     }
-                                                // })
+        //                                         //     if (meds_added.length === 0) {
+        //                                         //         temp_ews.push(
+        //                                         //             {
+        //                                         //                 "date": indate,
+        //                                         //                 "value": parseInt(item.value),
+        //                                         //                 // "med": true,
+        //                                         //             }
+        //                                         //         )
+        //                                         //     }
+        //                                         //     else {
+        //                                         //         temp_ews.push(
+        //                                         //             {
+        //                                         //                 "date": indate,
+        //                                         //                 "value": parseInt(item.value),
+        //                                         //                 "med": true,
+        //                                         //                 "medData": meds_added,
+        //                                         //             }
+        //                                         //         )
+        //                                         //     }
+        //                                         // })
 
-                                                setSpo2maxval(parseInt(Spo2MaxVal) + 5)
-                                                setSpo2minval(parseInt(Spo2MinVal) - 5)
-                                                setBpmaxval(parseInt(BpMaxVal) + 5)
-                                                setBpminval(parseInt(BpMinVal) - 5)
-                                                setRrmaxval(parseInt(RrMaxVal) + 5)
-                                                setRrminval(parseInt(RrMinVal) - 5)
-                                                setTempmaxval(parseInt(TempMaxVal) + 5)
-                                                setTempminval(parseInt(TempMinVal) - 5)
-                                                // setEwsmaxval(parseInt(EwsMaxVal) + 5)
-                                                // setEwsminval(parseInt(EwsMinVal) - 5)
+        //                                         setSpo2maxval(parseInt(Spo2MaxVal) + 5)
+        //                                         setSpo2minval(parseInt(Spo2MinVal) - 5)
+        //                                         setBpmaxval(parseInt(BpMaxVal) + 5)
+        //                                         setBpminval(parseInt(BpMinVal) - 5)
+        //                                         setRrmaxval(parseInt(RrMaxVal) + 5)
+        //                                         setRrminval(parseInt(RrMinVal) - 5)
+        //                                         setTempmaxval(parseInt(TempMaxVal) + 5)
+        //                                         setTempminval(parseInt(TempMinVal) - 5)
+        //                                         // setEwsmaxval(parseInt(EwsMaxVal) + 5)
+        //                                         // setEwsminval(parseInt(EwsMinVal) - 5)
 
-                                                console.log("MAX MIN :", Spo2MaxVal)
-                                                console.log("MAX MIN :", Spo2MinVal)
+        //                                         console.log("MAX MIN :", Spo2MaxVal)
+        //                                         console.log("MAX MIN :", Spo2MinVal)
 
-                                                alerts_data.map(alert => {
-                                                    for (var i = 0; i < temp_spo2.length; i++) {
-                                                        var alert_time = to12HourFormat(alert.firstRcvTm)
-                                                        var trend_time = temp_spo2[i].date
+        //                                         alerts_data.map(alert => {
+        //                                             for (var i = 0; i < temp_spo2.length; i++) {
+        //                                                 var alert_time = to12HourFormat(alert.firstRcvTm)
+        //                                                 var trend_time = temp_spo2[i].date
 
-                                                        if (alert_time === trend_time) {
-                                                            if (alert.value.includes("HR")) {
-                                                                if (temp_bp[i].hasOwnProperty('alertData')) {
-                                                                    temp_bp[i].alertData.push(
-                                                                        {
-                                                                            name: 'HR',
-                                                                            time: alert_time,
-                                                                            info: alert.type
-                                                                        }
-                                                                    )
-                                                                }
-                                                                else {
-                                                                    temp_bp[i] = {
-                                                                        ...temp_bp[i],
-                                                                        "alert": true,
-                                                                        "alertData": [{
-                                                                            name: 'HR',
-                                                                            time: alert_time,
-                                                                            info: alert.type
-                                                                        }]
-                                                                    }
-                                                                }
-                                                            }
-                                                            if (alert.value.includes("SPO2")) {
-                                                                if (temp_spo2[i].hasOwnProperty('alertData')) {
-                                                                    temp_spo2[i].alertData.push(
-                                                                        {
-                                                                            name: 'SpO2',
-                                                                            time: alert_time,
-                                                                            info: alert.type
-                                                                        }
-                                                                    )
-                                                                }
-                                                                else {
-                                                                    temp_spo2[i] = {
-                                                                        ...temp_spo2[i],
-                                                                        "alert": true,
-                                                                        "alertData": [{
-                                                                            name: 'SpO2',
-                                                                            time: alert_time,
-                                                                            info: alert.type
-                                                                        }]
-                                                                    }
-                                                                }
-                                                            }
-                                                            if (alert.value.includes("RR")) {
-                                                                if (temp_rr[i].hasOwnProperty('alertData')) {
-                                                                    temp_rr[i].alertData.push(
-                                                                        {
-                                                                            name: 'RR',
-                                                                            time: alert_time,
-                                                                            info: alert.type
-                                                                        }
-                                                                    )
-                                                                }
-                                                                else {
-                                                                    temp_rr[i] = {
-                                                                        ...temp_rr[i],
-                                                                        "alert": true,
-                                                                        "alertData": [{
-                                                                            name: 'RR',
-                                                                            time: alert_time,
-                                                                            info: alert.type
-                                                                        }]
-                                                                    }
-                                                                }
-                                                            }
-                                                            if (alert.value.includes("TEMP")) {
-                                                                if (temp_temp[i].hasOwnProperty('alertData')) {
-                                                                    temp_temp[i].alertData.push(
-                                                                        {
-                                                                            name: 'TEMP',
-                                                                            time: alert_time,
-                                                                            info: alert.type
-                                                                        }
-                                                                    )
-                                                                }
-                                                                else {
-                                                                    temp_temp[i] = {
-                                                                        ...temp_temp[i],
-                                                                        "alert": true,
-                                                                        "alertData": [{
-                                                                            name: 'TEMP',
-                                                                            time: alert_time,
-                                                                            info: alert.type
-                                                                        }]
-                                                                    }
-                                                                }
-                                                            }
-                                                            // if (alert.value.includes("EWS")) {
-                                                            //     if (temp_ews[i].hasOwnProperty('alertData')) {
-                                                            //         temp_ews[i].alertData.push(
-                                                            //             {
-                                                            //                 name: 'EWS',
-                                                            //                 time: alert_time,
-                                                            //                 info: alert.type
-                                                            //             }
-                                                            //         )
-                                                            //     }
-                                                            //     else {
-                                                            //         temp_ews[i] = {
-                                                            //             ...temp_ews[i],
-                                                            //             "alert": true,
-                                                            //             "alertData": [{
-                                                            //                 name: 'EWS',
-                                                            //                 time: alert_time,
-                                                            //                 info: alert.type
-                                                            //             }]
-                                                            //         }
-                                                            //     }
-                                                            // }
-                                                        }
-                                                    }
-                                                })
+        //                                                 if (alert_time === trend_time) {
+        //                                                     if (alert.value.includes("HR")) {
+        //                                                         if (temp_bp[i].hasOwnProperty('alertData')) {
+        //                                                             temp_bp[i].alertData.push(
+        //                                                                 {
+        //                                                                     name: 'HR',
+        //                                                                     time: alert_time,
+        //                                                                     info: alert.type
+        //                                                                 }
+        //                                                             )
+        //                                                         }
+        //                                                         else {
+        //                                                             temp_bp[i] = {
+        //                                                                 ...temp_bp[i],
+        //                                                                 "alert": true,
+        //                                                                 "alertData": [{
+        //                                                                     name: 'HR',
+        //                                                                     time: alert_time,
+        //                                                                     info: alert.type
+        //                                                                 }]
+        //                                                             }
+        //                                                         }
+        //                                                     }
+        //                                                     if (alert.value.includes("SPO2")) {
+        //                                                         if (temp_spo2[i].hasOwnProperty('alertData')) {
+        //                                                             temp_spo2[i].alertData.push(
+        //                                                                 {
+        //                                                                     name: 'SpO2',
+        //                                                                     time: alert_time,
+        //                                                                     info: alert.type
+        //                                                                 }
+        //                                                             )
+        //                                                         }
+        //                                                         else {
+        //                                                             temp_spo2[i] = {
+        //                                                                 ...temp_spo2[i],
+        //                                                                 "alert": true,
+        //                                                                 "alertData": [{
+        //                                                                     name: 'SpO2',
+        //                                                                     time: alert_time,
+        //                                                                     info: alert.type
+        //                                                                 }]
+        //                                                             }
+        //                                                         }
+        //                                                     }
+        //                                                     if (alert.value.includes("RR")) {
+        //                                                         if (temp_rr[i].hasOwnProperty('alertData')) {
+        //                                                             temp_rr[i].alertData.push(
+        //                                                                 {
+        //                                                                     name: 'RR',
+        //                                                                     time: alert_time,
+        //                                                                     info: alert.type
+        //                                                                 }
+        //                                                             )
+        //                                                         }
+        //                                                         else {
+        //                                                             temp_rr[i] = {
+        //                                                                 ...temp_rr[i],
+        //                                                                 "alert": true,
+        //                                                                 "alertData": [{
+        //                                                                     name: 'RR',
+        //                                                                     time: alert_time,
+        //                                                                     info: alert.type
+        //                                                                 }]
+        //                                                             }
+        //                                                         }
+        //                                                     }
+        //                                                     if (alert.value.includes("TEMP")) {
+        //                                                         if (temp_temp[i].hasOwnProperty('alertData')) {
+        //                                                             temp_temp[i].alertData.push(
+        //                                                                 {
+        //                                                                     name: 'TEMP',
+        //                                                                     time: alert_time,
+        //                                                                     info: alert.type
+        //                                                                 }
+        //                                                             )
+        //                                                         }
+        //                                                         else {
+        //                                                             temp_temp[i] = {
+        //                                                                 ...temp_temp[i],
+        //                                                                 "alert": true,
+        //                                                                 "alertData": [{
+        //                                                                     name: 'TEMP',
+        //                                                                     time: alert_time,
+        //                                                                     info: alert.type
+        //                                                                 }]
+        //                                                             }
+        //                                                         }
+        //                                                     }
+        //                                                     // if (alert.value.includes("EWS")) {
+        //                                                     //     if (temp_ews[i].hasOwnProperty('alertData')) {
+        //                                                     //         temp_ews[i].alertData.push(
+        //                                                     //             {
+        //                                                     //                 name: 'EWS',
+        //                                                     //                 time: alert_time,
+        //                                                     //                 info: alert.type
+        //                                                     //             }
+        //                                                     //         )
+        //                                                     //     }
+        //                                                     //     else {
+        //                                                     //         temp_ews[i] = {
+        //                                                     //             ...temp_ews[i],
+        //                                                     //             "alert": true,
+        //                                                     //             "alertData": [{
+        //                                                     //                 name: 'EWS',
+        //                                                     //                 time: alert_time,
+        //                                                     //                 info: alert.type
+        //                                                     //             }]
+        //                                                     //         }
+        //                                                     //     }
+        //                                                     // }
+        //                                                 }
+        //                                             }
+        //                                         })
 
-                                                setSpo2_data(temp_spo2)
-                                                setBp_data(temp_bp)
-                                                setRr_data(temp_rr)
-                                                setTemp_data(temp_temp)
-                                                // setEws_data(temp_ews)
-                                                console.log(temp_spo2)
+        //                                         setSpo2_data(temp_spo2)
+        //                                         setBp_data(temp_bp)
+        //                                         setRr_data(temp_rr)
+        //                                         setTemp_data(temp_temp)
+        //                                         // setEws_data(temp_ews)
+        //                                         console.log(temp_spo2)
 
-                                                if (activeTrendsArray.length === 0) {
-                                                    setActiveTrendsArray([
-                                                        {
-                                                            name: 'SpO2',
-                                                            data: temp_spo2,
-                                                            color1: '#FF7529',
-                                                            color2: '#FFD0B6',
-                                                            max: parseInt(Spo2MaxVal) + 5,
-                                                            min: parseInt(Spo2MinVal) - 5,
-                                                        },
-                                                        {
-                                                            name: 'HR',
-                                                            data: temp_bp,
-                                                            color1: '#2ACA44',
-                                                            color2: '#FFEEBA',
-                                                            max: parseInt(BpMaxVal) + 5,
-                                                            min: parseInt(BpMinVal) - 5,
-                                                        },
-                                                        {
-                                                            name: 'RR',
-                                                            data: temp_rr,
-                                                            color1: '#9e00c2',
-                                                            color2: '#C4AAFD',
-                                                            max: parseInt(RrMaxVal) + 5,
-                                                            min: parseInt(RrMinVal) - 5,
-                                                        },
-                                                        {
-                                                            name: 'TEMP',
-                                                            data: temp_temp,
-                                                            color1: '#0C70A3',
-                                                            color2: '#FFEEBA',
-                                                            max: parseInt(TempMaxVal) + 5,
-                                                            min: parseInt(TempMinVal) - 5,
-                                                        },
-                                                    ])
-                                                }
+        //                                         if (activeTrendsArray.length === 0) {
+        //                                             setActiveTrendsArray([
+        //                                                 {
+        //                                                     name: 'SpO2',
+        //                                                     data: temp_spo2,
+        //                                                     color1: '#FF7529',
+        //                                                     color2: '#FFD0B6',
+        //                                                     max: parseInt(Spo2MaxVal) + 5,
+        //                                                     min: parseInt(Spo2MinVal) - 5,
+        //                                                 },
+        //                                                 {
+        //                                                     name: 'HR',
+        //                                                     data: temp_bp,
+        //                                                     color1: '#2ACA44',
+        //                                                     color2: '#FFEEBA',
+        //                                                     max: parseInt(BpMaxVal) + 5,
+        //                                                     min: parseInt(BpMinVal) - 5,
+        //                                                 },
+        //                                                 {
+        //                                                     name: 'RR',
+        //                                                     data: temp_rr,
+        //                                                     color1: '#9e00c2',
+        //                                                     color2: '#C4AAFD',
+        //                                                     max: parseInt(RrMaxVal) + 5,
+        //                                                     min: parseInt(RrMinVal) - 5,
+        //                                                 },
+        //                                                 {
+        //                                                     name: 'TEMP',
+        //                                                     data: temp_temp,
+        //                                                     color1: '#0C70A3',
+        //                                                     color2: '#FFEEBA',
+        //                                                     max: parseInt(TempMaxVal) + 5,
+        //                                                     min: parseInt(TempMinVal) - 5,
+        //                                                 },
+        //                                             ])
+        //                                         }
 
-                                                setIsLoading(false)
-                                            })
-                                            .catch(err => {
-                                                console.log(err)
-                                            })
-                                    })
-                                    .catch(err => {
-                                        console.log(err)
-                                    })
-                            })
-                            .catch(err => [
-                                console.log(err)
-                            ])
-                    })
-                    .catch(err => {
-                        console.log(err)
-                    })
-            })
-            .catch(err => {
-                console.log(err)
-            })
+        //                                         setIsLoading(false)
+        //                                     })
+        //                                     .catch(err => {
+        //                                         console.log(err)
+        //                                     })
+        //                             })
+        //                             .catch(err => {
+        //                                 console.log(err)
+        //                             })
+        //                     })
+        //                     .catch(err => [
+        //                         console.log(err)
+        //                     ])
+        //             })
+        //             .catch(err => {
+        //                 console.log(err)
+        //             })
+        //     })
+        //     .catch(err => {
+        //         console.log(err)
+        //     })
     }
 
     useEffect(() => {
@@ -1591,7 +1737,6 @@ function GraphVisualizer() {
             />
         );
     };
-
 
     return (
         isLoading
@@ -1930,6 +2075,7 @@ function GraphVisualizer() {
                                         } >
                                             SpO2
                                         </div>
+
                                         <div onClick={() => {
                                             var flag = true
                                             activeTrendsArray.map((trend, index) => {

@@ -54,6 +54,13 @@
     font-size: 1.1rem;
 }
 
+#timer-count-ds{
+    font-size: 40px;
+    margin: 0;
+    color: #ff7629;
+    font-weight: bold;
+}
+
 .bm-header-number{
     font-size: 1.1rem;
     color: #878787;

@@ -185,6 +185,14 @@ const demographicsFormItems = (
         },
         {
             required: props.required,
+            label: "Weight",
+            name: "weight",
+            rules: [{ required: props.required, message: "Weight is required!" }],
+            className: "addPatientDetailsModal",
+            Input: <Input />,
+        },
+        {
+            required: props.required,
             label: "Gender",
             name: "sex",
             rules: [{ required: props.required, message: "gender is required!" }],

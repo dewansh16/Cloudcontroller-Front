@@ -152,7 +152,7 @@ export default function PatientDashboard(props) {
         isLoading: true,
         list: [],
     });
-    const pageSize = 10;
+    const pageSize = 5;
     const [currentPageVal, setCurrentPageVal] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [patientDetails, setPatientDetails] = useState(null);
@@ -322,7 +322,7 @@ export default function PatientDashboard(props) {
             EWS: filters.ews,
             spo2LevelsL: filters.spo2,
             respirationRate: filters.rr,
-            offset: Number(currentPageVal - 1), limit: pageSize,
+            offset: Number(currentPageVal), limit: pageSize,
         };
 
         Object.keys(searchOptions).forEach(search => {
@@ -379,6 +379,32 @@ export default function PatientDashboard(props) {
     const showBlur = (type) => {
         setBlur({ ...isBlur, [type]: !isBlur[type] });
     };
+
+    const onDeletePatient = (pid) => {
+        const { tenant } = UserStore.getUser();
+
+        const data = {
+            list: [ { pid } ],
+            tenantId: tenant
+        }
+        patientApi
+            .deletePatient(data)
+            .then(res => {
+                let newData = [...patientListToShow];
+                newData = newData.filter(patient => patient?.demographic_map?.pid !== pid);
+                setPatientList(newData);
+                
+                setPatientDetails(null);
+                setActive("");
+                setShowTrend(true);
+
+                notification.success({
+                    message: "Delete",
+                    description: "Delete patient successfully!",
+                })
+            })
+        
+    }
 
     return (
         <>
@@ -484,6 +510,7 @@ export default function PatientDashboard(props) {
                         setShowNotes={setShowNotes}
                         setShowTrend={setShowTrend}
                         setActive={setActive}
+                        onDeletePatient={onDeletePatient}
                     />
                 </motion.div>
             )}
@@ -542,6 +569,7 @@ export default function PatientDashboard(props) {
                                         setPatientDetails={setPatientDetails}
                                         active={active}
                                         setActive={setActive}
+                                        weight={Math.floor(Math.random() * (70 - 50 + 1)) + 50}
                                     />
                                 )}
                             ></List>

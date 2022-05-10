@@ -22,6 +22,10 @@ import device2 from "../../Assets/Images/temp1.png";
 import device3 from "../../Assets/Images/watch.jpg";
 import device4 from "../../Assets/Images/spo2.jpg";
 import device5 from "../../Assets/Images/BUNDLE_png.png";
+import imgAlphamed from "../../Assets/Images/alphamed.png";
+import imgIHealth from "../../Assets/Images/ihealth.png";
+import digitalScale from "../../Assets/Images/DigitalScale.png";
+
 import deviceApi from "../../Apis/deviceApis";
 // import PaginationBox from '../Components/paginationBox';
 import { PaginationBox } from "../Components/PaginationBox/pagination";
@@ -252,6 +256,12 @@ function PatchInventory() {
                 return device4;
             case "gateway":
                 return device3;
+            case "digital":
+                return digitalScale;
+            case "alphamed":
+                return imgAlphamed;
+            case "ihealth":
+                return imgIHealth;
             default:
                 return null;
         }
@@ -380,6 +390,12 @@ function PatchInventory() {
                     message: "Delete",
                     description: `Delete ${type} successfully!`,
                 })
+
+                if (arrayChecked?.includes(patch_uuid)) {
+                    let newArr = [...arrayChecked];
+                    newArr = newArr.filter(item => item !== patch_uuid)
+                    setArrayChecked(newArr)
+                }
             })
             .catch((err) => {
                 console.log(err);
@@ -403,22 +419,32 @@ function PatchInventory() {
             .then(res => {
                 let newData = [...filteredlist];
                 for(let i = 0; i < arrayChecked?.length; i++) {
-                    console.log('i:', i, 'arrayChecked[i]', arrayChecked[i]);
                     newData = newData.filter(record => record?.patch_uuid !== arrayChecked[i]);
                 }
-                
-                console.log('new Data', newData);
-                setFilteredList(newData);
 
                 notification.success({
                     message: "Delete",
                     description: `Delete list item selected successfully!`,
                 })
+                
+                setFilteredList(newData);
+                setArrayChecked([]);
             })
             .catch((err) => {
                 console.log(err);
             });
     };
+
+    const renderLabelPatchType = (type) => ({
+        "temperature": "Temperature Sensor",
+        "gateway": "Gateway Sensor (EV-04)",
+        "spo2": "SpO2 (Aeon)",
+        "ecg": "ECG Sensor",
+        "bps": "BP Sensor",
+        "digital": "Digital Scale",
+        "alphamed": "Alphamed",
+        "ihealth": "iHealth",
+    }[type]);
 
     const columns = [
         {
@@ -461,6 +487,7 @@ function PatchInventory() {
                             }}
                             disabled={record.patch_patient_map !== null}
                             className="checkbox-delete-device"
+                            checked={arrayChecked?.includes(record.patch_uuid)}
                         />
                     )}
                     <div>
@@ -655,7 +682,7 @@ function PatchInventory() {
                             textTransform: "capitalize",
                         }}
                     >
-                        {record.AssociatedPatch?.length > 1 ? "Bundle" : dataIndex}
+                        {record.AssociatedPatch?.length > 1 ? "Bundle" : renderLabelPatchType(dataIndex)}
                     </span>
                 </div>
             ),

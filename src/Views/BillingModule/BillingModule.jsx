@@ -30,6 +30,7 @@ import "./billingModule.css";
 
 import billingApi from "../../Apis/billingApis";
 import tenantApi from "../../Apis/tenantApis";
+import {CPT_CODE, CPT} from "../../Utils/utils";
 
 const { Panel } = Collapse;
 const { TextArea } = Input;
@@ -71,6 +72,9 @@ const columns = [
         key: "duration",
     },
 ];
+
+let clockCounter = null;
+let timeCount = 0;
 
 function BillingModule() {
     const pid = useParams().pid;
@@ -165,6 +169,7 @@ function BillingModule() {
     const [secondTwentyStageTwoTasks, setSecondTwentyStageTwoTasks] = useState([]);
 
     const [runUseEffect, setRunUseEffect] = useState(0);
+    const [showStopBtn, setShowStopBtn] = useState(false);
 
     function handleMonthChange(date, dateString) {
         console.log(dateString);
@@ -219,9 +224,6 @@ function BillingModule() {
         temp = temp + 1;
         setRunUseEffect(temp);
     }
-
-    console.log('runUseEffect', runUseEffect);
-    console.log('initialSetupState', initialSetupState);
 
     function findDateIndex(month) {
         return month === currentActiveMonth;
@@ -301,59 +303,54 @@ function BillingModule() {
     }
 
     function initialSetupPost() {
-        console.log('---------------------------');
-        console.log("PATCH INFO : ", patchArray);
-        console.log("PATCH INFO : ", patchInformation);
-
         var date = new Date();
         var date_string = date.toISOString();
-
-        // billingApi
-        //     .addBillingTask(
-        //         {
-        //             code_type: "CPTR",
-        //             code: "919457",
-        //             status: "99453",
-        //             bill_date: date_string,
-        //             pid: location.state.pid,
-        //             code_tasks: [
-        //                 {
-        //                     Billing_Information: [
-        //                         {
-        //                             code: "99453",
-        //                             code_internal: "",
-        //                             useruuid: "",
-        //                             date_time: date_string,
-        //                             taskTotalTimeSpent: "0",
-        //                             timeConsidered: "0",
-        //                             task: "initial_setup_complete",
-        //                             status: true,
-        //                         },
-        //                     ],
-        //                     Patch_Patient_Information: patchInformation,
-        //                     Patches: { patch_list: patchArray },
-        //                 },
-        //             ],
-        //         }
-        //     )
-        //     .then((res) => {
-        //         console.log("BILLING RESPONSE : ", res);
-        //         var temp = runUseEffect;
-        //         temp = temp + 1;
-        //         setRunUseEffect(temp);
-        //     })
-        //     .catch((err) => {
-        //         console.log(err);
-        //     });
-
         setInitialSetupLoading(false);
-        var temp = runUseEffect;
-        temp = temp + 1;
-        setRunUseEffect(temp);
+        billingApi
+            .addBillingTask(
+                {
+                    code_type: CPT,
+                    code: CPT_CODE.CPT_99453,
+                    bill_date: date_string,
+                    pid: location.state.pid,
+                    time_spent: Math.floor(timeCount / 60),
+                    revenue_code: 123,
+                    notecodes: "pending",
+                    bill_process: 0,
+                    fee: 20
+                }
+            )
+            .then((res) => {
+                console.log("BILLING RESPONSE : ", res);
+                var temp = runUseEffect;
+                temp = temp + 1;
+                setRunUseEffect(temp);
+                setInitialSetupState(true);
+            })
+            .catch((err) => {
+                console.log(err);
+                setInitialSetupState(true);
+            });
         
-        setInitialSetupState(true);
+    }
+    const startCountTimer = () => {
+        setShowStopBtn(true);
+        clockCounter = setInterval(function(){
+            timeCount = timeCount + 1;
+            let hours   = Math.floor(timeCount / 3600)
+            let minutes = Math.floor(timeCount / 60) % 60
+            let seconds = timeCount % 60
+            let timeDs = [hours,minutes,seconds]
+            .map(v => v < 10 ? "0" + v : v)
+            .filter((v,i) => v !== "00" || i > 0)
+            .join(":")
+            document.getElementById("timer-count-ds").innerText = timeDs;
+        }, 1000);
     }
 
+    const stopCountTimer = () => {
+        clearInterval(clockCounter);
+    }
     function enrollForPatch() {
         console.log("PATCH INFO : ", patchArray);
         console.log("PATCH INFO : ", patchInformation);
@@ -453,11 +450,11 @@ function BillingModule() {
             billingApi
                 .getBillingTasks(location.state.pid, currentDateApi, '0')
                 .then((res) => {
-                    console.log("BILLING RESPONSE : ", res.data.response.billingData[0]);
+                    console.log("BILLING RESPONSE : ", res.data.response.billingData);
                     // setFirstTwentyTasks(res.data.response.billingData[0].code_tasks)
                     setTasksLoadingState(false);
 
-                    setBillingInformation(res.data.response.billingData[0].code_tasks[0].Billing_Information)
+                    setBillingInformation(res.data.response.billingData)
 
                     setTenantuuid(res.data.response.billingData[0].tenant_id);
 
@@ -482,7 +479,7 @@ function BillingModule() {
                     var firstTotalTime = 0;
                     var secondTotalTimeStageOne = 0;
                     var secondTotalTimeStageTwo = 0;
-                    res.data.response.billingData[0].code_tasks[0].Billing_Information.map(
+                    res.data.response.billingData.map(
                         (item) => {
                             tempDataSource.push({
                                 date: getDateFromISO(item.date_time),
@@ -491,16 +488,16 @@ function BillingModule() {
                                 duration: getMinutesFromSeconds(item.timeConsidered),
                             });
 
-                            if (item.code === "99453") {
-                                const d = new Date(item.date_time);
+                            if (item.code == CPT_CODE.CPT_99453) {
+                                const d = new Date(item.bill_date);
                                 initialStepDone = true;
                                 initialData = {
-                                    date: getDateFromISO(item.date_time),
-                                    time: getTimeFromISO(item.date_time),
+                                    date: getDateFromISO(item.bill_date),
+                                    time: getTimeFromISO(item.bill_date),
                                     month: monthNames[d.getMonth()],
                                 };
                             }
-                            if (item.code === "99454") {
+                            if (item.code == "99454") {
                                 enrollPatch = true;
                                 tempPatchdata = {
                                     date: getDateFromISO(item.date_time),
@@ -517,8 +514,8 @@ function BillingModule() {
                                     };
                                 }
                             }
-                            if (item.code === "99458") {
-                                if (item.code_internal === "99458_stage1") {
+                            if (item.code == "99458") {
+                                if (item.code_internal == "99458_stage1") {
                                     tempSecondTwentyTasks.push(item);
                                     secondTotalTimeStageOne =
                                         secondTotalTimeStageOne + Number(item.timeConsidered);
@@ -529,7 +526,7 @@ function BillingModule() {
                                         };
                                     }
                                 }
-                                if (item.code_internal === "99458_stage2") {
+                                if (item.code_internal == "99458_stage2") {
                                     tempSecondTwentyStageTwoTasks.push(item);
                                     secondTotalTimeStageTwo =
                                         secondTotalTimeStageTwo + Number(item.timeConsidered);
@@ -1443,7 +1440,7 @@ function BillingModule() {
                     // setFirstTwentyTasks(res.data.response.billingData[0].code_tasks)
                     setTasksLoadingState(false);
 
-                    setBillingInformation(res.data.response.billingData[0].code_tasks[0].Billing_Information)
+                    setBillingInformation(res.data.response.billingData)
 
                     setTenantuuid(res.data.response.billingData[0].tenant_id);
 
@@ -1468,34 +1465,34 @@ function BillingModule() {
                     var firstTotalTime = 0;
                     var secondTotalTimeStageOne = 0;
                     var secondTotalTimeStageTwo = 0;
-                    res.data.response.billingData[0].code_tasks[0].Billing_Information.map(
+                    res.data.response.billingData.map(
                         (item) => {
                             tempDataSource.push({
-                                date: `${getDateFromISO(item.date_time)} ${getTimeFromISO(
-                                    item.date_time
+                                date: `${getDateFromISO(item.bill_date)} ${getTimeFromISO(
+                                    item.bill_date
                                 )}`,
                                 code: item.code,
-                                desc: item.task,
+                                desc: '',
                                 duration: getMinutesFromSeconds(item.timeConsidered),
                             });
 
-                            if (item.code === "99453") {
-                                const d = new Date(item.date_time);
+                            if (item.code == CPT_CODE.CPT_99453) {
+                                const d = new Date(item.bill_date);
                                 initialStepDone = true;
                                 initialData = {
-                                    date: getDateFromISO(item.date_time),
-                                    time: getTimeFromISO(item.date_time),
+                                    date: getDateFromISO(item.bill_date),
+                                    time: getTimeFromISO(item.bill_date),
                                     month: monthNames[d.getMonth()],
                                 };
                             }
-                            if (item.code === "99454") {
+                            if (item.code == CPT_CODE.CPT_99454) {
                                 enrollPatch = true;
                                 tempPatchdata = {
                                     date: getDateFromISO(item.date_time),
                                     time: getTimeFromISO(item.date_time),
                                 };
                             }
-                            if (item.code === "99457") {
+                            if (item.code == CPT_CODE.CPT_99457) {
                                 tempFirstTwentyTasks.push(item);
                                 firstTotalTime = firstTotalTime + Number(item.timeConsidered);
                                 if (!tempFirstTwentyData.hasOwnProperty("date")) {
@@ -1505,7 +1502,7 @@ function BillingModule() {
                                     };
                                 }
                             }
-                            if (item.code === "99458") {
+                            if (item.code == CPT_CODE.CPT_99458) {
                                 if (item.code_internal === "99458_stage1") {
                                     tempSecondTwentyTasks.push(item);
                                     secondTotalTimeStageOne =
@@ -1546,9 +1543,7 @@ function BillingModule() {
                     if (initialStepDone) {
                         setInitialBillDate(res.data.response.billingData[0].bill_date)
                         setEnrolledState(true);
-                        if (taskDeleteArray.length === 0) {
-                            setInitialSetupState(true);
-                        }
+                        setInitialSetupState(true);
                         setInitialSetupData(initialData);
                     }
                     setInitialSetupLoading(false);
@@ -2151,17 +2146,35 @@ function BillingModule() {
                                         As you enroll, remote patient monitoring will start.
                                     </div>
                                 </div>
+                                {showStopBtn && (
+                                    <div className="timer-counter">
+                                    <p id="timer-count-ds">{timeCount}</p>
+                                    </div>
+                                )}
                                 <CusBtn
                                     onClick={() => {
-                                        setEnrolledState(true);
-                                        // setInitialSetupLoading(true);
-                                        initialSetupPost();
+                                     startCountTimer()
                                     }}
                                     className="primary"
                                     style={{ marginTop: "3%", padding: "1% 5%" }}
                                 >
                                     Start
                                 </CusBtn>
+                                {showStopBtn && (
+                                    <CusBtn
+                                    onClick={() => {
+                                        setEnrolledState(true);
+                                        // setInitialSetupLoading(true);
+                                        initialSetupPost();
+                                        clearInterval(clockCounter);
+                                    }}
+                                    className="primary"
+                                    style={{ marginTop: "3%", padding: "1% 5%" }}
+                                >
+                                    Stop
+                                </CusBtn>
+                                )}
+                                
                             </div>
                         </div>
                     ) : (

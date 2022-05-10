@@ -35,8 +35,6 @@ import WardDetails from "../PatientJourney/wardDetails/wardDetails.patientJourne
 import Steps from "../PatientJourney/stepspatientJourney/steps.patientJourney";
 import DetailBox from "./components/detailBox.patientDetails";
 
-import { dataFake } from './constant';
-
 export default function PatientDetails(props) {
     const { pid } = useParams();
     let userData = UserStore.getUser();
@@ -47,14 +45,11 @@ export default function PatientDetails(props) {
     const [locationInventory, setLocationInventory] = useState(null);
 
     useEffect(() => {
-        // console.log('fakeData', dataFake);
-        // setPatient(dataFake);
         setLoading(true);
 
         patientApi
             .getDetailPatientById(pid)
             .then((res) => {
-                console.log("res getDetailPatientById:", res.data);
                 setPatient(res.data.response.patient);
                 setLoading(false);
             })
@@ -72,11 +67,9 @@ export default function PatientDetails(props) {
         patientApi
             .getPatientLocation(pid)
             .then((res) => {
-                console.log("res getPatientLocation", res.data);
                 setJourneyDetails(res.data.response.locations);
             })
             .catch((err) => {
-                console.log(err);
                 const error = err.response?.data.result;
                 notification.error({
                     message: "Error",
@@ -92,7 +85,6 @@ export default function PatientDetails(props) {
                 // setLoading(false);
             })
             .catch((err) => {
-                console.log(err);
                 const error = err.response?.data.result;
                 notification.error({
                     message: "Error",
@@ -300,14 +292,12 @@ export default function PatientDetails(props) {
                         getFormattedDate(new Date()) + " | " + to12HourFormat(new Date()),
                 });
             }
-            console.log("newDurationArray-----", newDurationArray);
             setDurationArray(newDurationArray);
         }
     }, [patient]);
 
     const changeMode = () => {
         setThemeMode((prevValue) => {
-            console.log(prevValue);
             return prevValue === "Dark" ? "Light" : "Dark";
         });
     };
@@ -648,7 +638,7 @@ export default function PatientDetails(props) {
                                             }}
                                             span={4}
                                         >
-                                            <Buttons
+                                            {/* <Buttons
                                                 style={{
                                                     border: "1px solid #878787",
                                                     borderRadius: "10px",
@@ -664,7 +654,7 @@ export default function PatientDetails(props) {
                                             >
                                                 {Icons.editPencil({})}
                                                 <span style={{ marginLeft: "4px" }}>Edit</span>
-                                            </Buttons>
+                                            </Buttons> */}
                                         </Col>
                                     </Row>
                                 </Col>
@@ -934,17 +924,14 @@ export default function PatientDetails(props) {
                                             style={{ margin: "0em 0 0 0", minHeight: "500px" }}
                                         >
                                             <Col span={24}>
-                                                {tabInventory.map((item) => {
-                                                    // console.log('activeStep', activeStep);
-                                                    // console.log('pid', pid, 'patient', patient);
-                                                    // console.log('stepArray', stepArray);
-
+                                                {tabInventory.map((item, index) => {
                                                     if (activeTab === item.name) {
                                                         if (item.name === "liveMonitor") {
                                                             return item.component;
                                                         } else
                                                             return (
                                                                 <item.component
+                                                                    key={index}
                                                                     pid={pid}
                                                                     patient={patient}
                                                                     wardArray={stepArray}

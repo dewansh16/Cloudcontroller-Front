@@ -118,8 +118,13 @@ function PatientParticular(props) {
         {/* BASIC INFO */}
         <Row>
             <Col span={24}>
-                <BasicInfo data={data} handleComponentClose={handleComponentClose} />
+                <BasicInfo 
+                    data={data} 
+                    handleComponentClose={handleComponentClose} 
+                    onDeletePatient={props.onDeletePatient}
+                />
             </Col>
+
             <Col span={24} style={{ marginTop: "1rem" }}>
                 <ButtonRow
                     deviceType={

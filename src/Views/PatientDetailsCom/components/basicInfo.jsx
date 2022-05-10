@@ -1,11 +1,12 @@
 import React from 'react';
-import { Tooltip, Row, Col } from 'antd';
+import { Tooltip, Row, Col, Popconfirm } from 'antd';
 import { useHistory } from 'react-router-dom';
 
 import Icons from '../../../Utils/iconMap';
 import { Button } from '../../../Theme/Components/Button/button';
+import iconDelete from '../../../Assets/Images/iconDelete.png'
 
-export default function BasicInfo({ data, handleComponentClose }) {
+export default function BasicInfo({ data, handleComponentClose, onDeletePatient }) {
     const history = useHistory();
 
     const takeToEditPage = () => {
@@ -22,14 +23,28 @@ export default function BasicInfo({ data, handleComponentClose }) {
             </p>
         </Col>
         <Col span={6} style={{ display: "flex", justifyContent: "flex-end" }}>
-            <Tooltip title={"Edit patient"}>
+            <Popconfirm
+                placement="bottom"
+                title="Are you sure to delete this patient?"
+                onConfirm={() => onDeletePatient(data.demographic_map.pid)}
+                okText="Yes"
+                cancelText="No"
+            >
+                <Tooltip title={"Delete patient"}>
+                    <Button type="secondary">
+                        <img src={iconDelete} width="24" height="22" style={{ marginTop: "-8px" }} />
+                    </Button>
+                </Tooltip>
+            </Popconfirm>
+            
+            {/* <Tooltip title={"Edit patient"}>
                 <Button
                     type="secondary"
                     onClick={takeToEditPage}
                 >
                     {Icons.edit({ Style: { fontSize: "1.5rem" } })}
                 </Button>
-            </Tooltip>
+            </Tooltip> */}
             <Tooltip title={"Call patient"}>
                 <Button
                     type="secondary"

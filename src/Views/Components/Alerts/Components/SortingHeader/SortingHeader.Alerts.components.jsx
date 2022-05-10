@@ -9,8 +9,6 @@ import patientApi from '../../../../../Apis/patientApis';
 import { Button as Buttons } from '../../../../../Theme/Components/Button/button';
 
 import Icons from '../../../../../Utils/iconMap';
-
-
 // const { Option } = Select;
 
 
@@ -20,8 +18,7 @@ function FetchDetails(pid) {
 
     useEffect(() => {
         patientApi.getPatientData(pid).then((res) => {
-            console.log("xxxx:", res)
-            setResponse(res.data?.response?.patients[0])
+            setResponse(res.data?.response?.patient)
             setLoading(false);
         }).catch((err) => {
             if (err) {
@@ -37,15 +34,9 @@ function FetchDetails(pid) {
     return [response, loading]
 }
 
-
-
 const SortingHeader = (props) => {
-
     const [topBellBtn, setTopBellBtn] = useState(false);
-
     const [data, isLoading] = FetchDetails(props.pid)
-
-    console.log(data);
 
     const topBellBtnStyle = {
         border: '1px solid #FB2D77',
@@ -68,8 +59,6 @@ const SortingHeader = (props) => {
         border: 'none',
     }
 
-
-
     return (
         <div >
             <Affix className='first-affix-box' >
@@ -78,47 +67,68 @@ const SortingHeader = (props) => {
                         gridTemplateColumns: "4fr 6fr 0.5fr"
                     }}>
                     <div className="alert-select-location ">
-                        <Buttons style={{
-                            border: 'none',
-                            boxShadow: 'none',
-                            marginRight: '10%'
-                        }} type='text' className='utility' onClick={props.goBack} >{Icons.headerBackArrow({})}</Buttons>
-                        <Buttons style={{
-                            margin: "5px",
-                            padding: "0.2rem"
-                        }} className='utility'
+                        <Buttons 
+                            style={{
+                                border: 'none',
+                                boxShadow: 'none',
+                                marginRight: '10%'
+                            }} 
+                            type='text' 
+                            className='utility' 
+                            onClick={props.goBack}
+                        >
+                            {Icons.headerBackArrow({})}
+                        </Buttons>
+
+                        <Buttons 
+                            style={{
+                                margin: "5px",
+                                padding: "0.2rem"
+                            }} 
+                            className='utility'
                             onClick={props.toPatientDetails}
                         >
-                            <div style={{
-                                height: "100%",
-                                width: "100%",
-                                padding: 'none',
-                                border: 'none',
-                                minHeight: "50px",
-                                minWidth: "170px",
-                                position: 'relative'
-                            }} className='alert-info-box'>
+                            <div 
+                                style={{
+                                    height: "100%",
+                                    width: "100%",
+                                    padding: 'none',
+                                    border: 'none',
+                                    minHeight: "50px",
+                                    minWidth: "170px",
+                                    position: 'relative'
+                                }} 
+                                className='alert-info-box'
+                            >
                                 {
                                     !isLoading && data !== null && data !== undefined &&
                                     <>
                                         <h1 style={{
                                             marginBottom: '0px', fontSize: '18px', fontWeight: '500',
                                             textAlign: 'left'
-                                        }} >
-                                            {`${data?.demographic_map.title === undefined ? '' : data?.demographic_map.title}` + " " + data?.demographic_map.fname + " " + data?.demographic_map.lname}
+                                        }}>
+                                            {
+                                            `${data?.demographic_map.title === undefined ? '' : data?.demographic_map.title}` 
+                                                + " " + data?.demographic_map.fname + " " + data?.demographic_map.lname
+                                            }
                                         </h1>
-                                        <p style={{
-                                            marginBottom: '0px', fontSize: '16px', fontWeight: '400', color: '#A5A5A5', textAlign: 'start'
-                                        }} >MR: {data.demographic_map?.med_record}</p>
+
+                                        <p 
+                                            style={{
+                                                marginBottom: '0px', fontSize: '16px', fontWeight: '400', color: '#A5A5A5', textAlign: 'start'
+                                            }}
+                                        >
+                                            MR: {data.demographic_map?.med_record}
+                                        </p>
                                     </>
                                 }
                                 {
-                                    isLoading && (data === undefined || data === null) && <Spin style={{ position: 'absolute', left: '40%', top: '30%' }} />
+                                    isLoading && (data === undefined || data === null) && 
+                                        <Spin style={{ position: 'absolute', left: '40%', top: '30%' }} />
                                 }
                             </div>
                         </Buttons>
                     </div>
-
 
                     <div className="alert-utility-group patient-details-header-second-column">
                         <div className='alert-type'>
@@ -135,7 +145,8 @@ const SortingHeader = (props) => {
                                 <Radio.Button value="userAlert" style={{ ...buttonStyle, padding: '0px' }} >User Alert</Radio.Button>
                                 <Radio.Button value="systemAlert" style={{ ...buttonStyle, padding: '0px' }}>System Alert</Radio.Button>
                             </Radio.Group >
-                        </div >
+                        </div>
+
                         <div className='is-attended'>
                             <Radio.Group defaultValue="notAttended" buttonStyle="solid"
                                 onChange={(e) => {
@@ -149,9 +160,6 @@ const SortingHeader = (props) => {
                             </Radio.Group>
                         </div>
                     </div>
-
-
-
                 </div>
             </Affix>
         </div >
@@ -159,8 +167,6 @@ const SortingHeader = (props) => {
 }
 
 export default SortingHeader
-
-
 
 // {
 //     <div className="alert-list-controllers">

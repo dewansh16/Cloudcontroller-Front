@@ -21,8 +21,7 @@ import { useParams } from 'react-router-dom'
 function FetchAlertData(pid, isAttended) {
     console.log('pid', pid);
     const [response, setResponse] = useState(null)
-    const [loading, setLoading] = useState(true)
-
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         // setLoading(true);
@@ -97,10 +96,7 @@ function FetchAlertData(pid, isAttended) {
     return [response, loading]
 }
 
-
-
 const HotkeysDemo = (props) => {
-
     const [isModalVisible, setModalVisible] = useState(false);
 
     const onKeyDown = (keyName, e, handle) => {
@@ -119,10 +115,7 @@ const HotkeysDemo = (props) => {
         if (text === 'details boydey') {
             props.prop.history.push('/dashboard/patient/details/patient156dbd7a-ba82-4503-bd58-21ccaffe6bc2')
         }
-        console.log(values.nlp, props.prop);
     }
-
-
 
     return (
         <Hotkeys
@@ -195,9 +188,7 @@ const HotkeysDemo = (props) => {
 }
 
 const Alerts = (props) => {
-
     const { pid } = useParams();
-    // console.log(pid);
 
     const [userType, setUserType] = useState('all');
     const [isAttended, setIsAttended] = useState('notAttended')
@@ -215,7 +206,14 @@ const Alerts = (props) => {
     return (
         <div style={{ width: '100%', margin: '0 auto', position: 'relative' }}>
             <div className='alerts-header'>
-                <SortingHeader pid={pid} toPatientDetails={toPatientDetails} goBack={goBack} isLoading={isLoading} setUserType={setUserType} setIsAttended={setIsAttended} />
+                <SortingHeader 
+                    pid={pid} 
+                    goBack={goBack} 
+                    isLoading={isLoading} 
+                    setUserType={setUserType} 
+                    setIsAttended={setIsAttended}
+                    toPatientDetails={toPatientDetails} 
+                />
             </div>
 
             <div style={{ position: 'relative', height: '100vh' }}>
@@ -223,6 +221,7 @@ const Alerts = (props) => {
                     <div className='no-alerts-div'>
                         <h1 style={{ fontSize: "60px" }}>No Alerts</h1>
                     </div>}
+                    
                 {!isLoading && data !== null && data !== undefined && data.length !== 0 &&
                     data.map(item => (
                         item.length > 0 ?

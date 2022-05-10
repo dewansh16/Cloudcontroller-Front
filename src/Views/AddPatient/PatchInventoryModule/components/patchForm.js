@@ -21,10 +21,10 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const PatchForm = (props) => {
-    console.log('props', props);
     const [patchList, setPatchList] = useState([]);
     const [patchFetched, setPatchFetched] = useState(false);
-    const { isSelectDisabled, setSelectDisabled } = useState(false);
+    const [isSelectDisabled, setSelectDisabled] = useState(false);
+    const [valueBpType, setValueBpType] = useState('alphamed')
 
     const [summary, setSummary] = React.useState({
         isVisible: false,
@@ -33,8 +33,22 @@ const PatchForm = (props) => {
     });
 
     useEffect(() => {
-        fetchPatchesData(props.type);
+        if (props.type !== 'bps') {
+            fetchPatchesData(props.type);
+        }
+
+        resetValueForm();
     }, [props.type]);
+
+    const resetValueForm = () => {
+        let type = props.type;
+        if (props.type === 'bps') {
+            type = valueBpType;
+        } 
+
+        props.form.setFieldsValue({ [`${type}_patch_serial`]: null });
+        props.form.setFieldsValue({ [`${type}_duration`]: null });
+    }
 
     const disAllocatePatch = (patchData) => {
         let userData = UserStore.getUser();
@@ -48,9 +62,10 @@ const PatchForm = (props) => {
             patchData[`${props.type}_duration`] = null;
             patchData.tenant_id = tenantId;
             patchData.pid = "0";
+            
             let payload = [];
             payload.push(patchData);
-            console.log("send in api to dusalocate", payload, props.pid);
+
             patientApi
                 .associatePatchToPatient(props.pid, payload)
                 .then((res) => {
@@ -63,7 +78,6 @@ const PatchForm = (props) => {
     };
 
     const removePatch = () => {
-        console.log('removePatch -----------------------');
         let userData = UserStore.getUser();
         let tenantId = userData.tenant;
         props.form.setFieldsValue({
@@ -101,54 +115,72 @@ const PatchForm = (props) => {
         }
     };
 
+    useEffect(() => {
+        if (props.type === 'bps') {
+            fetchPatchesData(valueBpType);
+        }
+    }, [valueBpType]);
+
     const handleChange = (values) => {
-        console.log('handleChange', values);
+        // console.log('value', values);
+        if (values[0].name[0] === 'bp-type') {
+            return setValueBpType(values[0].value);
+        }
+
+        let type = props.type;
+        if (props.type === 'bps') {
+            type = valueBpType;
+        } 
+
         switch (values[0].name[0]) {
             //FIXME: use delimiter as ampersand
-            case `${props.type}_patch_serial`: {
-                console.log(
-                    " pid from patchForm xxxxxxxx",
-                    props.pid,
-                    props.patchData[props.type]
-                );
-                if (
-                    props.patchData[props.type]?.[`${props.type}_patch_serial`] !==
-                    values[0].value
-                ) {
-                    disAllocatePatch(props.patchData[props.type]);
+            case `${type}_patch_serial`: {
+                // console.log(
+                //     " pid from patchForm xxxxxxxx",
+                //     props.pid,
+                //     props.patchData[type]
+                // );
+
+                if (props.patchData[type]?.[`${type}_patch_serial`] !== values[0].value) {
+                    disAllocatePatch(props.patchData[type]);
                 }
-                props.form.setFieldsValue({ [`${props.type}_duration`]: null });
+
+                props.form.setFieldsValue({ [`${type}_duration`]: null });
                 let selectedPatch = patchList.filter(
                     (patch) => patch.patch_serial === values[0].value
                 );
+
                 let payload = props.patchData;
-                payload[props.type] = {
+                payload[type] = {
                     patch_uuid: selectedPatch[0].patch_uuid,
-                    [`${props.type}_patch_serial`]: selectedPatch[0].patch_serial,
+                    [`${type}_patch_serial`]: selectedPatch[0].patch_serial,
                 };
+
                 props.savePatchDetails(payload);
                 break;
             }
-            case `${props.type}_duration`: {
-                // console.log(values[0].value)
+
+            case `${type}_duration`: {
                 if (values[0].value != null) {
                     let startDate = values[0].value[0]?.format("YYYY-MM-DD");
                     let endDate = values[0].value[1]?.format("YYYY-MM-DD");
                     let payload = props.patchData;
-                    payload[props.type] = {
-                        ...payload[props.type],
-                        [`${props.type}_duration`]: values[0].value,
+
+                    payload[type] = {
+                        ...payload[type],
+                        [`${type}_duration`]: values[0].value,
                         duration: `${startDate},${endDate}`,
                     };
-                    console.log(payload);
+
                     props.savePatchDetails(payload);
                 } else {
                     let payload = props.patchData;
-                    payload[props.type] = {
-                        ...payload[props.type],
-                        [`${props.type}_duration`]: null,
+                    payload[type] = {
+                        ...payload[type],
+                        [`${type}_duration`]: null,
                         duration: null,
                     };
+
                     props.savePatchDetails(payload);
                 }
                 break;
@@ -159,7 +191,6 @@ const PatchForm = (props) => {
     };
 
     function confirm(e) {
-        console.log(e);
         removePatch();
     }
 
@@ -168,7 +199,6 @@ const PatchForm = (props) => {
         deviceApi
             .getPatchesData(deviceType, -1, patchSerial, user.tenant)
             .then((res) => {
-                console.log(res.data?.response?.patches);
                 setPatchList(res.data?.response?.patches);
             })
             .catch((err) => {
@@ -183,6 +213,17 @@ const PatchForm = (props) => {
     };
 
     const raiseError = () => { };
+
+    const renderTitleSensor = (type) => ({
+        "temperature": "Temperature Sensor",
+        "gateway": "Gateway (EV-04)",
+        "spo2": "SpO2 (Aeon)",
+        "ecg": "ECG Sensor",
+        "bps": "BP Sensor",
+        "digital": "Digital Scale",
+        "alphamed": "Alphamed",
+        "ihealth": "iHealth",
+    }[type]);
 
     return summary.isVisible ? (
         <Summary status={summary.status} title={summary.title}>
@@ -209,11 +250,53 @@ const PatchForm = (props) => {
                     onFieldsChange={handleChange}
                 >
                     <Row>
+                        {props.type === "bps" && (
+                            <Col span={18}>
+                                <Form.Item
+                                    required={props.required}
+                                    label="BP type"
+                                    name="bp-type"
+                                    rules={[
+                                        {
+                                            required: props.required,
+                                            message: "serial number is required",
+                                        },
+                                    ]}
+                                    className="addPatientDetailsModal"
+                                    initialValue={valueBpType}
+                                >
+                                    <Select
+                                        disabled={isSelectDisabled}
+                                        showSearch
+                                        placeholder="Search to Select"
+                                        optionFilterProp="children"
+                                        // onFocus={() => {
+                                        //     if (!patchFetched) {
+                                        //         fetchPatchesData(props.type);
+                                        //         setPatchFetched(true);
+                                        //     }
+                                        // }}
+                                        // onSearch={(value) => {
+                                        //     fetchPatchesData(props.type, value);
+                                        // }}
+                                        // filterOption={true}
+                                    >
+                                        <Option value="alphamed">
+                                            Alphamed
+                                        </Option>
+                                        <Option value="ihealth">
+                                            iHealth
+                                        </Option>
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        )}
+
                         <Col span={18}>
                             <Form.Item
                                 required={props.required}
                                 label="Serial Number"
-                                name={`${props.type}_patch_serial`}
+                                name={`${props.type === 'bps' ? valueBpType : props.type}_patch_serial`}
                                 rules={[
                                     {
                                         required: props.required,
@@ -225,7 +308,7 @@ const PatchForm = (props) => {
                                 <Select
                                     disabled={isSelectDisabled}
                                     showSearch
-                                    placeholder="Search to Select 1"
+                                    placeholder="Search to Select"
                                     optionFilterProp="children"
                                     // onFocus={() => {
                                     //     if (!patchFetched) {
@@ -234,7 +317,7 @@ const PatchForm = (props) => {
                                     //     }
                                     // }}
                                     onSearch={(value) => {
-                                        fetchPatchesData(props.type, value);
+                                        fetchPatchesData(props.type === "bps" ? valueBpType : props.type, value);
                                     }}
                                     filterOption={true}
                                 >
@@ -280,7 +363,7 @@ const PatchForm = (props) => {
                     <Form.Item
                         required={!props.required}
                         label="Duration"
-                        name={`${props.type}_duration`}
+                        name={`${props.type === 'bps' ? valueBpType : props.type}_duration`}
                         rules={[
                             {
                                 required: !props.required,
@@ -319,9 +402,10 @@ const PatchForm = (props) => {
                         textTransform: "capitalize",
                     }}
                 >
-                    {props.type === "gateway" ? props.type : props.type + "Sensor"}
+
+                    {props.type === 'bps' ? valueBpType + " Sensor" : renderTitleSensor(props.type)}
                 </h2>
-                {getImageSrc(props.type, 200)}
+                {getImageSrc(props.type !== 'bps' ? props.type : valueBpType, 200)}
             </Col>
         </Row>
     );
