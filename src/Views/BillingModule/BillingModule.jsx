@@ -73,6 +73,9 @@ const columns = [
     },
 ];
 
+let clockCounter = null;
+let timeCount = 0;
+
 function BillingModule() {
     const pid = useParams().pid;
     // console.log("pid is here....", pid);
@@ -166,6 +169,7 @@ function BillingModule() {
     const [secondTwentyStageTwoTasks, setSecondTwentyStageTwoTasks] = useState([]);
 
     const [runUseEffect, setRunUseEffect] = useState(0);
+    const [showStopBtn, setShowStopBtn] = useState(false);
 
     function handleMonthChange(date, dateString) {
         console.log(dateString);
@@ -309,12 +313,11 @@ function BillingModule() {
                     code: CPT_CODE.CPT_99453,
                     bill_date: date_string,
                     pid: location.state.pid,
-                    time_spent: 20,
+                    time_spent: Math.floor(timeCount / 60),
                     revenue_code: 123,
                     notecodes: "pending",
                     bill_process: 0,
                     fee: 20
-
                 }
             )
             .then((res) => {
@@ -330,7 +333,24 @@ function BillingModule() {
             });
         
     }
+    const startCountTimer = () => {
+        setShowStopBtn(true);
+        clockCounter = setInterval(function(){
+            timeCount = timeCount + 1;
+            let hours   = Math.floor(timeCount / 3600)
+            let minutes = Math.floor(timeCount / 60) % 60
+            let seconds = timeCount % 60
+            let timeDs = [hours,minutes,seconds]
+            .map(v => v < 10 ? "0" + v : v)
+            .filter((v,i) => v !== "00" || i > 0)
+            .join(":")
+            document.getElementById("timer-count-ds").innerText = timeDs;
+        }, 1000);
+    }
 
+    const stopCountTimer = () => {
+        clearInterval(clockCounter);
+    }
     function enrollForPatch() {
         console.log("PATCH INFO : ", patchArray);
         console.log("PATCH INFO : ", patchInformation);
@@ -2126,17 +2146,35 @@ function BillingModule() {
                                         As you enroll, remote patient monitoring will start.
                                     </div>
                                 </div>
+                                {showStopBtn && (
+                                    <div className="timer-counter">
+                                    <p id="timer-count-ds">{timeCount}</p>
+                                    </div>
+                                )}
                                 <CusBtn
                                     onClick={() => {
-                                        setEnrolledState(true);
-                                        // setInitialSetupLoading(true);
-                                        initialSetupPost();
+                                     startCountTimer()
                                     }}
                                     className="primary"
                                     style={{ marginTop: "3%", padding: "1% 5%" }}
                                 >
                                     Start
                                 </CusBtn>
+                                {showStopBtn && (
+                                    <CusBtn
+                                    onClick={() => {
+                                        setEnrolledState(true);
+                                        // setInitialSetupLoading(true);
+                                        initialSetupPost();
+                                        clearInterval(clockCounter);
+                                    }}
+                                    className="primary"
+                                    style={{ marginTop: "3%", padding: "1% 5%" }}
+                                >
+                                    Stop
+                                </CusBtn>
+                                )}
+                                
                             </div>
                         </div>
                     ) : (
