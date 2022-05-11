@@ -16,28 +16,28 @@ function FetchProcedure(pid, limit) {
     const [dataSource, setDataSource] = useState([])
 
     useEffect(() => {
-        patientApi.getPatientProcedure(pid, limit).then((res) => {
-            console.log(res.data.response)
-            res.data.response['procedure_list'].map((procedure, idx) => {
-                dataSource.push({
-                    key: idx,
-                    ...procedure,
-                    data: { ...procedure }
-                })
-            })
-            setDataSource([...dataSource])
-            setResponse(res.data.response)
-            setLoading(false);
-        }).catch((err) => {
-            console.log(err)
-            if (err) {
-                notification.error({
-                    message: 'Error',
-                    description: `${err.response?.data.result}` || ""
-                })
-                setLoading(false);
-            }
-        })
+        // patientApi.getPatientProcedure(pid, limit).then((res) => {
+        //     console.log(res.data.response)
+        //     res.data.response['procedure_list'].map((procedure, idx) => {
+        //         dataSource.push({
+        //             key: idx,
+        //             ...procedure,
+        //             data: { ...procedure }
+        //         })
+        //     })
+        //     setDataSource([...dataSource])
+        //     setResponse(res.data.response)
+        //     setLoading(false);
+        // }).catch((err) => {
+        //     console.log(err)
+        //     if (err) {
+        //         notification.error({
+        //             message: 'Error',
+        //             description: `${err.response?.data.result}` || ""
+        //         })
+        //         setLoading(false);
+        //     }
+        // })
     }, [pid])
     return [response, loading, dataSource]
 }
