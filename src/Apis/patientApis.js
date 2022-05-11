@@ -1,6 +1,12 @@
 import axiosInstance from "./index";
 
 const patientApi = {
+    deletePatient: (data) => 
+        axiosInstance.request({
+            method: "DELETE",
+            url: "/patients",
+            data: data
+        }),
     addPatient: (data, pid) =>
         axiosInstance.request({
             method: "POST",
