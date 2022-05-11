@@ -1021,7 +1021,7 @@ function PatchInventory() {
             >
                 Device
             </Menu.Item>
-            <Menu.Item
+            {/* <Menu.Item
                 style={{
                     textAlign: "center",
                     padding: "6px 0px 6px 0px",
@@ -1031,7 +1031,7 @@ function PatchInventory() {
                 key="2"
             >
                 Gateway
-            </Menu.Item>
+            </Menu.Item> */}
             {/* <Menu.Divider />
             <Menu.Item
                 style={{
