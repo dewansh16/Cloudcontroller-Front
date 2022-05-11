@@ -83,7 +83,7 @@ const PatientDemographics = (props) => {
                         );
                     }
                     return (
-                        <Col key={item.name} span={(item.name === 'sex' || item.name === 'weight') ? 6 : 12}>
+                        <Col key={item.name} span={12}>
                             <Form.Item
                                 required={item.required}
                                 hasFeedback={item.hasFeedback}
