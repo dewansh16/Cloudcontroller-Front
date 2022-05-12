@@ -1,5 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { io } from "socket.io-client";
+
 import { Row, Col, Divider, Grid, Tooltip } from "antd";
 import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
@@ -71,6 +73,13 @@ const PatientListItem = (props) => {
     const [chartBlockData, setChartBlockData] = React.useState([]);
 
     const [isChartSectionVisible, setChartSectionVisibility] = React.useState(false);
+
+    React.useEffect(() => {
+        // var socket = io('http://localhost:3033', { transports: ['websocket', 'polling', 'flashsocket'] });
+        // socket.on('SOCKET_CHANGE', function (data) {
+        //     console.log("data", data)
+        // })
+    }, []);
 
     React.useEffect(() => {
         setChartBlockData([
@@ -157,7 +166,7 @@ const PatientListItem = (props) => {
             state: {
                 deboarded: true,
             },
-        });
+        });                     
     };
 
     const ShowPatientDetails = (e) => {
