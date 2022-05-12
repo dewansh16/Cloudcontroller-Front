@@ -17,6 +17,8 @@ import { withRouter } from "react-router-dom";
 import "./device.css";
 import PatchInventoryModal from "./addDevice/addDevice";
 import AddBundleModal from "./addBundle/addBundle";
+import AddGatewayModal from "./addGateway";
+
 import device1 from "../../Assets/Images/ecg.png";
 import device2 from "../../Assets/Images/temp1.png";
 import device3 from "../../Assets/Images/watch.jpg";
@@ -64,6 +66,7 @@ function PatchInventory() {
     const [activekey, setActiveKey] = useState(null);
     const [visible, setVisible] = useState(false);
     const [bundle, setBundle] = useState(false);
+    const [gateway, setVisibleGateway] = useState(false);
 
     const [modifiedList, setModifiedList] = useState([]);
     const [filteredlist, setFilteredList] = useState([]);
@@ -213,6 +216,14 @@ function PatchInventory() {
     const handleCancel = () => {
         setVisible(false);
     };
+
+    const showModalGateway = () => {
+        setVisibleGateway(true);
+    }
+
+    const onCloseGateway = () => {
+        setVisibleGateway(false);
+    }
 
     function onChange(pagination, filters, sorter, extra) {
         console.log("params", pagination, filters, sorter, extra);
@@ -1010,6 +1021,17 @@ function PatchInventory() {
             >
                 Device
             </Menu.Item>
+            {/* <Menu.Item
+                style={{
+                    textAlign: "center",
+                    padding: "6px 0px 6px 0px",
+                    fontSize: "16px",
+                }}
+                onClick={showModalGateway}
+                key="2"
+            >
+                Gateway
+            </Menu.Item> */}
             {/* <Menu.Divider />
             <Menu.Item
                 style={{
@@ -1160,6 +1182,19 @@ function PatchInventory() {
                 destroyOnClose={true}
             >
                 <AddBundleModal onGetList={fetchPatchList} />
+            </Modal>
+
+            <Modal
+                visible={gateway}
+                title=""
+                onCancel={onCloseGateway}
+                maskClosable={false}
+                footer={null}
+                closable={true}
+                width="60%"
+                destroyOnClose={true}
+            >
+                <AddGatewayModal onGetList={fetchPatchList} />
             </Modal>
         </>
     );

@@ -51,11 +51,11 @@ function CreateGraphData(pid, deviceType) {
                 setResponse(res)
             }).catch((err) => {
                 if (err) {
-                    console.log(err)
-                    notification.error({
-                        message: 'Error',
-                        description: "Some thing went wrong"
-                    })
+                    // console.log(err)
+                    // notification.error({
+                    //     message: 'Error',
+                    //     description: "Some thing went wrong"
+                    // })
                     setLoading(false);
                 }
             })

@@ -40,7 +40,7 @@ axiosInstance.interceptors.response.use((response) => {
         // eslint-disable-next-line no-restricted-globals
         location.reload();
     } else {
-        return Promise.reject(error);
+        return Promise.reject(error.response.data);
     }
 })
 
