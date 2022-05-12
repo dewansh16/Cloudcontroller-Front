@@ -495,6 +495,7 @@ function BillingModule() {
                                     date: getDateFromISO(item.bill_date),
                                     time: getTimeFromISO(item.bill_date),
                                     month: monthNames[d.getMonth()],
+                                    year: d.getFullYear()
                                 };
                             }
                             if (item.code == "99454") {
@@ -670,6 +671,7 @@ function BillingModule() {
                                     date: getDateFromISO(item.date_time),
                                     time: getTimeFromISO(item.date_time),
                                     month: monthNames[d.getMonth()],
+                                    year: d.getFullYear()
                                 };
                             }
                             if (item.code === "99454") {
@@ -845,6 +847,7 @@ function BillingModule() {
                                     date: getDateFromISO(item.date_time),
                                     time: getTimeFromISO(item.date_time),
                                     month: monthNames[d.getMonth()],
+                                    year: d.getFullYear()
                                 };
                             }
                             if (item.code === "99454") {
@@ -1442,9 +1445,9 @@ function BillingModule() {
 
                     setBillingInformation(res.data.response.billingData)
 
-                    setTenantuuid(res.data.response.billingData[0].tenant_id);
+                    setTenantuuid(res.data.response.billingData[0] ? res.data.response.billingData[0].tenant_id: '');
 
-                    setPatientData(res.data.response.billingData[0].patient_datum);
+                    setPatientData(res.data.response.billingData[0] ? res.data.response.billingData[0].patient_datum : '');
 
                     var tempDataSource = [];
 
@@ -1483,6 +1486,7 @@ function BillingModule() {
                                     date: getDateFromISO(item.bill_date),
                                     time: getTimeFromISO(item.bill_date),
                                     month: monthNames[d.getMonth()],
+                                    year: d.getFullYear()
                                 };
                             }
                             if (item.code == CPT_CODE.CPT_99454) {
@@ -1607,11 +1611,19 @@ function BillingModule() {
     }, [runUseEffect]);
 
     function placeDatePicker(width) {
+        let defaultDate = moment();
+        if(currentDateApi){
+            if(currentDateApi.split('-').length < 2) {
+                defaultDate = moment(`${currentDateApi}-02`, "YYYY-MM-DD"); 
+            } else {
+                defaultDate = moment(currentDateApi, "YYYY-MM-DD");
+            }
+        }
         if (width) {
             return (
                 <DatePicker
                     onChange={handleMonthChange}
-                    defaultValue={moment(currentDateApi, "YYYY-MM")}
+                    defaultValue={defaultDate}
                     picker="month"
                     style={{ marginRight: "5%", width: width, height: "60%" }}
                 />
@@ -1620,7 +1632,7 @@ function BillingModule() {
             return (
                 <DatePicker
                     onChange={handleMonthChange}
-                    defaultValue={moment(currentDateApi, "YYYY-MM")}
+                    defaultValue={defaultDate}
                     picker="month"
                     style={{ marginRight: "5%", width: "15%", height: "60%" }}
                 />
@@ -2151,15 +2163,17 @@ function BillingModule() {
                                     <p id="timer-count-ds">{timeCount}</p>
                                     </div>
                                 )}
-                                <CusBtn
-                                    onClick={() => {
-                                     startCountTimer()
-                                    }}
-                                    className="primary"
-                                    style={{ marginTop: "3%", padding: "1% 5%" }}
-                                >
-                                    Start
-                                </CusBtn>
+                                {!showStopBtn && (
+                                       <CusBtn
+                                       onClick={() => {
+                                        startCountTimer()
+                                       }}
+                                       className="primary"
+                                       style={{ marginTop: "3%", padding: "1% 5%" }}
+                                   >
+                                       Start
+                                   </CusBtn>
+                                )}
                                 {showStopBtn && (
                                     <CusBtn
                                     onClick={() => {
@@ -2313,7 +2327,7 @@ function BillingModule() {
                             </CusBtn>
                             <div className="bm-date-month-container">
                                 <div className="bm-month-container">
-                                    {initialSetupData.month}
+                                    {initialSetupData.month} {initialSetupData.year}
                                 </div>
                                 <div>{`First enabled on ${initialSetupData.date}`}</div>
                             </div>
