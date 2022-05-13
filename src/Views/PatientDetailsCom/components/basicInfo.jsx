@@ -37,14 +37,14 @@ export default function BasicInfo({ data, handleComponentClose, onDeletePatient 
                 </Tooltip>
             </Popconfirm>
             
-            {/* <Tooltip title={"Edit patient"}>
+            <Tooltip title={"Edit patient"}>
                 <Button
                     type="secondary"
                     onClick={takeToEditPage}
                 >
                     {Icons.edit({ Style: { fontSize: "1.5rem" } })}
                 </Button>
-            </Tooltip> */}
+            </Tooltip>
             <Tooltip title={"Call patient"}>
                 <Button
                     type="secondary"
