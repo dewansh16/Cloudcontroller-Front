@@ -426,7 +426,6 @@ const BedAllocationForm = (
                 >
                     {wardsArray.map((item, i) => (
                         <Option key={i} value={i + 1}>
-                            {console.log("from wards array", item, floor)}
                             {locationDetail.buildings["building_1"]?.floors[
                                 floorsArray[floor - 1]
                             ]?.wards[item].tag
