@@ -963,6 +963,60 @@ function BillingModule() {
         }
     }
 
+    const getFirstDateMonitored = (item) => {
+        let result = '';
+        if(item.duration){
+            let arrDur = item.duration.split(',');
+            if(arrDur.length > 0){
+                result = arrDur[0];
+            }
+        }
+        return result;
+    }
+
+    const getLastDateMonitored = (item) => {
+        let result = '';
+        if(item.duration){
+            let arrDur = item.duration.split(',');
+            if(arrDur.length > 1){
+                result = arrDur[1];
+            }
+        }
+        return result;
+    }
+    const getTotalDayMonitored = () => {
+        let result = 0;
+        patchArray.map(item => {
+            result = result + getTotalNumberDay(item);
+        })
+        return result;
+    }
+    const getTotalNumberDay = (item) => {
+        let result = 0;
+        let currentDate = moment();
+        if(item.duration){
+            let arrDuration = item.duration.split(',');
+            let firstDayMonitored = moment(arrDuration[0], 'YYYY-MM-DD');
+            let lastDateMonitored = moment(arrDuration[1], 'YYYY-MM-DD');
+            let firstDayOfMonth = moment().startOf('month');
+            let beginDayCal = null;
+            let endDayCal = null;
+            if(firstDayOfMonth > firstDayMonitored){
+                beginDayCal = firstDayOfMonth
+            } else {
+                beginDayCal = firstDayMonitored;
+            }
+            if(currentDate > lastDateMonitored){
+                endDayCal = lastDateMonitored;
+            } else {
+                endDayCal = currentDate;
+            }
+            result = endDayCal.diff(beginDayCal, 'days');
+        }
+        return result > 0 ? result : 0;
+    }
+
+
     function callUpdateOnCodeChange(
         taskTimeVal,
         taskTimeConsidered,
@@ -2452,7 +2506,7 @@ function BillingModule() {
                                     <div className="bm-sensor-monitored-bar-two"></div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: "1.2rem" }}>Days Monitored: 0/30</div>
+                            <div style={{ fontSize: "1.2rem" }}>Days Monitored: {getTotalDayMonitored()}/30</div>
                                     <div style={{ color: "#00000085" }}>
                                         You need to provide at least 16 days of monitoring.
                                     </div>
@@ -2464,7 +2518,10 @@ function BillingModule() {
                             <div className="bm-sensor-bottom-table-header">
                                 <div>Name of patch</div>
                                 <div style={{ marginLeft: "5%" }}>SR No</div>
-                                <div style={{ marginLeft: "33.5%" }}>Type of Patch</div>
+                                <div style={{ marginLeft: "5%" }}>Type of Patch</div>
+                                <div style={{ marginLeft: "5%" }}>First Date Monitored</div>
+                                <div style={{ marginLeft: "5%" }}>Last Date Monitored</div>
+                                <div style={{ marginLeft: "5%" }}>Total Number Of Day</div>
                             </div>
                             <div style={{ overflowY: "scroll", height: "70%" }}>
                                 {patchArray.length === 0 ? (
@@ -2497,17 +2554,25 @@ function BillingModule() {
                                                         <div
                                                             style={{
                                                                 marginLeft: "3.8%",
-                                                                width: "18%",
                                                                 fontSize: "1rem",
                                                             }}
                                                         >
                                                             {item["patches.patch_mac"]}
                                                         </div>
-                                                        <div style={{ width: "38%", fontSize: "1rem" }}>
+                                                        <div style={{fontSize: "1rem", marginLeft: "88px" }}>
                                                             {item["patches.patch_serial"]}
                                                         </div>
-                                                        <div style={{ fontSize: "1rem" }}>
+                                                        <div style={{ fontSize: "1rem", marginLeft: "18px" }}>
                                                             {item["patches.patch_type"]}
+                                                        </div>
+                                                        <div style={{ fontSize: "1rem", marginLeft: "112px" }}>
+                                                            {getFirstDateMonitored(item)}
+                                                        </div>
+                                                        <div style={{ fontSize: "1rem", marginLeft: "157px" }}>
+                                                            {getLastDateMonitored(item)}
+                                                        </div>
+                                                        <div style={{ fontSize: "1rem", marginLeft: "153px" }}>
+                                                            {getTotalNumberDay(item)}
                                                         </div>
                                                     </div>
                                                 }
