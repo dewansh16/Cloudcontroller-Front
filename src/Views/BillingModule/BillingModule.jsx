@@ -50,6 +50,8 @@ const monthNames = [
     "December",
 ];
 
+const TOTAL_HOURS_FOR_EACH_SENSOR_BILLED = 30;
+
 const columns = [
     {
         title: "Service Date",
@@ -981,6 +983,18 @@ function BillingModule() {
             if(arrDur.length > 1){
                 result = arrDur[1];
             }
+        }
+        return result;
+    }
+    const getHoursProcessSensor = () => {
+        let totalHours = getTotalDayMonitored();
+        return totalHours % TOTAL_HOURS_FOR_EACH_SENSOR_BILLED;
+    }
+    const getUnitBilledSensor = () => {
+        let result = 0;
+        let totalHours = getTotalDayMonitored();
+        if(totalHours > TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
+            result = Math.floor(totalHours / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
         }
         return result;
     }
@@ -2506,7 +2520,13 @@ function BillingModule() {
                                     <div className="bm-sensor-monitored-bar-two"></div>
                                 </div>
                                 <div>
-                            <div style={{ fontSize: "1.2rem" }}>Days Monitored: {getTotalDayMonitored()}/30</div>
+                            <div style={{ fontSize: "1.2rem" }}>Days Monitored: {getHoursProcessSensor()}/30</div>
+                            {getUnitBilledSensor() > 0 && (
+                                     <div style={{ color: "#00000085" }}>
+                                         {`${getUnitBilledSensor()} billed unit.`}
+                                     </div>
+                            )}
+                       
                                     <div style={{ color: "#00000085" }}>
                                         You need to provide at least 16 days of monitoring.
                                     </div>
