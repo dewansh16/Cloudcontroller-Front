@@ -557,7 +557,6 @@ export default function PatientDashboard(props) {
                                             item.PatientState.state === "CRITICAL" ? true : false
                                         }
                                         bedNumber={item.location_map?.ward || "NA"}
-                                        // bedNumber={item.bedNumber}
                                         Name={`${item.demographic_map.fname} ${item.demographic_map.lname[0]}.`}
                                         age={getAge(new Date(), new Date(item.demographic_map.DOB)) || ""}
                                         sex={item.demographic_map.sex}
@@ -569,7 +568,6 @@ export default function PatientDashboard(props) {
                                         setPatientDetails={setPatientDetails}
                                         active={active}
                                         setActive={setActive}
-                                        weight={Math.floor(Math.random() * (70 - 50 + 1)) + 50}
                                     />
                                 )}
                             ></List>

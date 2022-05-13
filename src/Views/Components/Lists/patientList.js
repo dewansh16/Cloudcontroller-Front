@@ -74,7 +74,7 @@ const PatientListItem = (props) => {
 
     const [isChartSectionVisible, setChartSectionVisibility] = React.useState(false);
 
-    React.useEffect(() => {
+    React.useEffect(() => { 
         var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
         socket.on('SENSOR_LOG', function (data) {
             console.log("data", data)
