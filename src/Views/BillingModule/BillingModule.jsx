@@ -145,7 +145,264 @@ function BillingModule() {
     const [patchLoading, setPatchLoading] = useState(false);
     const [patchEnrolled, setPatchEnrolled] = useState(false);
     const [patchData, setPatchData] = useState({});
-    const [patchArray, setPatchArray] = useState([]);
+    const [patchArray, setPatchArray] = useState([
+        {
+            "id": 414,
+            "pid": "patient7bda92c0-d3f8-4b78-8d1e-a55596f79b73",
+            "patch_uuid": "patch35c3ca53-e254-41b1-a4e4-175cff8056b0",
+            "duration": "2022-05-16,2022-07-08",
+            "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "date": "2022-05-13T03:45:45.000Z",
+            "config": {},
+            "prevConfig": null,
+            "keepaliveHistory": null,
+            "discoverDevices": null,
+            "command": null,
+            "keepaliveTime": null,
+            "configFlag": null,
+            "patches.id": 578,
+            "patches.patch_type": "gateway",
+            "patches.patch_name": null,
+            "patches.patch_uuid": "patch35c3ca53-e254-41b1-a4e4-175cff8056b0",
+            "patches.patch_status": "Inactive",
+            "patches.patch_group_id": "patch35c3ca53-e254-41b1-a4e4-175cff8056b0",
+            "patches.patch_mac": "mac-gtw-123",
+            "patches.patch_bluetooth": 1,
+            "patches.patch_sensor_id": null,
+            "patches.patch_serial": "ser-gtw-123",
+            "patches.tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "patches.pid": "0",
+            "patches.date": "2022-04-28T09:30:14.000Z",
+            "patches.patch_state": null,
+            "patches.group_type": "Device",
+            "patches.in_use": "true",
+            "patches.enterprise": "https://appollohospital.com/enterprise/"
+        },
+        {
+            "id": 410,
+            "pid": "patient7bda92c0-d3f8-4b78-8d1e-a55596f79b73",
+            "patch_uuid": "patch892ae4d9-4022-4811-ac95-ef82da2ad132",
+            "duration": null,
+            "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "date": "2022-05-12T07:31:40.000Z",
+            "config": {},
+            "prevConfig": null,
+            "keepaliveHistory": null,
+            "discoverDevices": null,
+            "command": null,
+            "keepaliveTime": null,
+            "configFlag": null,
+            "patches.id": 591,
+            "patches.patch_type": "temperature",
+            "patches.patch_name": null,
+            "patches.patch_uuid": "patch892ae4d9-4022-4811-ac95-ef82da2ad132",
+            "patches.patch_status": "Inactive",
+            "patches.patch_group_id": "patch892ae4d9-4022-4811-ac95-ef82da2ad132",
+            "patches.patch_mac": "Ng_temp_S2",
+            "patches.patch_bluetooth": 1,
+            "patches.patch_sensor_id": null,
+            "patches.patch_serial": "Ng_temp_S2",
+            "patches.tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "patches.pid": "0",
+            "patches.date": "2022-05-12T07:00:11.000Z",
+            "patches.patch_state": null,
+            "patches.group_type": "Device",
+            "patches.in_use": "true",
+            "patches.enterprise": "https://appollohospital.com/enterprise/"
+        },
+        {
+            "id": 409,
+            "pid": "patient7bda92c0-d3f8-4b78-8d1e-a55596f79b73",
+            "patch_uuid": "patche9095da6-14f7-4667-bb7b-a7860d2ab830",
+            "duration": null,
+            "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "date": "2022-05-12T07:30:53.000Z",
+            "config": {},
+            "prevConfig": null,
+            "keepaliveHistory": null,
+            "discoverDevices": null,
+            "command": null,
+            "keepaliveTime": null,
+            "configFlag": null,
+            "patches.id": 592,
+            "patches.patch_type": "temperature",
+            "patches.patch_name": null,
+            "patches.patch_uuid": "patche9095da6-14f7-4667-bb7b-a7860d2ab830",
+            "patches.patch_status": "Inactive",
+            "patches.patch_group_id": "patche9095da6-14f7-4667-bb7b-a7860d2ab830",
+            "patches.patch_mac": "Ng_temp_S2",
+            "patches.patch_bluetooth": 1,
+            "patches.patch_sensor_id": null,
+            "patches.patch_serial": "Ng_temp_S2",
+            "patches.tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "patches.pid": "0",
+            "patches.date": "2022-05-12T07:00:20.000Z",
+            "patches.patch_state": null,
+            "patches.group_type": "Device",
+            "patches.in_use": "true",
+            "patches.enterprise": "https://appollohospital.com/enterprise/"
+        },
+        {
+            "id": 408,
+            "pid": "patient7bda92c0-d3f8-4b78-8d1e-a55596f79b73",
+            "patch_uuid": "patchc4a12153-8bcf-4748-9482-21c4d2eef395",
+            "duration": null,
+            "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "date": "2022-05-12T07:30:45.000Z",
+            "config": {},
+            "prevConfig": null,
+            "keepaliveHistory": null,
+            "discoverDevices": null,
+            "command": null,
+            "keepaliveTime": null,
+            "configFlag": null,
+            "patches.id": 593,
+            "patches.patch_type": "gateway",
+            "patches.patch_name": null,
+            "patches.patch_uuid": "patchc4a12153-8bcf-4748-9482-21c4d2eef395",
+            "patches.patch_status": "Inactive",
+            "patches.patch_group_id": "patchc4a12153-8bcf-4748-9482-21c4d2eef395",
+            "patches.patch_mac": null,
+            "patches.patch_bluetooth": 1,
+            "patches.patch_sensor_id": null,
+            "patches.patch_serial": "ng_gateway_S2",
+            "patches.tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "patches.pid": "0",
+            "patches.date": "2022-05-12T07:02:17.000Z",
+            "patches.patch_state": null,
+            "patches.group_type": "Device",
+            "patches.in_use": "true",
+            "patches.enterprise": "https://appollohospital.com/enterprise/"
+        },
+        {
+            "id": 407,
+            "pid": "patient7bda92c0-d3f8-4b78-8d1e-a55596f79b73",
+            "patch_uuid": "patch56346cc6-11ce-405e-aab2-0487b1afb4bb",
+            "duration": null,
+            "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "date": "2022-05-12T07:30:36.000Z",
+            "config": {},
+            "prevConfig": null,
+            "keepaliveHistory": null,
+            "discoverDevices": null,
+            "command": null,
+            "keepaliveTime": null,
+            "configFlag": null,
+            "patches.id": 594,
+            "patches.patch_type": "spo2",
+            "patches.patch_name": null,
+            "patches.patch_uuid": "patch56346cc6-11ce-405e-aab2-0487b1afb4bb",
+            "patches.patch_status": "Inactive",
+            "patches.patch_group_id": "patch56346cc6-11ce-405e-aab2-0487b1afb4bb",
+            "patches.patch_mac": null,
+            "patches.patch_bluetooth": 1,
+            "patches.patch_sensor_id": null,
+            "patches.patch_serial": "ng_Spo2_S2",
+            "patches.tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "patches.pid": "0",
+            "patches.date": "2022-05-12T07:10:50.000Z",
+            "patches.patch_state": null,
+            "patches.group_type": "Device",
+            "patches.in_use": "true",
+            "patches.enterprise": "https://appollohospital.com/enterprise/"
+        },
+        {
+            "id": 411,
+            "pid": "patient7bda92c0-d3f8-4b78-8d1e-a55596f79b73",
+            "patch_uuid": "patch541e61c5-d711-4b9e-ac51-98bf4c7fd3fb",
+            "duration": null,
+            "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "date": "2022-05-12T07:32:03.000Z",
+            "config": {},
+            "prevConfig": null,
+            "keepaliveHistory": null,
+            "discoverDevices": null,
+            "command": null,
+            "keepaliveTime": null,
+            "configFlag": null,
+            "patches.id": 596,
+            "patches.patch_type": "digital",
+            "patches.patch_name": null,
+            "patches.patch_uuid": "patch541e61c5-d711-4b9e-ac51-98bf4c7fd3fb",
+            "patches.patch_status": "Inactive",
+            "patches.patch_group_id": "patch541e61c5-d711-4b9e-ac51-98bf4c7fd3fb",
+            "patches.patch_mac": null,
+            "patches.patch_bluetooth": 1,
+            "patches.patch_sensor_id": null,
+            "patches.patch_serial": "ng_digital scale_S2",
+            "patches.tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "patches.pid": "0",
+            "patches.date": "2022-05-12T07:11:14.000Z",
+            "patches.patch_state": null,
+            "patches.group_type": "Device",
+            "patches.in_use": "true",
+            "patches.enterprise": "https://appollohospital.com/enterprise/"
+        },
+        {
+            "id": 412,
+            "pid": "patient7bda92c0-d3f8-4b78-8d1e-a55596f79b73",
+            "patch_uuid": "patche6707c9a-62ac-4a0f-b024-39a9829e474b",
+            "duration": null,
+            "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "date": "2022-05-12T07:32:11.000Z",
+            "config": {},
+            "prevConfig": null,
+            "keepaliveHistory": null,
+            "discoverDevices": null,
+            "command": null,
+            "keepaliveTime": null,
+            "configFlag": null,
+            "patches.id": 597,
+            "patches.patch_type": "alphamed",
+            "patches.patch_name": null,
+            "patches.patch_uuid": "patche6707c9a-62ac-4a0f-b024-39a9829e474b",
+            "patches.patch_status": "Inactive",
+            "patches.patch_group_id": "patche6707c9a-62ac-4a0f-b024-39a9829e474b",
+            "patches.patch_mac": null,
+            "patches.patch_bluetooth": 1,
+            "patches.patch_sensor_id": null,
+            "patches.patch_serial": "ng_alphamed_S2",
+            "patches.tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "patches.pid": "0",
+            "patches.date": "2022-05-12T07:11:27.000Z",
+            "patches.patch_state": null,
+            "patches.group_type": "Device",
+            "patches.in_use": "true",
+            "patches.enterprise": "https://appollohospital.com/enterprise/"
+        },
+        {
+            "id": 413,
+            "pid": "patient7bda92c0-d3f8-4b78-8d1e-a55596f79b73",
+            "patch_uuid": "patch715d20f9-2076-4c47-8cea-fdffc2a20417",
+            "duration": null,
+            "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "date": "2022-05-12T07:32:20.000Z",
+            "config": {},
+            "prevConfig": null,
+            "keepaliveHistory": null,
+            "discoverDevices": null,
+            "command": null,
+            "keepaliveTime": null,
+            "configFlag": null,
+            "patches.id": 598,
+            "patches.patch_type": "ihealth",
+            "patches.patch_name": null,
+            "patches.patch_uuid": "patch715d20f9-2076-4c47-8cea-fdffc2a20417",
+            "patches.patch_status": "Inactive",
+            "patches.patch_group_id": "patch715d20f9-2076-4c47-8cea-fdffc2a20417",
+            "patches.patch_mac": null,
+            "patches.patch_bluetooth": 1,
+            "patches.patch_sensor_id": null,
+            "patches.patch_serial": "ng_ihealth_S2",
+            "patches.tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+            "patches.pid": "0",
+            "patches.date": "2022-05-12T07:11:41.000Z",
+            "patches.patch_state": null,
+            "patches.group_type": "Device",
+            "patches.in_use": "true",
+            "patches.enterprise": "https://appollohospital.com/enterprise/"
+        }
+    ]);
     const [patchInformation, setPatchInformation] = useState({});
 
     const [firstTotalTime, setFirstTotalTime] = useState(0);
@@ -569,9 +826,9 @@ function BillingModule() {
                     }
                     setPatchLoading(false);
                     if (res.data.response.patchData) {
-                        setPatchArray(
-                            res.data.response.patchData
-                        );
+                        // setPatchArray(
+                        //     res.data.response.patchData
+                        // );
                     }
                     var tempInfo = res.data.response.billingData[0].patch_patient_map;
                     if (tempInfo) {
@@ -2536,12 +2793,12 @@ function BillingModule() {
                         <div className="bm-sensor-bottom-container">
                             <div className="bm-sensor-bottom-header">Associated Devices</div>
                             <div className="bm-sensor-bottom-table-header">
-                                <div>Name of patch</div>
-                                <div style={{ marginLeft: "5%" }}>SR No</div>
-                                <div style={{ marginLeft: "5%" }}>Type of Patch</div>
-                                <div style={{ marginLeft: "5%" }}>First Date Monitored</div>
-                                <div style={{ marginLeft: "5%" }}>Last Date Monitored</div>
-                                <div style={{ marginLeft: "5%" }}>Total Number Of Day</div>
+                                <div className="bm-item-header" style={{ width: "20%" }}>Name of patch</div>
+                                <div className="bm-item-header" style={{ width: "20%" }}>SR No</div>
+                                <div className="bm-item-header" style={{ width: "17%" }}>Type of Patch</div>
+                                <div className="bm-item-header" style={{ width: "15%" }}>First Date Monitored</div>
+                                <div className="bm-item-header" style={{ width: "15%" }}>Last Date Monitored</div>
+                                <div className="bm-item-header" style={{ width: "13%" }}>Total Number Of Day</div>
                             </div>
                             <div style={{ overflowY: "scroll", height: "70%" }}>
                                 {patchArray.length === 0 ? (
@@ -2569,29 +2826,25 @@ function BillingModule() {
                                                             display: "flex",
                                                             alignItems: "center",
                                                             height: "40px",
+                                                            fontSize: "1rem"
                                                         }}
                                                     >
-                                                        <div
-                                                            style={{
-                                                                marginLeft: "3.8%",
-                                                                fontSize: "1rem",
-                                                            }}
-                                                        >
+                                                        <div className="bm-item-body" style={{ width: "20%" }}>
                                                             {item["patches.patch_mac"]}
                                                         </div>
-                                                        <div style={{fontSize: "1rem", marginLeft: "88px" }}>
+                                                        <div className="bm-item-body" style={{ width: "20%" }}>
                                                             {item["patches.patch_serial"]}
                                                         </div>
-                                                        <div style={{ fontSize: "1rem", marginLeft: "18px" }}>
+                                                        <div className="bm-item-body" style={{ width: "17%" }}>
                                                             {item["patches.patch_type"]}
                                                         </div>
-                                                        <div style={{ fontSize: "1rem", marginLeft: "112px" }}>
+                                                        <div className="bm-item-body" style={{ width: "15%" }}>
                                                             {getFirstDateMonitored(item)}
                                                         </div>
-                                                        <div style={{ fontSize: "1rem", marginLeft: "157px" }}>
+                                                        <div className="bm-item-body" style={{ width: "15%" }}>
                                                             {getLastDateMonitored(item)}
                                                         </div>
-                                                        <div style={{ fontSize: "1rem", marginLeft: "153px" }}>
+                                                        <div className="bm-item-body" style={{ width: "13%" }}>
                                                             {getTotalNumberDay(item)}
                                                         </div>
                                                     </div>
