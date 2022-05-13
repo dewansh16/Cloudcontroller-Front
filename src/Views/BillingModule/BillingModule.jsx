@@ -566,9 +566,9 @@ function BillingModule() {
                         setPatchData(tempPatchdata);
                     }
                     setPatchLoading(false);
-                    if (res.data.response.billingData[0].patch_patient_map.patches) {
+                    if (res.data.response.patchData) {
                         setPatchArray(
-                            res.data.response.billingData[0].patch_patient_map.patches
+                            res.data.response.patchData
                         );
                     }
                     var tempInfo = res.data.response.billingData[0].patch_patient_map;
@@ -742,9 +742,9 @@ function BillingModule() {
                         setPatchData(tempPatchdata);
                     }
                     setPatchLoading(false);
-                    if (res.data.response.billingData[0].patch_patient_map) {
+                    if (res.data.response.patchData) {
                         setPatchArray(
-                            res.data.response.billingData[0].patch_patient_map.patches
+                            res.data.response.patchData
                         );
                     }
                     var tempInfo = res.data.response.billingData[0].patch_patient_map;
@@ -917,9 +917,9 @@ function BillingModule() {
                         setPatchData(tempPatchdata);
                     }
                     setPatchLoading(false);
-                    if (res.data.response.billingData[0].patch_patient_map) {
+                    if (res.data.response.patchData) {
                         setPatchArray(
-                            res.data.response.billingData[0].patch_patient_map.patches
+                            res.data.response.patchData
                         );
                     }
                     var tempInfo = res.data.response.billingData[0].patch_patient_map;
@@ -1127,10 +1127,6 @@ function BillingModule() {
     }
 
     function callUpdateBillingTasks() {
-        console.log("PATCH INFO : ", patchArray);
-        console.log("PATCH INFO : ", patchInformation);
-        console.log("INTERNAL : ", taskCodeInternalActive);
-
         var taskTimeConsidered = taskTimeVal;
         var newTaskTime = 0;
 
@@ -1557,13 +1553,10 @@ function BillingModule() {
                         setPatchData(tempPatchdata);
                     }
                     setPatchLoading(false);
-                    if (res.data.response.billingData[0].patch_patient_map) {
+                  
+                    if (res.data.response.patchData) {
                         setPatchArray(
-                            res.data.response.billingData[0].patch_patient_map.patches
-                        );
-                        console.log(
-                            "PATCH ARRAY : ",
-                            res.data.response.billingData[0].patch_patient_map.patches
+                            res.data.response.patchData
                         );
                     }
                     var tempInfo = res.data.response.billingData[0].patch_patient_map;
@@ -2158,36 +2151,18 @@ function BillingModule() {
                                         As you enroll, remote patient monitoring will start.
                                     </div>
                                 </div>
-                                {showStopBtn && (
-                                    <div className="timer-counter">
-                                    <p id="timer-count-ds">{timeCount}</p>
-                                    </div>
-                                )}
-                                {!showStopBtn && (
-                                       <CusBtn
-                                       onClick={() => {
-                                        startCountTimer()
-                                       }}
-                                       className="primary"
-                                       style={{ marginTop: "3%", padding: "1% 5%" }}
-                                   >
-                                       Start
-                                   </CusBtn>
-                                )}
-                                {showStopBtn && (
-                                    <CusBtn
+                            
+                                <CusBtn
                                     onClick={() => {
                                         setEnrolledState(true);
                                         // setInitialSetupLoading(true);
                                         initialSetupPost();
-                                        clearInterval(clockCounter);
                                     }}
-                                    className="primary"
-                                    style={{ marginTop: "3%", padding: "1% 5%" }}
+                                       className="primary"
+                                       style={{ marginTop: "3%", padding: "1% 5%" }}
                                 >
-                                    Stop
+                                    Start
                                 </CusBtn>
-                                )}
                                 
                             </div>
                         </div>
@@ -2526,20 +2501,20 @@ function BillingModule() {
                                                                 fontSize: "1rem",
                                                             }}
                                                         >
-                                                            {item.patch_name}
+                                                            {item["patches.patch_mac"]}
                                                         </div>
                                                         <div style={{ width: "38%", fontSize: "1rem" }}>
-                                                            {item.patch_serial}
+                                                            {item["patches.patch_serial"]}
                                                         </div>
                                                         <div style={{ fontSize: "1rem" }}>
-                                                            {item.patch_type}
+                                                            {item["patches.patch_type"]}
                                                         </div>
                                                     </div>
                                                 }
                                                 key={index}
                                                 style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
                                             >
-                                                <div>Demo</div>
+                                    
                                             </Panel>
                                         ))}
                                     </Collapse>
