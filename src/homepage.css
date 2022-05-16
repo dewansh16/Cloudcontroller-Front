@@ -12,6 +12,7 @@
   width: 100vw;
   padding: 40px;
   /* -webkit-filter: blur(8px); */
+  position: relative;
 }
 .authContainer {
   display: flex;
@@ -68,4 +69,15 @@
   font-size: 2em;
   margin: 0.25em;
   font-weight: 500;
+}
+
+.build-number {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-bottom: 1rem;
+  margin-right: 2rem;
+  color: #ffffff;
+  font-size: 17px;
+  letter-spacing: 3px;
 }

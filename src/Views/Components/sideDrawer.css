@@ -117,3 +117,21 @@
   font-weight: 600;
   letter-spacing: 1px;
 }
+
+.sidebar .build-number {
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 4rem;
+  text-align: center;
+  font-size: 16px;
+  width: 100%;
+  color: #000;
+  margin-right: 0px;
+}
+
+.sidebar .build-number.number-hide {
+  width: min-content;
+  word-break: break-all;
+  margin-right: 23px;
+  line-height: 20px;
+}

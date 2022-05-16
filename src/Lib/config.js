@@ -1,7 +1,7 @@
 // config for environment variables 
 const Config = {
     PRODUCTION_API_URL: "http://20.230.234.202:7124" /* process.env.REACT_APP_PRODUCTION_API_URL */,
-    DEV_API_URL: "http://localhost:7124"  /* process.env.REACT_APP_DEV_API_URL */,
+    DEV_API_URL: "http://20.230.234.202:7124"  /* process.env.REACT_APP_DEV_API_URL */,
     // timezone: process.env.REACT_APP_TIMEZONE,
 
     ROLES: {
