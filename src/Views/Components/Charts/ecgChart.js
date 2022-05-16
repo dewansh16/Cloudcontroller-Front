@@ -19,7 +19,7 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
         isConnected,
         hasError,
     } = Ecg({ pid });
-    console.log("charData", chartData);
+    console.log("charData", chartData, "isLoading", isLoading);
     
     const chartOptions = {
         chart: {

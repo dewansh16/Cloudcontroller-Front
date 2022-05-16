@@ -13,7 +13,7 @@ const userApi = {
         axiosInstance.request({
             method: "GET",
             url: `/sign/logout`,
-            withCredentials: true,
+            // withCredentials: true,
         }),
     // getUserList: "/users/userinventory?limit=100&offset=0&filter=0",
     getUserList: (searchType, firstName, lastName, limit, offset, tenant_uuid) =>

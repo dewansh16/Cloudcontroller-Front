@@ -43,11 +43,9 @@ function FetchDetails(pid) {
 
     useEffect(() => {
         patientApi.getPatientData(pid).then((res) => {
-            console.log('res', res);
             setResponse(res.data.response.patient)
             setLoading(false);
         }).catch((err) => {
-            console.log('vo catch');
             if (err) {
                 notification.error({
                     message: 'Error',
@@ -227,7 +225,6 @@ export function EmrView({ pid, setEmrView, setPadding, defaultState = "subgroup-
                 </div>
             </div>
         )
-
     )
 }
 

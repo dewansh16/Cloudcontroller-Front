@@ -70,10 +70,7 @@ const createKey = (subgroupId, elementId = null) => {
     return elementId !== null ? `subgroup-${subgroupId + 1}-element-${elementId + 1}` : `subgroup-${subgroupId + 1}`
 }
 
-
 export default function Menu({ menuData, setCurrentState, defaultState }) {
-
-
     const [selected, setSelected] = useState(defaultState)
 
     return (

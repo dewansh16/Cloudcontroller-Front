@@ -15,7 +15,7 @@ function checkErroredValues(type, value) {
 export default function Ecg({ pid }) {
     const [chartData, setChartData] = React.useState([]);
     const [tickVal, setTickVal] = React.useState(0);
-    const [isLoading, setLoading] = React.useState(true);
+    const [isLoading, setLoading] = React.useState(false);
     const [isConnected, setConnected] = React.useState(false);
     const [hasError, setError] = React.useState(undefined);
     const [isPaused, setPaused] = React.useState(false);

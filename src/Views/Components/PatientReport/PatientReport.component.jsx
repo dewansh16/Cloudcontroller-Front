@@ -42,166 +42,166 @@ const { Option } = Select;
 
 function FetchDetails(pid, setDeboarded) {
     const [response, setResponse] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [reportDates, setReportDates] = useState([]);
     const location = useLocation();
 
     const user = UserStore.getUser();
 
     useEffect(() => {
-        if (location.state?.deboarded === true) {
-            setDeboarded(true);
-            reportApi
-                .getDeboardedReportData(pid)
-                .then((res) => {
-                    setResponse(res.data.response);
-                    const trends = res.data.response?.report.demographic_map[0].trend_map;
-                    let longestChart =
-                        res.data.response?.report.demographic_map[0].trend_map[0].spo2;
-                    trends.map((item) => {
-                        if (item.temp?.length > longestChart.length) {
-                            longestChart = item.temp;
-                        }
-                        if (item.rr?.length > longestChart.length) {
-                            longestChart = item.rr;
-                        }
-                        if (item.hr?.length > longestChart.length) {
-                            longestChart = item.hr;
-                        }
-                        if (item.ews?.length > longestChart.length) {
-                            longestChart = item.ews;
-                        }
-                    });
-                    let firstDay = longestChart.length > 0 ? longestChart[0] : null;
-                    let datesReq = [];
-                    if (longestChart.length > 0) datesReq.push(firstDay);
-                    longestChart.map((item) => {
-                        if (
-                            new Date(item.date).getDate !== new Date(firstDay.date).getDate
-                        ) {
-                            datesReq.push(item);
-                            firstDay = item;
-                        }
-                    });
-                    console.log(longestChart, datesReq);
-                    setReportDates(datesReq);
-                    setLoading(false);
-                })
-                .catch((err) => {
-                    if (err) {
-                        const error = err.response?.data.result;
-                        notification.error({
-                            message: "Error",
-                            description: "report not available",
-                        });
-                        setLoading(false);
-                    }
-                });
-        } else {
-            reportApi
-                .getReportData(pid, user?.tenant)
-                .then((res) => {
-                    if (
-                        res.data.response.report?.demographic_map[0]?.demographic_map
-                            ?.status === "Deboarded"
-                    ) {
-                        setDeboarded(true);
-                        reportApi
-                            .getDeboardedReportData(pid)
-                            .then((res) => {
-                                setResponse(res.data.response);
-                                const trends =
-                                    res.data.response?.report.demographic_map[0].trend_map;
-                                let longestChart =
-                                    res.data.response?.report.demographic_map[0].trend_map[0]
-                                        .spo2;
-                                trends.map((item) => {
-                                    if (item.temp?.length > longestChart.length) {
-                                        longestChart = item.temp;
-                                    }
-                                    if (item.rr?.length > longestChart.length) {
-                                        longestChart = item.rr;
-                                    }
-                                    if (item.hr?.length > longestChart.length) {
-                                        longestChart = item.hr;
-                                    }
-                                    if (item.ews?.length > longestChart.length) {
-                                        longestChart = item.ews;
-                                    }
-                                });
-                                let firstDay = longestChart.length > 0 ? longestChart[0] : null;
-                                let datesReq = [];
-                                if (longestChart.length > 0) datesReq.push(firstDay);
-                                longestChart.map((item) => {
-                                    if (
-                                        new Date(item.date).getDate !==
-                                        new Date(firstDay.date).getDate
-                                    ) {
-                                        datesReq.push(item);
-                                        firstDay = item;
-                                    }
-                                });
-                                console.log(longestChart, datesReq);
-                                setReportDates(datesReq);
-                                setLoading(false);
-                            })
-                            .catch((err) => {
-                                if (err) {
-                                    const error = err.response?.data.result;
-                                    notification.error({
-                                        message: "Error",
-                                        description: "report not available",
-                                    });
-                                    setLoading(false);
-                                }
-                            });
-                    } else {
-                        setResponse(res.data.response);
-                        const trends =
-                            res.data.response?.report.demographic_map[0].trend_map;
-                        let longestChart =
-                            res.data.response?.report.demographic_map[0].trend_map[0].spo2;
-                        trends.map((item) => {
-                            if (item.temp?.length > longestChart.length) {
-                                longestChart = item.temp;
-                            }
-                            if (item.rr?.length > longestChart.length) {
-                                longestChart = item.rr;
-                            }
-                            if (item.hr?.length > longestChart.length) {
-                                longestChart = item.hr;
-                            }
-                            if (item.ews?.length > longestChart.length) {
-                                longestChart = item.ews;
-                            }
-                        });
-                        let firstDay = longestChart.length > 0 ? longestChart[0] : null;
-                        let datesReq = [];
-                        if (longestChart.length > 0) datesReq.push(firstDay);
-                        longestChart.map((item) => {
-                            if (
-                                new Date(item.date).getDate !== new Date(firstDay.date).getDate
-                            ) {
-                                datesReq.push(item);
-                                firstDay = item;
-                            }
-                        });
-                        console.log(longestChart, datesReq);
-                        setReportDates(datesReq);
-                        setLoading(false);
-                    }
-                })
-                .catch((err) => {
-                    if (err) {
-                        const error = err.response?.data.result;
-                        notification.error({
-                            message: "Error",
-                            description: "report not available",
-                        });
-                        setLoading(false);
-                    }
-                });
-        }
+        // if (location.state?.deboarded === true) {
+        //     setDeboarded(true);
+        //     reportApi
+        //         .getDeboardedReportData(pid)
+        //         .then((res) => {
+        //             setResponse(res.data.response);
+        //             const trends = res.data.response?.report.demographic_map[0].trend_map;
+        //             let longestChart =
+        //                 res.data.response?.report.demographic_map[0].trend_map[0].spo2;
+        //             trends.map((item) => {
+        //                 if (item.temp?.length > longestChart.length) {
+        //                     longestChart = item.temp;
+        //                 }
+        //                 if (item.rr?.length > longestChart.length) {
+        //                     longestChart = item.rr;
+        //                 }
+        //                 if (item.hr?.length > longestChart.length) {
+        //                     longestChart = item.hr;
+        //                 }
+        //                 if (item.ews?.length > longestChart.length) {
+        //                     longestChart = item.ews;
+        //                 }
+        //             });
+        //             let firstDay = longestChart.length > 0 ? longestChart[0] : null;
+        //             let datesReq = [];
+        //             if (longestChart.length > 0) datesReq.push(firstDay);
+        //             longestChart.map((item) => {
+        //                 if (
+        //                     new Date(item.date).getDate !== new Date(firstDay.date).getDate
+        //                 ) {
+        //                     datesReq.push(item);
+        //                     firstDay = item;
+        //                 }
+        //             });
+        //             console.log(longestChart, datesReq);
+        //             setReportDates(datesReq);
+        //             setLoading(false);
+        //         })
+        //         .catch((err) => {
+        //             if (err) {
+        //                 const error = err.response?.data.result;
+        //                 notification.error({
+        //                     message: "Error",
+        //                     description: "report not available",
+        //                 });
+        //                 setLoading(false);
+        //             }
+        //         });
+        // } else {
+        //     reportApi
+        //         .getReportData(pid, user?.tenant)
+        //         .then((res) => {
+        //             if (
+        //                 res.data.response.report?.demographic_map[0]?.demographic_map
+        //                     ?.status === "Deboarded"
+        //             ) {
+        //                 setDeboarded(true);
+        //                 reportApi
+        //                     .getDeboardedReportData(pid)
+        //                     .then((res) => {
+        //                         setResponse(res.data.response);
+        //                         const trends =
+        //                             res.data.response?.report.demographic_map[0].trend_map;
+        //                         let longestChart =
+        //                             res.data.response?.report.demographic_map[0].trend_map[0]
+        //                                 .spo2;
+        //                         trends.map((item) => {
+        //                             if (item.temp?.length > longestChart.length) {
+        //                                 longestChart = item.temp;
+        //                             }
+        //                             if (item.rr?.length > longestChart.length) {
+        //                                 longestChart = item.rr;
+        //                             }
+        //                             if (item.hr?.length > longestChart.length) {
+        //                                 longestChart = item.hr;
+        //                             }
+        //                             if (item.ews?.length > longestChart.length) {
+        //                                 longestChart = item.ews;
+        //                             }
+        //                         });
+        //                         let firstDay = longestChart.length > 0 ? longestChart[0] : null;
+        //                         let datesReq = [];
+        //                         if (longestChart.length > 0) datesReq.push(firstDay);
+        //                         longestChart.map((item) => {
+        //                             if (
+        //                                 new Date(item.date).getDate !==
+        //                                 new Date(firstDay.date).getDate
+        //                             ) {
+        //                                 datesReq.push(item);
+        //                                 firstDay = item;
+        //                             }
+        //                         });
+        //                         console.log(longestChart, datesReq);
+        //                         setReportDates(datesReq);
+        //                         setLoading(false);
+        //                     })
+        //                     .catch((err) => {
+        //                         if (err) {
+        //                             const error = err.response?.data.result;
+        //                             notification.error({
+        //                                 message: "Error",
+        //                                 description: "report not available",
+        //                             });
+        //                             setLoading(false);
+        //                         }
+        //                     });
+        //             } else {
+        //                 setResponse(res.data.response);
+        //                 const trends =
+        //                     res.data.response?.report.demographic_map[0].trend_map;
+        //                 let longestChart =
+        //                     res.data.response?.report.demographic_map[0].trend_map[0].spo2;
+        //                 trends.map((item) => {
+        //                     if (item.temp?.length > longestChart.length) {
+        //                         longestChart = item.temp;
+        //                     }
+        //                     if (item.rr?.length > longestChart.length) {
+        //                         longestChart = item.rr;
+        //                     }
+        //                     if (item.hr?.length > longestChart.length) {
+        //                         longestChart = item.hr;
+        //                     }
+        //                     if (item.ews?.length > longestChart.length) {
+        //                         longestChart = item.ews;
+        //                     }
+        //                 });
+        //                 let firstDay = longestChart.length > 0 ? longestChart[0] : null;
+        //                 let datesReq = [];
+        //                 if (longestChart.length > 0) datesReq.push(firstDay);
+        //                 longestChart.map((item) => {
+        //                     if (
+        //                         new Date(item.date).getDate !== new Date(firstDay.date).getDate
+        //                     ) {
+        //                         datesReq.push(item);
+        //                         firstDay = item;
+        //                     }
+        //                 });
+        //                 console.log(longestChart, datesReq);
+        //                 setReportDates(datesReq);
+        //                 setLoading(false);
+        //             }
+        //         })
+        //         .catch((err) => {
+        //             if (err) {
+        //                 const error = err.response?.data.result;
+        //                 notification.error({
+        //                     message: "Error",
+        //                     description: "report not available",
+        //                 });
+        //                 setLoading(false);
+        //             }
+        //         });
+        // }
     }, [pid]);
     return [response, loading, reportDates];
 }
