@@ -50,6 +50,8 @@ const monthNames = [
     "December",
 ];
 
+const TOTAL_HOURS_FOR_EACH_SENSOR_BILLED = 16;
+
 const columns = [
     {
         title: "Service Date",
@@ -567,9 +569,9 @@ function BillingModule() {
                     }
                     setPatchLoading(false);
                     if (res.data.response.patchData) {
-                        setPatchArray(
-                            res.data.response.patchData
-                        );
+                        // setPatchArray(
+                        //     res.data.response.patchData
+                        // );
                     }
                     var tempInfo = res.data.response.billingData[0].patch_patient_map;
                     if (tempInfo) {
@@ -981,6 +983,18 @@ function BillingModule() {
             if(arrDur.length > 1){
                 result = arrDur[1];
             }
+        }
+        return result;
+    }
+    const getHoursProcessSensor = () => {
+        let totalHours = getTotalDayMonitored();
+        return totalHours % TOTAL_HOURS_FOR_EACH_SENSOR_BILLED;
+    }
+    const getUnitBilledSensor = () => {
+        let result = 0;
+        let totalHours = getTotalDayMonitored();
+        if(totalHours > TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
+            result = Math.floor(totalHours / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
         }
         return result;
     }
@@ -2485,15 +2499,6 @@ function BillingModule() {
                             </div>
                         </div>
                         <div className="bm-sensor-mid">
-                            {patchData.date ? (
-                                <div style={{ fontSize: "1.2rem" }}>
-                                    {`CPT code: 99454 enabled on ${patchData.date} at ${patchData.time}`}
-                                </div>
-                            ) : (
-                                <div style={{ fontSize: "1.2rem" }}>
-                                    {`CPT code: 99454 has not been enabled yet`}
-                                </div>
-                            )}
                             <div
                                 style={{
                                     width: "28%",
@@ -2506,9 +2511,15 @@ function BillingModule() {
                                     <div className="bm-sensor-monitored-bar-two"></div>
                                 </div>
                                 <div>
-                            <div style={{ fontSize: "1.2rem" }}>Days Monitored: {getTotalDayMonitored()}/30</div>
+                            <div style={{ fontSize: "1.2rem" }}>Days Monitored: {getHoursProcessSensor()}/{TOTAL_HOURS_FOR_EACH_SENSOR_BILLED}</div>
+                            {getUnitBilledSensor() > 0 && (
+                                     <div style={{ color: "#00000085" }}>
+                                         {`${getUnitBilledSensor()} billed unit.`}
+                                     </div>
+                            )}
+                       
                                     <div style={{ color: "#00000085" }}>
-                                        You need to provide at least 16 days of monitoring.
+                                        {`You need to provide at least ${TOTAL_HOURS_FOR_EACH_SENSOR_BILLED} days of monitoring.`}
                                     </div>
                                 </div>
                             </div>
@@ -2516,12 +2527,12 @@ function BillingModule() {
                         <div className="bm-sensor-bottom-container">
                             <div className="bm-sensor-bottom-header">Associated Devices</div>
                             <div className="bm-sensor-bottom-table-header">
-                                <div>Name of patch</div>
-                                <div style={{ marginLeft: "5%" }}>SR No</div>
-                                <div style={{ marginLeft: "5%" }}>Type of Patch</div>
-                                <div style={{ marginLeft: "5%" }}>First Date Monitored</div>
-                                <div style={{ marginLeft: "5%" }}>Last Date Monitored</div>
-                                <div style={{ marginLeft: "5%" }}>Total Number Of Day</div>
+                                <div className="bm-item-header" style={{ width: "20%" }}>Name of patch</div>
+                                <div className="bm-item-header" style={{ width: "20%" }}>SR No</div>
+                                <div className="bm-item-header" style={{ width: "17%" }}>Type of Patch</div>
+                                <div className="bm-item-header" style={{ width: "15%" }}>First Date Monitored</div>
+                                <div className="bm-item-header" style={{ width: "15%" }}>Last Date Monitored</div>
+                                <div className="bm-item-header" style={{ width: "13%" }}>Total Number Of Day</div>
                             </div>
                             <div style={{ overflowY: "scroll", height: "70%" }}>
                                 {patchArray.length === 0 ? (
@@ -2549,29 +2560,25 @@ function BillingModule() {
                                                             display: "flex",
                                                             alignItems: "center",
                                                             height: "40px",
+                                                            fontSize: "1rem"
                                                         }}
                                                     >
-                                                        <div
-                                                            style={{
-                                                                marginLeft: "3.8%",
-                                                                fontSize: "1rem",
-                                                            }}
-                                                        >
+                                                        <div className="bm-item-body" style={{ width: "20%" }}>
                                                             {item["patches.patch_mac"]}
                                                         </div>
-                                                        <div style={{fontSize: "1rem", marginLeft: "88px" }}>
+                                                        <div className="bm-item-body" style={{ width: "20%" }}>
                                                             {item["patches.patch_serial"]}
                                                         </div>
-                                                        <div style={{ fontSize: "1rem", marginLeft: "18px" }}>
+                                                        <div className="bm-item-body" style={{ width: "17%" }}>
                                                             {item["patches.patch_type"]}
                                                         </div>
-                                                        <div style={{ fontSize: "1rem", marginLeft: "112px" }}>
+                                                        <div className="bm-item-body" style={{ width: "15%" }}>
                                                             {getFirstDateMonitored(item)}
                                                         </div>
-                                                        <div style={{ fontSize: "1rem", marginLeft: "157px" }}>
+                                                        <div className="bm-item-body" style={{ width: "15%" }}>
                                                             {getLastDateMonitored(item)}
                                                         </div>
-                                                        <div style={{ fontSize: "1rem", marginLeft: "153px" }}>
+                                                        <div className="bm-item-body" style={{ width: "13%" }}>
                                                             {getTotalNumberDay(item)}
                                                         </div>
                                                     </div>
