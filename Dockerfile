@@ -5,7 +5,7 @@ WORKDIR /app-react
 
 # get package.json and install dependencies first
 COPY package.json  .
-RUN npm install
+RUN npm install -f
 
 # Install and configure `serve`.
 RUN npm install -g serve
