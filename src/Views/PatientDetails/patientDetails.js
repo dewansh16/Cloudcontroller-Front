@@ -40,12 +40,12 @@ export default function PatientDetails(props) {
     let userData = UserStore.getUser();
 
     const [patient, setPatient] = useState(null);
-    const [isLoading, setLoading] = useState(true);
+    const [isLoading, setLoading] = useState(false);
     const [journeyDetails, setJourneyDetails] = useState(null);
     const [locationInventory, setLocationInventory] = useState(null);
 
     useEffect(() => {
-        setLoading(true);
+        // setLoading(true);
 
         patientApi
             .getDetailPatientById(pid)
