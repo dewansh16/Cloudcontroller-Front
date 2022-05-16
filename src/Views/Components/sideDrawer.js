@@ -16,6 +16,7 @@ import { GrUserAdmin } from "react-icons/gr";
 import { MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import PowerIcon from "../../Theme/Icons/icons/powerButton";
 import "./sideDrawer.css";
+import { buildNumber } from "../../Utils/buildNumber";
 
 function MenuItem({
     url,
@@ -269,6 +270,9 @@ function SideDrawer(props) {
                         />
                     ))}
                 </ul>
+                
+                <div className={`build-number ${!isOpen ? 'number-hide' : ''}`}>{buildNumber}</div>
+
                 <div
                     className="logout-icon-container"
                     onClick={logout}

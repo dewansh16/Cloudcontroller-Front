@@ -246,12 +246,12 @@ const PatchForm = (props) => {
                         required={!props.required}
                         label="MAC address"
                         name="macAddress"
-                        // rules={[
-                        //     {
-                        //         required: props.required,
-                        //         message: "serial number is required",
-                        //     },
-                        // ]}
+                        rules={[
+                            {
+                                required: props.required,
+                                message: "Mac address is required",
+                            },
+                        ]}
                         className="addPatientDetailsModal"
                     >
                         <Input placeholder="Enter Mac address" />
@@ -423,28 +423,27 @@ export default function PatchInventoryModal(props) {
                             >
                                 {patientClass.list.map((listItem, index) => (
                                     <Menu.Item key={index} className="add-patient-menu-item">
-                                        <Row justify="space-around" align="bottom">
+                                        <Row justify="space-around" align="middle">
                                             <Col span={18}>
                                                 <span>{listItem.class}</span>
                                             </Col>
                                             
-                                            <Col span={6}>
-                                                {listItem.error
-                                                    ? Icons.exclamationCircleOutlined({})
-                                                    : ""}
+                                            <Col span={6} style={{ display: "flex", alignItems: "center" }}>
+                                                {listItem.error && (
+                                                    Icons.exclamationCircleOutlined({ Style: { marginRight: "1rem" }})
+                                                )}
 
-                                                {listItem.added ? Icons.checkCircleFilled({}) : ""}
+                                                {listItem.added && Icons.checkCircleFilled({})}
 
-                                                {listItem.delete ? (
+                                                {listItem.delete && (
                                                     <div
                                                         onClick={(e) => {
                                                             deletePatch(e, index);
                                                         }}
+                                                        style={{ display: "flex" }}
                                                     >
                                                         {Icons.CloseCircleOutlined({})}
                                                     </div>
-                                                ) : (
-                                                    ""
                                                 )}
                                             </Col>
                                         </Row>

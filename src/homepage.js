@@ -8,6 +8,7 @@ import clientBrand from './Assets/Images/clientLogo.png'
 // import Loader from './Assets/loader/loader'
 import './homepage.css';
 import Modal from 'antd/lib/modal/Modal';
+import { buildNumber } from "./Utils/buildNumber";
 
 function HomePage() {
     const [domainSettingsVisibility, setDomainSettingsVisibility] = useState(false);
@@ -38,6 +39,8 @@ function HomePage() {
                 <span className="live247">Live247.ai</span>
             </div>
         </div>
+
+        <div className='build-number'>{buildNumber}</div>
     </div>
         <Modal
             width="40%"

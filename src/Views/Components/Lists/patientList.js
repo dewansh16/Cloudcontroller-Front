@@ -1,5 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { io } from "socket.io-client";
+
 import { Row, Col, Divider, Grid, Tooltip } from "antd";
 import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
@@ -9,6 +11,8 @@ const { useBreakpoint } = Grid;
 
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
+
+    console.log("props", props);
 
     const dividerColor = "black";
     const listThemeColor = "#444444";
@@ -68,79 +72,101 @@ const PatientListItem = (props) => {
     const isElementClicked = props.active === props.pid;
     const activeTheme = isElementClicked ? activeThemeColor : listThemeColor;
 
-    const [chartBlockData, setChartBlockData] = React.useState([]);
-
     const [isChartSectionVisible, setChartSectionVisibility] = React.useState(false);
 
+    const arrDataChart = [
+        {
+            _key: 'temp',
+            name: "Temperature",
+            icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
+            val: 0,
+            color: Colors.purple,
+            // val:
+            // parseInt(props.data.ews_map?.temp) === -1
+            //     ? "NA"
+            //     : props.data.ews_map?.temp,
+            trendData: []
+        },
+        {
+            _key: 'spo2',
+            name: "SPO2",
+            icon: Icons.o2({ Style: { color: Colors.green } }),
+            val: 0,
+            color: Colors.green,
+            // val:
+            // parseInt(props.data.ews_map?.spo2) === -1
+            //     ? "NA"
+            //     : props.data.ews_map?.spo2,
+            trendData: []
+        },
+        {
+            _key: 'heart',
+            name: "Heart Rate",
+            icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
+            val: 0,
+            color: Colors.darkPink,
+            // val:
+            // parseInt(props.data.ews_map?.hr) === -1
+            //     ? "NA"
+            //     : props.data.ews_map?.hr,
+            trendData: []
+        },
+        {
+            _key: 'alphamed',
+            name: "Respiration Rate",
+            icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
+            val: 0,
+            color: Colors.orange,
+            // val:
+            // parseInt(props.data.ews_map?.rr) === -1
+            //     ? "NA"
+            //     : props.data.ews_map?.rr,
+            trendData: []
+        },
+        {
+            _key: 'blood',
+            name: "Blood Pressure",
+            icon: Icons.bpIcon({
+                Style: { color: Colors.darkPurple, fontSize: "24px" },
+            }),
+            val: 0,
+            color: Colors.darkPurple,
+            // val:
+            // parseInt(props.data.ews_map?.rr) === -1
+            //   ? "NA"
+            //   : props.data.ews_map?.rr,
+            trendData: []
+        },
+        {
+            _key: 'weight',
+            name: "Weight",
+            icon: Icons.bpIcon({
+                Style: { color: Colors.yellow, fontSize: "24px" },
+            }),
+            val: 0,
+            color: Colors.yellow,
+        },
+    ]
+
+    const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
+
     React.useEffect(() => {
-        setChartBlockData([
-            {
-                name: "Temperature",
-                icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
-                val: 0,
-                color: Colors.purple,
-                // val:
-                // parseInt(props.data.ews_map?.temp) === -1
-                //     ? "NA"
-                //     : props.data.ews_map?.temp,
-                trendData: []
-            },
-            {
-                name: "SPO2",
-                icon: Icons.o2({ Style: { color: Colors.green } }),
-                val: 0,
-                color: Colors.green,
-                // val:
-                // parseInt(props.data.ews_map?.spo2) === -1
-                //     ? "NA"
-                //     : props.data.ews_map?.spo2,
-                trendData: []
-            },
-            {
-                name: "Heart Rate",
-                icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
-                val: 0,
-                color: Colors.darkPink,
-                // val:
-                // parseInt(props.data.ews_map?.hr) === -1
-                //     ? "NA"
-                //     : props.data.ews_map?.hr,
-                trendData: []
-            },
-            {
-                name: "Respiration Rate",
-                icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
-                val: 0,
-                color: Colors.orange,
-                // val:
-                // parseInt(props.data.ews_map?.rr) === -1
-                //     ? "NA"
-                //     : props.data.ews_map?.rr,
-                trendData: []
-            },
-            {
-                name: "Blood Pressure",
-                icon: Icons.bpIcon({
-                    Style: { color: Colors.darkPurple, fontSize: "24px" },
-                }),
-                val: 0,
-                color: Colors.darkPurple,
-                // val:
-                // parseInt(props.data.ews_map?.rr) === -1
-                //   ? "NA"
-                //   : props.data.ews_map?.rr,
-                trendData: []
-            },
-            {
-                name: "Weight",
-                icon: Icons.bpIcon({
-                    Style: { color: Colors.yellow, fontSize: "24px" },
-                }),
-                val: 0,
-                color: Colors.yellow,
-            },
-        ]);
+
     }, [props.data.ews_map, props.data.trend_map]);
+
+    React.useEffect(() => { 
+        var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
+        socket.on('SENSOR_LOG', function (data) {
+            const dataSocket = data.body;
+            console.log("data SENSOR_LOG", data);
+
+            if (dataSocket.patientUUID === props.pid) {
+                const sensorFound = chartBlockData.find(item => item._key === dataSocket.deviceType);
+                sensorFound.val = dataSocket.bps || 0;
+                setChartBlockData([...chartBlockData]);
+            }
+        })
+    }, []);
 
     const pushToPatientDetails = () => {
         props.parentProps.history.push(`/dashboard/patient/details/${props.pid}`);
@@ -157,7 +183,7 @@ const PatientListItem = (props) => {
             state: {
                 deboarded: true,
             },
-        });
+        });                     
     };
 
     const ShowPatientDetails = (e) => {

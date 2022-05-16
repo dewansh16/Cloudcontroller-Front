@@ -118,7 +118,7 @@ function DeviceManagement({ pid }) {
                                 mode="inline"
                             >
                                 {deviceClass.list.map((listItem, index) => {
-                                    return  (
+                                    return (
                                         <Menu.Item
                                             key={`${listItem?.["patches.patch_type"]}-${index}`}
                                             className="menu-item"

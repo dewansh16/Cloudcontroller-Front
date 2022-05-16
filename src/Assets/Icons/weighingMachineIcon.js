@@ -18,7 +18,7 @@ function WeighingMachineIcon() {
         height="18"
         fill="url(#pattern0)"
         stroke="black"
-        stroke-width="2"
+        strokeWidth="2"
       />
       <defs>
         <pattern
