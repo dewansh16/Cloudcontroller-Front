@@ -427,12 +427,12 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType }) {
 
                 <Popconfirm
                     placement="bottom"
-                    title="Are you sure to unassociate this device?"
+                    title="Are you sure to detach this device?"
                     // onConfirm={onUnassociateDevice}
                     okText="Yes"
                     cancelText="No"
                 >
-                    <Buttons type="utility">Unassociate</Buttons>
+                    <Buttons type="utility">Detach</Buttons>
                 </Popconfirm>
             </Row>
 
