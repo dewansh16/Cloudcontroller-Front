@@ -3,6 +3,7 @@ import { Menu, Col, Row, notification } from "antd";
 import DeviceDetails from "./Components/DeviceData/deviceDetails/deviceDetails.DeviceData.Components.DeviceManagement.Components";
 
 import patientApi from "../../../Apis/patientApis";
+import { UserStore } from "../../../Stores/userStore";
 
 import "./DeviceManagement.css";
 
@@ -53,8 +54,10 @@ function DeviceManagement({ pid }) {
     }
 
     useEffect(() => {
+        const { tenant = '' } = UserStore.getUser();
+
         patientApi
-            .getPatientPatches(pid)
+            .getPatientPatches(pid, tenant)
             .then((res) => {
                 setClass({
                     list: theMenuItemSort(res.data?.response.patch_patient_map),

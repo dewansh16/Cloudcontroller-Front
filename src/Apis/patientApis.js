@@ -150,10 +150,10 @@ const patientApi = {
                 }&filter=${filter || 0}`,
             // withCredentials: true,
         }),
-    getPatientPatches: (pid) =>
+    getPatientPatches: (pid, tenantId) =>
         axiosInstance.request({
             method: "GET",
-            url: `/patients/${pid}/patch_map?limit=100&offset=10&filter=0`,
+            url: `/patients/${pid}/patch_map?limit=100&offset=10&filter=0&tenantId=${tenantId}`,
             // withCredentials: true,
         }),
     getDeviceManegement: (pid) =>
