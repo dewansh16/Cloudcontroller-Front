@@ -348,20 +348,11 @@ export default function PatientDashboard(props) {
                 filterBasedonPatientType(data);
             })
             .catch((err) => {
-                // console.log('err', err);
                 setPatient({ isLoading: false });
                 notification.error({
                     message: "Failure in fetching patients",
                 });
             });
-
-        // setTotalPages(
-        //     computeTotalPages(dataFake.patientTotalCount, pageSize)
-        // );
-
-        // let sortedData = sortPatient(dataFake?.patients);
-        // setPatient({ isLoading: false, list: sortedData });
-        // filterBasedonPatientType(sortedData);
     }
 
     useEffect(() => {}, [active]);
@@ -403,7 +394,6 @@ export default function PatientDashboard(props) {
                     description: "Delete patient successfully!",
                 })
             })
-        
     }
 
     return (
@@ -442,7 +432,7 @@ export default function PatientDashboard(props) {
                         />
 
                         <Button type="secondary" onClick={fetchPatientList}>
-                            delete {Icons.sync({ Style: { fontSize: "1.257rem" } })}
+                            refresh {Icons.sync({ Style: { fontSize: "1.257rem" } })}
                         </Button>
 
                         <Dropdown
@@ -530,7 +520,7 @@ export default function PatientDashboard(props) {
                                 <h3 style={{ width: "8rem", margin: "0" }}>Patient Type: </h3>
                             </div>
                             <Select
-                                defaultValue="incare"
+                                defaultValue="all"
                                 style={{ width: "100%" }}
                                 onSelect={showSelectedPatient}
                             >
