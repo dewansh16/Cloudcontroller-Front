@@ -643,7 +643,9 @@ function AddPatient() {
                     // }
                 })
                 .catch((err) => {
-                    const isExist = err.error.isExist || false;
+                    const error = err?.response?.data?.error;
+                    setButtonLoading(false);
+                    const isExist = error.isExist || false;
                     setButtonLoading(false);
                     setSummary({
                         isVisible: true,
