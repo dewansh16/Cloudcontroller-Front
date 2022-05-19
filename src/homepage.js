@@ -40,7 +40,10 @@ function HomePage() {
             </div>
         </div>
 
-        <div className='build-number'>{buildNumber}</div>
+        <div className='build-number'>
+            {"Build: "}
+            <span className='number'>{buildNumber}</span>
+        </div>
     </div>
         <Modal
             width="40%"

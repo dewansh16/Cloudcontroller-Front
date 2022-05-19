@@ -134,3 +134,7 @@
 .sidebar .build-number.number-hide {
   display: none;
 }
+
+.sidebar .build-number .number {
+  letter-spacing: 3px;
+}
