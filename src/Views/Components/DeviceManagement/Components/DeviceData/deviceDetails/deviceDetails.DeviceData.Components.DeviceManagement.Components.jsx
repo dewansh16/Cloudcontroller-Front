@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './deviceDetails.DeviceData.Components.PatientQuickInfo.Components.css'
-import { Menu, Col, Row, notification, Divider, Popover, Form, Tooltip, Spin } from '../../../../../../Theme/antdComponents'
+import { Menu, Col, Row, notification, Divider, Popover, Form, Tooltip, Spin, Popconfirm } from '../../../../../../Theme/antdComponents'
 import { Input, InputNumber, GlobalTextArea } from '../../../../../../Theme/Components/Input/input'
 import Icons from '../../../../../../Utils/iconMap'
 
@@ -24,7 +24,6 @@ function getCurrentDate(dateTime) {
 
     return `${dateInstance.getHours()}:${dateInstance.getMinutes() < 10 ? '0' + dateInstance.getMinutes() : dateInstance.getMinutes()} Hrs`
 }
-
 
 function CreateGraphData(pid, deviceType) {
     const [response, setResponse] = useState(null)
@@ -389,36 +388,54 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType }) {
         </div >
     }
 
-
     return (
         <div>
             <Row span={24} justify="space-between">
-                <Col span={8} style={{ display: "flex", justifyContent: "space-between" }}>
-                    <Buttons disabled={contentPosition === "config"} onClick={() => setContentPosition("config")} type="utility">
-                        Configure
-                    </Buttons>
-                    {deviceType === "gateway" && <>
-                        {otp ?
-                            (otpVisibility ?
-                                <div className='device-info'><p><span>OTP:</span> {otp}</p></div>
-                                :
-                                <Buttons onClick={viewOtp} type="utility">View OTP</Buttons>
-                            )
-                            :
-                            <Buttons style={{ minWidth: "90px" }} type="utility" onClick={getOtp}>
-                                {"View OTP"}
-                            </Buttons>
-                        }
-                    </>}
+                <Buttons disabled={contentPosition === "config"} onClick={() => setContentPosition("config")} type="utility">
+                    Configure
+                </Buttons>
 
-                </Col>
-                <Col span={6}>
-                    <Buttons disabled={contentPosition === "keepAlive"} onClick={() => { setContentPosition("keepAlive"); fetchKeepAliveHistrory() }} type="utility">Keep Alive</Buttons>
-                </Col>
-                <Col span={6}>
-                    <Buttons disabled={contentPosition === "testBaseline"} onClick={() => setContentPosition("testBaseline")} type="utility">Test & Baseline</Buttons>
-                </Col>
+                {deviceType === "gateway" && <>
+                    {otp ?
+                        (otpVisibility ?
+                            <div className='device-info'><p><span>OTP:</span> {otp}</p></div>
+                            :
+                            <Buttons onClick={viewOtp} type="utility">View OTP</Buttons>
+                        )
+                        :
+                        <Buttons style={{ minWidth: "90px" }} type="utility" onClick={getOtp}>
+                            {"View OTP"}
+                        </Buttons>
+                    }
+                </>}
+
+                <Buttons 
+                    disabled={contentPosition === "keepAlive"} 
+                    onClick={() => { setContentPosition("keepAlive"); fetchKeepAliveHistrory() }} 
+                    type="utility"
+                >
+                    Keep Alive
+                </Buttons>
+
+                <Buttons 
+                    disabled={contentPosition === "testBaseline"} 
+                    onClick={() => setContentPosition("testBaseline")} 
+                    type="utility"
+                >
+                    Test & Baseline
+                </Buttons>
+
+                <Popconfirm
+                    placement="bottom"
+                    title="Are you sure to detach this device?"
+                    // onConfirm={onUnassociateDevice}
+                    okText="Yes"
+                    cancelText="No"
+                >
+                    <Buttons type="utility">Detach</Buttons>
+                </Popconfirm>
             </Row>
+
             <Row style={{ marginTop: '2em' }}>
                 <div className='device-info'>
                     <p><span>Serial</span> {serial}</p>

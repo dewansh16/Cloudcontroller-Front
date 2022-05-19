@@ -271,7 +271,10 @@ function SideDrawer(props) {
                     ))}
                 </ul>
                 
-                <div className={`build-number ${!isOpen ? 'number-hide' : ''}`}>{buildNumber}</div>
+                <div className={`build-number ${!isOpen ? 'number-hide' : ''}`}>
+                    {"Build: "}
+                    <span className='number'>{buildNumber}</span>
+                </div>
 
                 <div
                     className="logout-icon-container"

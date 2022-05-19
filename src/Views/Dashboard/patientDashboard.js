@@ -287,33 +287,33 @@ export default function PatientDashboard(props) {
     }
 
     //filter based on selected type of patients
-    function filterBasedonPatientType(patientList) {
-        let filteredData = filterPatients(patientList);
-        const filteredPatients = filteredData.filter((patient) => {
-            switch (patientType) {
-                case "all":
-                    return patient;
-                case "discharged":
-                    return (
-                        patient.discharge_date !== null &&
-                        patient.discharge_date !== undefined &&
-                        patient.status !== "Deboarded"
-                    );
-                case "incare":
-                    return (
-                        (patient.discharge_date === null ||
-                        patient.discharge_date === undefined) &&
-                        patient.status !== "Deboarded"
-                    );
-                case "deboarded": {
-                    return patient.status === "Deboarded";
-                    }
-                default:
-                return patient;
-            }
-        });
-        setPatientList(filteredPatients);
-    }
+    // function filterBasedonPatientType(patientList) {
+    //     let filteredData = filterPatients(patientList);
+    //     const filteredPatients = filteredData.filter((patient) => {
+    //         switch (patientType) {
+    //             case "all":
+    //                 return patient;
+    //             case "discharged":
+    //                 return (
+    //                     patient.discharge_date !== null &&
+    //                     patient.discharge_date !== undefined &&
+    //                     patient.status !== "Deboarded"
+    //                 );
+    //             case "incare":
+    //                 return (
+    //                     (patient.discharge_date === null ||
+    //                     patient.discharge_date === undefined) &&
+    //                     patient.status !== "Deboarded"
+    //                 );
+    //             case "deboarded": {
+    //                 return patient.status === "Deboarded";
+    //                 }
+    //             default:
+    //             return patient;
+    //         }
+    //     });
+    //     setPatientList(filteredPatients);
+    // }
 
     const dataBodyFilter = useMemo(() => {
         const data = { 
@@ -345,23 +345,15 @@ export default function PatientDashboard(props) {
 
                 let data = res.data.response.patients;
                 setPatient({ isLoading: false, list: data });
-                filterBasedonPatientType(data);
+                // filterBasedonPatientType(data);
+                setPatientList(data);
             })
             .catch((err) => {
-                // console.log('err', err);
                 setPatient({ isLoading: false });
                 notification.error({
                     message: "Failure in fetching patients",
                 });
             });
-
-        // setTotalPages(
-        //     computeTotalPages(dataFake.patientTotalCount, pageSize)
-        // );
-
-        // let sortedData = sortPatient(dataFake?.patients);
-        // setPatient({ isLoading: false, list: sortedData });
-        // filterBasedonPatientType(sortedData);
     }
 
     useEffect(() => {}, [active]);
@@ -390,9 +382,7 @@ export default function PatientDashboard(props) {
         patientApi
             .deletePatient(data)
             .then(res => {
-                let newData = [...patientListToShow];
-                newData = newData.filter(patient => patient?.demographic_map?.pid !== pid);
-                setPatientList(newData);
+                fetchPatientList();
                 
                 setPatientDetails(null);
                 setActive("");
@@ -403,7 +393,12 @@ export default function PatientDashboard(props) {
                     description: "Delete patient successfully!",
                 })
             })
-        
+            .catch(() => {
+                notification.error({
+                    message: "Delete",
+                    description: "Delete patient failed!",
+                })
+            })
     }
 
     return (
@@ -442,7 +437,7 @@ export default function PatientDashboard(props) {
                         />
 
                         <Button type="secondary" onClick={fetchPatientList}>
-                            delete {Icons.sync({ Style: { fontSize: "1.257rem" } })}
+                            refresh {Icons.sync({ Style: { fontSize: "1.257rem" } })}
                         </Button>
 
                         <Dropdown
@@ -530,7 +525,7 @@ export default function PatientDashboard(props) {
                                 <h3 style={{ width: "8rem", margin: "0" }}>Patient Type: </h3>
                             </div>
                             <Select
-                                defaultValue="incare"
+                                defaultValue="all"
                                 style={{ width: "100%" }}
                                 onSelect={showSelectedPatient}
                             >

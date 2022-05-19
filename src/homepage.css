@@ -79,5 +79,9 @@
   margin-right: 2rem;
   color: #ffffff;
   font-size: 17px;
+  font-weight: 400;
+}
+
+.build-number .number {
   letter-spacing: 3px;
 }

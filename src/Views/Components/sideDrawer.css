@@ -127,11 +127,14 @@
   width: 100%;
   color: #000;
   margin-right: 0px;
+  background-color: #ffffff;
+  padding-top: 12px;
 }
 
 .sidebar .build-number.number-hide {
-  width: min-content;
-  word-break: break-all;
-  margin-right: 23px;
-  line-height: 20px;
+  display: none;
+}
+
+.sidebar .build-number .number {
+  letter-spacing: 3px;
 }
