@@ -287,33 +287,33 @@ export default function PatientDashboard(props) {
     }
 
     //filter based on selected type of patients
-    function filterBasedonPatientType(patientList) {
-        let filteredData = filterPatients(patientList);
-        const filteredPatients = filteredData.filter((patient) => {
-            switch (patientType) {
-                case "all":
-                    return patient;
-                case "discharged":
-                    return (
-                        patient.discharge_date !== null &&
-                        patient.discharge_date !== undefined &&
-                        patient.status !== "Deboarded"
-                    );
-                case "incare":
-                    return (
-                        (patient.discharge_date === null ||
-                        patient.discharge_date === undefined) &&
-                        patient.status !== "Deboarded"
-                    );
-                case "deboarded": {
-                    return patient.status === "Deboarded";
-                    }
-                default:
-                return patient;
-            }
-        });
-        setPatientList(filteredPatients);
-    }
+    // function filterBasedonPatientType(patientList) {
+    //     let filteredData = filterPatients(patientList);
+    //     const filteredPatients = filteredData.filter((patient) => {
+    //         switch (patientType) {
+    //             case "all":
+    //                 return patient;
+    //             case "discharged":
+    //                 return (
+    //                     patient.discharge_date !== null &&
+    //                     patient.discharge_date !== undefined &&
+    //                     patient.status !== "Deboarded"
+    //                 );
+    //             case "incare":
+    //                 return (
+    //                     (patient.discharge_date === null ||
+    //                     patient.discharge_date === undefined) &&
+    //                     patient.status !== "Deboarded"
+    //                 );
+    //             case "deboarded": {
+    //                 return patient.status === "Deboarded";
+    //                 }
+    //             default:
+    //             return patient;
+    //         }
+    //     });
+    //     setPatientList(filteredPatients);
+    // }
 
     const dataBodyFilter = useMemo(() => {
         const data = { 
@@ -345,7 +345,8 @@ export default function PatientDashboard(props) {
 
                 let data = res.data.response.patients;
                 setPatient({ isLoading: false, list: data });
-                filterBasedonPatientType(data);
+                // filterBasedonPatientType(data);
+                setPatientList(data);
             })
             .catch((err) => {
                 setPatient({ isLoading: false });
@@ -381,9 +382,7 @@ export default function PatientDashboard(props) {
         patientApi
             .deletePatient(data)
             .then(res => {
-                let newData = [...patientListToShow];
-                newData = newData.filter(patient => patient?.demographic_map?.pid !== pid);
-                setPatientList(newData);
+                fetchPatientList();
                 
                 setPatientDetails(null);
                 setActive("");
@@ -392,6 +391,12 @@ export default function PatientDashboard(props) {
                 notification.success({
                     message: "Delete",
                     description: "Delete patient successfully!",
+                })
+            })
+            .catch(() => {
+                notification.error({
+                    message: "Delete",
+                    description: "Delete patient failed!",
                 })
             })
     }
