@@ -163,7 +163,7 @@ function BillingModule() {
     const [taskNameVal, setTaskNameVal] = useState();
     const [taskNoteVal, setTaskNoteVal] = useState();
 
-    const [taskCodeActive, setTaskCodeActive] = useState("99457");
+    const [taskCodeActive, setTaskCodeActive] = useState(CPT_CODE.CPT_99453);
     const [taskCodeInternalActive, setTaskCodeInternalActive] = useState("");
 
     const [firstTwentyTasks, setFirstTwentyTasks] = useState([]);
@@ -171,7 +171,6 @@ function BillingModule() {
     const [secondTwentyStageTwoTasks, setSecondTwentyStageTwoTasks] = useState([]);
 
     const [runUseEffect, setRunUseEffect] = useState(0);
-    const [showStopBtn, setShowStopBtn] = useState(false);
 
     function handleMonthChange(date, dateString) {
         console.log(dateString);
@@ -233,13 +232,10 @@ function BillingModule() {
 
     function handleAddTaskDateChange(date, dateString) {
         var temp_date = new Date(dateString);
-        // console.log(temp_date.toISOString());
         setTaskDateVal(temp_date.toISOString());
     }
 
     function handleAddTaskTimeChange(time, timeString) {
-        // console.log(Number(timeString.substring(0, 2)));
-        // console.log(Number(timeString.substring(3, 5)));
         setTaskTimeVal(
             Number(timeString.substring(0, 2) * 60) +
             Number(timeString.substring(3, 5))
@@ -247,16 +243,14 @@ function BillingModule() {
     }
 
     function handleAddTaskNameChange(e) {
-        // console.log(e.target.value)
         setTaskNameVal(e.target.value);
     }
 
     function handleAddTaskNoteChange(e) {
-        // console.log(e.target.value)
         setTaskNoteVal(e.target.value);
     }
 
-    function addTaskComponent() {
+    function addTaskComponent(cptCode) {
         return (
             <div className="bm-add-task-container">
                 <div style={{ width: "100%", textAlign: "right" }}>
@@ -275,10 +269,6 @@ function BillingModule() {
                     <DatePicker onChange={handleAddTaskDateChange} />
                 </div>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <div style={{ width: "17.7%" }}>Time</div>
-                    <TimePicker onChange={handleAddTaskTimeChange} format={format} />
-                </div>
-                <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <div style={{ width: "21.7%" }}>Staff Name</div>
                     <Input placeholder="Name" onChange={handleAddTaskNameChange} />
                 </div>
@@ -295,7 +285,7 @@ function BillingModule() {
                     onClick={() => {
                         // setTasksLoadingState(true);
                         setAddTaskState(false);
-                        callUpdateBillingTasks();
+                        callUpdateBillingTasks(taskCodeActive);
                     }}
                 >
                     Task completed
@@ -336,7 +326,6 @@ function BillingModule() {
         
     }
     const startCountTimer = () => {
-        setShowStopBtn(true);
         clockCounter = setInterval(function(){
             timeCount = timeCount + 1;
             let hours   = Math.floor(timeCount / 3600)
@@ -1194,76 +1183,48 @@ function BillingModule() {
         stageTwoState(true);
     }
 
-    function callUpdateBillingTasks() {
-        var taskTimeConsidered = taskTimeVal;
-        var newTaskTime = 0;
-
-        if (taskCodeActive === "99457" && taskTimeVal + firstTotalTime > 1200) {
-            taskTimeConsidered = taskTimeVal;
-            taskTimeConsidered = taskTimeVal - (taskTimeVal + firstTotalTime - 1200);
-            newTaskTime = taskTimeVal + firstTotalTime - 1200;
-            callUpdateOnCodeChange(taskTimeVal, taskTimeConsidered, newTaskTime);
-        } else if (
-            taskCodeActive === "99458" &&
-            taskCodeInternalActive === "99458_stage1" &&
-            taskTimeVal + secondTotalTimeStageOne > 1200
-        ) {
-            taskTimeConsidered = taskTimeVal;
-            if (taskCodeInternalActive === "99458_stage1") {
-                taskTimeConsidered =
-                    taskTimeVal - (taskTimeVal + secondTotalTimeStageOne - 1200);
-                newTaskTime = taskTimeVal + secondTotalTimeStageOne - 1200;
-                callUpdateOnCodeStageChange(
-                    taskTimeVal,
-                    taskTimeConsidered,
-                    newTaskTime
-                );
-            }
-        } else {
-            if (taskCodeInternalActive === "99458_stage2") {
-                if (taskTimeVal + secondTotalTimeStageTwo > 1200) {
-                    taskTimeConsidered =
-                        taskTimeVal - (taskTimeVal + secondTotalTimeStageTwo - 1200);
+    function callUpdateBillingTasks(cptCode) {
+        var date = new Date();
+        var date_string = date.toISOString();
+       if(cptCode == CPT_CODE.CPT_99457){
+            let isCodeExist = false; 
+            billingInformation.map(item => {
+                if(item.code == CPT_CODE.CPT_99457){
+                    isCodeExist = true;
                 }
+            })
+            if(isCodeExist){
+                // update
+            } else {
+            billingApi
+            .addBillingTask(
+                {
+                    code_type: CPT,
+                    code: CPT_CODE.CPT_99457,
+                    bill_date: date_string,
+                    pid: location.state.pid,
+                    revenue_code: 123,
+                    notecodes: "pending",
+                    bill_process: 0,
+                    fee: 40,
+                    add_task_id: date.getTime(),
+                    add_task_date: taskDateVal,
+                    add_task_staff_name: taskNameVal,
+                    add_task_note: taskNoteVal
+                }
+            )
+            .then((res) => {
+                var temp = runUseEffect;
+                temp = temp + 1;
+                setRunUseEffect(temp);
+                setInitialSetupState(true);
+            })
+            .catch((err) => {
+                console.log(err);
+                setInitialSetupState(true);
+            });
             }
-
-            // billingApi
-            //     .addBillingTask(
-            //         {
-            //             code_type: "CPTR",
-            //             code: "919457",
-            //             status: taskCodeActive,
-            //             bill_date: initialBillDate,
-            //             pid: location.state.pid,
-            //             code_tasks: [
-            //                 {
-            //                     Billing_Information: [
-            //                         {
-            //                             code: taskCodeActive,
-            //                             code_internal: taskCodeInternalActive,
-            //                             useruuid: taskNameVal,
-            //                             date_time: taskDateVal,
-            //                             taskTotalTimeSpent: taskTimeVal.toString(),
-            //                             timeConsidered: taskTimeConsidered.toString(),
-            //                             task: taskNoteVal,
-            //                             status: true,
-            //                         },
-            //                     ],
-            //                     Patch_Patient_Information: [patchInformation],
-            //                     Patches: patchArray,
-            //                 },
-            //             ],
-            //         }
-            //     )
-            //     .then((res) => {
-            //         console.log("UPDATE RESPONSE : ", res);
-            //         callBillingTasks();
-            //     })
-            //     .catch((err) => {
-            //         console.log(err);
-            //     });
-            callBillingTasks();
-        }
+       }
     }
 
     function handleDeleteTasks() {
@@ -1561,14 +1522,7 @@ function BillingModule() {
                                 };
                             }
                             if (item.code == CPT_CODE.CPT_99457) {
-                                tempFirstTwentyTasks.push(item);
-                                firstTotalTime = firstTotalTime + Number(item.timeConsidered);
-                                if (!tempFirstTwentyData.hasOwnProperty("date")) {
-                                    tempFirstTwentyData = {
-                                        date: getDateFromISO(item.date_time),
-                                        time: getTimeFromISO(item.date_time),
-                                    };
-                                }
+                              tempFirstTwentyData = JSON.parse(item.params);
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
                                 if (item.code_internal === "99458_stage1") {
@@ -2228,6 +2182,7 @@ function BillingModule() {
                                     }}
                                        className="primary"
                                        style={{ marginTop: "3%", padding: "1% 5%" }}
+                                       disabled = {patchArray.length == 0 ? true : false}
                                 >
                                     Start
                                 </CusBtn>
