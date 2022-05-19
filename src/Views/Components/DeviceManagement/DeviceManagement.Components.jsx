@@ -101,6 +101,33 @@ function DeviceManagement({ pid }) {
         }
     }
 
+    const onDetachAssociate = (uuid) => () => {
+        console.log('abc');
+        // let newList = [...deviceClass.list];
+        // newList = newList.filter(device => device["patches.patch_uuid"] !== uuid);
+        // setClass({
+        //     ...deviceClass,
+        //     list: newList
+        // })
+        patientApi.detachSensorOfPatient({ 
+            patch_uuid: uuid,
+            action: "unassociate"
+        })
+        .then(() => {
+            let newList = [...deviceClass.list];
+            newList = newList.filter(device => device["patches.patch_uuid"] !== uuid);
+            setClass({
+                ...deviceClass,
+                list: newList
+            })
+            if (newList?.length > 0) {
+                setMenuState(
+                    `${newList[0]["patches.patch_type"]}-0`
+                );
+            }
+        })
+    };
+
     return (
         <div>
             <Row span={24}>
@@ -145,6 +172,7 @@ function DeviceManagement({ pid }) {
                                             duration={Item["duration"]}
                                             pid={pid}
                                             deviceType={Item["patches.patch_type"]}
+                                            onDetach={onDetachAssociate}
                                         />
                                     )
                             )}
