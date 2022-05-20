@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { io } from "socket.io-client";
+import { InfluxDB } from "@influxdata/influxdb-client";
 
 import { Row, Col, Divider, Grid, Tooltip } from "antd";
 import Colors from "../../../Theme/Colors/colors";
@@ -12,7 +13,7 @@ const { useBreakpoint } = Grid;
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
 
-    console.log("props", props);
+    // console.log("props", props);
 
     const dividerColor = "black";
     const listThemeColor = "#444444";
@@ -154,19 +155,79 @@ const PatientListItem = (props) => {
 
     }, [props.data.ews_map, props.data.trend_map]);
 
-    React.useEffect(() => { 
-        var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
-        socket.on('SENSOR_LOG', function (data) {
-            const dataSocket = data.body;
-            console.log("data SENSOR_LOG", data);
-
-            if (dataSocket.patientUUID === props.pid) {
-                const sensorFound = chartBlockData.find(item => item._key === dataSocket.deviceType);
-                sensorFound.val = dataSocket.bps || 0;
-                setChartBlockData([...chartBlockData]);
-            }
+    const getDataFromInFluxForSensor = () => {
+        const newArrChart = [...chartBlockData];
+        newArrChart.forEach(chart => {
+            chart.trendData = [];
         })
+
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
+
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+
+        const query = `from(bucket: "emr_dev")
+                        |> range(start: -6h)
+                        |> filter(fn: (r) => r["_measurement"] == "patient999399cc-61b1-42d3-bb8b-c54e73ce7583_Temperature")
+                        |> filter(fn: (r) => r["_field"] == "value")
+                        |> yield(name: "mean")`;
+
+       
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const dataQueryInFlux = tableMeta?.toObject(row);
+                const measurement = dataQueryInFlux?._measurement?.split("_") || "";
+                const patientId = measurement?.[0] || "";
+
+                if (props.pid === patientId) {
+                    newArrChart.forEach(chart => {
+                        if (chart.name === measurement?.[1]) {
+                            chart.val = dataQueryInFlux?._value;
+                            chart.trendData.push( {value: dataQueryInFlux?._value} );
+                            if (chart.trendData?.length > 30) {
+                                chart.trendData.splice(0, 1);
+                            }
+                        }
+                    })
+                }
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+                console.log('nFinished SUCCESS');
+                setChartBlockData(newArrChart);
+            },
+        })
+    }
+
+    useEffect(() => {
+        getDataFromInFluxForSensor();
+
+        const timeInterval = setInterval(() => {
+            getDataFromInFluxForSensor();
+        }, 10000);
+
+        return () => {
+            clearInterval(timeInterval);
+        }
     }, []);
+
+    // React.useEffect(() => {
+    //     var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
+    //     socket.on('SENSOR_LOG', function (data) {
+    //         const dataSocket = data.body;
+    //         console.log("data SENSOR_LOG", data);
+
+    //         if (dataSocket.patientUUID === props.pid) {
+    //             const sensorFound = chartBlockData.find(item => item._key === dataSocket.deviceType);
+    //             sensorFound.val = dataSocket.bps || 0;
+    //             setChartBlockData([...chartBlockData]);
+    //         }
+    //     })
+    // }, []);
 
     const pushToPatientDetails = () => {
         props.parentProps.history.push(`/dashboard/patient/details/${props.pid}`);
@@ -183,7 +244,7 @@ const PatientListItem = (props) => {
             state: {
                 deboarded: true,
             },
-        });                     
+        });
     };
 
     const ShowPatientDetails = (e) => {
