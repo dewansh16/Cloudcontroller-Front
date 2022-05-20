@@ -52,7 +52,8 @@
   margin: 0;
   width: 240px;
   overflow: auto;
-  max-height: calc(100vh - 76.4px - 64px);
+  /* max-height: calc(100vh - 76.4px - 64px); old code */ 
+  height: calc(100vh - 76.8px - 116px);
 }
 
 .submenu-list {
@@ -118,23 +119,24 @@
   letter-spacing: 1px;
 }
 
-.sidebar .build-number {
-  position: absolute;
-  bottom: 0;
-  margin-bottom: 4rem;
+.sidebar .build-nb {
   text-align: center;
   font-size: 16px;
   width: 100%;
   color: #000;
   margin-right: 0px;
   background-color: #ffffff;
-  padding-top: 12px;
+  padding: 12px 0px;
+  font-weight: 400;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
 }
 
-.sidebar .build-number.number-hide {
+.sidebar .build-nb.number-hide {
   display: none;
 }
 
-.sidebar .build-number .number {
+.sidebar .build-nb .number {
   letter-spacing: 3px;
+  font-weight: 600;
 }

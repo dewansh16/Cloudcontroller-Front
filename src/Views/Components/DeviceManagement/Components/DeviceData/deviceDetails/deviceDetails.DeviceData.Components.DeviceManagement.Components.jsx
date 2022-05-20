@@ -78,7 +78,7 @@ function GetPatientOTP(pid, setOtp, setOtpLoading, callback = () => { }) {
     })
 }
 
-function DeviceDetails({ serial, pid, uuid, duration, deviceType }) {
+function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
     const [data, isLoading] = CreateGraphData(pid, deviceType);
 
     const config = {
@@ -428,7 +428,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType }) {
                 <Popconfirm
                     placement="bottom"
                     title="Are you sure to detach this device?"
-                    // onConfirm={onUnassociateDevice}
+                    onConfirm={onDetach(uuid)}
                     okText="Yes"
                     cancelText="No"
                 >

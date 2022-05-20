@@ -171,7 +171,7 @@ function BillingModule() {
     const [secondTwentyStageTwoTasks, setSecondTwentyStageTwoTasks] = useState([]);
 
     const [runUseEffect, setRunUseEffect] = useState(0);
-
+    const [timerTask, setTimerTask] = useState(false);
     function handleMonthChange(date, dateString) {
         console.log(dateString);
 
@@ -325,7 +325,7 @@ function BillingModule() {
             });
         
     }
-    const startCountTimer = () => {
+    const startCountTimer = (elementId) => {
         clockCounter = setInterval(function(){
             timeCount = timeCount + 1;
             let hours   = Math.floor(timeCount / 3600)
@@ -335,10 +335,45 @@ function BillingModule() {
             .map(v => v < 10 ? "0" + v : v)
             .filter((v,i) => v !== "00" || i > 0)
             .join(":")
-            document.getElementById("timer-count-ds").innerText = timeDs;
+            document.getElementById(elementId).innerText = timeDs;
         }, 1000);
     }
 
+    const renderTimerClock = (item) => {
+        const elementId = 'task-99457-timer'
+        if(!timerTask){
+            return (
+                <CusBtn
+                onClick={() => {
+                    startCountTimer(elementId);
+                    setTimerTask(true);
+                }}
+                className="primary"
+            >
+                Start
+            </CusBtn>
+            )
+        } else {
+            return (
+                <div className="task-timer-wrapper" style={{ display: "flex", alginItems: "center"}}>
+                  <CusBtn
+                onClick={() => {
+                    item.task_time_spent = Math.floor(timeCount / 60);
+                    timeCount = 0;
+                    setTimerTask(false);
+                    callUpdateBillingTasks(CPT_CODE.CPT_99457, item)
+                }}
+                className="primary"
+            >
+                Stop
+            </CusBtn>
+            <p id={elementId} style={{height: "100%", width: "100%"}}></p>
+                </div>
+              
+            )
+        }
+           
+    }
     const stopCountTimer = () => {
         clearInterval(clockCounter);
     }
@@ -497,14 +532,8 @@ function BillingModule() {
                                 };
                             }
                             if (item.code === "99457") {
-                                tempFirstTwentyTasks.push(item);
-                                firstTotalTime = firstTotalTime + Number(item.timeConsidered);
-                                if (!tempFirstTwentyData.hasOwnProperty("date")) {
-                                    tempFirstTwentyData = {
-                                        date: getDateFromISO(item.date_time),
-                                        time: getTimeFromISO(item.date_time),
-                                    };
-                                }
+                                const params = JSON.parse(item.params);
+                                setFirstTwentyData(params);
                             }
                             if (item.code == "99458") {
                                 if (item.code_internal == "99458_stage1") {
@@ -1183,18 +1212,58 @@ function BillingModule() {
         stageTwoState(true);
     }
 
-    function callUpdateBillingTasks(cptCode) {
+    function callUpdateBillingTasks(cptCode, item = {}) {
         var date = new Date();
         var date_string = date.toISOString();
        if(cptCode == CPT_CODE.CPT_99457){
             let isCodeExist = false; 
+            let billingId = null;
             billingInformation.map(item => {
                 if(item.code == CPT_CODE.CPT_99457){
                     isCodeExist = true;
+                    billingId = item.id
                 }
             })
             if(isCodeExist){
                 // update
+                let updateData = {};
+                if(item.task_id){
+                    updateData = {
+                        code: CPT_CODE.CPT_99457,
+                        bill_date: date_string,
+                        pid: location.state.pid,
+                        billing_id: billingId,
+                        task_date: item.task_date,
+                        task_id: item.task_id,
+                        staff_name: item.staff_name,
+                        task_note: item.task_note,
+                        task_time_spent: item.task_time_spent
+                    }
+                } else {
+                    updateData = {
+                        code: CPT_CODE.CPT_99457,
+                        bill_date: date_string,
+                        pid: location.state.pid,
+                        billing_id: billingId,
+                        task_date: taskDateVal,
+                        staff_name: taskNameVal,
+                        task_note: taskNoteVal
+                    }
+                }
+                billingApi
+            .updateBillingTask(
+                updateData
+            )
+            .then((res) => {
+                var temp = runUseEffect;
+                temp = temp + 1;
+                setRunUseEffect(temp);
+                setInitialSetupState(true);
+            })
+            .catch((err) => {
+                console.log(err);
+                setInitialSetupState(true);
+            });
             } else {
             billingApi
             .addBillingTask(
@@ -1522,7 +1591,8 @@ function BillingModule() {
                                 };
                             }
                             if (item.code == CPT_CODE.CPT_99457) {
-                              tempFirstTwentyData = JSON.parse(item.params);
+                              tempFirstTwentyTasks = JSON.parse(item.params);
+                              setFirstTwentyTasks(tempFirstTwentyTasks);
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
                                 if (item.code_internal === "99458_stage1") {
@@ -2690,59 +2760,54 @@ function BillingModule() {
                                         </CusBtn>
                                     </div>
                                 ) : (
-                                    <div
-                                        style={{
-                                            height: "73%",
-                                            width: "100%",
-                                            overflowY: "scroll",
-                                        }}
-                                    >
+                                    <div className="bm-sensor-bottom-container">
+                            <div className="bm-sensor-bottom-header">Task</div>
+                            <div className="bm-sensor-bottom-table-header">
+                                <div className="bm-item-header" style={{ width: "20%" }}>Date</div>
+                                <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
+                                <div className="bm-item-header" style={{ width: "30%" }}>Note</div>
+                                <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
+
+                            </div>
+                            <div style={{ overflowY: "scroll", height: "70%" }}>
+                    
+                                    <Collapse defaultActiveKey={["1"]} expandIconPosition="right">
                                         {firstTwentyTasks.map((item, index) => (
-                                            <div
-                                                style={{
-                                                    display: "flex",
-                                                    width: "100%",
-                                                    alignItems: "center",
-                                                    height: "25%",
-                                                    padding: "0% 5%",
-                                                    borderBottom: "1px solid #00000026",
-                                                    background: "#ff920012",
-                                                }}
+                                            <Panel
+                                                header={
+                                                    <div
+                                                        style={{
+                                                            width: "100%",
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            height: "40px",
+                                                            fontSize: "1rem"
+                                                        }}
+                                                    >
+                                                        <div className="bm-item-body" style={{ width: "20%" }}>
+                                                            {moment(item["task_date"]).format("YYYY-MM-DD")}
+                                                        </div>
+                                                        <div className="bm-item-body" style={{ width: "30%" }}>
+                                                            {item["staff_name"]}
+                                                        </div>
+                                                        <div className="bm-item-body" style={{ width: "30%" }}>
+                                                            {item["task_note"]}
+                                                        </div>
+                                                        <div className="bm-item-body" style={{ width: "20%" }}>
+                                                            {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item)}
+                                                        </div>
+                                                    </div>
+                                                }
+                                                key={index}
+                                                style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
                                             >
-                                                <div style={{ width: "8%" }}>{index + 1}</div>
-                                                <div style={{ width: "15%" }}>
-                                                    <div>{getDateFromISO(item.date_time)}</div>
-                                                    <div>{getTimeFromISO(item.date_time)}</div>
-                                                </div>
-                                                <div style={{ width: "67%", paddingRight: "3%" }}>
-                                                    {item.task}
-                                                </div>
-                                                <div style={{ width: "10%" }}>
-                                                    {`${getMinutesFromSeconds(item.timeConsidered)}`}
-                                                </div>
-                                                <div>
-                                                    <Checkbox onChange={() => {
-                                                        var temp = []
-                                                        var flag = true
-                                                        temp = taskDeleteArray
-
-                                                        taskDeleteArray.map((ele, index) => {
-                                                            if (ele === item) {
-                                                                temp.splice(index, 1)
-                                                                flag = false
-                                                            }
-                                                        })
-
-                                                        if (flag) {
-                                                            temp.push(item)
-                                                        }
-
-                                                        setTaskDeleteArray([...temp])
-                                                    }}></Checkbox>
-                                                </div>
-                                            </div>
+                                    
+                                            </Panel>
                                         ))}
-                                    </div>
+                                    </Collapse>
+            
+                            </div>
+                        </div>
                                 )}
                                 {firstTwentyTasks.length !== 0 ? (
                                     <div

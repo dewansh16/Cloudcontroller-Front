@@ -1,6 +1,12 @@
 import axiosInstance from "./index";
 
 const patientApi = {
+    detachSensorOfPatient: (data) => 
+        axiosInstance.request({
+            method: "DELETE",
+            url: "/patients",
+            data: data
+        }),
     deletePatient: (data) => 
         axiosInstance.request({
             method: "DELETE",

@@ -270,26 +270,36 @@ function SideDrawer(props) {
                         />
                     ))}
                 </ul>
-                
-                <div className={`build-number ${!isOpen ? 'number-hide' : ''}`}>
-                    {"Build: "}
-                    <span className='number'>{buildNumber}</span>
-                </div>
 
-                <div
-                    className="logout-icon-container"
-                    onClick={logout}
-                    onMouseEnter={() => setLogoutColor("white")}
-                    onMouseLeave={() => setLogoutColor("#EB1348")}
-                >
-                    <div className="logout-icon">
-                        <PowerIcon props={{ size: 16, color: logoutColor }} />
-                    </div>
-                    {isOpen && (
-                        <div>
-                            <span className="logout-text">Logout</span>
+
+                <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    height: "115px"
+                }}>
+                    <div>
+                        <div className={`build-nb ${!isOpen ? 'number-hide' : ''}`}>
+                            {"Build: "}
+                            <span className='number'>{buildNumber}</span>
                         </div>
-                    )}
+                    </div>
+
+                    <div
+                        className="logout-icon-container"
+                        onClick={logout}
+                        onMouseEnter={() => setLogoutColor("white")}
+                        onMouseLeave={() => setLogoutColor("#EB1348")}
+                    >
+                        <div className="logout-icon">
+                            <PowerIcon props={{ size: 16, color: logoutColor }} />
+                        </div>
+                        {isOpen && (
+                            <div>
+                                <span className="logout-text">Logout</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </motion.div>
         </div>

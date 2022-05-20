@@ -15,6 +15,13 @@ const billingApi = {
             data: data,
             // withCredentials: true,
         }),
+        updateBillingTask: (data) =>
+        axiosInstance.request({
+            method: "POST",
+            url: `/billing/task`,
+            data: data,
+            // withCredentials: true,
+        }),
     deleteBillingTask: (data) =>
         axiosInstance.request({
             method: "PUT",
