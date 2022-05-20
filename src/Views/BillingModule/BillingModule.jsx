@@ -31,6 +31,7 @@ import "./billingModule.css";
 import billingApi from "../../Apis/billingApis";
 import tenantApi from "../../Apis/tenantApis";
 import { CPT_CODE, CPT } from "../../Utils/utils";
+import {isArray} from 'lodash';
 
 const { Panel } = Collapse;
 const { TextArea } = Input;
@@ -84,8 +85,6 @@ function BillingModule() {
     const [tenantuuid, setTenantuuid] = useState();
     // const [billProcessedLoading, setBillProcessedLoading] = useState(true);
     const [billProcessedLoading, setBillProcessedLoading] = useState(false);
-
-    console.log('tenantuuid', tenantuuid);
 
     const [initialBillDate, setInitialBillDate] = useState('')
 
@@ -1597,8 +1596,17 @@ function BillingModule() {
                                 };
                             }
                             if (item.code == CPT_CODE.CPT_99457) {
-                                tempFirstTwentyTasks = [JSON.parse(item.params)];
+                                tempFirstTwentyTasks = JSON.parse(item.params);
+                                if(!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
                                 setFirstTwentyTasks(tempFirstTwentyTasks);
+                                if(tempFirstTwentyTasks.length > 0){
+                                    tempFirstTwentyTasks.map(item => {
+                                        if(item.task_time_spend) {
+                                            firstTotalTime += item.task_time_spend;
+                                        }
+                                    })
+                                    firstTotalTime = firstTotalTime*60;
+                                }
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
                                 if (item.code_internal === "99458_stage1") {
@@ -1681,9 +1689,9 @@ function BillingModule() {
                     );
 
                     if (firstTotalTime === 1200) {
-                        setTaskCodeActive("99458");
+                        setTaskCodeActive(CPT_CODE.CPT_99458);
                     } else {
-                        setTaskCodeActive("99457");
+                        setTaskCodeActive(CPT_CODE.CPT_99457);
                     }
 
                     if (secondTotalTimeStageOne === 1200) {
@@ -1810,6 +1818,7 @@ function BillingModule() {
             setPdfState("")
         }
     }, [pdfState]);
+    console.log("taskCodeActive", taskCodeActive);
 
     return rightSideLoading ? (
         <div
@@ -1821,7 +1830,6 @@ function BillingModule() {
                 alignItems: "center",
             }}
         >
-            7
             <Spin />
         </div>
     ) : (
@@ -1863,7 +1871,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        initialSetupState ? "bm-selected-active 1" : "bm-selected"
+                                        initialSetupState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -1906,7 +1914,7 @@ function BillingModule() {
                                     }}
                                     className={
                                         associatedSensorsState
-                                            ? "bm-selected-active 2"
+                                            ? "bm-selected-active"
                                             : "bm-selected"
                                     }
                                 ></div>
@@ -1958,7 +1966,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        firstTwentyState ? "bm-selected-active 3" : "bm-selected"
+                                        firstTwentyState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -2009,7 +2017,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        secondTwentyState ? "bm-selected-active 4" : "bm-selected"
+                                        secondTwentyState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -2066,7 +2074,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        lastBillingState ? "bm-selected- 5" : "bm-selected"
+                                        lastBillingState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -2112,7 +2120,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        billProcessedState ? "bm-selected-active 6" : "bm-selected"
+                                        billProcessedState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -2150,7 +2158,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        summaryState ? "bm-selected-active 7" : "bm-selected"
+                                        summaryState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -2355,11 +2363,10 @@ function BillingModule() {
                             alignItems: "center",
                         }}
                     >
-                        1
                         <Spin />
                     </div>
                 ) : null}
-                {initialSetupState ? (
+                {(initialSetupState) ? (
                     <div className="bm-right-container">
                         <div
                             style={{
@@ -2469,7 +2476,6 @@ function BillingModule() {
                             alignItems: "center",
                         }}
                     >
-                        2
                         <Spin />
                     </div>
                 ) : associatedSensorsState ? (
@@ -2637,7 +2643,6 @@ function BillingModule() {
                                 alignItems: "center",
                             }}
                         >
-                            3
                             <Spin />
                         </div>
                     ) : (
@@ -2845,7 +2850,6 @@ function BillingModule() {
                                 alignItems: "center",
                             }}
                         >
-                            4
                             <Spin />
                         </div>
                     ) : (
@@ -3259,7 +3263,6 @@ function BillingModule() {
                             alignItems: "center",
                         }}
                     >
-                        5
                         <Spin />
                     </div>
                 ) : lastBillingState ? (
@@ -3376,7 +3379,6 @@ function BillingModule() {
                                 alignItems: "center",
                             }}
                         >
-                            6
                             <Spin />
                         </div>
                     ) : (
