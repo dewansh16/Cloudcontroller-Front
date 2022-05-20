@@ -1213,6 +1213,46 @@ function BillingModule() {
         stageTwoState(true);
     }
 
+    const getListFirstTwentyTasks = () => {
+        var billDate = new Date();
+        var billDateStr = getDateFromISO(billDate.toISOString());
+        var year = billDate.getFullYear();
+        var monthNumber = billDate.getMonth() + 1;
+        var dateMonthString = "";
+
+        if (currentActiveMonth === "") {
+            dateMonthString = `${year}-${monthNumber < 10 ? "0" : ""}${monthNumber}`;
+            setCurrentDateApi(dateMonthString);
+        }
+
+        billingApi
+            .getBillingTasks(location.state.pid, currentActiveMonth === "" ? dateMonthString : currentDateApi, '0')
+            .then((res) => {
+                var tempFirstTwentyTasks = [];
+                var firstTotalTime = 0;
+
+                res.data.response.billingData.map(
+                    (item) => {
+                        if (item.code == CPT_CODE.CPT_99457) {
+                            tempFirstTwentyTasks = JSON.parse(item.params);
+                            if(!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
+                            
+                            if(tempFirstTwentyTasks.length > 0){
+                                tempFirstTwentyTasks.map(item => {
+                                    if(item.task_time_spend) {
+                                        firstTotalTime += item.task_time_spend;
+                                    }
+                                })
+                                firstTotalTime = firstTotalTime*60;
+                            }
+                        }
+                    }
+                );
+
+                setFirstTwentyTasks(tempFirstTwentyTasks);
+            })
+    }
+
     function callUpdateBillingTasks(cptCode, item = {}) {
         var date = new Date();
         var date_string = date.toISOString();
@@ -1260,14 +1300,10 @@ function BillingModule() {
                         updateData
                     )
                     .then((res) => {
-                        var temp = runUseEffect;
-                        temp = temp + 1;
-                        setRunUseEffect(temp);
-                        // setInitialSetupState(true);
+                        getListFirstTwentyTasks();
                     })
                     .catch((err) => {
                         console.log(err);
-                        // setInitialSetupState(true);
                     });
             } else {
                 billingApi
@@ -1288,14 +1324,10 @@ function BillingModule() {
                         }
                     )
                     .then((res) => {
-                        var temp = runUseEffect;
-                        temp = temp + 1;
-                        setRunUseEffect(temp);
-                        // setInitialSetupState(true);
+                        getListFirstTwentyTasks();
                     })
                     .catch((err) => {
                         console.log(err);
-                        // setInitialSetupState(true);
                     });
             }
         }
@@ -1818,7 +1850,6 @@ function BillingModule() {
             setPdfState("")
         }
     }, [pdfState]);
-    console.log("taskCodeActive", taskCodeActive);
 
     return rightSideLoading ? (
         <div
@@ -2366,7 +2397,7 @@ function BillingModule() {
                         <Spin />
                     </div>
                 ) : null}
-                {(initialSetupState) ? (
+                {initialSetupState ? (
                     <div className="bm-right-container">
                         <div
                             style={{
