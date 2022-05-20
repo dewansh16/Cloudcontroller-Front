@@ -1229,22 +1229,12 @@ function BillingModule() {
             .getBillingTasks(location.state.pid, currentActiveMonth === "" ? dateMonthString : currentDateApi, '0')
             .then((res) => {
                 var tempFirstTwentyTasks = [];
-                var firstTotalTime = 0;
 
                 res.data.response.billingData.map(
                     (item) => {
                         if (item.code == CPT_CODE.CPT_99457) {
                             tempFirstTwentyTasks = JSON.parse(item.params);
                             if(!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
-                            
-                            if(tempFirstTwentyTasks.length > 0){
-                                tempFirstTwentyTasks.map(item => {
-                                    if(item.task_time_spend) {
-                                        firstTotalTime += item.task_time_spend;
-                                    }
-                                })
-                                firstTotalTime = firstTotalTime*60;
-                            }
                         }
                     }
                 );
