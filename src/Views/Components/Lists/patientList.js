@@ -170,7 +170,6 @@ const PatientListItem = (props) => {
         const query = `from(bucket: "emr_dev")
                         |> range(start: -6h)
                         |> filter(fn: (r) => r["_measurement"] == "patient999399cc-61b1-42d3-bb8b-c54e73ce7583_Temperature")
-                        |> filter(fn: (r) => r["_field"] == "value")
                         |> yield(name: "mean")`;
 
        
@@ -191,6 +190,7 @@ const PatientListItem = (props) => {
                         }
                     })
                 }
+                console.log('dataQueryInFlux', dataQueryInFlux);
             },
             error(error) {
                 console.error(error)
