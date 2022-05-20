@@ -31,6 +31,7 @@ import "./billingModule.css";
 import billingApi from "../../Apis/billingApis";
 import tenantApi from "../../Apis/tenantApis";
 import { CPT_CODE, CPT } from "../../Utils/utils";
+import {isArray} from 'lodash';
 
 const { Panel } = Collapse;
 const { TextArea } = Input;
@@ -1597,8 +1598,17 @@ function BillingModule() {
                                 };
                             }
                             if (item.code == CPT_CODE.CPT_99457) {
-                                tempFirstTwentyTasks = [JSON.parse(item.params)];
+                                tempFirstTwentyTasks = JSON.parse(item.params);
+                                if(!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
                                 setFirstTwentyTasks(tempFirstTwentyTasks);
+                                if(tempFirstTwentyTasks.length > 0){
+                                    tempFirstTwentyTasks.map(item => {
+                                        if(item.task_time_spend) {
+                                            firstTotalTime += item.task_time_spend;
+                                        }
+                                    })
+                                    firstTotalTime = firstTotalTime*60;
+                                }
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
                                 if (item.code_internal === "99458_stage1") {
@@ -1681,9 +1691,9 @@ function BillingModule() {
                     );
 
                     if (firstTotalTime === 1200) {
-                        setTaskCodeActive("99458");
+                        setTaskCodeActive(CPT_CODE.CPT_99458);
                     } else {
-                        setTaskCodeActive("99457");
+                        setTaskCodeActive(CPT_CODE.CPT_99457);
                     }
 
                     if (secondTotalTimeStageOne === 1200) {
