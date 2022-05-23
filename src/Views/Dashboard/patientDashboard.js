@@ -152,7 +152,7 @@ export default function PatientDashboard(props) {
         isLoading: true,
         list: [],
     });
-    const pageSize = 5;
+    const pageSize = 1;
     const [currentPageVal, setCurrentPageVal] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [patientDetails, setPatientDetails] = useState(null);
