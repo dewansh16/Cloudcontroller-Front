@@ -297,7 +297,6 @@ function BillingModule() {
     function initialSetupPost() {
         var date = new Date();
         var date_string = date.toISOString();
-        setInitialSetupLoading(false);
         billingApi
             .addBillingTask(
                 {
@@ -318,10 +317,11 @@ function BillingModule() {
                 temp = temp + 1;
                 setRunUseEffect(temp);
                 setInitialSetupState(true);
+                setInitialSetupLoading(false);
             })
             .catch((err) => {
                 console.log(err);
-                setInitialSetupState(true);
+                // setInitialSetupState(true);
             });
 
     }
@@ -1048,7 +1048,6 @@ function BillingModule() {
         }
         return result > 0 ? result : 0;
     }
-
 
     function callUpdateOnCodeChange(
         taskTimeVal,
@@ -1881,6 +1880,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
+                                        
                                     }}
                                     className={
                                         initialSetupState ? "bm-selected-active" : "bm-selected"
@@ -2273,7 +2273,7 @@ function BillingModule() {
                                 <CusBtn
                                     onClick={() => {
                                         setEnrolledState(true);
-                                        // setInitialSetupLoading(true);
+                                        setInitialSetupLoading(true);
                                         initialSetupPost();
                                     }}
                                     className="primary"
@@ -2365,6 +2365,7 @@ function BillingModule() {
                         </div>
                     )
                 ) : null}
+
                 {initialSetupLoading ? (
                     <div
                         style={{
@@ -2378,6 +2379,7 @@ function BillingModule() {
                         <Spin />
                     </div>
                 ) : null}
+
                 {initialSetupState ? (
                     <div className="bm-right-container">
                         <div
@@ -2478,6 +2480,7 @@ function BillingModule() {
                         </div>
                     </div>
                 ) : null}
+
                 {patchLoading ? (
                     <div
                         style={{
@@ -2599,7 +2602,7 @@ function BillingModule() {
                                         No Associated Devices
                                     </div>
                                 ) : (
-                                    <Collapse defaultActiveKey={["1"]} expandIconPosition="right">
+                                    <Collapse expandIconPosition="right">
                                         {patchArray.map((item, index) => (
                                             <Panel
                                                 header={
@@ -2644,6 +2647,7 @@ function BillingModule() {
                         </div>
                     </div>
                 ) : null}
+
                 {firstTwentyState ? (
                     tasksLoadingState ? (
                         <div

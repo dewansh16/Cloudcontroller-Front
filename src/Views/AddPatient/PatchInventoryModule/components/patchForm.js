@@ -361,13 +361,13 @@ const PatchForm = (props) => {
                     </Row>
 
                     <Form.Item
-                        required={!props.required}
+                        required={props.required}
                         label="Duration"
                         name={`${props.type === 'bps' ? valueBpType : props.type}_duration`}
                         rules={[
                             {
-                                required: !props.required,
-                                message: "serial number is required",
+                                required: props.required,
+                                message: "Duration is required",
                             },
                         ]}
                         className="addPatientDetailsModal"
