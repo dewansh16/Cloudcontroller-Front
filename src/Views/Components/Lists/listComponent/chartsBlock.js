@@ -67,21 +67,19 @@ export default function ChartsBlock({
                             </h3>
                         </div>
                     ) : (
-                        <h3 style={{ color: strokeColor }}>{value}</h3>
+                        <h3 style={{ color: strokeColor }}>{Math.round(value * 100) / 100}</h3>
                     )}
                 </Col>
             </Tooltip>
-            {chartData && (
-                <Col span={span[2]}>
-                    <div style={{ width: "100%", height: "100%" }}>
-                        <SmallLineChart
-                            chartData={chartData}
-                            dataKey={dataKey}
-                            strokeColor={strokeColor}
-                        />
-                    </div>
-                </Col>
-            )}
+            <Col span={span[2]}>
+                <div style={{ width: "100%", height: "100%" }}>
+                    <SmallLineChart
+                        chartData={chartData}
+                        dataKey={dataKey}
+                        strokeColor={strokeColor}
+                    />
+                </div>
+            </Col>
         </>
     );
 }

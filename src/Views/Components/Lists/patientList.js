@@ -113,7 +113,7 @@ const PatientListItem = (props) => {
             trendData: []
         },
         {
-            _key: 'alphamed',
+            _key: 'res_rate',
             name: "Respiration Rate",
             icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
             val: 0,
@@ -125,7 +125,7 @@ const PatientListItem = (props) => {
             trendData: []
         },
         {
-            _key: 'blood',
+            _key: 'alphamed_bps',
             name: "Blood Pressure",
             icon: Icons.bpIcon({
                 Style: { color: Colors.darkPurple, fontSize: "24px" },
@@ -146,6 +146,7 @@ const PatientListItem = (props) => {
             }),
             val: 0,
             color: Colors.yellow,
+            trendData: []
         },
     ]
 
@@ -155,7 +156,7 @@ const PatientListItem = (props) => {
 
     }, [props.data.ews_map, props.data.trend_map]);
 
-    const getDataFromInFluxForSensor = () => {
+    const getDataSensorFromInfluxDB = () => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
 
@@ -163,41 +164,18 @@ const PatientListItem = (props) => {
         const queryApi = client.getQueryApi(org);
 
         const newArrChart = [...chartBlockData];
-
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];
-            chart.trendData = [];
-
             const query = `from(bucket: "emr_dev")
-                            |> range(start: -6h)
-                            |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${chart?._key}")
-                            |> yield(name: "mean")`;
-        
+                    |> range(start: -6h)
+                    |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${chart?._key}")
+                    |> yield(name: "mean")`;
+
+            const arrayRes = [];
             queryApi.queryRows(query, {
                 next(row, tableMeta) {
-                    const dataQueryInFlux = tableMeta?.toObject(row);
-                    const measurement = dataQueryInFlux?._measurement?.split("_") || "";
-                    const patientId = measurement?.[0] || "";
-
-                    if (props.pid === patientId) {
-                        // newArrChart.forEach(chart => {
-                        //     if (chart.name === measurement?.[1]) {
-                        //         chart.val = dataQueryInFlux?._value;
-                        //         chart.trendData.push( {value: dataQueryInFlux?._value} );
-                        //         if (chart.trendData?.length > 30) {
-                        //             chart.trendData.splice(0, 1);
-                        //         }
-                        //     }
-                        // })
-                        if (chart._key === measurement?.[1]) {
-                            chart.val = dataQueryInFlux?._value;
-                            chart.trendData.push( {value: dataQueryInFlux?._value} );
-                            if (chart.trendData?.length > 30) {
-                                chart.trendData.splice(0, 1);
-                            }
-                        }
-                    }
-                    console.log('dataQueryInFlux', dataQueryInFlux);
+                    const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                    arrayRes.push({ value: dataQueryInFlux?._value || 0 });
                 },
                 error(error) {
                     console.error(error)
@@ -205,17 +183,23 @@ const PatientListItem = (props) => {
                 },
                 complete() {
                     console.log('nFinished SUCCESS');
+
+                    chart.trendData = arrayRes || [];
+                    chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
+                    if (chart.trendData?.length > 30) {
+                        chart.trendData.splice(0, 1);
+                    }
                     setChartBlockData(newArrChart);
                 },
             })
-        } 
-    }
+        }
+    };
 
     useEffect(() => {
-        getDataFromInFluxForSensor();
+        getDataSensorFromInfluxDB();
 
         const timeInterval = setInterval(() => {
-            getDataFromInFluxForSensor();
+            getDataSensorFromInfluxDB();
         }, 5000);
 
         return () => {
