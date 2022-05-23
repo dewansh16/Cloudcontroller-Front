@@ -1214,16 +1214,7 @@ function BillingModule() {
     }
 
     const getListFirstTwentyTasks = () => {
-        var billDate = new Date();
-        var billDateStr = getDateFromISO(billDate.toISOString());
-        var year = billDate.getFullYear();
-        var monthNumber = billDate.getMonth() + 1;
         var dateMonthString = "";
-
-        if (currentActiveMonth === "") {
-            dateMonthString = `${year}-${monthNumber < 10 ? "0" : ""}${monthNumber}`;
-            setCurrentDateApi(dateMonthString);
-        }
 
         billingApi
             .getBillingTasks(location.state.pid, currentActiveMonth === "" ? dateMonthString : currentDateApi, '0')
@@ -2793,7 +2784,7 @@ function BillingModule() {
                                     </div>
                                 ) : (
                                     <div className="bm-sensor-bottom-container">
-                                        <div className="bm-sensor-bottom-header">Task</div>
+                                        <div className="bm-sensor-bottom-header title-table">Task</div>
                                         <div className="bm-sensor-bottom-table-header">
                                             <div className="bm-item-header" style={{ width: "20%" }}>Date</div>
                                             <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
@@ -2802,7 +2793,7 @@ function BillingModule() {
 
                                         </div>
                                         <div style={{ overflowY: "scroll", height: "70%" }}>
-                                            <Collapse defaultActiveKey={["1"]} expandIconPosition="right">
+                                            <Collapse expandIconPosition="right">
                                                 {firstTwentyTasks.map((item, index) => (
                                                     <Panel
                                                         header={

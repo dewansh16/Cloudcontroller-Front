@@ -276,3 +276,12 @@
     right: 0;
     width: 5%;
 }
+
+.bm-sensor-bottom-container .title-table {
+    height: auto;
+    padding: 0.25rem 0;
+}
+
+.bm-twenty-bottom-container .bm-sensor-bottom-container {
+    margin-top: 1rem;
+}
