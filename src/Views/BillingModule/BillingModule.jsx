@@ -2665,7 +2665,15 @@ function BillingModule() {
                                 style={addTaskState ? { filter: "blur(4px)" } : null}
                                 className="bm-twenty-bottom-container"
                             >
-                                <div className="bm-twenty-header">Tasks <CusBtn onClick={() => { /* setRightSideLoading(true); */ handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn> </div>
+                                <div className="bm-twenty-header">
+                                    Tasks 
+                                    {/* <CusBtn 
+                                        onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} 
+                                        className="primary" 
+                                        style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }}
+                                        disabled={taskDeleteArray.length === 0 ? true : false} 
+                                    >Delete</CusBtn> */}
+                                </div>
                                 {firstTwentyTasks.length === 0 ? (
                                     <div
                                         style={{
@@ -2969,7 +2977,15 @@ function BillingModule() {
                                     }
                                     className="bm-twenty-bottom-container"
                                 >
-                                    <div className="bm-twenty-header">Tasks<CusBtn onClick={() => { /* setRightSideLoading(true); */ handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn></div>
+                                    <div className="bm-twenty-header">
+                                        Tasks
+                                        {/* <CusBtn 
+                                            onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} 
+                                            className="primary" 
+                                            style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} 
+                                            disabled={taskDeleteArray.length === 0 ? true : false} 
+                                        >Delete</CusBtn> */}
+                                    </div>
                                     {secondTwentyTasks.length === 0 ? (
                                         <div
                                             style={{
@@ -3077,7 +3093,15 @@ function BillingModule() {
                                     }
                                     className="bm-twenty-bottom-container"
                                 >
-                                    <div className="bm-twenty-header">Tasks<CusBtn onClick={() => { /* setRightSideLoading(true); */ handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn></div>
+                                    <div className="bm-twenty-header">
+                                        Tasks
+                                        {/* <CusBtn 
+                                            onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} 
+                                            className="primary" 
+                                            style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} 
+                                            disabled={taskDeleteArray.length === 0 ? true : false} 
+                                        >Delete</CusBtn> */}
+                                    </div>
                                     {secondTwentyStageTwoTasks.length === 0 ? (
                                         <div
                                             style={{
