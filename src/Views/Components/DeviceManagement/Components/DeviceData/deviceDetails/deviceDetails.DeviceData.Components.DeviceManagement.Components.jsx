@@ -36,13 +36,13 @@ function CreateGraphData(pid, deviceType) {
             .getTrends(pid, today)
             .then((res) => {
                 const batType = res.data.response.trend_map.trend_map[deviceTypeMap[deviceType][1]][deviceTypeMap[deviceType][0]];
-                const batMax = batType.length
+                const batMax = 10;
                 //TODO: add a limit if required const batMax = batType.length > 10 ? 10 : batType.length
                 for (let i = 0; i < batMax; i++) {
-                    let date = getCurrentDate(batType[i]["date"])
+                    let date = new Date();
                     let tempData = {}
                     tempData["time"] = date
-                    tempData["value"] = parseInt(batType[i]["value"])
+                    tempData["value"] = i + 10
                     data.push(tempData)
                 }
                 setData([...data.reverse()]);
@@ -79,7 +79,25 @@ function GetPatientOTP(pid, setOtp, setOtpLoading, callback = () => { }) {
 }
 
 function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
-    const [data, isLoading] = CreateGraphData(pid, deviceType);
+    // const [data, isLoading] = CreateGraphData(pid, deviceType);
+    const isLoading = false;
+
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        const arr = [];
+        var today = new Date();
+
+        for (let index = 0; index < 20; index++) {
+            arr.push({
+                "time": today.setDate(today.getDate() + index),
+                "value": Math.floor(Math.random() * 100) + 1,
+            })
+        }
+        setData(arr);
+    }, []);
+
+    console.log("data", data);
 
     const config = {
         data,
@@ -200,7 +218,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
         })
     }
 
-    const onFinishFailed = (values) => {};
+    const onFinishFailed = (values) => { };
 
     const [otp, setOtp] = useState(null);
     const [otpLoading, setOtpLoading] = useState(null);
@@ -241,7 +259,11 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
                         <p style={{ textAlign: "center" }}><span>Battery Trend</span></p>
                     </Col>
                 </Row>
-                {data && <Line {...config} />}
+                {data && (
+                    <>
+                        <Line {...config} />
+                    </>
+                )}
                 <div style={{ margin: '4em 0px' }}>
                     <Row className='device-info-box'>
                         <Col className='device-info' span={12}>
@@ -252,7 +274,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
                         </Col> */}
                     </Row>
                 </div>
-            </div> 
+            </div>
             :
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "332px" }}>
                 <Spin />
@@ -409,17 +431,17 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
                     }
                 </>}
 
-                <Buttons 
-                    disabled={contentPosition === "keepAlive"} 
-                    onClick={() => { setContentPosition("keepAlive"); fetchKeepAliveHistrory() }} 
+                <Buttons
+                    disabled={contentPosition === "keepAlive"}
+                    onClick={() => { setContentPosition("keepAlive"); fetchKeepAliveHistrory() }}
                     type="utility"
                 >
                     Keep Alive
                 </Buttons>
 
-                <Buttons 
-                    disabled={contentPosition === "testBaseline"} 
-                    onClick={() => setContentPosition("testBaseline")} 
+                <Buttons
+                    disabled={contentPosition === "testBaseline"}
+                    onClick={() => setContentPosition("testBaseline")}
                     type="utility"
                 >
                     Test & Baseline
