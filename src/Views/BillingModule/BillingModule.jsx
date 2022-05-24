@@ -1228,7 +1228,6 @@ function BillingModule() {
                         }
                     }
                 );
-
                 setFirstTwentyTasks(tempFirstTwentyTasks);
             })
     }
