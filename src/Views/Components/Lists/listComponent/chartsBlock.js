@@ -5,11 +5,13 @@ import SmallLineChart from "../../Charts/smallCharts/lineChart";
 export default function ChartsBlock({
     Icon,
     value,
+    valueBpd,
     name,
     chartData,
     dataKey,
     strokeColor,
     span = [1, 1, 2],
+    keyChart
 }) {
     const toolTipConfig = {
         Temperature: `${value}° F`,
@@ -18,6 +20,8 @@ export default function ChartsBlock({
         "Respiration Rate": `${value} bpm`,
         "Weight": `${value} kg`
     };
+
+    console.log("valueBpd", valueBpd);
 
     return (
         <>
@@ -53,7 +57,7 @@ export default function ChartsBlock({
                                     textAlign: "center",
                                 }}
                             >
-                                {value}
+                                {Math.round(value * 100) / 100}
                             </h3>
                             <Divider style={{ margin: "0px" }} />
                             <h3
@@ -63,7 +67,7 @@ export default function ChartsBlock({
                                     textAlign: "center",
                                 }}
                             >
-                                0
+                                {Math.round(valueBpd * 100) / 100}
                             </h3>
                         </div>
                     ) : (
@@ -71,8 +75,8 @@ export default function ChartsBlock({
                     )}
                 </Col>
             </Tooltip>
-            <Col span={span[2]}>
-                <div style={{ width: "100%", height: "100%" }}>
+            <Col span={span[2]} style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "100%", height: "100%", marginBottom: `${keyChart === "alphamed_bps" ? "-20px" : "0px"}` }}>
                     <SmallLineChart
                         chartData={chartData}
                         dataKey={dataKey}
