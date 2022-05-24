@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import moment from "moment";
 import {
@@ -188,6 +188,8 @@ function AddPatient() {
     const saveBundleDetails = (values) => {
         setBundleData({ ...bundleData, ...values });
     };
+
+    console.log("patchData",patchData);
 
     // factory method to validate data in global store
     function validate(data, schema) {
@@ -859,6 +861,18 @@ function AddPatient() {
         }
     };
 
+    const disabledBtnSaveSensor = useMemo(() => {
+        let disabled = true;
+        Object.keys(patchData).forEach(patch => {
+            if (!!patchData?.[patch]?.patch_uuid && !!patchData?.[patch]?.duration) {
+                disabled = false;
+            }
+        })
+        return disabled;
+    }, [patchData]);
+
+    console.log("disabledBtnSaveSensor", disabledBtnSaveSensor);
+
     return summary.isVisible ? (
         <div className="flex-container">
             <div className="section-container">
@@ -1056,21 +1070,7 @@ function AddPatient() {
                                         type="primary"
                                         style={{ marginRight: "2em" }}
                                         onClick={addPatch}
-                                        disabled={
-                                            bundleData.ecg === null &&
-                                            bundleData.spo2 === null &&
-                                            bundleData.temperature === null &&
-                                            bundleData.gateway === null &&
-                                            patchData.ecg === null &&
-                                            patchData.spo2 === null &&
-                                            patchData.temperature === null &&
-                                            patchData.gateway === null &&
-                                            patchData.alphamed === null &&
-                                            patchData.ihealth === null &&
-                                            patchData.digital === null
-                                            ? true
-                                            : false
-                                        }
+                                        disabled={disabledBtnSaveSensor}
                                     >
                                         Save Sensor
                                     </Button>
