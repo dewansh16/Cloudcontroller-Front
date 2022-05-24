@@ -86,8 +86,6 @@ function BillingModule() {
     // const [billProcessedLoading, setBillProcessedLoading] = useState(true);
     const [billProcessedLoading, setBillProcessedLoading] = useState(false);
 
-    console.log('tenantuuid', tenantuuid);
-
     const [initialBillDate, setInitialBillDate] = useState('')
 
     const [taskDeleteArray, setTaskDeleteArray] = useState([])
@@ -299,7 +297,6 @@ function BillingModule() {
     function initialSetupPost() {
         var date = new Date();
         var date_string = date.toISOString();
-        setInitialSetupLoading(false);
         billingApi
             .addBillingTask(
                 {
@@ -320,10 +317,11 @@ function BillingModule() {
                 temp = temp + 1;
                 setRunUseEffect(temp);
                 setInitialSetupState(true);
+                setInitialSetupLoading(false);
             })
             .catch((err) => {
                 console.log(err);
-                setInitialSetupState(true);
+                // setInitialSetupState(true);
             });
 
     }
@@ -1051,7 +1049,6 @@ function BillingModule() {
         return result > 0 ? result : 0;
     }
 
-
     function callUpdateOnCodeChange(
         taskTimeVal,
         taskTimeConsidered,
@@ -1215,6 +1212,27 @@ function BillingModule() {
         stageTwoState(true);
     }
 
+    const getListFirstTwentyTasks = () => {
+        var dateMonthString = "";
+
+        billingApi
+            .getBillingTasks(location.state.pid, currentActiveMonth === "" ? dateMonthString : currentDateApi, '0')
+            .then((res) => {
+                var tempFirstTwentyTasks = [];
+
+                res.data.response.billingData.map(
+                    (item) => {
+                        if (item.code == CPT_CODE.CPT_99457) {
+                            tempFirstTwentyTasks = JSON.parse(item.params);
+                            if(!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
+                        }
+                    }
+                );
+
+                setFirstTwentyTasks(tempFirstTwentyTasks);
+            })
+    }
+
     function callUpdateBillingTasks(cptCode, item = {}) {
         var date = new Date();
         var date_string = date.toISOString();
@@ -1262,14 +1280,10 @@ function BillingModule() {
                         updateData
                     )
                     .then((res) => {
-                        var temp = runUseEffect;
-                        temp = temp + 1;
-                        setRunUseEffect(temp);
-                        // setInitialSetupState(true);
+                        getListFirstTwentyTasks();
                     })
                     .catch((err) => {
                         console.log(err);
-                        // setInitialSetupState(true);
                     });
             } else {
                 billingApi
@@ -1290,14 +1304,10 @@ function BillingModule() {
                         }
                     )
                     .then((res) => {
-                        var temp = runUseEffect;
-                        temp = temp + 1;
-                        setRunUseEffect(temp);
-                        // setInitialSetupState(true);
+                        getListFirstTwentyTasks();
                     })
                     .catch((err) => {
                         console.log(err);
-                        // setInitialSetupState(true);
                     });
             }
         }
@@ -1831,7 +1841,6 @@ function BillingModule() {
                 alignItems: "center",
             }}
         >
-            7
             <Spin />
         </div>
     ) : (
@@ -1871,9 +1880,10 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
+                                        
                                     }}
                                     className={
-                                        initialSetupState ? "bm-selected-active 1" : "bm-selected"
+                                        initialSetupState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -1916,7 +1926,7 @@ function BillingModule() {
                                     }}
                                     className={
                                         associatedSensorsState
-                                            ? "bm-selected-active 2"
+                                            ? "bm-selected-active"
                                             : "bm-selected"
                                     }
                                 ></div>
@@ -1968,7 +1978,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        firstTwentyState ? "bm-selected-active 3" : "bm-selected"
+                                        firstTwentyState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -2019,7 +2029,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        secondTwentyState ? "bm-selected-active 4" : "bm-selected"
+                                        secondTwentyState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -2076,7 +2086,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        lastBillingState ? "bm-selected- 5" : "bm-selected"
+                                        lastBillingState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -2122,7 +2132,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        billProcessedState ? "bm-selected-active 6" : "bm-selected"
+                                        billProcessedState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -2160,7 +2170,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                     }}
                                     className={
-                                        summaryState ? "bm-selected-active 7" : "bm-selected"
+                                        summaryState ? "bm-selected-active" : "bm-selected"
                                     }
                                 ></div>
                             ) : null}
@@ -2263,7 +2273,7 @@ function BillingModule() {
                                 <CusBtn
                                     onClick={() => {
                                         setEnrolledState(true);
-                                        // setInitialSetupLoading(true);
+                                        setInitialSetupLoading(true);
                                         initialSetupPost();
                                     }}
                                     className="primary"
@@ -2355,6 +2365,7 @@ function BillingModule() {
                         </div>
                     )
                 ) : null}
+
                 {initialSetupLoading ? (
                     <div
                         style={{
@@ -2365,10 +2376,10 @@ function BillingModule() {
                             alignItems: "center",
                         }}
                     >
-                        1
                         <Spin />
                     </div>
                 ) : null}
+
                 {initialSetupState ? (
                     <div className="bm-right-container">
                         <div
@@ -2469,6 +2480,7 @@ function BillingModule() {
                         </div>
                     </div>
                 ) : null}
+
                 {patchLoading ? (
                     <div
                         style={{
@@ -2479,7 +2491,6 @@ function BillingModule() {
                             alignItems: "center",
                         }}
                     >
-                        2
                         <Spin />
                     </div>
                 ) : associatedSensorsState ? (
@@ -2591,7 +2602,7 @@ function BillingModule() {
                                         No Associated Devices
                                     </div>
                                 ) : (
-                                    <Collapse defaultActiveKey={["1"]} expandIconPosition="right">
+                                    <Collapse expandIconPosition="right">
                                         {patchArray.map((item, index) => (
                                             <Panel
                                                 header={
@@ -2636,6 +2647,7 @@ function BillingModule() {
                         </div>
                     </div>
                 ) : null}
+
                 {firstTwentyState ? (
                     tasksLoadingState ? (
                         <div
@@ -2647,7 +2659,6 @@ function BillingModule() {
                                 alignItems: "center",
                             }}
                         >
-                            3
                             <Spin />
                         </div>
                     ) : (
@@ -2777,7 +2788,7 @@ function BillingModule() {
                                     </div>
                                 ) : (
                                     <div className="bm-sensor-bottom-container">
-                                        <div className="bm-sensor-bottom-header">Task</div>
+                                        <div className="bm-sensor-bottom-header title-table">Task</div>
                                         <div className="bm-sensor-bottom-table-header">
                                             <div className="bm-item-header" style={{ width: "20%" }}>Date</div>
                                             <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
@@ -2786,7 +2797,7 @@ function BillingModule() {
 
                                         </div>
                                         <div style={{ overflowY: "scroll", height: "70%" }}>
-                                            <Collapse defaultActiveKey={["1"]} expandIconPosition="right">
+                                            <Collapse expandIconPosition="right">
                                                 {firstTwentyTasks.map((item, index) => (
                                                     <Panel
                                                         header={
@@ -2855,7 +2866,6 @@ function BillingModule() {
                                 alignItems: "center",
                             }}
                         >
-                            4
                             <Spin />
                         </div>
                     ) : (
@@ -3269,7 +3279,6 @@ function BillingModule() {
                             alignItems: "center",
                         }}
                     >
-                        5
                         <Spin />
                     </div>
                 ) : lastBillingState ? (
@@ -3386,7 +3395,6 @@ function BillingModule() {
                                 alignItems: "center",
                             }}
                         >
-                            6
                             <Spin />
                         </div>
                     ) : (
