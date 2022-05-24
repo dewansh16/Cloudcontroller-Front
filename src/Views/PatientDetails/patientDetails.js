@@ -638,7 +638,7 @@ export default function PatientDetails(props) {
                                             }}
                                             span={4}
                                         >
-                                            {/* <Buttons
+                                            <Buttons
                                                 style={{
                                                     border: "1px solid #878787",
                                                     borderRadius: "10px",
@@ -654,7 +654,7 @@ export default function PatientDetails(props) {
                                             >
                                                 {Icons.editPencil({})}
                                                 <span style={{ marginLeft: "4px" }}>Edit</span>
-                                            </Buttons> */}
+                                            </Buttons>
                                         </Col>
                                     </Row>
                                 </Col>

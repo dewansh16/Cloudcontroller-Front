@@ -131,12 +131,16 @@ const PatientListItem = (props) => {
                 Style: { color: Colors.darkPurple, fontSize: "24px" },
             }),
             val: 0,
+            val_bpd: 0,
             color: Colors.darkPurple,
             // val:
             // parseInt(props.data.ews_map?.rr) === -1
             //   ? "NA"
             //   : props.data.ews_map?.rr,
             trendData: []
+        },
+        {
+            _key: 'alphamed_bpd',
         },
         {
             _key: 'weight',
@@ -175,7 +179,11 @@ const PatientListItem = (props) => {
             queryApi.queryRows(query, {
                 next(row, tableMeta) {
                     const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                    arrayRes.push({ value: dataQueryInFlux?._value || 0 });
+                    if (chart?._key !== "alphamed_bpd") {
+                        arrayRes.push({ value: dataQueryInFlux?._value || 0 });
+                    } else {
+                        newArrChart[index - 1].val_bpd = dataQueryInFlux?._value || 0;
+                    }
                 },
                 error(error) {
                     console.error(error)
@@ -183,13 +191,14 @@ const PatientListItem = (props) => {
                 },
                 complete() {
                     console.log('nFinished SUCCESS');
-
-                    chart.trendData = arrayRes || [];
-                    chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-                    if (chart.trendData?.length > 30) {
-                        chart.trendData.splice(0, 1);
+                    if (arrayRes?.length > 0 && chart?._key !== "alphamed_bpd") {
+                        chart.trendData = arrayRes || [];
+                        chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
+                        if (chart.trendData?.length > 30) {
+                            chart.trendData.splice(0, 1);
+                        }
+                        setChartBlockData([...newArrChart]);
                     }
-                    setChartBlockData(newArrChart);
                 },
             })
         }
@@ -198,13 +207,13 @@ const PatientListItem = (props) => {
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        const timeInterval = setInterval(() => {
-            getDataSensorFromInfluxDB();
-        }, 5000);
+        // const timeInterval = setInterval(() => {
+        //     getDataSensorFromInfluxDB();
+        // }, 5000);
 
-        return () => {
-            clearInterval(timeInterval);
-        }
+        // return () => {
+        //     clearInterval(timeInterval);
+        // }
     }, []);
 
     // React.useEffect(() => {
@@ -354,6 +363,8 @@ const PatientListItem = (props) => {
     const ChartSection = ({ width }) => (
         <Row justify="space-around" gutter={2} style={{ width: width }}>
             {chartBlockData.map((item, i) => {
+                if (item?._key === "alphamed_bpd") return null;
+
                 if (i !== 0)
                     return (
                         <React.Fragment key={i}>
@@ -369,9 +380,11 @@ const PatientListItem = (props) => {
                                 Icon={item.icon}
                                 name={item.name}
                                 value={item.val}
+                                valueBpd={item?.val_bpd || 0}
                                 chartData={item.trendData}
                                 dataKey="value"
                                 strokeColor={item.color}
+                                keyChart={item?._key}
                             />
                         </React.Fragment>
                     );
@@ -382,9 +395,11 @@ const PatientListItem = (props) => {
                             Icon={item.icon}
                             name={item.name}
                             value={item.val}
+                            valueBpd={item?.val_bpd || 0}
                             chartData={item.trendData}
                             dataKey="value"
                             strokeColor={item.color}
+                            keyChart={item?._key}
                         />
                     );
             })}
@@ -411,7 +426,7 @@ const PatientListItem = (props) => {
                 <BedDetailsSection width="10%" />
                 <CustomDivider />
                 <NameSection width="10%" />
-                {/* <CustomDivider />
+                <CustomDivider />
                 <div
                     style={{
                         width: "20%",
@@ -423,7 +438,7 @@ const PatientListItem = (props) => {
                     <Button onClick={pushToEdit} type="secondary">
                         Edit Patient
                     </Button>
-                </div> */}
+                </div>
                 <CustomDivider />
                 <div
                     style={{
