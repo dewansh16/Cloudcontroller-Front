@@ -1699,7 +1699,7 @@ function BillingModule() {
                         Math.floor(secondTotalTimeStageTwo / 60)
                     );
 
-                    if (firstTotalTime === 1200) {
+                    if (firstTotalTime >= 1200) {
                         setTaskCodeActive(CPT_CODE.CPT_99458);
                     } else {
                         setTaskCodeActive(CPT_CODE.CPT_99457);
@@ -2722,7 +2722,7 @@ function BillingModule() {
                                 style={addTaskState ? { filter: "blur(4px)" } : null}
                                 className="bm-sensor-mid"
                             >
-                                {firstTwentyData.date ? (
+                                {firstTotalTime >= 1200 ? (
                                     <div style={{ fontSize: "1.2rem" }}>
                                         {`CPT code: 99457 enabled at  ${firstTwentyData.date}`}
                                     </div>
@@ -2848,7 +2848,7 @@ function BillingModule() {
                                                 setAddTaskState(true);
                                             }}
                                             style={{ padding: "1% 5%" }}
-                                            disabled={firstTotalTime === 1200 ? true : false}
+                                            disabled={firstTotalTime >= 1200 ? true : false}
                                         >
                                             Add
                                         </CusBtn>
