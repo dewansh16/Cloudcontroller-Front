@@ -53,6 +53,10 @@ function DeviceManagement({ pid }) {
         return list;
     }
 
+    // useEffect(() => {
+    //     getDataSensorFromInfluxDB();
+    // }, [])
+
     useEffect(() => {
         const { tenant = '' } = UserStore.getUser();
 

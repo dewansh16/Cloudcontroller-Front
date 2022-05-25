@@ -21,8 +21,6 @@ export default function ChartsBlock({
         "Weight": `${value} kg`
     };
 
-    console.log("valueBpd", valueBpd);
-
     return (
         <>
             <Tooltip title={name}>
