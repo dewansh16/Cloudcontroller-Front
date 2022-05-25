@@ -226,8 +226,6 @@ function BillingModule() {
         setRunUseEffect(temp);
     }
 
-    console.log("patchEnrolled", patchEnrolled);
-
     function findDateIndex(month) {
         return month === currentActiveMonth;
     }
@@ -1583,7 +1581,6 @@ function BillingModule() {
                     var secondTotalTimeStageTwo = 0;
                     res.data.response.billingData.map(
                         (item) => {
-                            console.log("item ------------", item.code, item);
                             tempDataSource.push({
                                 date: `${getDateFromISO(item.bill_date)} ${getTimeFromISO(
                                     item.bill_date
