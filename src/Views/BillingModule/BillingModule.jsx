@@ -360,6 +360,7 @@ function BillingModule() {
                         onClick={() => {
                             item.task_time_spent = Math.floor(timeCount / 60);
                             timeCount = 0;
+                            stopCountTimer();
                             setTimerTask(false);
                             callUpdateBillingTasks(CPT_CODE.CPT_99457, item)
                         }}
