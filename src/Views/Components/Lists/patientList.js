@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { io } from "socket.io-client";
+import { InfluxDB } from "@influxdata/influxdb-client";
 
 import { Row, Col, Divider, Grid, Tooltip } from "antd";
 import Colors from "../../../Theme/Colors/colors";
@@ -12,7 +13,7 @@ const { useBreakpoint } = Grid;
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
 
-    console.log("props", props);
+    // console.log("props", props);
 
     const dividerColor = "black";
     const listThemeColor = "#444444";
@@ -112,7 +113,7 @@ const PatientListItem = (props) => {
             trendData: []
         },
         {
-            _key: 'alphamed',
+            _key: 'res_rate',
             name: "Respiration Rate",
             icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
             val: 0,
@@ -124,18 +125,22 @@ const PatientListItem = (props) => {
             trendData: []
         },
         {
-            _key: 'blood',
+            _key: 'alphamed_bps',
             name: "Blood Pressure",
             icon: Icons.bpIcon({
                 Style: { color: Colors.darkPurple, fontSize: "24px" },
             }),
             val: 0,
+            val_bpd: 0,
             color: Colors.darkPurple,
             // val:
             // parseInt(props.data.ews_map?.rr) === -1
             //   ? "NA"
             //   : props.data.ews_map?.rr,
             trendData: []
+        },
+        {
+            _key: 'alphamed_bpd',
         },
         {
             _key: 'weight',
@@ -145,6 +150,7 @@ const PatientListItem = (props) => {
             }),
             val: 0,
             color: Colors.yellow,
+            trendData: []
         },
     ]
 
@@ -154,19 +160,75 @@ const PatientListItem = (props) => {
 
     }, [props.data.ews_map, props.data.trend_map]);
 
-    React.useEffect(() => { 
-        var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
-        socket.on('SENSOR_LOG', function (data) {
-            const dataSocket = data.body;
-            console.log("data SENSOR_LOG", data);
+    const getDataSensorFromInfluxDB = () => {
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
 
-            if (dataSocket.patientUUID === props.pid) {
-                const sensorFound = chartBlockData.find(item => item._key === dataSocket.deviceType);
-                sensorFound.val = dataSocket.bps || 0;
-                setChartBlockData([...chartBlockData]);
-            }
-        })
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+
+        const newArrChart = [...chartBlockData];
+        for (let index = 0; index < newArrChart.length; index++) {
+            const chart = newArrChart[index];
+            const query = `from(bucket: "emr_dev")
+                    |> range(start: -6h)
+                    |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${chart?._key}")
+                    |> yield(name: "mean")`;
+
+            const arrayRes = [];
+            queryApi.queryRows(query, {
+                next(row, tableMeta) {
+                    const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                    if (chart?._key !== "alphamed_bpd") {
+                        arrayRes.push({ value: dataQueryInFlux?._value || 0 });
+                    } else {
+                        newArrChart[index - 1].val_bpd = dataQueryInFlux?._value || 0;
+                    }
+                },
+                error(error) {
+                    console.error(error)
+                    console.log('nFinished ERROR')
+                },
+                complete() {
+                    console.log('nFinished SUCCESS');
+                    if (arrayRes?.length > 0 && chart?._key !== "alphamed_bpd") {
+                        chart.trendData = arrayRes || [];
+                        chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
+                        if (chart.trendData?.length > 30) {
+                            chart.trendData.splice(0, 1);
+                        }
+                        setChartBlockData([...newArrChart]);
+                    }
+                },
+            })
+        }
+    };
+
+    useEffect(() => {
+        getDataSensorFromInfluxDB();
+
+        // const timeInterval = setInterval(() => {
+        //     getDataSensorFromInfluxDB();
+        // }, 5000);
+
+        // return () => {
+        //     clearInterval(timeInterval);
+        // }
     }, []);
+
+    // React.useEffect(() => {
+    //     var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
+    //     socket.on('SENSOR_LOG', function (data) {
+    //         const dataSocket = data.body;
+    //         console.log("data SENSOR_LOG", data);
+
+    //         if (dataSocket.patientUUID === props.pid) {
+    //             const sensorFound = chartBlockData.find(item => item._key === dataSocket.deviceType);
+    //             sensorFound.val = dataSocket.bps || 0;
+    //             setChartBlockData([...chartBlockData]);
+    //         }
+    //     })
+    // }, []);
 
     const pushToPatientDetails = () => {
         props.parentProps.history.push(`/dashboard/patient/details/${props.pid}`);
@@ -183,7 +245,7 @@ const PatientListItem = (props) => {
             state: {
                 deboarded: true,
             },
-        });                     
+        });
     };
 
     const ShowPatientDetails = (e) => {
@@ -301,6 +363,8 @@ const PatientListItem = (props) => {
     const ChartSection = ({ width }) => (
         <Row justify="space-around" gutter={2} style={{ width: width }}>
             {chartBlockData.map((item, i) => {
+                if (item?._key === "alphamed_bpd") return null;
+
                 if (i !== 0)
                     return (
                         <React.Fragment key={i}>
@@ -316,9 +380,11 @@ const PatientListItem = (props) => {
                                 Icon={item.icon}
                                 name={item.name}
                                 value={item.val}
+                                valueBpd={item?.val_bpd || 0}
                                 chartData={item.trendData}
                                 dataKey="value"
                                 strokeColor={item.color}
+                                keyChart={item?._key}
                             />
                         </React.Fragment>
                     );
@@ -329,9 +395,11 @@ const PatientListItem = (props) => {
                             Icon={item.icon}
                             name={item.name}
                             value={item.val}
+                            valueBpd={item?.val_bpd || 0}
                             chartData={item.trendData}
                             dataKey="value"
                             strokeColor={item.color}
+                            keyChart={item?._key}
                         />
                     );
             })}
@@ -358,7 +426,7 @@ const PatientListItem = (props) => {
                 <BedDetailsSection width="10%" />
                 <CustomDivider />
                 <NameSection width="10%" />
-                {/* <CustomDivider />
+                <CustomDivider />
                 <div
                     style={{
                         width: "20%",
@@ -370,7 +438,7 @@ const PatientListItem = (props) => {
                     <Button onClick={pushToEdit} type="secondary">
                         Edit Patient
                     </Button>
-                </div> */}
+                </div>
                 <CustomDivider />
                 <div
                     style={{
