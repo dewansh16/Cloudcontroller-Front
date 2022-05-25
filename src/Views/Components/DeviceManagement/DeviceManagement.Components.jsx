@@ -110,7 +110,8 @@ function DeviceManagement({ pid, associated_list }) {
             patch_uuid: uuid,
             type_device: type,
             associated_list: JSON.parse(associated_list),
-            action: "unassociate"
+            action: "unassociate",
+            pid: pid
         })
             .then(() => {
                 let newList = [...deviceClass.list];
