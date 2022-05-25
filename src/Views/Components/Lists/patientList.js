@@ -101,7 +101,7 @@ const PatientListItem = (props) => {
             trendData: []
         },
         {
-            _key: 'heart',
+            _key: 'ecg_hr',
             name: "Heart Rate",
             icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
             val: 0,
@@ -113,7 +113,7 @@ const PatientListItem = (props) => {
             trendData: []
         },
         {
-            _key: 'res_rate',
+            _key: 'ecg_rr',
             name: "Respiration Rate",
             icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
             val: 0,

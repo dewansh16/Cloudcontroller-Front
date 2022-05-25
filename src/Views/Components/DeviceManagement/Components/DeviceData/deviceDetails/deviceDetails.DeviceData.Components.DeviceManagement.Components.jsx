@@ -34,7 +34,19 @@ function CreateGraphData(pid, deviceType) {
     const newDeviceType = useMemo(() => {
         switch (deviceType) {
             case "gateway":
+                return "gateway"
+            case "ecg":
                 return "ecg"
+            case "ihealth":
+                return "ihealth"
+            case "temperature":
+                return "temp"
+            case "alphamed":
+                return "alphamed"
+            case "spo2":
+                return "spo2"
+            case "digital":
+                return "weight"
             default:
                 break;
         }
@@ -49,7 +61,7 @@ function CreateGraphData(pid, deviceType) {
     
         const query = `from(bucket: "emr_dev")
                 |> range(start: -12h)
-                |> filter(fn: (r) => r["_measurement"] == "patient73b699c7-571b-4fb2-a88f-768ba293349e_${newDeviceType}_battery")
+                |> filter(fn: (r) => r["_measurement"] == "${pid}_${newDeviceType}_battery")
                 |> yield(name: "mean")`;
     
         const arrBattery = [];
@@ -60,6 +72,8 @@ function CreateGraphData(pid, deviceType) {
 
                 const measurement = dataQueryInFlux?._measurement.split("_");
                 const keyDevice = measurement[1] || "";
+
+                console.log("dataQueryInFlux", dataQueryInFlux);
 
                 if (keyDevice === newDeviceType) {
                     arrBattery.push({
@@ -131,7 +145,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
         },
         yAxis: {
             min: 0,
-            max: 100,
+            max: 120,
         },
         size: 8,
         tooltip: {
