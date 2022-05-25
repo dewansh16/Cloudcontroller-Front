@@ -4,7 +4,6 @@ import DeviceDetails from "./Components/DeviceData/deviceDetails/deviceDetails.D
 
 import patientApi from "../../../Apis/patientApis";
 import { UserStore } from "../../../Stores/userStore";
-import { InfluxDB } from "@influxdata/influxdb-client";
 
 import "./DeviceManagement.css";
 
@@ -54,36 +53,9 @@ function DeviceManagement({ pid }) {
         return list;
     }
 
-    const getDataSensorFromInfluxDB = () => {
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
-
-        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-        const queryApi = client.getQueryApi(org);
-
-        const query = `from(bucket: "emr_dev")
-                |> range(start: -12h)
-                |> filter(fn: (r) => r["_measurement"] == "patient398b4a19-83d6-42f8-9ad0-a164a2a55f8e_ihealth_battery")
-                |> yield(name: "mean")`;
-
-        queryApi.queryRows(query, {
-            next(row, tableMeta) {
-                const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                console.log("dataQueryInFlux", dataQueryInFlux);
-            },
-            error(error) {
-                console.error(error)
-                console.log('nFinished ERROR')
-            },
-            complete() {
-                console.log('nFinished SUCCESS');
-            },
-        })
-    };
-
-    useEffect(() => {
-        getDataSensorFromInfluxDB();
-    }, [])
+    // useEffect(() => {
+    //     getDataSensorFromInfluxDB();
+    // }, [])
 
     useEffect(() => {
         const { tenant = '' } = UserStore.getUser();

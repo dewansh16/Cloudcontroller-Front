@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import './deviceDetails.DeviceData.Components.PatientQuickInfo.Components.css'
 import { Menu, Col, Row, notification, Divider, Popover, Form, Tooltip, Spin, Popconfirm } from '../../../../../../Theme/antdComponents'
 import { Input, InputNumber, GlobalTextArea } from '../../../../../../Theme/Components/Input/input'
@@ -6,9 +6,11 @@ import Icons from '../../../../../../Utils/iconMap'
 
 import { Button as Buttons } from '../../../../../../Theme/Components/Button/button'
 
-import { Line } from '@ant-design/charts';
 import patientApi from '../../../../../../Apis/patientApis'
 import { SelectOption, Select } from '../../../../../../Theme/Components/Select/select'
+
+import { Line } from '@ant-design/charts';
+import { InfluxDB } from "@influxdata/influxdb-client";
 
 const deviceTypeMap = {
     ecg: ['bat_ecg', 7],
@@ -26,40 +28,74 @@ function getCurrentDate(dateTime) {
 }
 
 function CreateGraphData(pid, deviceType) {
-    const [response, setResponse] = useState(null)
-    const [loading, setLoading] = useState(false)
-    const [data, setData] = useState([])
-    const today = new Date();
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState([]);
+
+    const newDeviceType = useMemo(() => {
+        switch (deviceType) {
+            case "gateway":
+                return "ecg"
+            default:
+                break;
+        }
+    }, [deviceType]);
+
+    const getDataBatteryFromInfluxDB = () => {
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
+    
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+    
+        const query = `from(bucket: "emr_dev")
+                |> range(start: -12h)
+                |> filter(fn: (r) => r["_measurement"] == "patient73b699c7-571b-4fb2-a88f-768ba293349e_${newDeviceType}_battery")
+                |> yield(name: "mean")`;
+    
+        const arrBattery = [];
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                const time = new Date(dataQueryInFlux?._time);
+
+                const measurement = dataQueryInFlux?._measurement.split("_");
+                const keyDevice = measurement[1] || "";
+
+                if (keyDevice === newDeviceType) {
+                    arrBattery.push({
+                        time: `${time.getHours()}h${time.getMinutes() < 10 ? `0${time.getMinutes()}` : time.getMinutes()}p`,
+                        value: dataQueryInFlux?._value
+                    });
+
+                    if (arrBattery?.length > 10) {
+                        arrBattery.splice(0, 1);
+                    }
+                }
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+                console.log('nFinished SUCCESS');
+                setData(arrBattery);
+            },
+        })
+    };
 
     useEffect(() => {
-        patientApi
-            .getTrends(pid, today)
-            .then((res) => {
-                const batType = res.data.response.trend_map.trend_map[deviceTypeMap[deviceType][1]][deviceTypeMap[deviceType][0]];
-                const batMax = 10;
-                //TODO: add a limit if required const batMax = batType.length > 10 ? 10 : batType.length
-                for (let i = 0; i < batMax; i++) {
-                    let date = new Date();
-                    let tempData = {}
-                    tempData["time"] = date
-                    tempData["value"] = i + 10
-                    data.push(tempData)
-                }
-                setData([...data.reverse()]);
-                setLoading(false);
-                setResponse(res)
-            }).catch((err) => {
-                if (err) {
-                    // console.log(err)
-                    // notification.error({
-                    //     message: 'Error',
-                    //     description: "Some thing went wrong"
-                    // })
-                    setLoading(false);
-                }
-            })
-    }, [pid])
-    return [data, loading]
+        getDataBatteryFromInfluxDB();
+
+        const timer = setInterval(() => {
+            getDataBatteryFromInfluxDB();
+        }, 10000)
+
+        return () => {
+            clearInterval(timer);
+        }
+    }, [pid, deviceType]);
+
+    return [data, loading];
 }
 
 function GetPatientOTP(pid, setOtp, setOtpLoading, callback = () => { }) {
@@ -79,25 +115,8 @@ function GetPatientOTP(pid, setOtp, setOtpLoading, callback = () => { }) {
 }
 
 function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
-    // const [data, isLoading] = CreateGraphData(pid, deviceType);
-    const isLoading = false;
-
-    const [data, setData] = useState([]);
-
-    useEffect(() => {
-        const arr = [];
-        var today = new Date();
-
-        for (let index = 0; index < 20; index++) {
-            arr.push({
-                "time": today.setDate(today.getDate() + index),
-                "value": Math.floor(Math.random() * 100) + 1,
-            })
-        }
-        setData(arr);
-    }, []);
-
-    console.log("data", data);
+    const [data, isLoading] = CreateGraphData(pid, deviceType);
+    // console.log("data", data);
 
     const config = {
         data,
@@ -119,13 +138,13 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
             customContent: (title, items) => {
                 return (
                     <>
-                        <h5 style={{ marginTop: 16 }}>Battery %</h5>
+                        {/* <h5 style={{ marginTop: 16 }}>Battery %</h5> */}
                         <ul style={{ paddingLeft: 0 }}>
                             {items?.map((item, index) => {
                                 const { name, value } = item;
                                 return (
                                     <li
-                                        key={item.time}
+                                        key={index}
                                         className="g2-tooltip-list-item"
                                         data-index={index}
                                         style={{ marginBottom: 4, display: 'flex', alignItems: 'center' }}
@@ -134,8 +153,8 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
                                         <span
                                             style={{ display: 'inline-flex', flex: 1, justifyContent: 'space-between' }}
                                         >
-                                            <span style={{ margiRight: 16 }}>{name}:</span>
-                                            <span className="g2-tooltip-list-item-value">{value}</span>
+                                            <span style={{ margiRight: 50 }}>Battery:</span>
+                                            <span className="g2-tooltip-list-item-value" style={{ marginLeft: "2px" }}>{value}%</span>
                                         </span>
                                     </li>
                                 );
@@ -158,7 +177,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
             },
         },
     };
-    const [configForm] = Form.useForm()
+    const [configForm] = Form.useForm();
 
     const onFinish = (values) => {
         console.log(values)
@@ -202,7 +221,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
         })
     }
 
-    const [keepAliveHistory, setKeepAliveHistory] = useState("")
+    const [keepAliveHistory, setKeepAliveHistory] = useState("");
     const fetchKeepAliveHistrory = () => {
         patientApi.getPatientPatches(pid).then((res) => {
             const { keepaliveHistory = "" } = res.data?.response.patch_patient_map[0];
@@ -238,10 +257,12 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
     //         setOtp(null)
     //     }
     // }, [])
+    
     const [contentPosition, setContentPosition] = useState("default");
     // code for the special select component
-    const [items, setItems] = useState(["kill", "save", "pause"])
-    const [commandName, setCommandName] = useState("")
+    const [items, setItems] = useState(["kill", "save", "pause"]);
+    const [commandName, setCommandName] = useState("");
+
     const addItem = () => {
         if (commandName === "") { return }
         setItems([...items, commandName])
