@@ -105,13 +105,11 @@ function DeviceManagement({ pid, associated_list }) {
         }
     }
 
-    console.log("associated_list", associated_list);
-
     const onDetachAssociate = (uuid, type) => () => {
         patientApi.detachSensorOfPatient({
             patch_uuid: uuid,
             type_device: type,
-            associated_list,
+            associated_list: JSON.parse(associated_list),
             action: "unassociate"
         })
             .then(() => {

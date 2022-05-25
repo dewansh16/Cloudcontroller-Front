@@ -797,7 +797,7 @@ function AddPatient() {
         const dataBody = {
             tenantId,
             pid: patientId,
-            associated_list: patientData.associated_list,
+            associated_list: JSON.parse(patientData.associated_list),
             list: payload
         }
 
