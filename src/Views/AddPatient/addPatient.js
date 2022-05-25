@@ -797,6 +797,7 @@ function AddPatient() {
         const dataBody = {
             tenantId,
             pid: patientId,
+            associated_list: patientData.associated_list,
             list: payload
         }
 
@@ -870,8 +871,6 @@ function AddPatient() {
         })
         return disabled;
     }, [patchData]);
-
-    console.log("disabledBtnSaveSensor", disabledBtnSaveSensor);
 
     return summary.isVisible ? (
         <div className="flex-container">

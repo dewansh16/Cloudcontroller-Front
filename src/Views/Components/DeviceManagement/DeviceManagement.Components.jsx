@@ -30,7 +30,7 @@ import "./DeviceManagement.css";
 //     return [response, loading]
 // }
 
-function DeviceManagement({ pid }) {
+function DeviceManagement({ pid, associated_list }) {
     const [deviceClass, setClass] = useState({
         isLoading: true,
         list: [],
@@ -105,9 +105,13 @@ function DeviceManagement({ pid }) {
         }
     }
 
-    const onDetachAssociate = (uuid) => () => {
+    console.log("associated_list", associated_list);
+
+    const onDetachAssociate = (uuid, type) => () => {
         patientApi.detachSensorOfPatient({
             patch_uuid: uuid,
+            type_device: type,
+            associated_list,
             action: "unassociate"
         })
             .then(() => {
