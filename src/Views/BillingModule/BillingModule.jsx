@@ -31,7 +31,7 @@ import "./billingModule.css";
 import billingApi from "../../Apis/billingApis";
 import tenantApi from "../../Apis/tenantApis";
 import { CPT_CODE, CPT } from "../../Utils/utils";
-import {isArray} from 'lodash';
+import { isArray } from 'lodash';
 
 const { Panel } = Collapse;
 const { TextArea } = Input;
@@ -283,7 +283,7 @@ function BillingModule() {
                 <CusBtn
                     className="primary"
                     onClick={() => {
-                        // setTasksLoadingState(true);
+                        setTasksLoadingState(true);
                         setAddTaskState(false);
                         callUpdateBillingTasks(taskCodeActive);
                     }}
@@ -378,7 +378,7 @@ function BillingModule() {
     const stopCountTimer = () => {
         clearInterval(clockCounter);
     }
-    
+
     function enrollForPatch() {
         console.log("PATCH INFO : ", patchArray);
         console.log("PATCH INFO : ", patchInformation);
@@ -1008,7 +1008,7 @@ function BillingModule() {
     }
     const getHoursProcessSensor = () => {
         let totalHours = getTotalDayMonitored();
-        return totalHours % TOTAL_HOURS_FOR_EACH_SENSOR_BILLED;
+        return totalHours === TOTAL_HOURS_FOR_EACH_SENSOR_BILLED ? totalHours : totalHours % TOTAL_HOURS_FOR_EACH_SENSOR_BILLED;
     }
     const getUnitBilledSensor = () => {
         let result = 0;
@@ -1018,6 +1018,7 @@ function BillingModule() {
         }
         return result;
     }
+
     const getTotalDayMonitored = () => {
         let result = 0;
         patchArray.map(item => {
@@ -1025,6 +1026,7 @@ function BillingModule() {
         })
         return result;
     }
+
     const getTotalNumberDay = (item) => {
         let result = 0;
         let currentDate = moment();
@@ -1225,7 +1227,7 @@ function BillingModule() {
                     (item) => {
                         if (item.code == CPT_CODE.CPT_99457) {
                             tempFirstTwentyTasks = JSON.parse(item.params);
-                            if(!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
+                            if (!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
                         }
                     }
                 );
@@ -1274,12 +1276,13 @@ function BillingModule() {
                         task_note: taskNoteVal
                     }
                 }
-                
+
                 billingApi
                     .updateBillingTask(
                         updateData
                     )
                     .then((res) => {
+                        setTasksLoadingState(false);
                         getListFirstTwentyTasks();
                     })
                     .catch((err) => {
@@ -1304,6 +1307,7 @@ function BillingModule() {
                         }
                     )
                     .then((res) => {
+                        setTasksLoadingState(false);
                         getListFirstTwentyTasks();
                     })
                     .catch((err) => {
@@ -1609,15 +1613,15 @@ function BillingModule() {
                             }
                             if (item.code == CPT_CODE.CPT_99457) {
                                 tempFirstTwentyTasks = JSON.parse(item.params);
-                                if(!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
+                                if (!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
                                 setFirstTwentyTasks(tempFirstTwentyTasks);
-                                if(tempFirstTwentyTasks.length > 0){
+                                if (tempFirstTwentyTasks.length > 0) {
                                     tempFirstTwentyTasks.map(item => {
-                                        if(item.task_time_spend) {
+                                        if (item.task_time_spend) {
                                             firstTotalTime += item.task_time_spend;
                                         }
                                     })
-                                    firstTotalTime = firstTotalTime*60;
+                                    firstTotalTime = firstTotalTime * 60;
                                 }
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
@@ -1880,7 +1884,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
-                                        
+
                                     }}
                                     className={
                                         initialSetupState ? "bm-selected-active" : "bm-selected"
@@ -2561,7 +2565,11 @@ function BillingModule() {
                                 }}
                             >
                                 <div className="bm-sensor-monitored-bar">
-                                    <div className="bm-sensor-monitored-bar-two"></div>
+                                    <div className="bm-sensor-monitored-bar-two"
+                                        style={{
+                                            width: `${(getHoursProcessSensor() / 16) * 100}%`,
+                                        }}>
+                                    </div>
                                 </div>
                                 <div>
                                     <div style={{ fontSize: "1.2rem" }}>Days Monitored: {getHoursProcessSensor()}/{TOTAL_HOURS_FOR_EACH_SENSOR_BILLED}</div>
@@ -2764,7 +2772,7 @@ function BillingModule() {
                                 className="bm-twenty-bottom-container"
                             >
                                 <div className="bm-twenty-header">
-                                    Tasks 
+                                    Tasks
                                     {/* <CusBtn onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn>  */}
                                 </div>
                                 {firstTwentyTasks.length === 0 ? (
@@ -2953,7 +2961,7 @@ function BillingModule() {
                                     >
                                         <div className="bm-sensor-monitored-bar">
                                             <div
-                                                className="bm-sensor-monitored-bar-two"
+                                                className="bm-sensor-monitored-bar-two 2"
                                                 style={{
                                                     width: `${(secondTotalTimeStageOneDisplay / 20) * 100
                                                         }%`,
@@ -3064,7 +3072,7 @@ function BillingModule() {
                                     className="bm-twenty-bottom-container"
                                 >
                                     <div className="bm-twenty-header">
-                                        Tasks 
+                                        Tasks
                                         {/* <CusBtn onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn>  */}
                                     </div>
                                     {secondTwentyTasks.length === 0 ? (
@@ -3175,7 +3183,7 @@ function BillingModule() {
                                     className="bm-twenty-bottom-container"
                                 >
                                     <div className="bm-twenty-header">
-                                        Tasks 
+                                        Tasks
                                         {/* <CusBtn onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn>  */}
                                     </div>
                                     {secondTwentyStageTwoTasks.length === 0 ? (
