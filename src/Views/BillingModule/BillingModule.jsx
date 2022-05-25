@@ -2798,9 +2798,8 @@ function BillingModule() {
                                             <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
                                             <div className="bm-item-header" style={{ width: "30%" }}>Note</div>
                                             <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
-
                                         </div>
-                                        <div style={{ overflowY: "scroll", height: "70%" }}>
+                                        <div style={{ overflowY: "scroll", height: "70%", marginRight: "-6px" }}>
                                             <Collapse expandIconPosition="right">
                                                 {firstTwentyTasks.map((item, index) => (
                                                     <Panel
