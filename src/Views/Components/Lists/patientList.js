@@ -177,6 +177,9 @@ const PatientListItem = (props) => {
                     const dataQueryInFlux = tableMeta?.toObject(row) || {};
                     if (chart?._key !== "alphamed_bpd") {
                         arrayRes.push({ value: dataQueryInFlux?._value || 0 });
+                        if (arrayRes?.length > 30) {
+                            arrayRes.splice(0, 1);
+                        }
                     } else {
                         newArrChart[index + 1].val_bpd = dataQueryInFlux?._value || 0;
                     }
@@ -190,9 +193,9 @@ const PatientListItem = (props) => {
                     if (arrayRes?.length > 0 && chart?._key !== "alphamed_bpd") {
                         chart.trendData = arrayRes || [];
                         chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-                        if (chart.trendData?.length > 20) {
-                            chart.trendData.splice(0, 1);
-                        }
+                        // if (chart.trendData?.length > 20) {
+                        //     chart.trendData.splice(0, 1);
+                        // }
                         setChartBlockData([...newArrChart]);
                     }
                 },
