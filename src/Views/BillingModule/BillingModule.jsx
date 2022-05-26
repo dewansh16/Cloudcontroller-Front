@@ -333,6 +333,7 @@ function BillingModule() {
     }
 
     const renderTimerClock = (item, cptCode) => {
+        console.log("item", item);
         const elementId = `task-${cptCode}-timer`;
         if (!timerTask) {
             return (
@@ -1713,6 +1714,11 @@ function BillingModule() {
         }
     }, [pdfState]);
 
+    const disabledBtnAddTask = (array) => {
+        const even = (element) => element['task_time_spend'] === undefined || element['task_time_spend'] === null || element['task_time_spend'] === 0;
+        return array.some(even);
+    };
+
     return rightSideLoading ? (
         <div
             style={{
@@ -2720,7 +2726,7 @@ function BillingModule() {
                                                 setAddTaskState(true);
                                             }}
                                             style={{ padding: "1% 5%" }}
-                                            disabled={firstTotalTime >= 1200 ? true : false}
+                                            disabled={disabledBtnAddTask(firstTwentyTasks) || firstTotalTime >= 1200 ? true : false}
                                         >
                                             Add
                                         </CusBtn>
@@ -2936,7 +2942,7 @@ function BillingModule() {
                                                 setAddTaskState(true);
                                             }}
                                             style={{ padding: "1% 5%" }}
-                                            // disabled={firstTotalTime >= 1200 ? true : false}
+                                            disabled={disabledBtnAddTask(secondTwentyTasks)}
                                         >
                                             Add
                                         </CusBtn>
