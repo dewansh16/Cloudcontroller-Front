@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { io } from "socket.io-client";
 import { InfluxDB } from "@influxdata/influxdb-client";
-import { isArray } from 'lodash';
+import { isJsonString } from "../../../Utils/utils";
 
 import { Row, Col, Divider, Grid, Tooltip } from "antd";
 import Colors from "../../../Theme/Colors/colors";
@@ -135,7 +135,7 @@ const PatientListItem = (props) => {
 
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
 
-    const processDataForSensor = (key, newArrChart, chart, index) => {
+    const processDataForSensor = (key, newArrChart, chart) => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
 
@@ -176,20 +176,23 @@ const PatientListItem = (props) => {
     }
 
     const getDataSensorFromInfluxDB = () => {
-        const associated_list = JSON.parse(props.data.demographic_map.associated_list);
-        if (!isArray(associated_list)) associated_list = [];
+        let associatedList = [];
 
-        // console.log("associated_list", associated_list);
+        const isString = isJsonString(props?.data?.demographic_map?.associated_list);
+        if (isString) {
+            associatedList = JSON.parse(props?.data?.demographic_map?.associated_list);
+        }
+
         const newArrChart = [...chartBlockData];
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];
 
             const key = chart?._key;
             if (key !== "blood_pressuer") {
-                processDataForSensor(key, newArrChart, chart, index)
+                processDataForSensor(key, newArrChart, chart)
             } else {
                 let arrKeyChild = [];
-                if (associated_list?.includes("alphamed")) {
+                if (associatedList?.includes("alphamed")) {
                     arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
                 } else {
                     arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
@@ -198,7 +201,7 @@ const PatientListItem = (props) => {
                 // console.log("arrKeyChild", arrKeyChild);
 
                 for (let j = 0; j < arrKeyChild.length; j++) {
-                    processDataForSensor(arrKeyChild[j], newArrChart, chart, index);
+                    processDataForSensor(arrKeyChild[j], newArrChart, chart);
                 }
             }
         }

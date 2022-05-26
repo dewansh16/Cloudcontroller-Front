@@ -7,3 +7,12 @@ export const CPT_CODE = {
 }
 
 export const CPT = "CPT";
+
+export const isJsonString = (str) => {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
