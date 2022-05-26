@@ -149,7 +149,7 @@ const PatientListItem = (props) => {
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
-
+                console.log("dataQueryInFlux", dataQueryInFlux);
                 if (key === "alphamed_bpd" || key === "ihealth_bpd") {
                     chart.val_bpd = dataQueryInFlux?._value;
                 } else {
@@ -176,7 +176,7 @@ const PatientListItem = (props) => {
 
     const getDataSensorFromInfluxDB = () => {
         const associated_list = JSON.parse(props.data.demographic_map.associated_list) || [];
-        console.log("associated_list", associated_list);
+        // console.log("associated_list", associated_list);
         const newArrChart = [...chartBlockData];
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];
@@ -192,7 +192,7 @@ const PatientListItem = (props) => {
                     arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
                 }
 
-                console.log("arrKeyChild", arrKeyChild);
+                // console.log("arrKeyChild", arrKeyChild);
 
                 for (let j = 0; j < arrKeyChild.length; j++) {
                     processDataForSensor(arrKeyChild[j], newArrChart, chart, index);
