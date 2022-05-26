@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { io } from "socket.io-client";
 import { InfluxDB } from "@influxdata/influxdb-client";
+import { isJsonString } from "../../../Utils/utils";
 
 import { Row, Col, Divider, Grid, Tooltip } from "antd";
 import Colors from "../../../Theme/Colors/colors";
@@ -9,6 +10,7 @@ import Icons from "../../../Utils/iconMap";
 import ChartsBlock from "./listComponent/chartsBlock";
 import { Button } from "../../../Theme/Components/Button/button";
 const { useBreakpoint } = Grid;
+
 
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
@@ -82,10 +84,6 @@ const PatientListItem = (props) => {
             icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
             val: 0,
             color: Colors.purple,
-            // val:
-            // parseInt(props.data.ews_map?.temp) === -1
-            //     ? "NA"
-            //     : props.data.ews_map?.temp,
             trendData: []
         },
         {
@@ -94,38 +92,26 @@ const PatientListItem = (props) => {
             icon: Icons.o2({ Style: { color: Colors.green } }),
             val: 0,
             color: Colors.green,
-            // val:
-            // parseInt(props.data.ews_map?.spo2) === -1
-            //     ? "NA"
-            //     : props.data.ews_map?.spo2,
             trendData: []
         },
         {
-            _key: 'heart',
+            _key: 'ecg_hr',
             name: "Heart Rate",
             icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
             val: 0,
             color: Colors.darkPink,
-            // val:
-            // parseInt(props.data.ews_map?.hr) === -1
-            //     ? "NA"
-            //     : props.data.ews_map?.hr,
             trendData: []
         },
         {
-            _key: 'res_rate',
+            _key: 'ecg_rr',
             name: "Respiration Rate",
             icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
             val: 0,
             color: Colors.orange,
-            // val:
-            // parseInt(props.data.ews_map?.rr) === -1
-            //     ? "NA"
-            //     : props.data.ews_map?.rr,
             trendData: []
         },
         {
-            _key: 'alphamed_bps',
+            _key: "blood_pressuer",
             name: "Blood Pressure",
             icon: Icons.bpIcon({
                 Style: { color: Colors.darkPurple, fontSize: "24px" },
@@ -133,14 +119,7 @@ const PatientListItem = (props) => {
             val: 0,
             val_bpd: 0,
             color: Colors.darkPurple,
-            // val:
-            // parseInt(props.data.ews_map?.rr) === -1
-            //   ? "NA"
-            //   : props.data.ews_map?.rr,
             trendData: []
-        },
-        {
-            _key: 'alphamed_bpd',
         },
         {
             _key: 'weight',
@@ -156,64 +135,88 @@ const PatientListItem = (props) => {
 
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
 
-    React.useEffect(() => {
-
-    }, [props.data.ews_map, props.data.trend_map]);
-
-    const getDataSensorFromInfluxDB = () => {
+    const processDataForSensor = (key, newArrChart, chart) => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
 
         const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
         const queryApi = client.getQueryApi(org);
 
+        const query = `from(bucket: "emr_dev")
+                |> range(start: -3h)
+                |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
+                |> yield(name: "mean")`;
+
+        const arrayRes = [];
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                if (key === "alphamed_bpd" || key === "ihealth_bpd") {
+                    chart.val_bpd = dataQueryInFlux?._value;
+                } else {
+                    arrayRes.push({ value: dataQueryInFlux?._value || 0 });
+                    if (arrayRes?.length > 30) {
+                        arrayRes.splice(0, 1);
+                    }
+                }
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+                // console.log('nFinished SUCCESS');
+                if (arrayRes?.length > 0 && key !== "alphamed_bpd") {
+                    chart.trendData = arrayRes || [];
+                    chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
+                    setChartBlockData([...newArrChart]);
+                }
+            },
+        })
+    }
+
+    const getDataSensorFromInfluxDB = () => {
+        let associatedList = [];
+
+        const isString = isJsonString(props?.data?.demographic_map?.associated_list);
+        if (isString) {
+            associatedList = JSON.parse(props?.data?.demographic_map?.associated_list);
+        }
+
         const newArrChart = [...chartBlockData];
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];
-            const query = `from(bucket: "emr_dev")
-                    |> range(start: -6h)
-                    |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${chart?._key}")
-                    |> yield(name: "mean")`;
 
-            const arrayRes = [];
-            queryApi.queryRows(query, {
-                next(row, tableMeta) {
-                    const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                    if (chart?._key !== "alphamed_bpd") {
-                        arrayRes.push({ value: dataQueryInFlux?._value || 0 });
-                    } else {
-                        newArrChart[index - 1].val_bpd = dataQueryInFlux?._value || 0;
-                    }
-                },
-                error(error) {
-                    console.error(error)
-                    console.log('nFinished ERROR')
-                },
-                complete() {
-                    console.log('nFinished SUCCESS');
-                    if (arrayRes?.length > 0 && chart?._key !== "alphamed_bpd") {
-                        chart.trendData = arrayRes || [];
-                        chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-                        if (chart.trendData?.length > 30) {
-                            chart.trendData.splice(0, 1);
-                        }
-                        setChartBlockData([...newArrChart]);
-                    }
-                },
-            })
+            const key = chart?._key;
+            if (key !== "blood_pressuer") {
+                processDataForSensor(key, newArrChart, chart)
+            } else {
+                let arrKeyChild = [];
+                if (associatedList?.includes("alphamed")) {
+                    arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
+                } else {
+                    arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
+                }
+
+                // console.log("arrKeyChild", arrKeyChild);
+
+                for (let j = 0; j < arrKeyChild.length; j++) {
+                    processDataForSensor(arrKeyChild[j], newArrChart, chart);
+                }
+            }
         }
     };
 
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        // const timeInterval = setInterval(() => {
-        //     getDataSensorFromInfluxDB();
-        // }, 5000);
+        const timeInterval = setInterval(() => {
+            getDataSensorFromInfluxDB();
+        }, 5000);
 
-        // return () => {
-        //     clearInterval(timeInterval);
-        // }
+        return () => {
+            clearInterval(timeInterval);
+        }
     }, []);
 
     // React.useEffect(() => {

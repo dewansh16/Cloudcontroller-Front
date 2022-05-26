@@ -154,6 +154,7 @@ const PatchForm = (props) => {
                 payload[type] = {
                     patch_uuid: selectedPatch[0].patch_uuid,
                     [`${type}_patch_serial`]: selectedPatch[0].patch_serial,
+                    type_device: type
                 };
 
                 props.savePatchDetails(payload);
