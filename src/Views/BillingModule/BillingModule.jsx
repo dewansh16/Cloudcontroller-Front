@@ -2974,7 +2974,6 @@ function BillingModule() {
                                                 setAddTaskState(true);
                                             }}
                                             style={{ padding: "1% 5%" }}
-                                            disabled={firstTotalTime >= 1200 ? true : false}
                                         >
                                             Add
                                         </CusBtn>
