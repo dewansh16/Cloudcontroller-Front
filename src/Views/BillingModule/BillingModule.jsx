@@ -31,7 +31,7 @@ import "./billingModule.css";
 import billingApi from "../../Apis/billingApis";
 import tenantApi from "../../Apis/tenantApis";
 import { CPT_CODE, CPT } from "../../Utils/utils";
-import {isArray} from 'lodash';
+import { isArray } from 'lodash';
 
 const { Panel } = Collapse;
 const { TextArea } = Input;
@@ -283,7 +283,7 @@ function BillingModule() {
                 <CusBtn
                     className="primary"
                     onClick={() => {
-                        // setTasksLoadingState(true);
+                        setTasksLoadingState(true);
                         setAddTaskState(false);
                         callUpdateBillingTasks(taskCodeActive);
                     }}
@@ -378,7 +378,7 @@ function BillingModule() {
     const stopCountTimer = () => {
         clearInterval(clockCounter);
     }
-    
+
     function enrollForPatch() {
         console.log("PATCH INFO : ", patchArray);
         console.log("PATCH INFO : ", patchInformation);
@@ -987,7 +987,7 @@ function BillingModule() {
     }
     const getHoursProcessSensor = () => {
         let totalHours = getTotalDayMonitored();
-        return totalHours % TOTAL_HOURS_FOR_EACH_SENSOR_BILLED;
+        return totalHours === TOTAL_HOURS_FOR_EACH_SENSOR_BILLED ? totalHours : totalHours % TOTAL_HOURS_FOR_EACH_SENSOR_BILLED;
     }
     const getUnitBilledSensor = () => {
         let result = 0;
@@ -997,6 +997,7 @@ function BillingModule() {
         }
         return result;
     }
+
     const getTotalDayMonitored = () => {
         let result = 0;
         patchArray.map(item => {
@@ -1004,12 +1005,14 @@ function BillingModule() {
         })
         return result;
     }
+
     const getDateEnable99457 = () => {
         if(isArray(firstTwentyTasks) && firstTwentyTasks.length > 0) {
             return moment(firstTwentyTasks[firstTwentyTasks.length - 1]).format('YYYY-MM-DD');
         }
         return '';
     }
+    
     const getTotalNumberDay = (item) => {
         let result = 0;
         let currentDate = moment();
@@ -1210,7 +1213,7 @@ function BillingModule() {
                     (item) => {
                         if (item.code == CPT_CODE.CPT_99457) {
                             tempFirstTwentyTasks = JSON.parse(item.params);
-                            if(!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
+                            if (!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
                         }
                     }
                 );
@@ -1258,12 +1261,13 @@ function BillingModule() {
                         task_note: taskNoteVal
                     }
                 }
-                
+
                 billingApi
                     .updateBillingTask(
                         updateData
                     )
                     .then((res) => {
+                        setTasksLoadingState(false);
                         getListFirstTwentyTasks();
                     })
                     .catch((err) => {
@@ -1288,6 +1292,7 @@ function BillingModule() {
                         }
                     )
                     .then((res) => {
+                        setTasksLoadingState(false);
                         getListFirstTwentyTasks();
                     })
                     .catch((err) => {
@@ -1593,15 +1598,15 @@ function BillingModule() {
                             }
                             if (item.code == CPT_CODE.CPT_99457) {
                                 tempFirstTwentyTasks = JSON.parse(item.params);
-                                if(!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
+                                if (!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
                                 setFirstTwentyTasks(tempFirstTwentyTasks);
-                                if(tempFirstTwentyTasks.length > 0){
+                                if (tempFirstTwentyTasks.length > 0) {
                                     tempFirstTwentyTasks.map(item => {
-                                        if(item.task_time_spend) {
+                                        if (item.task_time_spend) {
                                             firstTotalTime += item.task_time_spend;
                                         }
                                     })
-                                    firstTotalTime = firstTotalTime*60;
+                                    firstTotalTime = firstTotalTime * 60;
                                 }
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
@@ -1831,7 +1836,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
-                                        
+
                                     }}
                                     className={
                                         initialSetupState ? "bm-selected-active" : "bm-selected"
@@ -1887,7 +1892,7 @@ function BillingModule() {
                                     className="bm-header-dot"
                                     style={
                                         initialStepDoneState
-                                            ? patchEnrolled
+                                            ? getUnitBilledSensor()
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -1905,7 +1910,7 @@ function BillingModule() {
                                     className="bm-header-line"
                                     style={
                                         initialStepDoneState
-                                            ? patchEnrolled
+                                            ? getUnitBilledSensor()
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -2510,7 +2515,11 @@ function BillingModule() {
                                 }}
                             >
                                 <div className="bm-sensor-monitored-bar">
-                                    <div className="bm-sensor-monitored-bar-two"></div>
+                                    <div className="bm-sensor-monitored-bar-two"
+                                        style={{
+                                            width: `${(getHoursProcessSensor() / 16) * 100}%`,
+                                        }}>
+                                    </div>
                                 </div>
                                 <div>
                                     <div style={{ fontSize: "1.2rem" }}>Days Monitored: {getHoursProcessSensor()}/{TOTAL_HOURS_FOR_EACH_SENSOR_BILLED}</div>
@@ -2713,7 +2722,7 @@ function BillingModule() {
                                 className="bm-twenty-bottom-container"
                             >
                                 <div className="bm-twenty-header">
-                                    Tasks 
+                                    Tasks
                                     {/* <CusBtn onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn>  */}
                                 </div>
                                 {firstTwentyTasks.length === 0 ? (
@@ -2747,9 +2756,8 @@ function BillingModule() {
                                             <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
                                             <div className="bm-item-header" style={{ width: "30%" }}>Note</div>
                                             <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
-
                                         </div>
-                                        <div style={{ overflowY: "scroll", height: "70%" }}>
+                                        <div style={{ overflowY: "scroll", height: "70%", marginRight: "-6px" }}>
                                             <Collapse expandIconPosition="right">
                                                 {firstTwentyTasks.map((item, index) => (
                                                     <Panel
@@ -2903,8 +2911,19 @@ function BillingModule() {
                                             width: "100%",
                                         }}
                                     >
+<<<<<<< HEAD
+                                        <div className="bm-sensor-monitored-bar">
+                                            <div
+                                                className="bm-sensor-monitored-bar-two 2"
+                                                style={{
+                                                    width: `${(secondTotalTimeStageOneDisplay / 20) * 100
+                                                        }%`,
+                                                }}
+                                            ></div>
+=======
                                         <div style={{ margin: "2%" }}>
                                             No tasks updated or scheduled yet
+>>>>>>> 10182bbcd5b1ec3792a50d0eca4f89ed108187fa
                                         </div>
                                         <CusBtn
                                             onClick={() => {
@@ -2979,6 +2998,285 @@ function BillingModule() {
                                         </CusBtn>
                                     </div>
                                 ) : null}
+<<<<<<< HEAD
+                            </div>
+                            <div
+                                style={
+                                    addTaskState
+                                        ? {
+                                            filter: "blur(4px)",
+                                            display: "flex",
+                                            height: "7%",
+                                            margin: "0% 5%",
+                                        }
+                                        : { display: "flex", height: "7%", margin: "0% 5%" }
+                                }
+                            >
+                                <div
+                                    onClick={() => {
+                                        setStageOneState(true);
+                                        setStageTwoState(false);
+                                        setTaskDeleteArray([]);
+                                    }}
+                                    className={
+                                        stageOneState
+                                            ? "bm-sensor-bottom-header"
+                                            : "bm-sensor-bottom-header bm-stage-btn-inactive"
+                                    }
+                                    style={{ height: "100%" }}
+                                >
+                                    Stage 1
+                                </div>
+                                <div
+                                    onClick={() => {
+                                        if (secondTotalTimeStageOne === 1200) {
+                                            setStageTwoState(true);
+                                            setStageOneState(false);
+                                            setTaskDeleteArray([]);
+                                        }
+                                    }}
+                                    className={
+                                        stageTwoState
+                                            ? "bm-sensor-bottom-header"
+                                            : "bm-sensor-bottom-header bm-stage-btn-inactive"
+                                    }
+                                    style={
+                                        secondTotalTimeStageOne === 1200
+                                            ? { height: "100%" }
+                                            : {
+                                                height: "100%",
+                                                background: "#85858545",
+                                                color: "#00000070",
+                                            }
+                                    }
+                                >
+                                    Stage 2
+                                </div>
+                            </div>
+                            {stageOneState ? (
+                                <div
+                                    style={
+                                        addTaskState
+                                            ? { filter: "blur(4px)", height: "52%" }
+                                            : { height: "52%" }
+                                    }
+                                    className="bm-twenty-bottom-container"
+                                >
+                                    <div className="bm-twenty-header">
+                                        Tasks
+                                        {/* <CusBtn onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn>  */}
+                                    </div>
+                                    {secondTwentyTasks.length === 0 ? (
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                height: "85%",
+                                                width: "100%",
+                                            }}
+                                        >
+                                            <div style={{ margin: "2%" }}>
+                                                No tasks updated or scheduled yet
+                                            </div>
+                                            <CusBtn
+                                                onClick={() => {
+                                                    setAddTaskState(true);
+                                                }}
+                                                className="primary"
+                                            >
+                                                Add
+                                            </CusBtn>
+                                        </div>
+                                    ) : (
+                                        <div
+                                            style={{
+                                                height: "73%",
+                                                width: "100%",
+                                                overflowY: "scroll",
+                                            }}
+                                        >
+                                            {secondTwentyTasks.map((item, index) => (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        width: "100%",
+                                                        alignItems: "center",
+                                                        height: "25%",
+                                                        padding: "0% 5%",
+                                                        borderBottom: "1px solid #00000026",
+                                                        background: "#ff920012",
+                                                    }}
+                                                >
+                                                    <div style={{ width: "8%" }}>{index + 1}</div>
+                                                    <div style={{ width: "15%" }}>
+                                                        <div>{getDateFromISO(item.date_time)}</div>
+                                                        <div>{getTimeFromISO(item.date_time)}</div>
+                                                    </div>
+                                                    <div style={{ width: "67%", paddingRight: "3%" }}>
+                                                        {item.task}
+                                                    </div>
+                                                    <div style={{ width: "10%" }}>
+                                                        {`${getMinutesFromSeconds(item.timeConsidered)}`}
+                                                    </div>
+                                                    <div>
+                                                        <Checkbox onChange={() => {
+                                                            var temp = []
+                                                            var flag = true
+                                                            temp = taskDeleteArray
+
+                                                            taskDeleteArray.map((ele, index) => {
+                                                                if (ele === item) {
+                                                                    temp.splice(index, 1)
+                                                                    flag = false
+                                                                }
+                                                            })
+
+                                                            if (flag) {
+                                                                temp.push(item)
+                                                            }
+
+                                                            setTaskDeleteArray([...temp])
+                                                        }}></Checkbox>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {secondTwentyTasks.length !== 0 ? (
+                                        <div
+                                            style={addTaskState ? { filter: "blur(4px)" } : null}
+                                            className="bm-bottom-add-btn"
+                                        >
+                                            <CusBtn
+                                                onClick={() => {
+                                                    setAddTaskState(true);
+                                                }}
+                                                style={{ padding: "1% 5%" }}
+                                                disabled={
+                                                    secondTotalTimeStageOne === 1200 ? true : false
+                                                }
+                                            >
+                                                Add
+                                            </CusBtn>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ) : null}
+                            {stageTwoState ? (
+                                <div
+                                    style={
+                                        addTaskState
+                                            ? { filter: "blur(4px)", height: "52%" }
+                                            : { height: "52%" }
+                                    }
+                                    className="bm-twenty-bottom-container"
+                                >
+                                    <div className="bm-twenty-header">
+                                        Tasks
+                                        {/* <CusBtn onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn>  */}
+                                    </div>
+                                    {secondTwentyStageTwoTasks.length === 0 ? (
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                height: "85%",
+                                                width: "100%",
+                                            }}
+                                        >
+                                            <div style={{ margin: "2%" }}>
+                                                No tasks updated or scheduled yet 2
+                                            </div>
+                                            <CusBtn
+                                                onClick={() => {
+                                                    setAddTaskState(true);
+                                                }}
+                                                className="primary"
+                                            >
+                                                Add
+                                            </CusBtn>
+                                        </div>
+                                    ) : (
+                                        <div
+                                            style={{
+                                                height: "73%",
+                                                width: "100%",
+                                                overflowY: "scroll",
+                                            }}
+                                        >
+                                            {secondTwentyStageTwoTasks.map((item, index) => (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        width: "100%",
+                                                        alignItems: "center",
+                                                        height: "25%",
+                                                        padding: "0% 5%",
+                                                        borderBottom: "1px solid #00000026",
+                                                        background: "#ff920012",
+                                                    }}
+                                                >
+                                                    <div style={{ width: "8%" }}>{index + 1}</div>
+                                                    <div style={{ width: "15%" }}>
+                                                        <div>{getDateFromISO(item.date_time)}</div>
+                                                        <div>{getTimeFromISO(item.date_time)}</div>
+                                                    </div>
+                                                    <div style={{ width: "67%", paddingRight: "3%" }}>
+                                                        {item.task}
+                                                    </div>
+                                                    <div style={{ width: "10%" }}>
+                                                        {`${getMinutesFromSeconds(item.timeConsidered)}`}
+                                                    </div>
+                                                    <div>
+                                                        <Checkbox onChange={() => {
+                                                            var temp = []
+                                                            var flag = true
+                                                            temp = taskDeleteArray
+
+                                                            taskDeleteArray.map((ele, index) => {
+                                                                if (ele === item) {
+                                                                    temp.splice(index, 1)
+                                                                    flag = false
+                                                                }
+                                                            })
+
+                                                            if (flag) {
+                                                                temp.push(item)
+                                                            }
+
+                                                            setTaskDeleteArray([...temp])
+                                                        }}></Checkbox>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {secondTwentyStageTwoTasks.length !== 0 ? (
+                                        <div
+                                            style={addTaskState ? { filter: "blur(4px)" } : null}
+                                            className="bm-bottom-add-btn"
+                                        >
+                                            <CusBtn
+                                                onClick={() => {
+                                                    setAddTaskState(true);
+                                                }}
+                                                style={{ padding: "1% 5%" }}
+                                                disabled={
+                                                    secondTotalTimeStageTwo === 1200 ? true : false
+                                                }
+                                            >
+                                                Add
+                                            </CusBtn>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ) : null}
+=======
+>>>>>>> 10182bbcd5b1ec3792a50d0eca4f89ed108187fa
                         </div>
                     )
                 ) : null}
