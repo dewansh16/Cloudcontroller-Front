@@ -1802,8 +1802,6 @@ function BillingModule() {
         return array.some(even);
     };
 
-    console.log("disabledBtnAddTask", disabledBtnAddTask(firstTwentyTasks));
-
     return rightSideLoading ? (
         <div
             style={{
