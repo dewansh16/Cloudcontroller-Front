@@ -73,8 +73,6 @@ function CreateGraphData(pid, deviceType) {
                 const measurement = dataQueryInFlux?._measurement.split("_");
                 const keyDevice = measurement[1] || "";
 
-                console.log("dataQueryInFlux", dataQueryInFlux);
-
                 if (keyDevice === newDeviceType) {
                     arrBattery.push({
                         time: `${time.getHours()}h${time.getMinutes() < 10 ? `0${time.getMinutes()}` : time.getMinutes()}p`,
@@ -128,9 +126,8 @@ function GetPatientOTP(pid, setOtp, setOtpLoading, callback = () => { }) {
     })
 }
 
-function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
+function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach,  }) {
     const [data, isLoading] = CreateGraphData(pid, deviceType);
-    // console.log("data", data);
 
     const config = {
         data,
@@ -155,7 +152,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
                         {/* <h5 style={{ marginTop: 16 }}>Battery %</h5> */}
                         <ul style={{ paddingLeft: 0 }}>
                             {items?.map((item, index) => {
-                                const { name, value } = item;
+                                const { value } = item;
                                 return (
                                     <li
                                         key={index}
@@ -485,7 +482,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach }) {
                 <Popconfirm
                     placement="bottom"
                     title="Are you sure to detach this device?"
-                    onConfirm={onDetach(uuid)}
+                    onConfirm={onDetach(uuid, deviceType)}
                     okText="Yes"
                     cancelText="No"
                 >

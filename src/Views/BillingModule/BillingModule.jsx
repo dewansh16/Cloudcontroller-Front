@@ -339,8 +339,8 @@ function BillingModule() {
         }, 1000);
     }
 
-    const renderTimerClock = (item) => {
-        const elementId = 'task-99457-timer'
+    const renderTimerClock = (item, cptCode) => {
+        const elementId = `task-${cptCode}-timer`;
         if (!timerTask) {
             return (
                 <CusBtn
@@ -362,7 +362,7 @@ function BillingModule() {
                             timeCount = 0;
                             stopCountTimer();
                             setTimerTask(false);
-                            callUpdateBillingTasks(CPT_CODE.CPT_99457, item)
+                            callUpdateBillingTasks(cptCode, item)
                         }}
                         className="primary"
                     >
@@ -792,13 +792,13 @@ function BillingModule() {
                         Math.floor(secondTotalTimeStageTwo / 60)
                     );
 
-                    if (firstTotalTime === 1200) {
+                    if (firstTotalTime >= 1200) {
                         setTaskCodeActive("99458");
                     } else {
                         setTaskCodeActive("99457");
                     }
 
-                    if (secondTotalTimeStageOne === 1200) {
+                    if (secondTotalTimeStageOne >= 1200) {
                         setTaskCodeInternalActive("99458_stage2");
                     } else {
                         setTaskCodeInternalActive("99458_stage1");
@@ -889,23 +889,8 @@ function BillingModule() {
                                     };
                                 }
                             }
-                            if (item.code === "99458") {
-                                if (item.code_internal === "99458_stage1") {
-                                    tempSecondTwentyTasks.push(item);
-                                    secondTotalTimeStageOne =
-                                        secondTotalTimeStageOne + Number(item.timeConsidered);
-                                    if (!tempSecondTwentyData.hasOwnProperty("date")) {
-                                        tempSecondTwentyData = {
-                                            date: getDateFromISO(item.date_time),
-                                            time: getTimeFromISO(item.date_time),
-                                        };
-                                    }
-                                }
-                                if (item.code_internal === "99458_stage2") {
-                                    tempSecondTwentyStageTwoTasks.push(item);
-                                    secondTotalTimeStageTwo =
-                                        secondTotalTimeStageTwo + Number(item.timeConsidered);
-                                }
+                            if (item.code == CPT_CODE.CPT_99458) {
+                                
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -968,15 +953,9 @@ function BillingModule() {
                     );
 
                     if (firstTotalTime === 1200) {
-                        setTaskCodeActive("99458");
+                        setTaskCodeActive(CPT_CODE.CPT_99458);
                     } else {
-                        setTaskCodeActive("99457");
-                    }
-
-                    if (secondTotalTimeStageOne === 1200) {
-                        setTaskCodeInternalActive("99458_stage2");
-                    } else {
-                        setTaskCodeInternalActive("99458_stage1");
+                        setTaskCodeActive(CPT_CODE.CPT_99457);
                     }
                 })
                 .catch((err) => {
@@ -1027,6 +1006,13 @@ function BillingModule() {
         return result;
     }
 
+    const getDateEnable99457 = () => {
+        if(isArray(firstTwentyTasks) && firstTwentyTasks.length > 0) {
+            return moment(firstTwentyTasks[firstTwentyTasks.length - 1]).format('YYYY-MM-DD');
+        }
+        return '';
+    }
+    
     const getTotalNumberDay = (item) => {
         let result = 0;
         let currentDate = moment();
@@ -1238,13 +1224,12 @@ function BillingModule() {
     function callUpdateBillingTasks(cptCode, item = {}) {
         var date = new Date();
         var date_string = date.toISOString();
-
-        if (cptCode == CPT_CODE.CPT_99457) {
+        if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
             let isCodeExist = false;
             let billingId = null;
 
             billingInformation.map(item => {
-                if (item.code == CPT_CODE.CPT_99457) {
+                if (item.code == cptCode) {
                     isCodeExist = true;
                     billingId = item.id
                 }
@@ -1255,7 +1240,7 @@ function BillingModule() {
                 let updateData = {};
                 if (item.task_id) {
                     updateData = {
-                        code: CPT_CODE.CPT_99457,
+                        code: cptCode,
                         bill_date: date_string,
                         pid: location.state.pid,
                         billing_id: billingId,
@@ -1267,7 +1252,7 @@ function BillingModule() {
                     }
                 } else {
                     updateData = {
-                        code: CPT_CODE.CPT_99457,
+                        code: cptCode,
                         bill_date: date_string,
                         pid: location.state.pid,
                         billing_id: billingId,
@@ -1293,7 +1278,7 @@ function BillingModule() {
                     .addBillingTask(
                         {
                             code_type: CPT,
-                            code: CPT_CODE.CPT_99457,
+                            code: cptCode,
                             bill_date: date_string,
                             pid: location.state.pid,
                             revenue_code: 123,
@@ -1625,22 +1610,8 @@ function BillingModule() {
                                 }
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
-                                if (item.code_internal === "99458_stage1") {
-                                    tempSecondTwentyTasks.push(item);
-                                    secondTotalTimeStageOne =
-                                        secondTotalTimeStageOne + Number(item.timeConsidered);
-                                    if (!tempSecondTwentyData.hasOwnProperty("date")) {
-                                        tempSecondTwentyData = {
-                                            date: getDateFromISO(item.date_time),
-                                            time: getTimeFromISO(item.date_time),
-                                        };
-                                    }
-                                }
-                                if (item.code_internal === "99458_stage2") {
-                                    tempSecondTwentyStageTwoTasks.push(item);
-                                    secondTotalTimeStageTwo =
-                                        secondTotalTimeStageTwo + Number(item.timeConsidered);
-                                }
+                                tempSecondTwentyTasks = JSON.parse(item.params);
+                                if(!isArray(tempSecondTwentyTasks)) tempSecondTwentyTasks = [];
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -1653,9 +1624,6 @@ function BillingModule() {
                     );
 
                     setDataSource(tempDataSource);
-
-                    setFirstTwentyData(tempFirstTwentyData);
-                    setSecondTwentyData(tempSecondTwentyData);
 
                     setLastStateDone(lastState);
                     setLastStateData(lastData);
@@ -1689,31 +1657,15 @@ function BillingModule() {
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
                     setSecondTwentyTasks(tempSecondTwentyTasks);
-                    setSecondTwentyStageTwoTasks(tempSecondTwentyStageTwoTasks);
 
                     setFirstTotalTime(firstTotalTime);
                     setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
 
-                    setSecondTotalTimeStageOne(secondTotalTimeStageOne);
-                    setSecondTotalTimeStageOneDisplay(
-                        Math.floor(secondTotalTimeStageOne / 60)
-                    );
-
-                    setSecondTotalTimeStageTwo(secondTotalTimeStageTwo);
-                    setSecondTotalTimeStageTwoDisplay(
-                        Math.floor(secondTotalTimeStageTwo / 60)
-                    );
 
                     if (firstTotalTime >= 1200) {
                         setTaskCodeActive(CPT_CODE.CPT_99458);
                     } else {
                         setTaskCodeActive(CPT_CODE.CPT_99457);
-                    }
-
-                    if (secondTotalTimeStageOne === 1200) {
-                        setTaskCodeInternalActive("99458_stage2");
-                    } else {
-                        setTaskCodeInternalActive("99458_stage1");
                     }
 
                     setTaskDeleteArray([])
@@ -1900,7 +1852,7 @@ function BillingModule() {
                                             : { background: "#ffcd00" }
                                     }
                                 ></div>
-                                <div className="bm-header-number-active">99453</div>
+                                <div className="bm-header-number-active">{CPT_CODE.CPT_99453}</div>
                             </div>
                             <div className="bm-cptcode-b-header">
                                 <div
@@ -1940,7 +1892,7 @@ function BillingModule() {
                                     className="bm-header-dot"
                                     style={
                                         initialStepDoneState
-                                            ? patchEnrolled
+                                            ? getUnitBilledSensor()
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -1950,7 +1902,7 @@ function BillingModule() {
                                     className="bm-header-number"
                                     style={initialStepDoneState ? { color: "black" } : null}
                                 >
-                                    99454
+                                    {CPT_CODE.CPT_99454}
                                 </div>
                             </div>
                             <div className="bm-cptcode-b-header">
@@ -1958,7 +1910,7 @@ function BillingModule() {
                                     className="bm-header-line"
                                     style={
                                         initialStepDoneState
-                                            ? patchEnrolled
+                                            ? getUnitBilledSensor()
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -1991,7 +1943,7 @@ function BillingModule() {
                                     className="bm-header-dot"
                                     style={
                                         initialStepDoneState
-                                            ? firstTotalTime === 1200
+                                            ? firstTotalTime >= 1200
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -2001,7 +1953,7 @@ function BillingModule() {
                                     className="bm-header-number"
                                     style={initialStepDoneState ? { color: "black" } : null}
                                 >
-                                    99457
+                                    {CPT_CODE.CPT_99457}
                                 </div>
                             </div>
                             <div className="bm-cptcode-b-header">
@@ -2019,7 +1971,7 @@ function BillingModule() {
                             </div>
                         </div>
                         <div className="bm-cptcode-container">
-                            {enrolledState && firstTotalTime === 1200 ? (
+                            {enrolledState && firstTotalTime >= 1200 ? (
                                 <div
                                     onClick={() => {
                                         setAssociatedSensorsState(false);
@@ -2041,18 +1993,16 @@ function BillingModule() {
                                 <div
                                     className="bm-header-dot"
                                     style={
-                                        firstTotalTime === 1200
-                                            ? secondTotalTimeStageOne < 1200
-                                                ? { background: "#ffcd00" }
-                                                : { background: "#81ff00" }
+                                        firstTotalTime >= 1200
+                                            ? { background: "#ffcd00" }
                                             : null
                                     }
                                 ></div>
                                 <div
                                     className="bm-header-number"
-                                    style={firstTotalTime === 1200 ? { color: "black" } : null}
+                                    style={firstTotalTime >= 1200 ? { color: "black" } : null}
                                 >
-                                    99458
+                                    {CPT_CODE.CPT_99458}
                                 </div>
                             </div>
                             <div className="bm-cptcode-b-header">
@@ -2733,7 +2683,7 @@ function BillingModule() {
                             >
                                 {firstTotalTime >= 1200 ? (
                                     <div style={{ fontSize: "1.2rem" }}>
-                                        {`CPT code: 99457 enabled at  ${firstTwentyData.date}`}
+                                        {`CPT code: 99457 enabled at  ${getDateEnable99457()}`}
                                     </div>
                                 ) : (
                                     <div style={{ fontSize: "1.2rem" }}>
@@ -2752,7 +2702,7 @@ function BillingModule() {
                                         <div
                                             className="bm-sensor-monitored-bar-two"
                                             style={{
-                                                width: `${(firstTotalTimeDisplay / 20) * 100}%`,
+                                                width: `${(firstTotalTimeDisplay / 20) * 100 > 100 ? 100 : (firstTotalTimeDisplay / 20) * 100}%`,
                                             }}
                                         ></div>
                                     </div>
@@ -2806,9 +2756,8 @@ function BillingModule() {
                                             <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
                                             <div className="bm-item-header" style={{ width: "30%" }}>Note</div>
                                             <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
-
                                         </div>
-                                        <div style={{ overflowY: "scroll", height: "70%" }}>
+                                        <div style={{ overflowY: "scroll", height: "70%", marginRight: "-6px" }}>
                                             <Collapse expandIconPosition="right">
                                                 {firstTwentyTasks.map((item, index) => (
                                                     <Panel
@@ -2832,7 +2781,7 @@ function BillingModule() {
                                                                     {item["task_note"]}
                                                                 </div>
                                                                 <div className="bm-item-body" style={{ width: "20%" }}>
-                                                                    {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item)}
+                                                                    {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99457)}
                                                                 </div>
                                                             </div>
                                                         }
@@ -2950,15 +2899,19 @@ function BillingModule() {
                                         {`CPT code: 99458 has not been enabled yet`}
                                     </div>
                                 )}
-                                {stageOneState ? (
+                            </div>
+                            {secondTwentyTasks.length === 0 ? (
                                     <div
                                         style={{
-                                            width: "28%",
                                             display: "flex",
                                             flexDirection: "column",
-                                            justifyContent: "space-between",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            height: "85%",
+                                            width: "100%",
                                         }}
                                     >
+<<<<<<< HEAD
                                         <div className="bm-sensor-monitored-bar">
                                             <div
                                                 className="bm-sensor-monitored-bar-two 2"
@@ -2967,47 +2920,86 @@ function BillingModule() {
                                                         }%`,
                                                 }}
                                             ></div>
+=======
+                                        <div style={{ margin: "2%" }}>
+                                            No tasks updated or scheduled yet
+>>>>>>> 10182bbcd5b1ec3792a50d0eca4f89ed108187fa
                                         </div>
-                                        <div>
-                                            <div style={{ fontSize: "1.2rem" }}>
-                                                {`Mins Monitored: ${secondTotalTimeStageOneDisplay}/20`}
-                                            </div>
-                                            <div style={{ color: "#00000085" }}>
-                                                <b>{`${20 - secondTotalTimeStageOneDisplay} mins`}</b>{" "}
-                                                left to enable Stage 2.
-                                            </div>
+                                        <CusBtn
+                                            onClick={() => {
+                                                setAddTaskState(true);
+                                            }}
+                                            className="primary"
+                                        >
+                                            Add
+                                        </CusBtn>
+                                    </div>
+                                ) : (
+                                    <div className="bm-sensor-bottom-container">
+                                        <div className="bm-sensor-bottom-header title-table">Task</div>
+                                        <div className="bm-sensor-bottom-table-header">
+                                            <div className="bm-item-header" style={{ width: "20%" }}>Date</div>
+                                            <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
+                                            <div className="bm-item-header" style={{ width: "30%" }}>Note</div>
+                                            <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
+
+                                        </div>
+                                        <div style={{ overflowY: "scroll", height: "70%" }}>
+                                            <Collapse expandIconPosition="right">
+                                                {secondTwentyTasks.map((item, index) => (
+                                                    <Panel
+                                                        header={
+                                                            <div
+                                                                style={{
+                                                                    width: "100%",
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    height: "40px",
+                                                                    fontSize: "1rem"
+                                                                }}
+                                                            >
+                                                                <div className="bm-item-body" style={{ width: "20%" }}>
+                                                                    {moment(item["task_date"]).format("YYYY-MM-DD")}
+                                                                </div>
+                                                                <div className="bm-item-body" style={{ width: "30%" }}>
+                                                                    {item["staff_name"]}
+                                                                </div>
+                                                                <div className="bm-item-body" style={{ width: "30%" }}>
+                                                                    {item["task_note"]}
+                                                                </div>
+                                                                <div className="bm-item-body" style={{ width: "20%" }}>
+                                                                    {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99458)}
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        key={index}
+                                                        style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
+                                                    >
+
+                                                    </Panel>
+                                                ))}
+                                            </Collapse>
+
                                         </div>
                                     </div>
-                                ) : null}
-                                {stageTwoState ? (
+                                )}
+                                {secondTwentyTasks.length !== 0 ? (
                                     <div
-                                        style={{
-                                            width: "28%",
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            justifyContent: "space-between",
-                                        }}
+                                        style={addTaskState ? { filter: "blur(4px)" } : null}
+                                        className="bm-bottom-add-btn"
                                     >
-                                        <div className="bm-sensor-monitored-bar">
-                                            <div
-                                                className="bm-sensor-monitored-bar-two"
-                                                style={{
-                                                    width: `${(secondTotalTimeStageTwoDisplay / 20) * 100
-                                                        }%`,
-                                                }}
-                                            ></div>
-                                        </div>
-                                        <div>
-                                            <div style={{ fontSize: "1.2rem" }}>
-                                                {`Mins Monitored: ${secondTotalTimeStageTwoDisplay}/20`}
-                                            </div>
-                                            <div style={{ color: "#00000085" }}>
-                                                <b>{`${20 - secondTotalTimeStageTwoDisplay} mins`}</b>{" "}
-                                                left.
-                                            </div>
-                                        </div>
+                                        <CusBtn
+                                            onClick={() => {
+                                                setAddTaskState(true);
+                                            }}
+                                            style={{ padding: "1% 5%" }}
+                                            disabled={firstTotalTime >= 1200 ? true : false}
+                                        >
+                                            Add
+                                        </CusBtn>
                                     </div>
                                 ) : null}
+<<<<<<< HEAD
                             </div>
                             <div
                                 style={
@@ -3284,6 +3276,8 @@ function BillingModule() {
                                     ) : null}
                                 </div>
                             ) : null}
+=======
+>>>>>>> 10182bbcd5b1ec3792a50d0eca4f89ed108187fa
                         </div>
                     )
                 ) : null}
