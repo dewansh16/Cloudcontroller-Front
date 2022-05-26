@@ -82,10 +82,6 @@ const PatientListItem = (props) => {
             icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
             val: 0,
             color: Colors.purple,
-            // val:
-            // parseInt(props.data.ews_map?.temp) === -1
-            //     ? "NA"
-            //     : props.data.ews_map?.temp,
             trendData: []
         },
         {
@@ -94,10 +90,6 @@ const PatientListItem = (props) => {
             icon: Icons.o2({ Style: { color: Colors.green } }),
             val: 0,
             color: Colors.green,
-            // val:
-            // parseInt(props.data.ews_map?.spo2) === -1
-            //     ? "NA"
-            //     : props.data.ews_map?.spo2,
             trendData: []
         },
         {
@@ -106,10 +98,6 @@ const PatientListItem = (props) => {
             icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
             val: 0,
             color: Colors.darkPink,
-            // val:
-            // parseInt(props.data.ews_map?.hr) === -1
-            //     ? "NA"
-            //     : props.data.ews_map?.hr,
             trendData: []
         },
         {
@@ -118,17 +106,15 @@ const PatientListItem = (props) => {
             icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
             val: 0,
             color: Colors.orange,
-            // val:
-            // parseInt(props.data.ews_map?.rr) === -1
-            //     ? "NA"
-            //     : props.data.ews_map?.rr,
             trendData: []
         },
+        // {
+        //     _key: 'alphamed_bpd',
+        // },
         {
-            _key: 'alphamed_bpd',
-        },
-        {
-            _key: 'alphamed_bps',
+            // _key: 'alphamed_bps',
+            _key: "blood_pressuer",
+            arrayChild: ["alphamed_bpd", "alphamed_bps"],
             name: "Blood Pressure",
             icon: Icons.bpIcon({
                 Style: { color: Colors.darkPurple, fontSize: "24px" },
@@ -136,10 +122,6 @@ const PatientListItem = (props) => {
             val: 0,
             val_bpd: 0,
             color: Colors.darkPurple,
-            // val:
-            // parseInt(props.data.ews_map?.rr) === -1
-            //   ? "NA"
-            //   : props.data.ews_map?.rr,
             trendData: []
         },
         {
@@ -156,47 +138,63 @@ const PatientListItem = (props) => {
 
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
 
-    const getDataSensorFromInfluxDB = () => {
+    const processDataForSensor = (key, newArrChart, chart, index) => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
 
         const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
         const queryApi = client.getQueryApi(org);
 
+        const query = `from(bucket: "emr_dev")
+                |> range(start: -3h)
+                |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
+                |> yield(name: "mean")`;
+
+        const arrayRes = [];
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                if (chart?._key !== "alphamed_bpd") {
+                    arrayRes.push({ value: dataQueryInFlux?._value || 0 });
+                } else {
+                    newArrChart[index + 1].val_bpd = dataQueryInFlux?._value || 0;
+                }
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+                // console.log('nFinished SUCCESS');
+                if (arrayRes?.length > 0) {
+                    chart.trendData = arrayRes || [];
+                    chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
+                    if (chart.trendData?.length > 20) {
+                        chart.trendData.splice(0, 1);
+                    }
+                    setChartBlockData([...newArrChart]);
+                }
+            },
+        })
+    }
+
+    const getDataSensorFromInfluxDB = () => {
+      
+
         const newArrChart = [...chartBlockData];
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];
-            const query = `from(bucket: "emr_dev")
-                    |> range(start: -3h)
-                    |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${chart?._key}")
-                    |> yield(name: "mean")`;
 
-            const arrayRes = [];
-            queryApi.queryRows(query, {
-                next(row, tableMeta) {
-                    const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                    if (chart?._key !== "alphamed_bpd") {
-                        arrayRes.push({ value: dataQueryInFlux?._value || 0 });
-                    } else {
-                        newArrChart[index + 1].val_bpd = dataQueryInFlux?._value || 0;
-                    }
-                },
-                error(error) {
-                    console.error(error)
-                    console.log('nFinished ERROR')
-                },
-                complete() {
-                    // console.log('nFinished SUCCESS');
-                    if (arrayRes?.length > 0 && chart?._key !== "alphamed_bpd") {
-                        chart.trendData = arrayRes || [];
-                        chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-                        if (chart.trendData?.length > 20) {
-                            chart.trendData.splice(0, 1);
-                        }
-                        setChartBlockData([...newArrChart]);
-                    }
-                },
-            })
+            const key = chart?._key;
+            if (key !== "blood_pressuer") {
+                processDataForSensor(key, newArrChart, chart, index)
+            } else {
+                // const arrKeyChild = key?.arrayChild;
+                // for (let j = 0; j < arrKeyChild.length; j++) {
+                //     const keyChild = arrKeyChild[j];
+                //     processDataForSensor(keyChild);
+                // }
+            }
         }
     };
 
