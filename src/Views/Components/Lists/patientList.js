@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { io } from "socket.io-client";
 import { InfluxDB } from "@influxdata/influxdb-client";
+import { isArray } from 'lodash';
 
 import { Row, Col, Divider, Grid, Tooltip } from "antd";
 import Colors from "../../../Theme/Colors/colors";
@@ -9,6 +10,7 @@ import Icons from "../../../Utils/iconMap";
 import ChartsBlock from "./listComponent/chartsBlock";
 import { Button } from "../../../Theme/Components/Button/button";
 const { useBreakpoint } = Grid;
+
 
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
@@ -149,7 +151,6 @@ const PatientListItem = (props) => {
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                console.log("dataQueryInFlux", dataQueryInFlux);
                 if (key === "alphamed_bpd" || key === "ihealth_bpd") {
                     chart.val_bpd = dataQueryInFlux?._value;
                 } else {
@@ -175,7 +176,9 @@ const PatientListItem = (props) => {
     }
 
     const getDataSensorFromInfluxDB = () => {
-        const associated_list = JSON.parse(props.data.demographic_map.associated_list) || [];
+        const associated_list = JSON.parse(props.data.demographic_map.associated_list);
+        if (!isArray(associated_list)) associated_list = [];
+
         // console.log("associated_list", associated_list);
         const newArrChart = [...chartBlockData];
         for (let index = 0; index < newArrChart.length; index++) {
