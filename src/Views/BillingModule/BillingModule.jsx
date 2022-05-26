@@ -52,6 +52,7 @@ const monthNames = [
 ];
 
 const TOTAL_HOURS_FOR_EACH_SENSOR_BILLED = 16;
+const TOTAL_HOURS_FOR_EACH_99458_BILLED = 30;
 
 const columns = [
     {
@@ -149,10 +150,7 @@ function BillingModule() {
 
     const [firstTotalTime, setFirstTotalTime] = useState(0);
     const [firstTotalTimeDisplay, setFirstTotalTimeDisplay] = useState(0);
-    const [secondTotalTimeStageOne, setSecondTotalTimeStageOne] = useState(0);
-    const [secondTotalTimeStageOneDisplay, setSecondTotalTimeStageOneDisplay] = useState(0);
-    const [secondTotalTimeStageTwo, setSecondTotalTimeStageTwo] = useState(0);
-    const [secondTotalTimeStageTwoDisplay, setSecondTotalTimeStageTwoDisplay] = useState(0);
+    const [secondTotalTime, setSecondTotalTime] = useState(0);
 
     const [stageOneState, setStageOneState] = useState(true);
     const [stageTwoState, setStageTwoState] = useState(false);
@@ -167,7 +165,6 @@ function BillingModule() {
 
     const [firstTwentyTasks, setFirstTwentyTasks] = useState([]);
     const [secondTwentyTasks, setSecondTwentyTasks] = useState([]);
-    const [secondTwentyStageTwoTasks, setSecondTwentyStageTwoTasks] = useState([]);
 
     const [runUseEffect, setRunUseEffect] = useState(0);
     const [timerTask, setTimerTask] = useState(false);
@@ -204,11 +201,8 @@ function BillingModule() {
         setPatchArray([]);
         setPatchInformation({});
         setFirstTotalTime(0);
+        setSecondTotalTime(0);
         setFirstTotalTimeDisplay(0);
-        setSecondTotalTimeStageOne(0);
-        setSecondTotalTimeStageOneDisplay(0);
-        setSecondTotalTimeStageTwo(0);
-        setSecondTotalTimeStageTwoDisplay(0);
         setStageOneState(true);
         setStageTwoState(false);
         setTaskDateVal();
@@ -219,7 +213,6 @@ function BillingModule() {
         setTaskCodeInternalActive("");
         setFirstTwentyTasks([]);
         setSecondTwentyTasks([]);
-        setSecondTwentyStageTwoTasks([]);
 
         var temp = runUseEffect;
         temp = temp + 1;
@@ -505,8 +498,7 @@ function BillingModule() {
                     var tempSecondTwentyData = {};
 
                     var firstTotalTime = 0;
-                    var secondTotalTimeStageOne = 0;
-                    var secondTotalTimeStageTwo = 0;
+                    var secondTotalTime = 0;
                     res.data.response.billingData.map(
                         (item) => {
                             tempDataSource.push({
@@ -538,22 +530,7 @@ function BillingModule() {
                                 setFirstTwentyData(params);
                             }
                             if (item.code == "99458") {
-                                if (item.code_internal == "99458_stage1") {
-                                    tempSecondTwentyTasks.push(item);
-                                    secondTotalTimeStageOne =
-                                        secondTotalTimeStageOne + Number(item.timeConsidered);
-                                    if (!tempSecondTwentyData.hasOwnProperty("date")) {
-                                        tempSecondTwentyData = {
-                                            date: getDateFromISO(item.date_time),
-                                            time: getTimeFromISO(item.date_time),
-                                        };
-                                    }
-                                }
-                                if (item.code_internal == "99458_stage2") {
-                                    tempSecondTwentyStageTwoTasks.push(item);
-                                    secondTotalTimeStageTwo =
-                                        secondTotalTimeStageTwo + Number(item.timeConsidered);
-                                }
+                                
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -601,31 +578,14 @@ function BillingModule() {
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
                     setSecondTwentyTasks(tempSecondTwentyTasks);
-                    setSecondTwentyStageTwoTasks(tempSecondTwentyStageTwoTasks);
 
                     setFirstTotalTime(firstTotalTime);
                     setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
-
-                    setSecondTotalTimeStageOne(secondTotalTimeStageOne);
-                    setSecondTotalTimeStageOneDisplay(
-                        Math.floor(secondTotalTimeStageOne / 60)
-                    );
-
-                    setSecondTotalTimeStageTwo(secondTotalTimeStageTwo);
-                    setSecondTotalTimeStageTwoDisplay(
-                        Math.floor(secondTotalTimeStageTwo / 60)
-                    );
 
                     if (firstTotalTime === 1200) {
                         setTaskCodeActive("99458");
                     } else {
                         setTaskCodeActive("99457");
-                    }
-
-                    if (secondTotalTimeStageOne === 1200) {
-                        setTaskCodeInternalActive("99458_stage2");
-                    } else {
-                        setTaskCodeInternalActive("99458_stage1");
                     }
                 })
                 .catch((err) => {
@@ -675,8 +635,6 @@ function BillingModule() {
                     var tempSecondTwentyData = {};
 
                     var firstTotalTime = 0;
-                    var secondTotalTimeStageOne = 0;
-                    var secondTotalTimeStageTwo = 0;
                     res.data.response.billingData[0].code_tasks[0].Billing_Information.map(
                         (item) => {
                             tempDataSource.push({
@@ -714,22 +672,7 @@ function BillingModule() {
                                 }
                             }
                             if (item.code === "99458") {
-                                if (item.code_internal === "99458_stage1") {
-                                    tempSecondTwentyTasks.push(item);
-                                    secondTotalTimeStageOne =
-                                        secondTotalTimeStageOne + Number(item.timeConsidered);
-                                    if (!tempSecondTwentyData.hasOwnProperty("date")) {
-                                        tempSecondTwentyData = {
-                                            date: getDateFromISO(item.date_time),
-                                            time: getTimeFromISO(item.date_time),
-                                        };
-                                    }
-                                }
-                                if (item.code_internal === "99458_stage2") {
-                                    tempSecondTwentyStageTwoTasks.push(item);
-                                    secondTotalTimeStageTwo =
-                                        secondTotalTimeStageTwo + Number(item.timeConsidered);
-                                }
+                                
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -777,20 +720,9 @@ function BillingModule() {
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
                     setSecondTwentyTasks(tempSecondTwentyTasks);
-                    setSecondTwentyStageTwoTasks(tempSecondTwentyStageTwoTasks);
 
                     setFirstTotalTime(firstTotalTime);
                     setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
-
-                    setSecondTotalTimeStageOne(secondTotalTimeStageOne);
-                    setSecondTotalTimeStageOneDisplay(
-                        Math.floor(secondTotalTimeStageOne / 60)
-                    );
-
-                    setSecondTotalTimeStageTwo(secondTotalTimeStageTwo);
-                    setSecondTotalTimeStageTwoDisplay(
-                        Math.floor(secondTotalTimeStageTwo / 60)
-                    );
 
                     if (firstTotalTime >= 1200) {
                         setTaskCodeActive("99458");
@@ -798,11 +730,6 @@ function BillingModule() {
                         setTaskCodeActive("99457");
                     }
 
-                    if (secondTotalTimeStageOne >= 1200) {
-                        setTaskCodeInternalActive("99458_stage2");
-                    } else {
-                        setTaskCodeInternalActive("99458_stage1");
-                    }
                 })
                 .catch((err) => {
                     console.log(err);
@@ -851,8 +778,7 @@ function BillingModule() {
                     var tempSecondTwentyData = {};
 
                     var firstTotalTime = 0;
-                    var secondTotalTimeStageOne = 0;
-                    var secondTotalTimeStageTwo = 0;
+                    var secondTotalTime = 0;
                     res.data.response.billingData[0].code_tasks[0].Billing_Information.map(
                         (item) => {
                             tempDataSource.push({
@@ -937,20 +863,9 @@ function BillingModule() {
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
                     setSecondTwentyTasks(tempSecondTwentyTasks);
-                    setSecondTwentyStageTwoTasks(tempSecondTwentyStageTwoTasks);
 
                     setFirstTotalTime(firstTotalTime);
                     setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
-
-                    setSecondTotalTimeStageOne(secondTotalTimeStageOne);
-                    setSecondTotalTimeStageOneDisplay(
-                        Math.floor(secondTotalTimeStageOne / 60)
-                    );
-
-                    setSecondTotalTimeStageTwo(secondTotalTimeStageTwo);
-                    setSecondTotalTimeStageTwoDisplay(
-                        Math.floor(secondTotalTimeStageTwo / 60)
-                    );
 
                     if (firstTotalTime === 1200) {
                         setTaskCodeActive(CPT_CODE.CPT_99458);
@@ -1542,9 +1457,6 @@ function BillingModule() {
                 setCurrentDateApi(dateMonthString);
             }
 
-            console.log("DATE 4 : ", dateMonthString)
-            console.log("CURRENT DATE API : ", currentDateApi)
-
             billingApi
                 .getBillingTasks(location.state.pid, currentActiveMonth === "" ? dateMonthString : currentDateApi, '0')
                 .then((res) => {
@@ -1575,8 +1487,7 @@ function BillingModule() {
                     var tempSecondTwentyData = {};
 
                     var firstTotalTime = 0;
-                    var secondTotalTimeStageOne = 0;
-                    var secondTotalTimeStageTwo = 0;
+                    var secondTotalTime =  0;
                     res.data.response.billingData.map(
                         (item) => {
                             tempDataSource.push({
@@ -1621,6 +1532,13 @@ function BillingModule() {
                             if (item.code == CPT_CODE.CPT_99458) {
                                 tempSecondTwentyTasks = JSON.parse(item.params);
                                 if (!isArray(tempSecondTwentyTasks)) tempSecondTwentyTasks = [];
+                                if (tempSecondTwentyTasks.length > 0) {
+                                    tempSecondTwentyTasks.map(item => {
+                                        if (item.task_time_spend) {
+                                            secondTotalTime += item.task_time_spend;
+                                        }
+                                    })
+                                }
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -1668,9 +1586,8 @@ function BillingModule() {
                     setSecondTwentyTasks(tempSecondTwentyTasks);
 
                     setFirstTotalTime(firstTotalTime);
+                    setSecondTotalTime(secondTotalTime);
                     setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
-
-
                     if (firstTotalTime >= 1200) {
                         setTaskCodeActive(CPT_CODE.CPT_99458);
                     } else {
@@ -2017,20 +1934,8 @@ function BillingModule() {
                             <div className="bm-cptcode-b-header">
                                 <div
                                     className="bm-header-line"
-                                    style={
-                                        firstTotalTime === 1200
-                                            ? secondTotalTimeStageOne < 1200
-                                                ? { background: "#ffcd00" }
-                                                : { background: "#81ff00" }
-                                            : null
-                                    }
+                                    style={{ background: "#ffcd00" }}
                                 ></div>
-                                {stageOneState ? (
-                                    <div className="bm-header-below">{`Stage 1: ${secondTotalTimeStageOneDisplay} mins monitored`}</div>
-                                ) : null}
-                                {stageTwoState ? (
-                                    <div className="bm-header-below">{`Stage 2: ${secondTotalTimeStageTwoDisplay} mins monitored`}</div>
-                                ) : null}
                             </div>
                         </div>
                         <div className="bm-cptcode-container">
@@ -2921,21 +2826,23 @@ function BillingModule() {
                                         <div
                                             className="bm-sensor-monitored-bar-two"
                                             style={{
-                                                width: `${(secondTotalTimeStageOneDisplay / 20) * 100
+                                                width: `${(secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED / TOTAL_HOURS_FOR_EACH_99458_BILLED) * 100
                                                     }%`,
                                             }}
                                         ></div>
-                                        {/* <div style={{ margin: "2%" }}>
-                                            No tasks updated or scheduled yet
+                                           <div style={{marginTop: "10px"}}>
+                                        <div style={{ fontSize: "1.2rem" }}>
+                                            {`Mins Monitored: ${secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED}/${TOTAL_HOURS_FOR_EACH_99458_BILLED}`}
                                         </div>
-                                        <CusBtn
-                                            onClick={() => {
-                                                setAddTaskState(true);
-                                            }}
-                                            className="primary"
-                                        >
-                                            Add
-                                        </CusBtn> */}
+                                        {Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0 && (
+                                            <p>{Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED)} Unit Billed</p>
+                                        )}
+                                        
+                                        <div style={{ color: "#00000085" }}>
+                                            <b>{`${TOTAL_HOURS_FOR_EACH_99458_BILLED - (secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED)} mins`}</b> left to
+                                            enable the next CPT code.
+                                        </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
