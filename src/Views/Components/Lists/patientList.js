@@ -76,45 +76,40 @@ const PatientListItem = (props) => {
     const [isChartSectionVisible, setChartSectionVisibility] = React.useState(false);
 
     const arrDataChart = [
-        {
-            _key: 'temp',
-            name: "Temperature",
-            icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
-            val: 0,
-            color: Colors.purple,
-            trendData: []
-        },
-        {
-            _key: 'spo2',
-            name: "SPO2",
-            icon: Icons.o2({ Style: { color: Colors.green } }),
-            val: 0,
-            color: Colors.green,
-            trendData: []
-        },
-        {
-            _key: 'ecg_hr',
-            name: "Heart Rate",
-            icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
-            val: 0,
-            color: Colors.darkPink,
-            trendData: []
-        },
-        {
-            _key: 'ecg_rr',
-            name: "Respiration Rate",
-            icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
-            val: 0,
-            color: Colors.orange,
-            trendData: []
-        },
         // {
-        //     _key: 'alphamed_bpd',
+        //     _key: 'temp',
+        //     name: "Temperature",
+        //     icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
+        //     val: 0,
+        //     color: Colors.purple,
+        //     trendData: []
+        // },
+        // {
+        //     _key: 'spo2',
+        //     name: "SPO2",
+        //     icon: Icons.o2({ Style: { color: Colors.green } }),
+        //     val: 0,
+        //     color: Colors.green,
+        //     trendData: []
+        // },
+        // {
+        //     _key: 'ecg_hr',
+        //     name: "Heart Rate",
+        //     icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
+        //     val: 0,
+        //     color: Colors.darkPink,
+        //     trendData: []
+        // },
+        // {
+        //     _key: 'ecg_rr',
+        //     name: "Respiration Rate",
+        //     icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
+        //     val: 0,
+        //     color: Colors.orange,
+        //     trendData: []
         // },
         {
-            // _key: 'alphamed_bps',
             _key: "blood_pressuer",
-            arrayChild: ["alphamed_bpd", "alphamed_bps"],
             name: "Blood Pressure",
             icon: Icons.bpIcon({
                 Style: { color: Colors.darkPurple, fontSize: "24px" },
@@ -124,16 +119,16 @@ const PatientListItem = (props) => {
             color: Colors.darkPurple,
             trendData: []
         },
-        {
-            _key: 'weight',
-            name: "Weight",
-            icon: Icons.bpIcon({
-                Style: { color: Colors.yellow, fontSize: "24px" },
-            }),
-            val: 0,
-            color: Colors.yellow,
-            trendData: []
-        },
+        // {
+        //     _key: 'weight',
+        //     name: "Weight",
+        //     icon: Icons.bpIcon({
+        //         Style: { color: Colors.yellow, fontSize: "24px" },
+        //     }),
+        //     val: 0,
+        //     color: Colors.yellow,
+        //     trendData: []
+        // },
     ]
 
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
@@ -154,10 +149,14 @@ const PatientListItem = (props) => {
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                if (chart?._key !== "alphamed_bpd") {
-                    arrayRes.push({ value: dataQueryInFlux?._value || 0 });
+
+                if (key === "alphamed_bpd" || key === "ihealth_bpd") {
+                    chart.val_bpd = dataQueryInFlux?._value;
                 } else {
-                    newArrChart[index + 1].val_bpd = dataQueryInFlux?._value || 0;
+                    arrayRes.push({ value: dataQueryInFlux?._value || 0 });
+                    if (arrayRes?.length > 30) {
+                        arrayRes.splice(0, 1);
+                    }
                 }
             },
             error(error) {
@@ -166,12 +165,9 @@ const PatientListItem = (props) => {
             },
             complete() {
                 // console.log('nFinished SUCCESS');
-                if (arrayRes?.length > 0) {
+                if (arrayRes?.length > 0 && key !== "alphamed_bpd") {
                     chart.trendData = arrayRes || [];
                     chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-                    if (chart.trendData?.length > 20) {
-                        chart.trendData.splice(0, 1);
-                    }
                     setChartBlockData([...newArrChart]);
                 }
             },
@@ -179,8 +175,8 @@ const PatientListItem = (props) => {
     }
 
     const getDataSensorFromInfluxDB = () => {
-      
-
+        const associated_list = JSON.parse(props.data.demographic_map.associated_list) || [];
+        console.log("associated_list", associated_list);
         const newArrChart = [...chartBlockData];
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];
@@ -189,11 +185,18 @@ const PatientListItem = (props) => {
             if (key !== "blood_pressuer") {
                 processDataForSensor(key, newArrChart, chart, index)
             } else {
-                // const arrKeyChild = key?.arrayChild;
-                // for (let j = 0; j < arrKeyChild.length; j++) {
-                //     const keyChild = arrKeyChild[j];
-                //     processDataForSensor(keyChild);
-                // }
+                let arrKeyChild = [];
+                if (associated_list?.includes("alphamed")) {
+                    arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
+                } else {
+                    arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
+                }
+
+                console.log("arrKeyChild", arrKeyChild);
+
+                for (let j = 0; j < arrKeyChild.length; j++) {
+                    processDataForSensor(arrKeyChild[j], newArrChart, chart, index);
+                }
             }
         }
     };
