@@ -890,7 +890,7 @@ function BillingModule() {
                                 }
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
-                                
+
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -1007,12 +1007,12 @@ function BillingModule() {
     }
 
     const getDateEnable99457 = () => {
-        if(isArray(firstTwentyTasks) && firstTwentyTasks.length > 0) {
+        if (isArray(firstTwentyTasks) && firstTwentyTasks.length > 0) {
             return moment(firstTwentyTasks[firstTwentyTasks.length - 1]).format('YYYY-MM-DD');
         }
         return '';
     }
-    
+
     const getTotalNumberDay = (item) => {
         let result = 0;
         let currentDate = moment();
@@ -1208,16 +1208,25 @@ function BillingModule() {
             .getBillingTasks(location.state.pid, currentActiveMonth === "" ? dateMonthString : currentDateApi, '0')
             .then((res) => {
                 var tempFirstTwentyTasks = [];
-
+                var tempSecondTwentyTasks = [];
+                
                 res.data.response.billingData.map(
                     (item) => {
                         if (item.code == CPT_CODE.CPT_99457) {
                             tempFirstTwentyTasks = JSON.parse(item.params);
                             if (!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
                         }
+
+                        if (item.code == CPT_CODE.CPT_99458) {
+                            tempSecondTwentyTasks = JSON.parse(item.params);
+                            if (!isArray(tempSecondTwentyTasks)) tempSecondTwentyTasks = [];
+                        }
                     }
                 );
+
+              
                 setFirstTwentyTasks(tempFirstTwentyTasks);
+                setSecondTwentyTasks(tempSecondTwentyTasks);
             })
     }
 
@@ -1611,7 +1620,7 @@ function BillingModule() {
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
                                 tempSecondTwentyTasks = JSON.parse(item.params);
-                                if(!isArray(tempSecondTwentyTasks)) tempSecondTwentyTasks = [];
+                                if (!isArray(tempSecondTwentyTasks)) tempSecondTwentyTasks = [];
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -1961,7 +1970,7 @@ function BillingModule() {
                                     className="bm-header-line"
                                     style={
                                         initialStepDoneState
-                                            ? firstTotalTime === 1200
+                                            ? firstTotalTime >= 1200
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -2816,174 +2825,220 @@ function BillingModule() {
                         </div>
                     )
                 ) : null}
-                
+
                 {secondTwentyState ? (
-    tasksLoadingState ? (
-        <div
-            style={{
-                height: "100%",
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
-            <Spin />
-        </div>
-    ) : (
-        <div className="bm-right-container">
-            {addTaskState ? addTaskComponent() : null}
-            <div
-            style={
-                addTaskState
-                    ? {
-                        filter: "blur(4px)",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        width: "100%",
-                        height: "11%",
-                    }
-                    : {
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        width: "100%",
-                        height: "11%",
-                    }
-            }
-        >
-            <CusBtn
-                onClick={() => {
-                    history.push(
-                        `/dashboard/patient/details/${location.state.pid}`
-                    );
-                }}
-                className="secondary"
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    padding: "1% 5%",
-                }}
-            >
-                <div
-                    className="gv-patient-name"
-                    style={{ fontSize: "1.4rem" }}
-                >
-                    {location.state
-                        ? location.state.name
-                        : history.push(`/dashboard/patient/details/${pid}`)}
-                </div>
-                <div
-                    className="gv-patient-mr"
-                    style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
-                >
-                    {"MR: "}
-                    {location.state
-                        ? location.state.mr
-                        : history.push(`/dashboard/patient/details/${pid}`)}
-                </div>
-            </CusBtn>
-            {placeDatePicker()}
-            <div
-                style={addTaskState ? { filter: "blur(4px)" } : null}
-                className="bm-sensor-mid"
-            >
-                {secondTwentyData.date ? (
-                    <div style={{ fontSize: "1.2rem" }}>
-                        {`CPT code: 99458 enabled at ${secondTwentyData.date}`}
-                    </div>
-                ) : (
-                    <div style={{ fontSize: "1.2rem" }}>
-                        {`CPT code: 99458 has not been enabled yet`}
-                    </div>
-                )}
-            </div>
-            {secondTwentyTasks.length === 0 ? (
-                <div
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "85%",
-                    width: "100%",
-                }}
-            >
-                <div className="bm-sensor-monitored-bar">
+                    tasksLoadingState ? (
                         <div
-                            className="bm-sensor-monitored-bar-two 2"
                             style={{
-                                width: `${(secondTotalTimeStageOneDisplay / 20) * 100
-                                    }%`,
+                                height: "100%",
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
                             }}
-                        ></div>
-                    <div style={{ margin: "2%" }}>
-                        No tasks updated or scheduled yet
-                    </div>
-                    <CusBtn
-                        onClick={() => {
-                            setAddTaskState(true);
-                        }}
-                        className="primary"
-                    >
-                        Add
-                    </CusBtn>
-            </div>
-            </div>
-            ):(
-                <div className="bm-sensor-bottom-container">
-                    <div className="bm-sensor-bottom-header title-table">Task</div>
-                    <div className="bm-sensor-bottom-table-header">
-                        <div className="bm-item-header" style={{ width: "20%" }}>Date</div>
-                        <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
-                        <div className="bm-item-header" style={{ width: "30%" }}>Note</div>
-                        <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
-
-                    </div>
-                    <div style={{ overflowY: "scroll", height: "70%" }}>
-                        <Collapse expandIconPosition="right">
-                            {secondTwentyTasks.map((item, index) => (
-                                <Panel
-                                    header={
-                                        <div
-                                            style={{
-                                                width: "100%",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                height: "40px",
-                                                fontSize: "1rem"
-                                            }}
-                                        >
-                                            <div className="bm-item-body" style={{ width: "20%" }}>
-                                                {moment(item["task_date"]).format("YYYY-MM-DD")}
-                                            </div>
-                                            <div className="bm-item-body" style={{ width: "30%" }}>
-                                                {item["staff_name"]}
-                                            </div>
-                                            <div className="bm-item-body" style={{ width: "30%" }}>
-                                                {item["task_note"]}
-                                            </div>
-                                            <div className="bm-item-body" style={{ width: "20%" }}>
-                                                {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99458)}
-                                            </div>
-                                        </div>
-                                    }
-                                    key={index}
-                                    style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
+                        >
+                            <Spin />
+                        </div>
+                    ) : (
+                        <div className="bm-right-container">
+                            {addTaskState ? addTaskComponent() : null}
+                            <div
+                                style={
+                                    addTaskState
+                                        ? {
+                                            filter: "blur(4px)",
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            width: "100%",
+                                            height: "11%",
+                                        }
+                                        : {
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            width: "100%",
+                                            height: "11%",
+                                        }
+                                }
+                            >
+                                <CusBtn
+                                    onClick={() => {
+                                        history.push(
+                                            `/dashboard/patient/details/${location.state.pid}`
+                                        );
+                                    }}
+                                    className="secondary"
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "center",
+                                        padding: "1% 5%",
+                                    }}
                                 >
+                                    <div
+                                        className="gv-patient-name"
+                                        style={{ fontSize: "1.4rem" }}
+                                    >
+                                        {location.state
+                                            ? location.state.name
+                                            : history.push(`/dashboard/patient/details/${pid}`)}
+                                    </div>
+                                    <div
+                                        className="gv-patient-mr"
+                                        style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
+                                    >
+                                        {"MR: "}
+                                        {location.state
+                                            ? location.state.mr
+                                            : history.push(`/dashboard/patient/details/${pid}`)}
+                                    </div>
+                                </CusBtn>
+                                {placeDatePicker()}
+                            </div>
+                            <div
+                                style={addTaskState ? { filter: "blur(4px)" } : null}
+                                className="bm-sensor-mid"
+                            >
+                                {secondTwentyData.date ? (
+                                    <div style={{ fontSize: "1.2rem" }}>
+                                        {`CPT code: 99458 enabled at ${secondTwentyData.date}`}
+                                    </div>
+                                ) : (
+                                    <div style={{ fontSize: "1.2rem" }}>
+                                        {`CPT code: 99458 has not been enabled yet`}
+                                    </div>
+                                )}
+                                <div
+                                    style={{
+                                        width: "28%",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "space-between",
+                                    }}
+                                >
+                                    <div className="bm-sensor-monitored-bar">
+                                        <div
+                                            className="bm-sensor-monitored-bar-two"
+                                            style={{
+                                                width: `${(secondTotalTimeStageOneDisplay / 20) * 100
+                                                    }%`,
+                                            }}
+                                        ></div>
+                                        {/* <div style={{ margin: "2%" }}>
+                                            No tasks updated or scheduled yet
+                                        </div>
+                                        <CusBtn
+                                            onClick={() => {
+                                                setAddTaskState(true);
+                                            }}
+                                            className="primary"
+                                        >
+                                            Add
+                                        </CusBtn> */}
+                                    </div>
+                                </div>
+                            </div>
 
-                                </Panel>
-                            ))}
-                        </Collapse>
-                    </div>
-                </div>
-            )}
-        </div>
-    </div>
-    )
-) : null}
+                            <div
+                                style={addTaskState ? { filter: "blur(4px)" } : null}
+                                className="bm-twenty-bottom-container"
+                            >
+                                <div className="bm-twenty-header">
+                                    Tasks
+                                    {/* <CusBtn onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn>  */}
+                                </div>
+                                {secondTwentyTasks.length === 0 ? (
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            height: "85%",
+                                            width: "100%",
+                                        }}
+                                    >
+                                        <div style={{ margin: "2%" }}>
+                                            No tasks updated or scheduled yet
+                                        </div>
+                                        <CusBtn
+                                            onClick={() => {
+                                                setAddTaskState(true);
+                                            }}
+                                            className="primary"
+                                        >
+                                            Add
+                                        </CusBtn>
+                                    </div>
+                                ) : (
+                                    <div className="bm-sensor-bottom-container">
+                                        <div className="bm-sensor-bottom-header title-table">Task</div>
+                                        <div className="bm-sensor-bottom-table-header">
+                                            <div className="bm-item-header" style={{ width: "20%" }}>Date</div>
+                                            <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
+                                            <div className="bm-item-header" style={{ width: "30%" }}>Note</div>
+                                            <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
+
+                                        </div>
+                                        <div style={{ overflowY: "scroll", height: "70%", marginRight: "-6px" }}>
+                                            <Collapse expandIconPosition="right">
+                                                {secondTwentyTasks.map((item, index) => (
+                                                    <Panel
+                                                        header={
+                                                            <div
+                                                                style={{
+                                                                    width: "100%",
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    height: "40px",
+                                                                    fontSize: "1rem"
+                                                                }}
+                                                            >
+                                                                <div className="bm-item-body" style={{ width: "20%" }}>
+                                                                    {moment(item["task_date"]).format("YYYY-MM-DD")}
+                                                                </div>
+                                                                <div className="bm-item-body" style={{ width: "30%" }}>
+                                                                    {item["staff_name"]}
+                                                                </div>
+                                                                <div className="bm-item-body" style={{ width: "30%" }}>
+                                                                    {item["task_note"]}
+                                                                </div>
+                                                                <div className="bm-item-body" style={{ width: "20%" }}>
+                                                                    {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99458)}
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        key={index}
+                                                        style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
+                                                    >
+
+                                                    </Panel>
+                                                ))}
+                                            </Collapse>
+                                        </div>
+                                    </div>
+                                )}
+                                {secondTwentyTasks.length !== 0 ? (
+                                    <div
+                                        style={addTaskState ? { filter: "blur(4px)" } : null}
+                                        className="bm-bottom-add-btn"
+                                    >
+                                        <CusBtn
+                                            onClick={() => {
+                                                setAddTaskState(true);
+                                            }}
+                                            style={{ padding: "1% 5%" }}
+                                            // disabled={firstTotalTime >= 1200 ? true : false}
+                                        >
+                                            Add
+                                        </CusBtn>
+                                    </div>
+                                ) : null}
+                            </div>
+                        </div>
+                    )
+                ) : null}
 
                 {lastStateLoading ? (
                     <div
