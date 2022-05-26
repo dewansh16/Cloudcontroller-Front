@@ -152,7 +152,7 @@ export default function PatientDashboard(props) {
         isLoading: true,
         list: [],
     });
-    const pageSize = 5;
+    const pageSize = 1;
     const [currentPageVal, setCurrentPageVal] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [patientDetails, setPatientDetails] = useState(null);
@@ -553,7 +553,7 @@ export default function PatientDashboard(props) {
                                         }
                                         bedNumber={item.location_map?.ward || "NA"}
                                         Name={`${item.demographic_map.fname} ${item.demographic_map.lname[0]}.`}
-                                        age={getAge(new Date(), new Date(item.demographic_map.DOB)) || ""}
+                                        age={getAge(new Date(), new Date(item.demographic_map.DOB)) || 0}
                                         sex={item.demographic_map.sex}
                                         //pid is passed to set active element
                                         pid={item.demographic_map.pid}
