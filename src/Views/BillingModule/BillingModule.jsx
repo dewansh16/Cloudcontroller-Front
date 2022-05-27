@@ -3063,9 +3063,9 @@ function BillingModule() {
                         >
                             <div>
                                 <div style={{ fontSize: "1.2rem" }}>
-                                    CPT code: 99457 has not been enabled yet
+                                    CPT code: 99091 has not been enabled yet
                                 </div>
-                                <p>30 Minutes of Monitoring Each 30 days .....</p>
+                                <p>30 Minutes of Monitoring Each 30 Days without Interactive Communication</p>
                             </div>
 
                             <Row>
@@ -3184,7 +3184,14 @@ function BillingModule() {
                                                     2mins
                                                 </div>
                                                 <div style={{ width: "5%" }}>
-                                                    edit
+                                                <CusBtn
+                                                    onClick={() => {
+                                                        setAddTaskState(true);
+                                                    }}
+                                                    style={{ padding: "1% 5%" }}
+                                                >
+                                                    Add
+                                                </CusBtn>
                                                 </div>
                                             </div>
                                         </div>
