@@ -52,6 +52,7 @@ const monthNames = [
 ];
 
 const TOTAL_HOURS_FOR_EACH_SENSOR_BILLED = 16;
+const TOTAL_HOURS_FOR_EACH_99458_BILLED = 30;
 
 const columns = [
     {
@@ -149,10 +150,7 @@ function BillingModule() {
 
     const [firstTotalTime, setFirstTotalTime] = useState(0);
     const [firstTotalTimeDisplay, setFirstTotalTimeDisplay] = useState(0);
-    const [secondTotalTimeStageOne, setSecondTotalTimeStageOne] = useState(0);
-    const [secondTotalTimeStageOneDisplay, setSecondTotalTimeStageOneDisplay] = useState(0);
-    const [secondTotalTimeStageTwo, setSecondTotalTimeStageTwo] = useState(0);
-    const [secondTotalTimeStageTwoDisplay, setSecondTotalTimeStageTwoDisplay] = useState(0);
+    const [secondTotalTime, setSecondTotalTime] = useState(0);
 
     const [stageOneState, setStageOneState] = useState(true);
     const [stageTwoState, setStageTwoState] = useState(false);
@@ -167,7 +165,6 @@ function BillingModule() {
 
     const [firstTwentyTasks, setFirstTwentyTasks] = useState([]);
     const [secondTwentyTasks, setSecondTwentyTasks] = useState([]);
-    const [secondTwentyStageTwoTasks, setSecondTwentyStageTwoTasks] = useState([]);
 
     const [runUseEffect, setRunUseEffect] = useState(0);
     const [timerTask, setTimerTask] = useState(false);
@@ -204,11 +201,8 @@ function BillingModule() {
         setPatchArray([]);
         setPatchInformation({});
         setFirstTotalTime(0);
+        setSecondTotalTime(0);
         setFirstTotalTimeDisplay(0);
-        setSecondTotalTimeStageOne(0);
-        setSecondTotalTimeStageOneDisplay(0);
-        setSecondTotalTimeStageTwo(0);
-        setSecondTotalTimeStageTwoDisplay(0);
         setStageOneState(true);
         setStageTwoState(false);
         setTaskDateVal();
@@ -219,7 +213,6 @@ function BillingModule() {
         setTaskCodeInternalActive("");
         setFirstTwentyTasks([]);
         setSecondTwentyTasks([]);
-        setSecondTwentyStageTwoTasks([]);
 
         var temp = runUseEffect;
         temp = temp + 1;
@@ -340,6 +333,7 @@ function BillingModule() {
     }
 
     const renderTimerClock = (item, cptCode) => {
+        console.log("item", item);
         const elementId = `task-${cptCode}-timer`;
         if (!timerTask) {
             return (
@@ -505,8 +499,7 @@ function BillingModule() {
                     var tempSecondTwentyData = {};
 
                     var firstTotalTime = 0;
-                    var secondTotalTimeStageOne = 0;
-                    var secondTotalTimeStageTwo = 0;
+                    var secondTotalTime = 0;
                     res.data.response.billingData.map(
                         (item) => {
                             tempDataSource.push({
@@ -538,22 +531,7 @@ function BillingModule() {
                                 setFirstTwentyData(params);
                             }
                             if (item.code == "99458") {
-                                if (item.code_internal == "99458_stage1") {
-                                    tempSecondTwentyTasks.push(item);
-                                    secondTotalTimeStageOne =
-                                        secondTotalTimeStageOne + Number(item.timeConsidered);
-                                    if (!tempSecondTwentyData.hasOwnProperty("date")) {
-                                        tempSecondTwentyData = {
-                                            date: getDateFromISO(item.date_time),
-                                            time: getTimeFromISO(item.date_time),
-                                        };
-                                    }
-                                }
-                                if (item.code_internal == "99458_stage2") {
-                                    tempSecondTwentyStageTwoTasks.push(item);
-                                    secondTotalTimeStageTwo =
-                                        secondTotalTimeStageTwo + Number(item.timeConsidered);
-                                }
+                                
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -601,31 +579,14 @@ function BillingModule() {
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
                     setSecondTwentyTasks(tempSecondTwentyTasks);
-                    setSecondTwentyStageTwoTasks(tempSecondTwentyStageTwoTasks);
 
                     setFirstTotalTime(firstTotalTime);
                     setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
-
-                    setSecondTotalTimeStageOne(secondTotalTimeStageOne);
-                    setSecondTotalTimeStageOneDisplay(
-                        Math.floor(secondTotalTimeStageOne / 60)
-                    );
-
-                    setSecondTotalTimeStageTwo(secondTotalTimeStageTwo);
-                    setSecondTotalTimeStageTwoDisplay(
-                        Math.floor(secondTotalTimeStageTwo / 60)
-                    );
 
                     if (firstTotalTime === 1200) {
                         setTaskCodeActive("99458");
                     } else {
                         setTaskCodeActive("99457");
-                    }
-
-                    if (secondTotalTimeStageOne === 1200) {
-                        setTaskCodeInternalActive("99458_stage2");
-                    } else {
-                        setTaskCodeInternalActive("99458_stage1");
                     }
                 })
                 .catch((err) => {
@@ -675,8 +636,6 @@ function BillingModule() {
                     var tempSecondTwentyData = {};
 
                     var firstTotalTime = 0;
-                    var secondTotalTimeStageOne = 0;
-                    var secondTotalTimeStageTwo = 0;
                     res.data.response.billingData[0].code_tasks[0].Billing_Information.map(
                         (item) => {
                             tempDataSource.push({
@@ -714,22 +673,7 @@ function BillingModule() {
                                 }
                             }
                             if (item.code === "99458") {
-                                if (item.code_internal === "99458_stage1") {
-                                    tempSecondTwentyTasks.push(item);
-                                    secondTotalTimeStageOne =
-                                        secondTotalTimeStageOne + Number(item.timeConsidered);
-                                    if (!tempSecondTwentyData.hasOwnProperty("date")) {
-                                        tempSecondTwentyData = {
-                                            date: getDateFromISO(item.date_time),
-                                            time: getTimeFromISO(item.date_time),
-                                        };
-                                    }
-                                }
-                                if (item.code_internal === "99458_stage2") {
-                                    tempSecondTwentyStageTwoTasks.push(item);
-                                    secondTotalTimeStageTwo =
-                                        secondTotalTimeStageTwo + Number(item.timeConsidered);
-                                }
+                                
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -777,20 +721,9 @@ function BillingModule() {
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
                     setSecondTwentyTasks(tempSecondTwentyTasks);
-                    setSecondTwentyStageTwoTasks(tempSecondTwentyStageTwoTasks);
 
                     setFirstTotalTime(firstTotalTime);
                     setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
-
-                    setSecondTotalTimeStageOne(secondTotalTimeStageOne);
-                    setSecondTotalTimeStageOneDisplay(
-                        Math.floor(secondTotalTimeStageOne / 60)
-                    );
-
-                    setSecondTotalTimeStageTwo(secondTotalTimeStageTwo);
-                    setSecondTotalTimeStageTwoDisplay(
-                        Math.floor(secondTotalTimeStageTwo / 60)
-                    );
 
                     if (firstTotalTime >= 1200) {
                         setTaskCodeActive("99458");
@@ -798,11 +731,6 @@ function BillingModule() {
                         setTaskCodeActive("99457");
                     }
 
-                    if (secondTotalTimeStageOne >= 1200) {
-                        setTaskCodeInternalActive("99458_stage2");
-                    } else {
-                        setTaskCodeInternalActive("99458_stage1");
-                    }
                 })
                 .catch((err) => {
                     console.log(err);
@@ -851,8 +779,7 @@ function BillingModule() {
                     var tempSecondTwentyData = {};
 
                     var firstTotalTime = 0;
-                    var secondTotalTimeStageOne = 0;
-                    var secondTotalTimeStageTwo = 0;
+                    var secondTotalTime = 0;
                     res.data.response.billingData[0].code_tasks[0].Billing_Information.map(
                         (item) => {
                             tempDataSource.push({
@@ -890,7 +817,7 @@ function BillingModule() {
                                 }
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
-                                
+
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -937,20 +864,9 @@ function BillingModule() {
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
                     setSecondTwentyTasks(tempSecondTwentyTasks);
-                    setSecondTwentyStageTwoTasks(tempSecondTwentyStageTwoTasks);
 
                     setFirstTotalTime(firstTotalTime);
                     setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
-
-                    setSecondTotalTimeStageOne(secondTotalTimeStageOne);
-                    setSecondTotalTimeStageOneDisplay(
-                        Math.floor(secondTotalTimeStageOne / 60)
-                    );
-
-                    setSecondTotalTimeStageTwo(secondTotalTimeStageTwo);
-                    setSecondTotalTimeStageTwoDisplay(
-                        Math.floor(secondTotalTimeStageTwo / 60)
-                    );
 
                     if (firstTotalTime === 1200) {
                         setTaskCodeActive(CPT_CODE.CPT_99458);
@@ -1007,12 +923,12 @@ function BillingModule() {
     }
 
     const getDateEnable99457 = () => {
-        if(isArray(firstTwentyTasks) && firstTwentyTasks.length > 0) {
+        if (isArray(firstTwentyTasks) && firstTwentyTasks.length > 0) {
             return moment(firstTwentyTasks[firstTwentyTasks.length - 1]).format('YYYY-MM-DD');
         }
         return '';
     }
-    
+
     const getTotalNumberDay = (item) => {
         let result = 0;
         let currentDate = moment();
@@ -1208,16 +1124,25 @@ function BillingModule() {
             .getBillingTasks(location.state.pid, currentActiveMonth === "" ? dateMonthString : currentDateApi, '0')
             .then((res) => {
                 var tempFirstTwentyTasks = [];
-
+                var tempSecondTwentyTasks = [];
+                
                 res.data.response.billingData.map(
                     (item) => {
                         if (item.code == CPT_CODE.CPT_99457) {
                             tempFirstTwentyTasks = JSON.parse(item.params);
                             if (!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
                         }
+
+                        if (item.code == CPT_CODE.CPT_99458) {
+                            tempSecondTwentyTasks = JSON.parse(item.params);
+                            if (!isArray(tempSecondTwentyTasks)) tempSecondTwentyTasks = [];
+                        }
                     }
                 );
+
+              
                 setFirstTwentyTasks(tempFirstTwentyTasks);
+                setSecondTwentyTasks(tempSecondTwentyTasks);
             })
     }
 
@@ -1533,9 +1458,6 @@ function BillingModule() {
                 setCurrentDateApi(dateMonthString);
             }
 
-            console.log("DATE 4 : ", dateMonthString)
-            console.log("CURRENT DATE API : ", currentDateApi)
-
             billingApi
                 .getBillingTasks(location.state.pid, currentActiveMonth === "" ? dateMonthString : currentDateApi, '0')
                 .then((res) => {
@@ -1566,8 +1488,7 @@ function BillingModule() {
                     var tempSecondTwentyData = {};
 
                     var firstTotalTime = 0;
-                    var secondTotalTimeStageOne = 0;
-                    var secondTotalTimeStageTwo = 0;
+                    var secondTotalTime =  0;
                     res.data.response.billingData.map(
                         (item) => {
                             tempDataSource.push({
@@ -1611,7 +1532,14 @@ function BillingModule() {
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
                                 tempSecondTwentyTasks = JSON.parse(item.params);
-                                if(!isArray(tempSecondTwentyTasks)) tempSecondTwentyTasks = [];
+                                if (!isArray(tempSecondTwentyTasks)) tempSecondTwentyTasks = [];
+                                if (tempSecondTwentyTasks.length > 0) {
+                                    tempSecondTwentyTasks.map(item => {
+                                        if (item.task_time_spend) {
+                                            secondTotalTime += item.task_time_spend;
+                                        }
+                                    })
+                                }
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -1659,9 +1587,8 @@ function BillingModule() {
                     setSecondTwentyTasks(tempSecondTwentyTasks);
 
                     setFirstTotalTime(firstTotalTime);
+                    setSecondTotalTime(secondTotalTime);
                     setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
-
-
                     if (firstTotalTime >= 1200) {
                         setTaskCodeActive(CPT_CODE.CPT_99458);
                     } else {
@@ -1786,6 +1713,11 @@ function BillingModule() {
             setPdfState("")
         }
     }, [pdfState]);
+
+    const disabledBtnAddTask = (array) => {
+        const even = (element) => element['task_time_spend'] === undefined || element['task_time_spend'] === null || element['task_time_spend'] === 0;
+        return array.some(even);
+    };
 
     return rightSideLoading ? (
         <div
@@ -1961,7 +1893,7 @@ function BillingModule() {
                                     className="bm-header-line"
                                     style={
                                         initialStepDoneState
-                                            ? firstTotalTime === 1200
+                                            ? firstTotalTime >= 1200
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -2008,20 +1940,8 @@ function BillingModule() {
                             <div className="bm-cptcode-b-header">
                                 <div
                                     className="bm-header-line"
-                                    style={
-                                        firstTotalTime === 1200
-                                            ? secondTotalTimeStageOne < 1200
-                                                ? { background: "#ffcd00" }
-                                                : { background: "#81ff00" }
-                                            : null
-                                    }
+                                    style={{ background: "#ffcd00" }}
                                 ></div>
-                                {stageOneState ? (
-                                    <div className="bm-header-below">{`Stage 1: ${secondTotalTimeStageOneDisplay} mins monitored`}</div>
-                                ) : null}
-                                {stageTwoState ? (
-                                    <div className="bm-header-below">{`Stage 2: ${secondTotalTimeStageTwoDisplay} mins monitored`}</div>
-                                ) : null}
                             </div>
                         </div>
                         <div className="bm-cptcode-container">
@@ -2806,7 +2726,7 @@ function BillingModule() {
                                                 setAddTaskState(true);
                                             }}
                                             style={{ padding: "1% 5%" }}
-                                            disabled={firstTotalTime >= 1200 ? true : false}
+                                            disabled={disabledBtnAddTask(firstTwentyTasks) || firstTotalTime >= 1200 ? true : false}
                                         >
                                             Add
                                         </CusBtn>
@@ -2816,174 +2736,222 @@ function BillingModule() {
                         </div>
                     )
                 ) : null}
-                
+
                 {secondTwentyState ? (
-    tasksLoadingState ? (
-        <div
-            style={{
-                height: "100%",
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
-            <Spin />
-        </div>
-    ) : (
-        <div className="bm-right-container">
-            {addTaskState ? addTaskComponent() : null}
-            <div
-            style={
-                addTaskState
-                    ? {
-                        filter: "blur(4px)",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        width: "100%",
-                        height: "11%",
-                    }
-                    : {
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        width: "100%",
-                        height: "11%",
-                    }
-            }
-        >
-            <CusBtn
-                onClick={() => {
-                    history.push(
-                        `/dashboard/patient/details/${location.state.pid}`
-                    );
-                }}
-                className="secondary"
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    padding: "1% 5%",
-                }}
-            >
-                <div
-                    className="gv-patient-name"
-                    style={{ fontSize: "1.4rem" }}
-                >
-                    {location.state
-                        ? location.state.name
-                        : history.push(`/dashboard/patient/details/${pid}`)}
-                </div>
-                <div
-                    className="gv-patient-mr"
-                    style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
-                >
-                    {"MR: "}
-                    {location.state
-                        ? location.state.mr
-                        : history.push(`/dashboard/patient/details/${pid}`)}
-                </div>
-            </CusBtn>
-            {placeDatePicker()}
-            <div
-                style={addTaskState ? { filter: "blur(4px)" } : null}
-                className="bm-sensor-mid"
-            >
-                {secondTwentyData.date ? (
-                    <div style={{ fontSize: "1.2rem" }}>
-                        {`CPT code: 99458 enabled at ${secondTwentyData.date}`}
-                    </div>
-                ) : (
-                    <div style={{ fontSize: "1.2rem" }}>
-                        {`CPT code: 99458 has not been enabled yet`}
-                    </div>
-                )}
-            </div>
-            {secondTwentyTasks.length === 0 ? (
-                <div
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "85%",
-                    width: "100%",
-                }}
-            >
-                <div className="bm-sensor-monitored-bar">
+                    tasksLoadingState ? (
                         <div
-                            className="bm-sensor-monitored-bar-two 2"
                             style={{
-                                width: `${(secondTotalTimeStageOneDisplay / 20) * 100
-                                    }%`,
+                                height: "100%",
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
                             }}
-                        ></div>
-                    <div style={{ margin: "2%" }}>
-                        No tasks updated or scheduled yet
-                    </div>
-                    <CusBtn
-                        onClick={() => {
-                            setAddTaskState(true);
-                        }}
-                        className="primary"
-                    >
-                        Add
-                    </CusBtn>
-            </div>
-            </div>
-            ):(
-                <div className="bm-sensor-bottom-container">
-                    <div className="bm-sensor-bottom-header title-table">Task</div>
-                    <div className="bm-sensor-bottom-table-header">
-                        <div className="bm-item-header" style={{ width: "20%" }}>Date</div>
-                        <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
-                        <div className="bm-item-header" style={{ width: "30%" }}>Note</div>
-                        <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
-
-                    </div>
-                    <div style={{ overflowY: "scroll", height: "70%" }}>
-                        <Collapse expandIconPosition="right">
-                            {secondTwentyTasks.map((item, index) => (
-                                <Panel
-                                    header={
-                                        <div
-                                            style={{
-                                                width: "100%",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                height: "40px",
-                                                fontSize: "1rem"
-                                            }}
-                                        >
-                                            <div className="bm-item-body" style={{ width: "20%" }}>
-                                                {moment(item["task_date"]).format("YYYY-MM-DD")}
-                                            </div>
-                                            <div className="bm-item-body" style={{ width: "30%" }}>
-                                                {item["staff_name"]}
-                                            </div>
-                                            <div className="bm-item-body" style={{ width: "30%" }}>
-                                                {item["task_note"]}
-                                            </div>
-                                            <div className="bm-item-body" style={{ width: "20%" }}>
-                                                {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99458)}
-                                            </div>
-                                        </div>
-                                    }
-                                    key={index}
-                                    style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
+                        >
+                            <Spin />
+                        </div>
+                    ) : (
+                        <div className="bm-right-container">
+                            {addTaskState ? addTaskComponent() : null}
+                            <div
+                                style={
+                                    addTaskState
+                                        ? {
+                                            filter: "blur(4px)",
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            width: "100%",
+                                            height: "11%",
+                                        }
+                                        : {
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            width: "100%",
+                                            height: "11%",
+                                        }
+                                }
+                            >
+                                <CusBtn
+                                    onClick={() => {
+                                        history.push(
+                                            `/dashboard/patient/details/${location.state.pid}`
+                                        );
+                                    }}
+                                    className="secondary"
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "center",
+                                        padding: "1% 5%",
+                                    }}
                                 >
+                                    <div
+                                        className="gv-patient-name"
+                                        style={{ fontSize: "1.4rem" }}
+                                    >
+                                        {location.state
+                                            ? location.state.name
+                                            : history.push(`/dashboard/patient/details/${pid}`)}
+                                    </div>
+                                    <div
+                                        className="gv-patient-mr"
+                                        style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
+                                    >
+                                        {"MR: "}
+                                        {location.state
+                                            ? location.state.mr
+                                            : history.push(`/dashboard/patient/details/${pid}`)}
+                                    </div>
+                                </CusBtn>
+                                {placeDatePicker()}
+                            </div>
+                            <div
+                                style={addTaskState ? { filter: "blur(4px)" } : null}
+                                className="bm-sensor-mid"
+                            >
+                                {secondTwentyData.date ? (
+                                    <div style={{ fontSize: "1.2rem" }}>
+                                        {`CPT code: 99458 enabled at ${secondTwentyData.date}`}
+                                    </div>
+                                ) : (
+                                    <div style={{ fontSize: "1.2rem" }}>
+                                        {`CPT code: 99458 has not been enabled yet`}
+                                    </div>
+                                )}
+                                <div
+                                    style={{
+                                        width: "28%",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "space-between",
+                                    }}
+                                >
+                                    <div className="bm-sensor-monitored-bar">
+                                        <div
+                                            className="bm-sensor-monitored-bar-two"
+                                            style={{
+                                                width: `${(secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED / TOTAL_HOURS_FOR_EACH_99458_BILLED) * 100
+                                                    }%`,
+                                            }}
+                                        ></div>
+                                           <div style={{marginTop: "10px"}}>
+                                        <div style={{ fontSize: "1.2rem" }}>
+                                            {`Mins Monitored: ${secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED}/${TOTAL_HOURS_FOR_EACH_99458_BILLED}`}
+                                        </div>
+                                        {Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0 && (
+                                            <p>{Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED)} Unit Billed</p>
+                                        )}
+                                        
+                                        <div style={{ color: "#00000085" }}>
+                                            <b>{`${TOTAL_HOURS_FOR_EACH_99458_BILLED - (secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED)} mins`}</b> left to
+                                            enable the next CPT code.
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                                </Panel>
-                            ))}
-                        </Collapse>
-                    </div>
-                </div>
-            )}
-        </div>
-    </div>
-    )
-) : null}
+                            <div
+                                style={addTaskState ? { filter: "blur(4px)" } : null}
+                                className="bm-twenty-bottom-container"
+                            >
+                                <div className="bm-twenty-header">
+                                    Tasks
+                                    {/* <CusBtn onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn>  */}
+                                </div>
+                                {secondTwentyTasks.length === 0 ? (
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            height: "85%",
+                                            width: "100%",
+                                        }}
+                                    >
+                                        <div style={{ margin: "2%" }}>
+                                            No tasks updated or scheduled yet
+                                        </div>
+                                        <CusBtn
+                                            onClick={() => {
+                                                setAddTaskState(true);
+                                            }}
+                                            className="primary"
+                                        >
+                                            Add
+                                        </CusBtn>
+                                    </div>
+                                ) : (
+                                    <div className="bm-sensor-bottom-container">
+                                        <div className="bm-sensor-bottom-header title-table">Task</div>
+                                        <div className="bm-sensor-bottom-table-header">
+                                            <div className="bm-item-header" style={{ width: "20%" }}>Date</div>
+                                            <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
+                                            <div className="bm-item-header" style={{ width: "30%" }}>Note</div>
+                                            <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
+
+                                        </div>
+                                        <div style={{ overflowY: "scroll", height: "70%", marginRight: "-6px" }}>
+                                            <Collapse expandIconPosition="right">
+                                                {secondTwentyTasks.map((item, index) => (
+                                                    <Panel
+                                                        header={
+                                                            <div
+                                                                style={{
+                                                                    width: "100%",
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    height: "40px",
+                                                                    fontSize: "1rem"
+                                                                }}
+                                                            >
+                                                                <div className="bm-item-body" style={{ width: "20%" }}>
+                                                                    {moment(item["task_date"]).format("YYYY-MM-DD")}
+                                                                </div>
+                                                                <div className="bm-item-body" style={{ width: "30%" }}>
+                                                                    {item["staff_name"]}
+                                                                </div>
+                                                                <div className="bm-item-body" style={{ width: "30%" }}>
+                                                                    {item["task_note"]}
+                                                                </div>
+                                                                <div className="bm-item-body" style={{ width: "20%" }}>
+                                                                    {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99458)}
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        key={index}
+                                                        style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
+                                                    >
+
+                                                    </Panel>
+                                                ))}
+                                            </Collapse>
+                                        </div>
+                                    </div>
+                                )}
+                                {secondTwentyTasks.length !== 0 ? (
+                                    <div
+                                        style={addTaskState ? { filter: "blur(4px)" } : null}
+                                        className="bm-bottom-add-btn"
+                                    >
+                                        <CusBtn
+                                            onClick={() => {
+                                                setAddTaskState(true);
+                                            }}
+                                            style={{ padding: "1% 5%" }}
+                                            disabled={disabledBtnAddTask(secondTwentyTasks)}
+                                        >
+                                            Add
+                                        </CusBtn>
+                                    </div>
+                                ) : null}
+                            </div>
+                        </div>
+                    )
+                ) : null}
 
                 {lastStateLoading ? (
                     <div
