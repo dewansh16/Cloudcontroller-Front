@@ -12,6 +12,8 @@ import {
     Spin,
     Table,
     Checkbox,
+    Row,
+    Col
 } from "antd";
 import {
     CloseOutlined,
@@ -531,7 +533,7 @@ function BillingModule() {
                                 setFirstTwentyData(params);
                             }
                             if (item.code == "99458") {
-                                
+
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -673,7 +675,7 @@ function BillingModule() {
                                 }
                             }
                             if (item.code === "99458") {
-                                
+
                             }
                             if (item.code === "99091") {
                                 lastState = true;
@@ -1125,7 +1127,7 @@ function BillingModule() {
             .then((res) => {
                 var tempFirstTwentyTasks = [];
                 var tempSecondTwentyTasks = [];
-                
+
                 res.data.response.billingData.map(
                     (item) => {
                         if (item.code == CPT_CODE.CPT_99457) {
@@ -1140,7 +1142,7 @@ function BillingModule() {
                     }
                 );
 
-              
+
                 setFirstTwentyTasks(tempFirstTwentyTasks);
                 setSecondTwentyTasks(tempSecondTwentyTasks);
             })
@@ -1488,7 +1490,7 @@ function BillingModule() {
                     var tempSecondTwentyData = {};
 
                     var firstTotalTime = 0;
-                    var secondTotalTime =  0;
+                    var secondTotalTime = 0;
                     res.data.response.billingData.map(
                         (item) => {
                             tempDataSource.push({
@@ -1719,6 +1721,34 @@ function BillingModule() {
         return array.some(even);
     };
 
+    const arrayTable99091 = [
+        {
+            _key: "temp",
+            name: "Temperature",
+            value: 98.4
+        },
+        {
+            _key: "spo2",
+            name: "SPO2",
+            value: 96
+        },
+        {
+            _key: "hear_rate",
+            name: "Hear Rate",
+            value: 80
+        },
+        {
+            _key: "blood_pressure",
+            name: "Blood Pressure",
+            value: "137 / 82"
+        },
+        {
+            _key: "res_rate",
+            name: "Respiration Rate",
+            value: 12
+        },
+    ];
+
     return rightSideLoading ? (
         <div
             style={{
@@ -1926,10 +1956,10 @@ function BillingModule() {
                                     className="bm-header-dot"
                                     style={
                                         initialStepDoneState ?
-                                        Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
+                                            Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
-                                        : null
+                                            : null
                                     }
                                 ></div>
                                 <div
@@ -1944,10 +1974,10 @@ function BillingModule() {
                                     className="bm-header-line"
                                     style={
                                         initialStepDoneState ?
-                                        Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
+                                            Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
-                                        : null
+                                            : null
                                     }
                                 ></div>
                                 <div className="bm-header-below">{`${secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED} mins monitored`}</div>
@@ -2851,19 +2881,19 @@ function BillingModule() {
                                                     }%`,
                                             }}
                                         ></div>
-                                           <div style={{marginTop: "10px"}}>
-                                        <div style={{ fontSize: "1.2rem" }}>
-                                            {`Mins Monitored: ${secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED}/${TOTAL_HOURS_FOR_EACH_99458_BILLED}`}
+                                        <div style={{ marginTop: "10px" }}>
+                                            <div style={{ fontSize: "1.2rem" }}>
+                                                {`Mins Monitored: ${secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED}/${TOTAL_HOURS_FOR_EACH_99458_BILLED}`}
+                                            </div>
+                                            {Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0 && (
+                                                <p>{Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED)} Unit Billed</p>
+                                            )}
+
+                                            <div style={{ color: "#00000085" }}>
+                                                <b>{`${TOTAL_HOURS_FOR_EACH_99458_BILLED - (secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED)} mins`}</b> left to
+                                                enable the next CPT code.
+                                            </div>
                                         </div>
-                                        {Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0 && (
-                                            <p>{Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED)} Unit Billed</p>
-                                        )}
-                                        
-                                        <div style={{ color: "#00000085" }}>
-                                            <b>{`${TOTAL_HOURS_FOR_EACH_99458_BILLED - (secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED)} mins`}</b> left to
-                                            enable the next CPT code.
-                                        </div>
-                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -3024,8 +3054,147 @@ function BillingModule() {
                             {placeDatePicker()}
                             {/* </div> */}
                         </div>
+                        <div
+                            style={{
+                                width: "90%",
+                                height: "14%",
+                                margin: "5%"
+                            }}
+                        >
+                            <div>
+                                <div style={{ fontSize: "1.2rem" }}>
+                                    CPT code: 99457 has not been enabled yet
+                                </div>
+                                <p>30 Minutes of Monitoring Each 30 days .....</p>
+                            </div>
 
-                        {lastStateDone ? (
+                            <Row>
+                                <Col span={12}>
+                                    <div style={{ width: "100%" }}>
+                                        <Table
+                                            size="small"
+                                            className="vital-table"
+                                            columns={[
+                                                {
+                                                    width: "40%",
+                                                    title: (
+                                                        <div
+                                                            style={{
+                                                                fontFamily: "Lexend",
+                                                                fontWeight: "500",
+                                                                fontSize: "14px",
+                                                                color: "#727272",
+                                                            }}
+                                                        >
+                                                            Vitals
+                                                        </div>
+                                                    ),
+                                                    dataIndex: "name",
+                                                    key: "name",
+                                                },
+                                                {
+                                                    width: "30%",
+                                                    title: (
+                                                        <div
+                                                            style={{
+                                                                textAlign: "center",
+                                                                fontFamily: "Lexend",
+                                                                fontWeight: "500",
+                                                                fontSize: "14px",
+                                                                color: "#727272",
+                                                            }}
+                                                        >
+                                                            12.12.12 3:00PM
+                                                        </div>
+                                                    ),
+                                                    dataIndex: "value",
+                                                    key: "value",
+                                                },
+                                            ]}
+                                            dataSource={arrayTable99091}
+                                            pagination={false}
+                                            bordered
+                                        />
+                                    </div>
+                                </Col>
+
+                                <Col span={12} style={{ paddingLeft: "5%" }}>
+                                    <div>
+                                        
+                                        <div style={{
+                                            background: "#ddd",
+                                            borderRadius: "1rem",
+                                            padding: "3% 7%"
+                                        }}>
+                                            <div style={{ textAlign: "center" }}>
+                                                Last updated at 12/12/12 8:00 pm
+                                            </div>
+                                            <div>
+                                                <div
+                                                    style={{ 
+                                                        display: "flex",
+                                                        alignItems: "center"
+                                                    }}
+                                                >
+                                                    <div style={{ width: "45%"}}>Status: Active</div>
+                                                    <div style={{ width: "55%"}}>Enrollment: 25/02/21</div>
+                                                </div>
+
+                                                <div
+                                                    style={{ 
+                                                        display: "flex",
+                                                        alignItems: "center"
+                                                    }}
+                                                >
+                                                    <div style={{ width: "45%"}}>Months of CMM: 2</div>
+                                                    <div style={{ width: "55%"}}>Next followup: NA</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{
+                                            background: "#ddd",
+                                            borderRadius: "1rem",
+                                            padding: "3% 4%",
+                                            marginTop: "1rem"
+                                        }}>
+                                            <div
+                                                style={{
+                                                    borderBottom: "1px solid #00000029",
+                                                    paddingBottom: "6px"
+                                                }}
+                                            >
+                                                Notes
+                                            </div>
+
+                                            <div style={{ 
+                                                display: "flex",
+                                                padding: "1rem 0.5rem"
+                                            }}>
+                                                <div style={{ width: "5%"}}>
+                                                    1
+                                                </div>
+                                                <div style={{ width: "25%" }}>
+                                                    12/12/12 12:00 
+                                                </div>
+                                                <div style={{ width: "50%" }}>
+                                                    Note
+                                                </div>
+                                                <div style={{ width: "15%" }}>
+                                                    2mins
+                                                </div>
+                                                <div style={{ width: "5%" }}>
+                                                    edit
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Col>
+                            </Row>
+                        </div>
+
+
+                        {/* {lastStateDone ? (
                             <div
                                 style={{
                                     display: "flex",
@@ -3053,34 +3222,34 @@ function BillingModule() {
                                 >{`Recorded timestamp: ${lastStateData.date} ${lastStateData.time}`}</div>
                             </div>
                         ) : (
-                            <div className="bm-notenroll-container" style={{ height: "89%" }}>
-                                <div style={{ fontSize: "3rem" }}>
-                                    Enroll to generate CPT Code: 99091
-                                </div>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <div style={{ fontSize: "1rem", color: "#7E7979" }}>
-                                        CPT code 99091 has not been enabled for this month
-                                    </div>
-                                </div>
-                                <CusBtn
-                                    onClick={() => {
-                                        // setLastStateLoading(true);
-                                        enrollLastState();
-                                    }}
-                                    className="primary"
-                                    style={{ marginTop: "3%", padding: "1% 5%" }}
-                                >
-                                    Enroll
-                                </CusBtn>
-                            </div>
-                        )}
+                            // <div className="bm-notenroll-container" style={{ height: "89%" }}>
+                            //     <div style={{ fontSize: "3rem" }}>
+                            //         Enroll to generate CPT Code: 99091
+                            //     </div>
+                            //     <div
+                            //         style={{
+                            //             display: "flex",
+                            //             flexDirection: "column",
+                            //             justifyContent: "center",
+                            //             alignItems: "center",
+                            //         }}
+                            //     >
+                            //         <div style={{ fontSize: "1rem", color: "#7E7979" }}>
+                            //             CPT code 99091 has not been enabled for this month
+                            //         </div>
+                            //     </div>
+                            //     <CusBtn
+                            //         onClick={() => {
+                            //             // setLastStateLoading(true);
+                            //             enrollLastState();
+                            //         }}
+                            //         className="primary"
+                            //         style={{ marginTop: "3%", padding: "1% 5%" }}
+                            //     >
+                            //         Enroll
+                            //     </CusBtn>
+                            // </div>
+                        )} */}
                     </div>
                 ) : null}
                 {billProcessedState ? (
