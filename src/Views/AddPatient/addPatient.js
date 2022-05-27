@@ -189,8 +189,6 @@ function AddPatient() {
         setBundleData({ ...bundleData, ...values });
     };
 
-    console.log("patchData",patchData);
-
     // factory method to validate data in global store
     function validate(data, schema) {
         const { error } = schema.validate(data);

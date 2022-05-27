@@ -467,6 +467,9 @@ export default function PatientDetails(props) {
                                                 className="back-buttons utility"
                                                 onClick={() => {
                                                     history.push('/dashboard/patient/list');
+                                                    // state: {
+                                                    //     name:
+                                                    // },
                                                 }}
                                             >
                                                 {Icons.headerBackArrow({})}
@@ -745,7 +748,7 @@ export default function PatientDetails(props) {
                                                     >
                                                         Summary
                                                     </Buttons>
-                                                    <Buttons
+                                                    {/* <Buttons
                                                         style={
                                                             activeTab === "quickInfo"
                                                                 ? activeButtonStyle
@@ -757,7 +760,7 @@ export default function PatientDetails(props) {
                                                         type="text"
                                                     >
                                                         Trends
-                                                    </Buttons>
+                                                    </Buttons> */}
                                                     <Buttons
                                                         style={
                                                             activeTab === "liveMonitor"

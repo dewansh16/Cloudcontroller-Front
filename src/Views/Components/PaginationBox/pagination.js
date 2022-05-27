@@ -27,7 +27,7 @@ function computeTotalPages(maxItems, pageSize) {
     return val;
 }
 
-const PaginationBox = ({ totalPages, currentPageVal, setCurrentPageVal }) => {
+const PaginationBox = ({ totalPages, currentPageVal, setCurrentPageVal, valuePageLength, setValuePageLength }) => {
 
     const increamentPage = () => {
         if (currentPageVal < totalPages) {
@@ -43,8 +43,19 @@ const PaginationBox = ({ totalPages, currentPageVal, setCurrentPageVal }) => {
     const setPageValOnSelect = (val) => {
         setCurrentPageVal(val)
     }
-    return <div className='pagination-box' style={{ width: "20em" }}>
-        <Button style={controlButtonStyle} onClick={decreamentPage}>{Icons.leftArrowFilled({})}</Button>
+
+    const setValPageLengthOnSelect = (val) => {
+        setValuePageLength(val)
+    }
+
+    return <div className='pagination-box'>
+        <Button 
+            style={controlButtonStyle}
+            disabled={Number(currentPageVal) === 1}
+            onClick={decreamentPage}
+        >
+            {Icons.leftArrowFilled({ Style: { opacity: Number(currentPageVal) === 1 ? "0.5" : "1" } })}
+        </Button>
         <div className='pagination-main-box'>
             <Select value={currentPageVal} bordered={false}
                 style={{
@@ -68,7 +79,38 @@ const PaginationBox = ({ totalPages, currentPageVal, setCurrentPageVal }) => {
                 <h1>out of {totalPages}</h1>
             </div>
         </div>
-        <Button style={controlButtonStyle} onClick={increamentPage}>{Icons.rightArrowFilled({})}</Button>
+        <Button 
+            style={controlButtonStyle} 
+            disabled={Number(currentPageVal) === Number(totalPages)}
+            onClick={increamentPage}
+        >
+            {Icons.rightArrowFilled({ Style: { opacity: Number(currentPageVal) === Number(totalPages) ? "0.5" : "1" }})}
+        </Button>
+
+        <div className='pagination-box-length'>
+            <div className="total-page-box">
+                <h1>Page length</h1>
+            </div>
+            <Select value={valuePageLength} bordered={false}
+                style={{
+                    display: 'flex',
+                    height: '100%',
+                    border: `1px solid ${Colors.orange}`,
+                    borderRadius: "6px",
+                    zIndex: "1",
+                    padding: "0.6rem",
+                    WebkitAppearance: "none",
+                    MozAppearance: "none",
+                    appearance: "none",
+                    background: "white"
+                }}
+                onSelect={setValPageLengthOnSelect}
+            >
+                <Option style={{ display: 'flex', height: '100%' }} value={10}>10</Option>
+                <Option style={{ display: 'flex', height: '100%' }} value={25}>25</Option>
+                <Option style={{ display: 'flex', height: '100%' }} value={50}>50</Option>
+            </Select>
+        </div>
     </div>
 }
 

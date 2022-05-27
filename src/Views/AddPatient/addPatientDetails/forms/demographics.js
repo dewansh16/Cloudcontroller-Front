@@ -13,7 +13,7 @@ const PatientDemographics = (props) => {
     );
     const StoreDemographics = (fieldValues) => {
         //FIXME:remove hardfix deceased date
-        console.log(props.patientData);
+        // console.log(props.patientData);
     };
 
     const handleChange = (values) => {
