@@ -210,13 +210,13 @@ const PatientListItem = (props) => {
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        const timeInterval = setInterval(() => {
-            getDataSensorFromInfluxDB();
-        }, 10000);
+        // const timeInterval = setInterval(() => {
+        //     getDataSensorFromInfluxDB();
+        // }, 10000);
 
-        return () => {
-            clearInterval(timeInterval);
-        }
+        // return () => {
+        //     clearInterval(timeInterval);
+        // }
     }, []);
 
     // React.useEffect(() => {
@@ -253,7 +253,6 @@ const PatientListItem = (props) => {
 
     const ShowPatientDetails = (e) => {
         e.stopPropagation();
-        // console.log(e);
         props.setPatientDetails({ patientDetails: props.data });
         props.setActive(props.pid);
         props.setShowTrend(false);
@@ -280,7 +279,7 @@ const PatientListItem = (props) => {
                 {Icons.patientInBedIcon({
                     Style: { color: `${activeTheme}`, width: "2em" },
                 })}
-                <span
+                {/* <span
                     style={{
                         color: `${activeTheme}`,
                         fontWeight: "bold",
@@ -288,7 +287,7 @@ const PatientListItem = (props) => {
                     }}
                 >
                     {props.bedNumber}
-                </span>
+                </span> */}
             </div>
             <div>
                 <span
@@ -480,16 +479,16 @@ const PatientListItem = (props) => {
                             })}
                         </Button>
                     </div>
-                    <BedDetailsSection width="12%" />
+                    <BedDetailsSection width="13%" />
 
                     <CustomDivider />
                     <NameSection width="10%" />
 
-                    <CustomDivider />
-                    <EwsSection width="5%" />
+                    {/* <CustomDivider />
+                    <EwsSection width="5%" /> */}
 
                     <CustomDivider />
-                    <ChartSection width="70%" />
+                    <ChartSection width="72%" />
                 </div>
             );
         } else {
