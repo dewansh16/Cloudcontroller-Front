@@ -259,6 +259,26 @@ function PatientParticular(props) {
         // return () => clearTimeout();
     }, [data.demographic_map.pid]);
 
+    const renderValueByKey = ({ _key = "", val = 0, val_bpd = 0}) => {
+        switch (_key) {
+            case "temp":
+                const celsius = 5 / 9 * (val - 32);
+                return `${val}°F / ${celsius.toFixed(1)}°C`
+            case "spo2": 
+                return `${val}`;
+            case "ecg_hr": 
+            case "ecg_rr":
+                return `${val} bpm`;
+            case "blood_pressuer": 
+                return `${val} mmHg`;
+            case "weight": 
+                const lbs = val * 2.2046;
+                return `${val} kg / ${lbs.toFixed(1)} lbs`
+            default:
+                break;
+        }
+    };
+
     return (
         <div className="patientParticularMain">
             {/* BASIC INFO */}
@@ -317,10 +337,11 @@ function PatientParticular(props) {
                                         <Row>
                                             <Col span={24} className="patientscoredata">
                                                 <p>
-                                                    {itemSensor?.val}
+                                                    {renderValueByKey(itemSensor)}
+                                                    {/* {itemSensor?.val}
                                                     {itemSensor?._key === "blood_pressuer" && (
                                                         ` - ${itemSensor?.val_bpd}`
-                                                    )}
+                                                    )} */}
                                                 </p>
                                             </Col>
                                         </Row>

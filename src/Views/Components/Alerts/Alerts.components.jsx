@@ -25,73 +25,73 @@ function FetchAlertData(pid, isAttended) {
 
     useEffect(() => {
         // setLoading(true);
-        // alertApi.getPatientAlerts(pid).then((res) => {
-        //     let alerts = res.data?.response.alerts[0].alerts;
-        //     if (isAttended === "attended") {
-        //         alerts = alerts.filter((item) => {
-        //             return (item.status === 'close');
-        //         })
-        //     }
+        alertApi.getPatientAlerts(pid).then((res) => {
+            let alerts = res.data?.response.alerts[0].alerts;
+            if (isAttended === "attended") {
+                alerts = alerts.filter((item) => {
+                    return (item.status === 'close');
+                })
+            }
 
-        //     if (isAttended === "notAttended") {
-        //         alerts = alerts.filter((item) => {
-        //             return (item.status === 'open');
-        //         })
-        //     }
+            if (isAttended === "notAttended") {
+                alerts = alerts.filter((item) => {
+                    return (item.status === 'open');
+                })
+            }
 
 
-        //     const monthNames = [
-        //         "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
-        //     ];
+            const monthNames = [
+                "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+            ];
 
-        //     const toNormalDate = (date) => {
-        //         const date1 = new Date(date);
-        //         const date2 = `${date1.getDate()}  ${monthNames[date1.getMonth()]} ${date1.getFullYear()}`;
-        //         return (date2);
-        //     }
+            const toNormalDate = (date) => {
+                const date1 = new Date(date);
+                const date2 = `${date1.getDate()}  ${monthNames[date1.getMonth()]} ${date1.getFullYear()}`;
+                return (date2);
+            }
 
-        //     let reqData = [];
-        //     let oneDayAlerts = [];
-        //     let allDates = [];
-        //     let allDatesSorted;
-        //     if (alerts.length > 0) {
+            let reqData = [];
+            let oneDayAlerts = [];
+            let allDates = [];
+            let allDatesSorted;
+            if (alerts.length > 0) {
 
-        //         allDates.push(toNormalDate(alerts[0]?.firstRcvTm));
-        //         alerts.forEach(item => {
-        //             if (!(allDates.includes(toNormalDate(item.firstRcvTm))))
-        //                 allDates.push(toNormalDate(item.firstRcvTm))
-        //         })
+                allDates.push(toNormalDate(alerts[0]?.firstRcvTm));
+                alerts.forEach(item => {
+                    if (!(allDates.includes(toNormalDate(item.firstRcvTm))))
+                        allDates.push(toNormalDate(item.firstRcvTm))
+                })
 
-        //         allDatesSorted = allDates.sort(function (a, b) {
-        //             var dateA = new Date(a), dateB = new Date(b);
-        //             return dateB - dateA;
-        //         });
-        //         console.log(allDatesSorted);
+                allDatesSorted = allDates.sort(function (a, b) {
+                    var dateA = new Date(a), dateB = new Date(b);
+                    return dateB - dateA;
+                });
+                console.log(allDatesSorted);
 
-        //         allDatesSorted.forEach(date => {
-        //             alerts.forEach(item => {
-        //                 if (toNormalDate(item.firstRcvTm) === date) {
-        //                     oneDayAlerts.push(item);
-        //                 }
-        //             })
-        //             reqData.push(oneDayAlerts)
-        //             oneDayAlerts = [];
-        //         })
-        //     }
+                allDatesSorted.forEach(date => {
+                    alerts.forEach(item => {
+                        if (toNormalDate(item.firstRcvTm) === date) {
+                            oneDayAlerts.push(item);
+                        }
+                    })
+                    reqData.push(oneDayAlerts)
+                    oneDayAlerts = [];
+                })
+            }
 
-        //     console.log(reqData);
-        //     setResponse(reqData);
-        //     setLoading(false)
-        // }).catch((err) => {
-        //     if (err) {
-        //         const error = err.response?.data.result;
-        //         notification.error({
-        //             message: 'Error',
-        //             description: `${error}` || ""
-        //         })
-        //         setLoading(false);
-        //     }
-        // })
+            console.log(reqData);
+            setResponse(reqData);
+            setLoading(false)
+        }).catch((err) => {
+            if (err) {
+                const error = err.response?.data.result;
+                notification.error({
+                    message: 'Error',
+                    description: `${error}` || ""
+                })
+                setLoading(false);
+            }
+        })
     }, [pid, isAttended])
     return [response, loading]
 }

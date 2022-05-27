@@ -97,7 +97,7 @@ const PatientListItem = (props) => {
         {
             _key: 'ecg_hr',
             name: "Heart Rate",
-            icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
+            icon:  Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
             val: 0,
             color: Colors.darkPink,
             trendData: []
@@ -113,9 +113,7 @@ const PatientListItem = (props) => {
         {
             _key: "blood_pressuer",
             name: "Blood Pressure",
-            icon: Icons.bpIcon({
-                Style: { color: Colors.darkPurple, fontSize: "24px" },
-            }),
+            icon: Icons.bloodPressure({ Style: { color: Colors.darkPurple, transform: 'scale(0.75)' } }),
             val: 0,
             val_bpd: 0,
             color: Colors.darkPurple,
@@ -183,7 +181,7 @@ const PatientListItem = (props) => {
             associatedList = JSON.parse(props?.data?.demographic_map?.associated_list);
         }
 
-        const newArrChart = [...chartBlockData];
+        const newArrChart = [...arrDataChart];
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];
 
@@ -276,8 +274,8 @@ const PatientListItem = (props) => {
                     textAlign: "center",
                 }}
             >
-                {Icons.patientInBedIcon({
-                    Style: { color: `${activeTheme}`, width: "2em" },
+                {Icons.houseIcon({
+                    Style: { color: `${activeTheme}`, width: "2em", opacity: "0.75" },
                 })}
                 {/* <span
                     style={{
