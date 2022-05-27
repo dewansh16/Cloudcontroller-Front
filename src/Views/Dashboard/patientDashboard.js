@@ -152,14 +152,17 @@ export default function PatientDashboard(props) {
         isLoading: true,
         list: [],
     });
-    const pageSize = 5;
+
+    // const pageSize = 5;
     const [currentPageVal, setCurrentPageVal] = useState(1);
+    const [valuePageLength, setValuePageLength] = useState(10);
+
     const [totalPages, setTotalPages] = useState(1);
     const [patientDetails, setPatientDetails] = useState(null);
     const [patientListToShow, setPatientList] = useState([]);
     const [showNotes, setShowNotes] = useState(false);
     const [wardDetails, setWardDetails] = useState({ text: null, value: null });
-    const [patientType, setSelectedPatient] = useState("incare");
+    const [patientType, setSelectedPatient] = useState("remote");
     // const [showModal, setShowModal] = useState(false);
 
     //animation config
@@ -322,7 +325,7 @@ export default function PatientDashboard(props) {
             EWS: filters.ews,
             spo2LevelsL: filters.spo2,
             respirationRate: filters.rr,
-            offset: Number(currentPageVal), limit: pageSize,
+            offset: Number(currentPageVal), limit: Number(valuePageLength),
         };
 
         Object.keys(searchOptions).forEach(search => {
@@ -332,7 +335,7 @@ export default function PatientDashboard(props) {
         })
 
         return data;
-    }, [searchOptions, filters, currentPageVal, patientType]);
+    }, [searchOptions, filters, currentPageVal, patientType, valuePageLength]);
 
     function fetchPatientList() {
         setPatient({ isLoading: true });
@@ -340,7 +343,7 @@ export default function PatientDashboard(props) {
         patientApi.getPatientList(dataBodyFilter)
             .then((res) => {
                 setTotalPages(
-                    computeTotalPages(res.data.response.patientTotalCount, pageSize)
+                    computeTotalPages(res.data.response.patientTotalCount, valuePageLength)
                 );
 
                 let data = res.data.response.patients;
@@ -362,7 +365,7 @@ export default function PatientDashboard(props) {
 
     useEffect(() => {
         fetchPatientList();
-    }, [currentPageVal, searchOptions, patientType]);
+    }, [currentPageVal, searchOptions, patientType, valuePageLength]);
 
     // useEffect(() => {
     //   filterBasedonPatientType(patient.list);
@@ -417,19 +420,30 @@ export default function PatientDashboard(props) {
             ) : null}
             <Navbar
                 startChildren={
-                    <WardSelector
-                        wardDetails={wardDetails}
-                        setWardDetails={setWardDetails}
-                        patientList={patient.list}
-                        setPatientList={setPatientList}
-                        locationUuid={searchOptions.locationUuid}
-                        searchOptions={searchOptions}
-                        setLocationUuid={setSearchOptions}
-                    />
+                    // <WardSelector
+                    //     wardDetails={wardDetails}
+                    //     setWardDetails={setWardDetails}
+                    //     patientList={patient.list}
+                    //     setPatientList={setPatientList}
+                    //     locationUuid={searchOptions.locationUuid}
+                    //     searchOptions={searchOptions}
+                    //     setLocationUuid={setSearchOptions}
+                    // />
+                    <>
+                        <Button type="secondary" onClick={fetchPatientList}>
+                            Refresh {Icons.sync({ Style: { fontSize: "1.257rem" } })}
+                        </Button>
+                        <Search
+                            placeholder="input search text"
+                            onSearch={searchPatient}
+                            enterButton
+                            allowClear
+                        />
+                    </>
                 }
                 centerChildren={
                     <>
-                        <Search
+                        {/* <Search
                             placeholder="input search text"
                             onSearch={searchPatient}
                             enterButton
@@ -437,10 +451,10 @@ export default function PatientDashboard(props) {
                         />
 
                         <Button type="secondary" onClick={fetchPatientList}>
-                            refresh {Icons.sync({ Style: { fontSize: "1.257rem" } })}
-                        </Button>
+                            Refresh {Icons.sync({ Style: { fontSize: "1.257rem" } })}
+                        </Button> */}
 
-                        <Dropdown
+                        {/* <Dropdown
                             overlay={FilterMenu(
                                 filters,
                                 setFilters,
@@ -465,7 +479,7 @@ export default function PatientDashboard(props) {
                             timeIntervalOptions={timeIntervalOptions}
                             searchOptions={searchOptions}
                             setFilters={setSearchOptions}
-                        />
+                        /> */}
                     </>
                 }
                 endChildren={
@@ -474,6 +488,8 @@ export default function PatientDashboard(props) {
                             totalPages={totalPages}
                             currentPageVal={currentPageVal}
                             setCurrentPageVal={setCurrentPageVal}
+                            valuePageLength={valuePageLength}
+                            setValuePageLength={setValuePageLength}
                         />
                     </>
                 }
@@ -525,14 +541,15 @@ export default function PatientDashboard(props) {
                                 <h3 style={{ width: "8rem", margin: "0" }}>Patient Type: </h3>
                             </div>
                             <Select
-                                defaultValue="all"
+                                defaultValue="remote"
                                 style={{ width: "100%" }}
                                 onSelect={showSelectedPatient}
                             >
-                                <Option value="incare">In Care</Option>
+                                {/* <Option value="incare">In Care</Option>
                                 <Option value="discharged">Discharged</Option>
                                 <Option value="deboarded">Deboarded</Option>
-                                <Option value="all">All Patients</Option>
+                                <Option value="all">All Patients</Option> */}
+                                <Option value="remote">Remote</Option>
                             </Select>
                         </Col>
                         

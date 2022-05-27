@@ -29,3 +29,17 @@
   opacity: 0.6;
   margin: 0;
 }
+
+.pagination-box-length {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 14px;
+}
+
+.pagination-box-length .total-page-box {
+  width: 8.5rem;
+  left: 0;
+  margin-left: 1rem;
+  margin-right: -5px;
+}
