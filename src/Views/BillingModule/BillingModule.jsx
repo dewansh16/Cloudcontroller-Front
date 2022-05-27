@@ -1925,9 +1925,11 @@ function BillingModule() {
                                 <div
                                     className="bm-header-dot"
                                     style={
-                                        firstTotalTime >= 1200
-                                            ? { background: "#ffcd00" }
-                                            : null
+                                        initialStepDoneState ?
+                                        Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
+                                                ? { background: "#81ff00" }
+                                                : { background: "#ffcd00" }
+                                        : null
                                     }
                                 ></div>
                                 <div
@@ -1940,9 +1942,22 @@ function BillingModule() {
                             <div className="bm-cptcode-b-header">
                                 <div
                                     className="bm-header-line"
+                                    style={
+                                        initialStepDoneState ?
+                                        Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
+                                                ? { background: "#81ff00" }
+                                                : { background: "#ffcd00" }
+                                        : null
+                                    }
+                                ></div>
+                                <div className="bm-header-below">{`${secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED} mins monitored`}</div>
+                            </div>
+                            {/* <div className="bm-cptcode-b-header">
+                                <div
+                                    className="bm-header-line"
                                     style={{ background: "#ffcd00" }}
                                 ></div>
-                            </div>
+                            </div> */}
                         </div>
                         <div className="bm-cptcode-container">
                             {enrolledState ? (
