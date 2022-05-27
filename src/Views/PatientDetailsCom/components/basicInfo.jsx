@@ -23,7 +23,7 @@ export default function BasicInfo({ data, handleComponentClose, onDeletePatient 
             </p>
         </Col>
         <Col span={6} style={{ display: "flex", justifyContent: "flex-end" }}>
-            <Popconfirm
+            {/* <Popconfirm
                 placement="bottom"
                 title="Are you sure to delete this patient?"
                 onConfirm={() => onDeletePatient(data.demographic_map.pid)}
@@ -35,7 +35,7 @@ export default function BasicInfo({ data, handleComponentClose, onDeletePatient 
                         <img src={iconDelete} width="24" height="22" style={{ marginTop: "-8px" }} />
                     </Button>
                 </Tooltip>
-            </Popconfirm>
+            </Popconfirm> */}
             
             <Tooltip title={"Edit patient"}>
                 <Button

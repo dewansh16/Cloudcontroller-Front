@@ -163,6 +163,7 @@ export default function PatientDashboard(props) {
     const [showNotes, setShowNotes] = useState(false);
     const [wardDetails, setWardDetails] = useState({ text: null, value: null });
     const [patientType, setSelectedPatient] = useState("remote");
+    const [arrDataSensorPopupDetail, setDataSensorPopupDetail] = useState([]);
     // const [showModal, setShowModal] = useState(false);
 
     //animation config
@@ -404,6 +405,8 @@ export default function PatientDashboard(props) {
             })
     }
 
+    // console.log("arrDataSensorPopupDetail", arrDataSensorPopupDetail);
+
     return (
         <>
             <HotkeysDemo prop={props} />
@@ -522,6 +525,7 @@ export default function PatientDashboard(props) {
                         setShowTrend={setShowTrend}
                         setActive={setActive}
                         onDeletePatient={onDeletePatient}
+                        arrDataSensorPopupDetail={arrDataSensorPopupDetail}
                     />
                 </motion.div>
             )}
@@ -580,6 +584,7 @@ export default function PatientDashboard(props) {
                                         setPatientDetails={setPatientDetails}
                                         active={active}
                                         setActive={setActive}
+                                        setDataSensorPopupDetail={setDataSensorPopupDetail}
                                     />
                                 )}
                             ></List>
