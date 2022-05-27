@@ -162,7 +162,7 @@ export default function PatientDashboard(props) {
     const [patientListToShow, setPatientList] = useState([]);
     const [showNotes, setShowNotes] = useState(false);
     const [wardDetails, setWardDetails] = useState({ text: null, value: null });
-    const [patientType, setSelectedPatient] = useState("incare");
+    const [patientType, setSelectedPatient] = useState("remote");
     // const [showModal, setShowModal] = useState(false);
 
     //animation config
@@ -541,14 +541,15 @@ export default function PatientDashboard(props) {
                                 <h3 style={{ width: "8rem", margin: "0" }}>Patient Type: </h3>
                             </div>
                             <Select
-                                defaultValue="all"
+                                defaultValue="remote"
                                 style={{ width: "100%" }}
                                 onSelect={showSelectedPatient}
                             >
-                                <Option value="incare">In Care</Option>
+                                {/* <Option value="incare">In Care</Option>
                                 <Option value="discharged">Discharged</Option>
                                 <Option value="deboarded">Deboarded</Option>
-                                <Option value="all">All Patients</Option>
+                                <Option value="all">All Patients</Option> */}
+                                <Option value="remote">Remote</Option>
                             </Select>
                         </Col>
                         
