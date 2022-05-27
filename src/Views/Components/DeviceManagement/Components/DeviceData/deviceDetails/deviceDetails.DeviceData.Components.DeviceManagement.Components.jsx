@@ -60,7 +60,7 @@ function CreateGraphData(pid, deviceType) {
         const queryApi = client.getQueryApi(org);
     
         const query = `from(bucket: "emr_dev")
-                |> range(start: -12h)
+                |> range(start: -48h)
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${newDeviceType}_battery")
                 |> yield(name: "mean")`;
     
@@ -79,9 +79,9 @@ function CreateGraphData(pid, deviceType) {
                         value: dataQueryInFlux?._value
                     });
 
-                    if (arrBattery?.length > 10) {
-                        arrBattery.splice(0, 1);
-                    }
+                    // if (arrBattery?.length > 30) {
+                    //     arrBattery.splice(0, 1);
+                    // }
                 }
             },
             error(error) {

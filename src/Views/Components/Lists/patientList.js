@@ -143,7 +143,7 @@ const PatientListItem = (props) => {
         const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: -3h)
+                |> range(start: -48h)
                 |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
                 |> yield(name: "mean")`;
 
@@ -155,9 +155,9 @@ const PatientListItem = (props) => {
                     chart.val_bpd = dataQueryInFlux?._value;
                 } else {
                     arrayRes.push({ value: dataQueryInFlux?._value || 0 });
-                    if (arrayRes?.length > 30) {
-                        arrayRes.splice(0, 1);
-                    }
+                    // if (arrayRes?.length > 200) {
+                    //     arrayRes.splice(0, 1);
+                    // }
                 }
             },
             error(error) {
@@ -212,7 +212,7 @@ const PatientListItem = (props) => {
 
         const timeInterval = setInterval(() => {
             getDataSensorFromInfluxDB();
-        }, 5000);
+        }, 10000);
 
         return () => {
             clearInterval(timeInterval);

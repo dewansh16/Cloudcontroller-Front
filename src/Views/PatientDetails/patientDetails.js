@@ -467,6 +467,9 @@ export default function PatientDetails(props) {
                                                 className="back-buttons utility"
                                                 onClick={() => {
                                                     history.push('/dashboard/patient/list');
+                                                    // state: {
+                                                    //     name:
+                                                    // },
                                                 }}
                                             >
                                                 {Icons.headerBackArrow({})}
