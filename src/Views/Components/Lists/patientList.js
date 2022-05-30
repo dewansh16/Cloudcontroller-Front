@@ -15,6 +15,8 @@ const { useBreakpoint } = Grid;
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
 
+    // console.log("dataFilterOnHeader", props?.dataFilterOnHeader);
+
     // console.log("props", props);
 
     const dividerColor = "black";
@@ -141,7 +143,7 @@ const PatientListItem = (props) => {
         const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: -48h)
+                |> range(start: -${props.dataFilterOnHeader.valDuration})
                 |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
                 |> yield(name: "mean")`;
 
@@ -152,10 +154,11 @@ const PatientListItem = (props) => {
                 if (key === "alphamed_bpd" || key === "ihealth_bpd") {
                     chart.val_bpd = dataQueryInFlux?._value;
                 } else {
-                    arrayRes.push({ value: dataQueryInFlux?._value || 0 });
-                    // if (arrayRes?.length > 200) {
-                    //     arrayRes.splice(0, 1);
-                    // }
+                    let value = dataQueryInFlux?._value || 0;
+                    if (key === "weight") {
+                        value = value * 2.2046
+                    }
+                    arrayRes.push({ value });
                 }
             },
             error(error) {
@@ -164,7 +167,7 @@ const PatientListItem = (props) => {
             },
             complete() {
                 // console.log('nFinished SUCCESS');
-                if (arrayRes?.length > 0 && key !== "alphamed_bpd") {
+                if (key !== "alphamed_bpd" && key !== "ihealth_bpd") {
                     chart.trendData = arrayRes || [];
                     chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
                     setChartBlockData([...newArrChart]);
@@ -215,7 +218,7 @@ const PatientListItem = (props) => {
         // return () => {
         //     clearInterval(timeInterval);
         // }
-    }, []);
+    }, [props.dataFilterOnHeader]);
 
     // React.useEffect(() => {
     //     var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
@@ -232,7 +235,8 @@ const PatientListItem = (props) => {
     // }, []);
 
     const pushToPatientDetails = () => {
-        props.parentProps.history.push(`/dashboard/patient/details/${props.pid}`);
+        console.log("----------------------");
+        // props.parentProps.history.push(`/dashboard/patient/details/${props.pid}`);
     };
 
     const pushToEdit = () => {

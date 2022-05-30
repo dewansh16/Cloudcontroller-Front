@@ -1984,7 +1984,7 @@ function BillingModule() {
                             </div>
                             {/* <div className="bm-cptcode-b-header">
                                 <div
-                                    className="bm-header-line"
+                                    className="bm-header-line
                                     style={{ background: "#ffcd00" }}
                                 ></div>
                             </div> */}

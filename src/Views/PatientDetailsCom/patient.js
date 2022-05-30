@@ -108,10 +108,11 @@ function PatientParticular(props) {
         const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: -48h)
+                |> range(start: -${props.valDuration})
                 |> filter(fn: (r) => r["_measurement"] == "${props.patient.patientDetails?.demographic_map.pid}_${key}")
                 |> yield(name: "mean")`;
 
+        console.log("query", query);
         const arrayRes = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {
@@ -131,7 +132,8 @@ function PatientParticular(props) {
             },
             complete() {
                 // console.log('nFinished SUCCESS');
-                if ((key !== "alphamed_bpd" || key !== "ihealth_bpd")) {
+                console.log("arrayRes", arrayRes);
+                if ((key !== "alphamed_bpd" && key !== "ihealth_bpd")) {
                     chart.trendData = arrayRes || [];
                     chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
 
@@ -270,7 +272,7 @@ function PatientParticular(props) {
             case "ecg_rr":
                 return `${val} bpm`;
             case "blood_pressuer": 
-                return `${val} mmHg`;
+                return `${val} - ${val_bpd} mmHg`;
             case "weight": 
                 const lbs = val * 2.2046;
                 return `${val} kg / ${lbs.toFixed(1)} lbs`

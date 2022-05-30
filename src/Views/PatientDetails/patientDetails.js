@@ -664,6 +664,13 @@ export default function PatientDetails(props) {
                             </Row>
                         </Affix>
 
+                        {/* props.history.push({
+            pathname: `/dashboard/patient/details/${data.demographic_map.pid}`,
+            state: {
+                dataFilterHeader: true,
+            },
+        }); */}
+
                         <Row style={{ height: "68px", alignItems: "center" }}>
                             <Col span={7}>
                                 <Row style={{ justifyContent: "flex-start" }}>
