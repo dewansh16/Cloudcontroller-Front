@@ -25,6 +25,7 @@ import {
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import moment from "moment";
+import { InfluxDB } from "@influxdata/influxdb-client";
 
 import { UserStore } from "../../Stores/userStore";
 
@@ -919,7 +920,8 @@ function BillingModule() {
     const getTotalDayMonitored = () => {
         let result = 0;
         patchArray.map(item => {
-            result = result + getTotalNumberDay(item);
+            const totalDay = item?.totalDay || 0;
+            result = result + totalDay;
         })
         return result;
     }
@@ -1439,6 +1441,26 @@ function BillingModule() {
             });
     }
 
+    const shortTypeQueryOfSensor = (patchType) => {
+        switch (patchType) {
+            case "temperature":
+                return "temp"
+            case "digital":
+                return "weight"
+            case "spo2":
+                return "spo2"
+            case "ecg":
+                return "ecg"
+            case "alphamed":
+                return "alphamed"
+            case "ihealth":
+                return "ihealth"
+
+            default:
+                break;
+        }
+    };
+
     useEffect(() => {
         var billDate = new Date();
         var billDateStr = getDateFromISO(billDate.toISOString());
@@ -1575,6 +1597,29 @@ function BillingModule() {
                     setPatchLoading(false);
 
                     if (res.data.response.patchData) {
+                        res.data.response.patchData?.forEach((patch) => {
+                            const startDate = getFirstDateMonitored(patch) || "";
+                            const endDate = getLastDateMonitored(patch) || "";
+                            const typeQuery = shortTypeQueryOfSensor(patch["patches.patch_type"]);
+
+                            let arrKeyChild = [];
+                            if (typeQuery === "alphamed") {
+                                arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
+                            } else if (typeQuery === "ihealth") {
+                                arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
+                            }
+
+                            if (!!startDate && !!endDate && !!typeQuery) {
+                                if (arrKeyChild?.length > 0) {
+                                    arrKeyChild.forEach((itemKey) => {
+                                        checkTotalNumberDateHaveDataFromInflux(startDate, endDate, itemKey, patch);
+                                    })
+                                } else {
+                                    checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
+                                }
+                            }
+                        })
+
                         setPatchArray(
                             res.data.response.patchData
                         );
@@ -1748,6 +1793,54 @@ function BillingModule() {
             value: 12
         },
     ];
+
+    const numberOfNightsBetweenDates = (start, end) => {
+        let dayCount = 0;
+        while (end > start) {
+            dayCount++;
+            start.setDate(start.getDate() + 1);
+        };
+
+        return dayCount
+    }
+
+    console.log("patchArray", patchArray);
+
+    const checkTotalNumberDateHaveDataFromInflux = (startDate = "", endDate = "", sensorType = "", patch) => {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
+
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+
+        const query = `from(bucket: "emr_dev")
+                |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
+                |> filter(fn: (r) => r["_measurement"] == "patient0f32e7d0-fe65-4d8b-894f-a5be26484ff3_${sensorType}")
+                |> yield(name: "mean")
+            `
+
+        const arrDateQuery = [];
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const o = tableMeta.toObject(row);
+                let time = new Date(o._time);
+                time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
+                if (!arrDateQuery.includes(time)) {
+                    arrDateQuery.push(time);
+                }
+            },
+            error(error) {
+                console.log('ERROR', patch)
+            },
+            complete() {
+                patch.totalDay = arrDateQuery?.length;
+                patch.datesInflux = arrDateQuery;
+            },
+        })
+    };
 
     return rightSideLoading ? (
         <div
@@ -2510,7 +2603,7 @@ function BillingModule() {
                                 <div className="bm-item-header" style={{ width: "15%" }}>Last Date Monitored</div>
                                 <div className="bm-item-header" style={{ width: "13%" }}>Total Number Of Day</div>
                             </div>
-                            <div style={{ overflowY: "scroll", height: "70%" }}>
+                            <div style={{ overflowY: "scroll", height: "70%", marginRight: '-6px' }}>
                                 {patchArray.length === 0 ? (
                                     <div
                                         style={{
@@ -2526,46 +2619,41 @@ function BillingModule() {
                                         No Associated Devices
                                     </div>
                                 ) : (
-                                    <Collapse expandIconPosition="right">
+                                    <>
                                         {patchArray.map((item, index) => (
-                                            <Panel
-                                                header={
-                                                    <div
-                                                        style={{
-                                                            width: "100%",
-                                                            display: "flex",
-                                                            alignItems: "center",
-                                                            height: "40px",
-                                                            fontSize: "1rem"
-                                                        }}
-                                                    >
-                                                        <div className="bm-item-body" style={{ width: "20%" }}>
-                                                            {item["patches.patch_mac"]}
-                                                        </div>
-                                                        <div className="bm-item-body" style={{ width: "20%" }}>
-                                                            {item["patches.patch_serial"]}
-                                                        </div>
-                                                        <div className="bm-item-body" style={{ width: "17%" }}>
-                                                            {item["patches.patch_type"]}
-                                                        </div>
-                                                        <div className="bm-item-body" style={{ width: "15%" }}>
-                                                            {getFirstDateMonitored(item)}
-                                                        </div>
-                                                        <div className="bm-item-body" style={{ width: "15%" }}>
-                                                            {getLastDateMonitored(item)}
-                                                        </div>
-                                                        <div className="bm-item-body" style={{ width: "13%" }}>
-                                                            {getTotalNumberDay(item)}
-                                                        </div>
-                                                    </div>
-                                                }
+                                            <div
                                                 key={index}
-                                                style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
+                                                style={{
+                                                    width: "100%",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    height: "55px",
+                                                    fontSize: "1rem",
+                                                    background: "#ffb300c2",
+                                                    margin: "0.5% 0%"
+                                                }}
                                             >
-
-                                            </Panel>
+                                                <div className="bm-item-body" style={{ width: "20%" }}>
+                                                    {item["patches.patch_mac"]}
+                                                </div>
+                                                <div className="bm-item-body" style={{ width: "20%" }}>
+                                                    {item["patches.patch_serial"]}
+                                                </div>
+                                                <div className="bm-item-body" style={{ width: "17%" }}>
+                                                    {item["patches.patch_type"]}
+                                                </div>
+                                                <div className="bm-item-body" style={{ width: "15%" }}>
+                                                    {getFirstDateMonitored(item)}
+                                                </div>
+                                                <div className="bm-item-body" style={{ width: "15%" }}>
+                                                    {getLastDateMonitored(item)}
+                                                </div>
+                                                <div className="bm-item-body" style={{ width: "13%" }}>
+                                                    {item?.totalDay || 0}
+                                                </div>
+                                            </div>
                                         ))}
-                                    </Collapse>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -2723,41 +2811,33 @@ function BillingModule() {
                                             <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
                                         </div>
                                         <div style={{ overflowY: "scroll", height: "70%", marginRight: "-6px" }}>
-                                            <Collapse expandIconPosition="right">
-                                                {firstTwentyTasks.map((item, index) => (
-                                                    <Panel
-                                                        header={
-                                                            <div
-                                                                style={{
-                                                                    width: "100%",
-                                                                    display: "flex",
-                                                                    alignItems: "center",
-                                                                    height: "40px",
-                                                                    fontSize: "1rem"
-                                                                }}
-                                                            >
-                                                                <div className="bm-item-body" style={{ width: "20%" }}>
-                                                                    {moment(item["task_date"]).format("YYYY-MM-DD")}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "30%" }}>
-                                                                    {item["staff_name"]}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "30%" }}>
-                                                                    {item["task_note"]}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "20%" }}>
-                                                                    {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99457)}
-                                                                </div>
-                                                            </div>
-                                                        }
-                                                        key={index}
-                                                        style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
-                                                    >
-
-                                                    </Panel>
-                                                ))}
-                                            </Collapse>
-
+                                            {firstTwentyTasks.map((item, index) => (
+                                                <div
+                                                    key={index}
+                                                    style={{
+                                                        width: "100%",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        height: "60px",
+                                                        fontSize: "1rem",
+                                                        background: "#ffb300c2",
+                                                        margin: "0.5% 0%"
+                                                    }}
+                                                >
+                                                    <div className="bm-item-body" style={{ width: "20%" }}>
+                                                        {moment(item["task_date"]).format("YYYY-MM-DD")}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "30%" }}>
+                                                        {item["staff_name"]}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "30%" }}>
+                                                        {item["task_note"]}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "20%" }}>
+                                                        {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99457)}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
@@ -2940,40 +3020,33 @@ function BillingModule() {
 
                                         </div>
                                         <div style={{ overflowY: "scroll", height: "70%", marginRight: "-6px" }}>
-                                            <Collapse expandIconPosition="right">
-                                                {secondTwentyTasks.map((item, index) => (
-                                                    <Panel
-                                                        header={
-                                                            <div
-                                                                style={{
-                                                                    width: "100%",
-                                                                    display: "flex",
-                                                                    alignItems: "center",
-                                                                    height: "40px",
-                                                                    fontSize: "1rem"
-                                                                }}
-                                                            >
-                                                                <div className="bm-item-body" style={{ width: "20%" }}>
-                                                                    {moment(item["task_date"]).format("YYYY-MM-DD")}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "30%" }}>
-                                                                    {item["staff_name"]}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "30%" }}>
-                                                                    {item["task_note"]}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "20%" }}>
-                                                                    {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99458)}
-                                                                </div>
-                                                            </div>
-                                                        }
-                                                        key={index}
-                                                        style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
-                                                    >
-
-                                                    </Panel>
-                                                ))}
-                                            </Collapse>
+                                            {secondTwentyTasks.map((item, index) => (
+                                                <div
+                                                    key={index}
+                                                    style={{
+                                                        width: "100%",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        height: "65px",
+                                                        fontSize: "1rem",
+                                                        background: "#ffb300c2",
+                                                        margin: "0.5% 0%"
+                                                    }}
+                                                >
+                                                    <div className="bm-item-body" style={{ width: "20%" }}>
+                                                        {moment(item["task_date"]).format("YYYY-MM-DD")}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "30%" }}>
+                                                        {item["staff_name"]}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "30%" }}>
+                                                        {item["task_note"]}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "20%" }}>
+                                                        {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99458)}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
@@ -3120,7 +3193,7 @@ function BillingModule() {
 
                                 <Col span={12} style={{ paddingLeft: "5%" }}>
                                     <div>
-                                        
+
                                         <div style={{
                                             background: "#ddd",
                                             borderRadius: "1rem",
@@ -3131,23 +3204,23 @@ function BillingModule() {
                                             </div>
                                             <div>
                                                 <div
-                                                    style={{ 
+                                                    style={{
                                                         display: "flex",
                                                         alignItems: "center"
                                                     }}
                                                 >
-                                                    <div style={{ width: "45%"}}>Status: Active</div>
-                                                    <div style={{ width: "55%"}}>Enrollment: 25/02/21</div>
+                                                    <div style={{ width: "45%" }}>Status: Active</div>
+                                                    <div style={{ width: "55%" }}>Enrollment: 25/02/21</div>
                                                 </div>
 
                                                 <div
-                                                    style={{ 
+                                                    style={{
                                                         display: "flex",
                                                         alignItems: "center"
                                                     }}
                                                 >
-                                                    <div style={{ width: "45%"}}>Months of CMM: 2</div>
-                                                    <div style={{ width: "55%"}}>Next followup: NA</div>
+                                                    <div style={{ width: "45%" }}>Months of CMM: 2</div>
+                                                    <div style={{ width: "55%" }}>Next followup: NA</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -3167,15 +3240,15 @@ function BillingModule() {
                                                 Notes
                                             </div>
 
-                                            <div style={{ 
+                                            <div style={{
                                                 display: "flex",
                                                 padding: "1rem 0.5rem"
                                             }}>
-                                                <div style={{ width: "5%"}}>
+                                                <div style={{ width: "5%" }}>
                                                     1
                                                 </div>
                                                 <div style={{ width: "25%" }}>
-                                                    12/12/12 12:00 
+                                                    12/12/12 12:00
                                                 </div>
                                                 <div style={{ width: "50%" }}>
                                                     Note

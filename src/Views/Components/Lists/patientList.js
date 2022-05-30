@@ -141,7 +141,7 @@ const PatientListItem = (props) => {
         const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: -48h)
+                |> range(start: -4d)
                 |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
                 |> yield(name: "mean")`;
 
