@@ -15,10 +15,6 @@ const { useBreakpoint } = Grid;
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
 
-    // console.log("dataFilterOnHeader", props?.dataFilterOnHeader);
-
-    // console.log("props", props);
-
     const dividerColor = "black";
     const listThemeColor = "#444444";
     const border = "#C7C7C7";
@@ -199,8 +195,6 @@ const PatientListItem = (props) => {
                     arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
                 }
 
-                // console.log("arrKeyChild", arrKeyChild);
-
                 for (let j = 0; j < arrKeyChild.length; j++) {
                     processDataForSensor(arrKeyChild[j], newArrChart, chart);
                 }
@@ -235,8 +229,12 @@ const PatientListItem = (props) => {
     // }, []);
 
     const pushToPatientDetails = () => {
-        console.log("----------------------");
-        // props.parentProps.history.push(`/dashboard/patient/details/${props.pid}`);
+        props.parentProps.history.push({
+            pathname: `/dashboard/patient/details/${props.pid}`,
+            state: {
+                dataFilterHeader: props.dataFilterOnHeader,
+            },
+        });
     };
 
     const pushToEdit = () => {

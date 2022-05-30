@@ -108,11 +108,10 @@ function PatientParticular(props) {
         const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: -${props.valDuration})
+                |> range(start: -${props.dataFilterOnHeader.valDuration})
                 |> filter(fn: (r) => r["_measurement"] == "${props.patient.patientDetails?.demographic_map.pid}_${key}")
                 |> yield(name: "mean")`;
 
-        console.log("query", query);
         const arrayRes = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {
@@ -132,7 +131,6 @@ function PatientParticular(props) {
             },
             complete() {
                 // console.log('nFinished SUCCESS');
-                console.log("arrayRes", arrayRes);
                 if ((key !== "alphamed_bpd" && key !== "ihealth_bpd")) {
                     chart.trendData = arrayRes || [];
                     chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
@@ -165,8 +163,6 @@ function PatientParticular(props) {
                 } else {
                     arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
                 }
-
-                // console.log("arrKeyChild", arrKeyChild);
 
                 for (let j = 0; j < arrKeyChild.length; j++) {
                     processDataForSensor(arrKeyChild[j], newArrChart, chart);
@@ -203,9 +199,16 @@ function PatientParticular(props) {
     };
 
     const pushToPatientDetails = () => {
-        props.history.push(
-            `/dashboard/patient/details/${data.demographic_map.pid}`
-        );
+        // props.history.push(
+        //     `/dashboard/patient/details/${data.demographic_map.pid}`
+        // );
+
+        props.history.push({
+            pathname: `/dashboard/patient/details/${data.demographic_map.pid}`,
+            state: {
+                dataFilterHeader: props.dataFilterOnHeader,
+            },
+        });
     };
 
     const openReport = () => {

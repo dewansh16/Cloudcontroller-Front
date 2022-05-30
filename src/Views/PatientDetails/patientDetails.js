@@ -466,10 +466,10 @@ export default function PatientDetails(props) {
                                                 style={{ border: "none", boxShadow: "none" }}
                                                 className="back-buttons utility"
                                                 onClick={() => {
-                                                    history.push('/dashboard/patient/list');
-                                                    // state: {
-                                                    //     name:
-                                                    // },
+                                                    history.push({ 
+                                                        pathname: '/dashboard/patient/list',
+                                                        state: { dataFilterHeader: props?.location?.state?.dataFilterHeader || null }
+                                                    });
                                                 }}
                                             >
                                                 {Icons.headerBackArrow({})}
@@ -663,13 +663,6 @@ export default function PatientDetails(props) {
                                 </Col>
                             </Row>
                         </Affix>
-
-                        {/* props.history.push({
-            pathname: `/dashboard/patient/details/${data.demographic_map.pid}`,
-            state: {
-                dataFilterHeader: true,
-            },
-        }); */}
 
                         <Row style={{ height: "68px", alignItems: "center" }}>
                             <Col span={7}>

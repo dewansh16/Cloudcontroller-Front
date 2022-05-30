@@ -153,11 +153,13 @@ export default function PatientDashboard(props) {
         list: [],
     });
 
+    const dataFilterHeader = props?.location?.state?.dataFilterHeader || null;
+
     // const pageSize = 5;
-    const [currentPageVal, setCurrentPageVal] = useState(1);
-    const [valuePageLength, setValuePageLength] = useState(10);
-    const [valSearch, setValSearch] = useState("");
-    const [valDuration, setValDuration] = useState("7d");
+    const [currentPageVal, setCurrentPageVal] = useState(dataFilterHeader?.currentPageVal || 1);
+    const [valuePageLength, setValuePageLength] = useState(dataFilterHeader?.valuePageLength || 10);
+    const [valSearch, setValSearch] = useState(dataFilterHeader?.valSearch || "");
+    const [valDuration, setValDuration] = useState(dataFilterHeader?.valDuration || "7d");
 
     const [totalPages, setTotalPages] = useState(1);
     const [patientDetails, setPatientDetails] = useState(null);
@@ -305,7 +307,8 @@ export default function PatientDashboard(props) {
             tenantId,
             patientType,
             name: valSearch,
-            offset: Number(currentPageVal), limit: Number(valuePageLength)
+            offset: Number(currentPageVal), 
+            limit: Number(valuePageLength) 
         }
 
         patientApi.getPatientList(data)
@@ -318,6 +321,7 @@ export default function PatientDashboard(props) {
                 setPatient({ isLoading: false, list: data });
                 // filterBasedonPatientType(data);
                 setPatientList(data);
+                props.location.state.dataFilterHeader = null;
             })
             .catch((err) => {
                 setPatient({ isLoading: false });
@@ -373,8 +377,6 @@ export default function PatientDashboard(props) {
         };
     }, [currentPageVal, valuePageLength, valSearch, valDuration]);
 
-    // console.log("arrDataSensorPopupDetail", arrDataSensorPopupDetail);
-
     return (
         <>
             <HotkeysDemo prop={props} />
@@ -409,6 +411,7 @@ export default function PatientDashboard(props) {
                             onSearch={searchPatient}
                             enterButton
                             allowClear
+                            defaultValue={valSearch}
                         />
                     </>
                 }
@@ -493,7 +496,8 @@ export default function PatientDashboard(props) {
                         setShowTrend={setShowTrend}
                         setActive={setActive}
                         onDeletePatient={onDeletePatient}
-                        valDuration={valDuration}
+                        // valDuration={valDuration}
+                        dataFilterOnHeader={dataFilterOnHeader}
                     />
                 </motion.div>
             )}

@@ -45,7 +45,8 @@ const PaginationBox = ({ totalPages, currentPageVal, setCurrentPageVal, valuePag
     }
 
     const setValPageLengthOnSelect = (val) => {
-        setValuePageLength(val)
+        setValuePageLength(val);
+        setCurrentPageVal(1);
     }
 
     return <div className='pagination-box'>
