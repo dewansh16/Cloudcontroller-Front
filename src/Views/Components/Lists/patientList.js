@@ -1,16 +1,20 @@
 import React, { useEffect, useRef } from "react";
+
 import { motion } from "framer-motion";
 import { io } from "socket.io-client";
 import { InfluxDB } from "@influxdata/influxdb-client";
 import { isJsonString } from "../../../Utils/utils";
 
 import { Row, Col, Divider, Grid, Tooltip } from "antd";
+
 import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
 import ChartsBlock from "./listComponent/chartsBlock";
 import { Button } from "../../../Theme/Components/Button/button";
-const { useBreakpoint } = Grid;
 
+import { arrDataChart } from "../../arrayChart";
+
+const { useBreakpoint } = Grid;
 
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
@@ -74,60 +78,6 @@ const PatientListItem = (props) => {
     const activeTheme = isElementClicked ? activeThemeColor : listThemeColor;
 
     const [isChartSectionVisible, setChartSectionVisibility] = React.useState(false);
-
-    const arrDataChart = [
-        {
-            _key: 'temp',
-            name: "Temperature",
-            icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
-            val: 0,
-            color: Colors.purple,
-            trendData: []
-        },
-        {
-            _key: 'spo2',
-            name: "SPO2",
-            icon: Icons.o2({ Style: { color: Colors.green } }),
-            val: 0,
-            color: Colors.green,
-            trendData: []
-        },
-        {
-            _key: 'ecg_hr',
-            name: "Heart Rate",
-            icon:  Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
-            val: 0,
-            color: Colors.darkPink,
-            trendData: []
-        },
-        {
-            _key: 'ecg_rr',
-            name: "Respiration Rate",
-            icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
-            val: 0,
-            color: Colors.orange,
-            trendData: []
-        },
-        {
-            _key: "blood_pressuer",
-            name: "Blood Pressure",
-            icon: Icons.bloodPressure({ Style: { color: Colors.darkPurple, transform: 'scale(0.75)' } }),
-            val: 0,
-            val_bpd: 0,
-            color: Colors.darkPurple,
-            trendData: []
-        },
-        {
-            _key: 'weight',
-            name: "Weight",
-            icon: Icons.bpIcon({
-                Style: { color: Colors.yellow, fontSize: "24px" },
-            }),
-            val: 0,
-            color: Colors.yellow,
-            trendData: []
-        },
-    ]
 
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
 
@@ -205,13 +155,13 @@ const PatientListItem = (props) => {
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        // const timeInterval = setInterval(() => {
-        //     getDataSensorFromInfluxDB();
-        // }, 10000);
+        const timeInterval = setInterval(() => {
+            getDataSensorFromInfluxDB();
+        }, 10000);
 
-        // return () => {
-        //     clearInterval(timeInterval);
-        // }
+        return () => {
+            clearInterval(timeInterval);
+        }
     }, [props.dataFilterOnHeader]);
 
     // React.useEffect(() => {

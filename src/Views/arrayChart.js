@@ -1,5 +1,5 @@
-import Colors from "../../Theme/Colors/colors";
-import Icons from "../../Utils/iconMap";
+import Colors from "../Theme/Colors/colors";
+import Icons from "../Utils/iconMap";
 
 export const arrDataChart = [
     {

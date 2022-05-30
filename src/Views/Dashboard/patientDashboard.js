@@ -23,7 +23,6 @@ import NotesSection from "../PatientDetails/components/notesSection";
 import TrendTimeSelector from "../PatientIcu/components/trendTimeSelector";
 import getAge from "../../Utils/getAge";
 
-import { dataFake } from './constant';
 import patientApi from "../../Apis/patientApis";
 import { UserStore } from "../../Stores/userStore";
 

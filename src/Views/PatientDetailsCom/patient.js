@@ -6,6 +6,7 @@ import { isJsonString } from "../../Utils/utils";
 
 import { Col, Row, Tabs, notification } from "antd";
 import { Button } from "../../Theme/Components/Button/button";
+import { arrDataChart } from "../arrayChart";
 
 import alertApi from "../../Apis/alertApis";
 import patientApi from "../../Apis/patientApis";
@@ -42,62 +43,6 @@ function GetPatientOTP(pid, setOtp, setOtpLoading, callback = () => { }) {
 }
 
 function PatientParticular(props) {
-    const arrDataChart = [
-        {
-            _key: 'temp',
-            name: "Temperature",
-            icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
-            val: 0,
-            color: Colors.purple,
-            trendData: []
-        },
-        {
-            _key: 'spo2',
-            name: "SPO2",
-            icon: Icons.o2({ Style: { color: Colors.green } }),
-            val: 0,
-            color: Colors.green,
-            trendData: []
-        },
-        {
-            _key: 'ecg_hr',
-            name: "Heart Rate",
-            icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
-            val: 0,
-            color: Colors.darkPink,
-            trendData: []
-        },
-        {
-            _key: 'ecg_rr',
-            name: "Respiration Rate",
-            icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
-            val: 0,
-            color: Colors.orange,
-            trendData: []
-        },
-        {
-            _key: "blood_pressuer",
-            name: "Blood Pressure",
-            icon: Icons.bpIcon({
-                Style: { color: Colors.darkPurple, fontSize: "24px" },
-            }),
-            val: 0,
-            val_bpd: 0,
-            color: Colors.darkPurple,
-            trendData: []
-        },
-        {
-            _key: 'weight',
-            name: "Weight",
-            icon: Icons.bpIcon({
-                Style: { color: Colors.yellow, fontSize: "24px" },
-            }),
-            val: 0,
-            color: Colors.yellow,
-            trendData: []
-        },
-    ]
-
     const [chartBlockData, setChartBlockData] = React.useState([]);
 
     const processDataForSensor = (key, newArrChart, chart) => {
@@ -172,16 +117,15 @@ function PatientParticular(props) {
     };
 
     useEffect(() => {
-        // setChartBlockData(chartBlockData);
         getDataSensorFromInfluxDB();
 
-        // const timeInterval = setInterval(() => {
-        //     getDataSensorFromInfluxDB();
-        // }, 10000);
+        const timeInterval = setInterval(() => {
+            getDataSensorFromInfluxDB();
+        }, 10000);
 
-        // return () => {
-        //     clearInterval(timeInterval);
-        // }
+        return () => {
+            clearInterval(timeInterval);
+        }
     }, [props.patient.patientDetails?.demographic_map.pid]);
 
     const data = props.patient.patientDetails;

@@ -1813,8 +1813,6 @@ function BillingModule() {
         return dayCount
     }
 
-    console.log("patchArray", patchArray);
-
     const checkTotalNumberDateHaveDataFromInflux = (startDate = "", endDate = "", sensorType = "", patch) => {
         const start = new Date(startDate);
         const end = new Date(endDate);
