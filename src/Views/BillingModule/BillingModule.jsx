@@ -25,6 +25,7 @@ import {
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import moment from "moment";
+import { InfluxDB } from "@influxdata/influxdb-client";
 
 import { UserStore } from "../../Stores/userStore";
 
@@ -81,6 +82,7 @@ const columns = [
 
 let clockCounter = null;
 let timeCount = 0;
+let currentIdTimerClockActive = null;
 
 function BillingModule() {
     const pid = useParams().pid;
@@ -258,7 +260,10 @@ function BillingModule() {
                         <CloseOutlined />
                     </CusBtn>
                 </div>
-                <div style={{ fontSize: "1.5rem", textAlign: "center" }}>Add Task</div>
+                <div style={{ fontSize: "1.5rem", textAlign: "center" }}>
+                    Add Task
+                    <p id="add-task-timer"></p>
+                </div>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <div style={{ width: "17.7%" }}>Date</div>
                     <DatePicker onChange={handleAddTaskDateChange} />
@@ -278,9 +283,13 @@ function BillingModule() {
                 <CusBtn
                     className="primary"
                     onClick={() => {
+                        let itemTmp = {}
+                        itemTmp.task_time_spend = timeCount;
+                        timeCount = 0;
+                        stopCountTimer();
                         setTasksLoadingState(true);
                         setAddTaskState(false);
-                        callUpdateBillingTasks(taskCodeActive);
+                        callUpdateBillingTasks(taskCodeActive, itemTmp);
                     }}
                 >
                     Task completed
@@ -320,29 +329,39 @@ function BillingModule() {
             });
 
     }
+    const renderTimeDisplay = (timeCount) => {
+        let hours = Math.floor(timeCount / 3600)
+        let minutes = Math.floor(timeCount / 60) % 60
+        let seconds = timeCount % 60
+        let timeDs = [hours, minutes, seconds]
+            .map(v => v < 10 ? "0" + v : v)
+            .filter((v, i) => v !== "00" || i > 0)
+            .join(":")
+        return timeDs;    
+    }
     const startCountTimer = (elementId) => {
         clockCounter = setInterval(function () {
             timeCount = timeCount + 1;
-            let hours = Math.floor(timeCount / 3600)
-            let minutes = Math.floor(timeCount / 60) % 60
-            let seconds = timeCount % 60
-            let timeDs = [hours, minutes, seconds]
-                .map(v => v < 10 ? "0" + v : v)
-                .filter((v, i) => v !== "00" || i > 0)
-                .join(":")
+            let timeDs = renderTimeDisplay(timeCount);
             document.getElementById(elementId).innerText = timeDs;
         }, 1000);
     }
 
     const renderTimerClock = (item, cptCode) => {
-        console.log("item", item);
         const elementId = `task-${cptCode}-timer`;
-        if (!timerTask) {
+        if (!timerTask || item.task_id != currentIdTimerClockActive) {
             return (
                 <CusBtn
                     onClick={() => {
+                        if(cptCode == CPT_CODE.CPT_99457){
+                            if(document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)){
+                                document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "none";
+                            }
+                            currentIdTimerClockActive = item.task_id;
+                        }
                         startCountTimer(elementId);
                         setTimerTask(true);
+                        
                     }}
                     className="primary"
                 >
@@ -354,11 +373,16 @@ function BillingModule() {
                 <div className="task-timer-wrapper" style={{ display: "flex", alignItems: "center" }}>
                     <CusBtn
                         onClick={() => {
-                            item.task_time_spent = Math.floor(timeCount / 60);
+                            item.task_time_spend += timeCount;
                             timeCount = 0;
                             stopCountTimer();
                             setTimerTask(false);
                             callUpdateBillingTasks(cptCode, item)
+                            if(cptCode == CPT_CODE.CPT_99457){
+                                if(document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)){
+                                    document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "initial";
+                                }
+                            }
                         }}
                         className="primary"
                     >
@@ -583,7 +607,7 @@ function BillingModule() {
                     setSecondTwentyTasks(tempSecondTwentyTasks);
 
                     setFirstTotalTime(firstTotalTime);
-                    setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
+                    setFirstTotalTimeDisplay(firstTotalTime);
 
                     if (firstTotalTime === 1200) {
                         setTaskCodeActive("99458");
@@ -725,7 +749,7 @@ function BillingModule() {
                     setSecondTwentyTasks(tempSecondTwentyTasks);
 
                     setFirstTotalTime(firstTotalTime);
-                    setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
+                    setFirstTotalTimeDisplay(firstTotalTime);
 
                     if (firstTotalTime >= 1200) {
                         setTaskCodeActive("99458");
@@ -868,7 +892,7 @@ function BillingModule() {
                     setSecondTwentyTasks(tempSecondTwentyTasks);
 
                     setFirstTotalTime(firstTotalTime);
-                    setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
+                    setFirstTotalTimeDisplay(firstTotalTime);
 
                     if (firstTotalTime === 1200) {
                         setTaskCodeActive(CPT_CODE.CPT_99458);
@@ -919,7 +943,8 @@ function BillingModule() {
     const getTotalDayMonitored = () => {
         let result = 0;
         patchArray.map(item => {
-            result = result + getTotalNumberDay(item);
+            const totalDay = item?.totalDay || 0;
+            result = result + totalDay;
         })
         return result;
     }
@@ -1127,12 +1152,22 @@ function BillingModule() {
             .then((res) => {
                 var tempFirstTwentyTasks = [];
                 var tempSecondTwentyTasks = [];
-
+                let tmpTotalTime = 0;
                 res.data.response.billingData.map(
                     (item) => {
                         if (item.code == CPT_CODE.CPT_99457) {
                             tempFirstTwentyTasks = JSON.parse(item.params);
                             if (!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
+                            if (tempFirstTwentyTasks.length > 0) {
+                                tempFirstTwentyTasks.map(item => {
+                                    if (item.task_time_spend) {
+                                        tmpTotalTime += item.task_time_spend;
+                                    }
+                                })
+                            }
+                            setFirstTwentyTasks(tempFirstTwentyTasks);
+                            setFirstTotalTime(tmpTotalTime);
+                            setFirstTotalTimeDisplay(tmpTotalTime);
                         }
 
                         if (item.code == CPT_CODE.CPT_99458) {
@@ -1143,7 +1178,7 @@ function BillingModule() {
                 );
 
 
-                setFirstTwentyTasks(tempFirstTwentyTasks);
+                
                 setSecondTwentyTasks(tempSecondTwentyTasks);
             })
     }
@@ -1175,7 +1210,7 @@ function BillingModule() {
                         task_id: item.task_id,
                         staff_name: item.staff_name,
                         task_note: item.task_note,
-                        task_time_spent: item.task_time_spent
+                        task_time_spend: item.task_time_spend
                     }
                 } else {
                     updateData = {
@@ -1185,7 +1220,8 @@ function BillingModule() {
                         billing_id: billingId,
                         task_date: taskDateVal,
                         staff_name: taskNameVal,
-                        task_note: taskNoteVal
+                        task_note: taskNoteVal,
+                        task_time_spend: item.task_time_spend
                     }
                 }
 
@@ -1215,7 +1251,8 @@ function BillingModule() {
                             add_task_id: date.getTime(),
                             add_task_date: taskDateVal,
                             add_task_staff_name: taskNameVal,
-                            add_task_note: taskNoteVal
+                            add_task_note: taskNoteVal,
+                            task_time_spend: item.task_time_spend
                         }
                     )
                     .then((res) => {
@@ -1380,8 +1417,6 @@ function BillingModule() {
 
         }
 
-        console.log("FINAL JSON : ", temp)
-
         billingApi.deleteBillingTask({
             "pid": pid,
             "code_tasks": [
@@ -1438,6 +1473,26 @@ function BillingModule() {
                 console.log(err);
             });
     }
+
+    const shortTypeQueryOfSensor = (patchType) => {
+        switch (patchType) {
+            case "temperature":
+                return "temp"
+            case "digital":
+                return "weight"
+            case "spo2":
+                return "spo2"
+            case "ecg":
+                return "ecg"
+            case "alphamed":
+                return "alphamed"
+            case "ihealth":
+                return "ihealth"
+
+            default:
+                break;
+        }
+    };
 
     useEffect(() => {
         var billDate = new Date();
@@ -1529,7 +1584,7 @@ function BillingModule() {
                                             firstTotalTime += item.task_time_spend;
                                         }
                                     })
-                                    firstTotalTime = firstTotalTime * 60;
+                                    firstTotalTime = firstTotalTime;
                                 }
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
@@ -1575,6 +1630,29 @@ function BillingModule() {
                     setPatchLoading(false);
 
                     if (res.data.response.patchData) {
+                        res.data.response.patchData?.forEach((patch) => {
+                            const startDate = getFirstDateMonitored(patch) || "";
+                            const endDate = getLastDateMonitored(patch) || "";
+                            const typeQuery = shortTypeQueryOfSensor(patch["patches.patch_type"]);
+
+                            let arrKeyChild = [];
+                            if (typeQuery === "alphamed") {
+                                arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
+                            } else if (typeQuery === "ihealth") {
+                                arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
+                            }
+
+                            if (!!startDate && !!endDate && !!typeQuery) {
+                                if (arrKeyChild?.length > 0) {
+                                    arrKeyChild.forEach((itemKey) => {
+                                        checkTotalNumberDateHaveDataFromInflux(startDate, endDate, itemKey, patch);
+                                    })
+                                } else {
+                                    checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
+                                }
+                            }
+                        })
+
                         setPatchArray(
                             res.data.response.patchData
                         );
@@ -1590,7 +1668,7 @@ function BillingModule() {
 
                     setFirstTotalTime(firstTotalTime);
                     setSecondTotalTime(secondTotalTime);
-                    setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
+                    setFirstTotalTimeDisplay(firstTotalTime);
                     if (firstTotalTime >= 1200) {
                         setTaskCodeActive(CPT_CODE.CPT_99458);
                     } else {
@@ -1748,6 +1826,54 @@ function BillingModule() {
             value: 12
         },
     ];
+
+    const numberOfNightsBetweenDates = (start, end) => {
+        let dayCount = 0;
+        while (end > start) {
+            dayCount++;
+            start.setDate(start.getDate() + 1);
+        };
+
+        return dayCount
+    }
+
+    console.log("patchArray", patchArray);
+
+    const checkTotalNumberDateHaveDataFromInflux = (startDate = "", endDate = "", sensorType = "", patch) => {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
+
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+
+        const query = `from(bucket: "emr_dev")
+                |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
+                |> filter(fn: (r) => r["_measurement"] == "patient0f32e7d0-fe65-4d8b-894f-a5be26484ff3_${sensorType}")
+                |> yield(name: "mean")
+            `
+
+        const arrDateQuery = [];
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const o = tableMeta.toObject(row);
+                let time = new Date(o._time);
+                time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
+                if (!arrDateQuery.includes(time)) {
+                    arrDateQuery.push(time);
+                }
+            },
+            error(error) {
+                console.log('ERROR', patch)
+            },
+            complete() {
+                patch.totalDay = arrDateQuery?.length;
+                patch.datesInflux = arrDateQuery;
+            },
+        })
+    };
 
     return rightSideLoading ? (
         <div
@@ -1929,7 +2055,7 @@ function BillingModule() {
                                             : null
                                     }
                                 ></div>
-                                <div className="bm-header-below">{`${firstTotalTimeDisplay} mins monitored`}</div>
+                                <div className="bm-header-below">{`${Math.floor(firstTotalTimeDisplay / 60)} mins monitored`}</div>
                             </div>
                         </div>
                         <div className="bm-cptcode-container">
@@ -2510,7 +2636,7 @@ function BillingModule() {
                                 <div className="bm-item-header" style={{ width: "15%" }}>Last Date Monitored</div>
                                 <div className="bm-item-header" style={{ width: "13%" }}>Total Number Of Day</div>
                             </div>
-                            <div style={{ overflowY: "scroll", height: "70%" }}>
+                            <div style={{ overflowY: "scroll", height: "70%", marginRight: '-6px' }}>
                                 {patchArray.length === 0 ? (
                                     <div
                                         style={{
@@ -2526,46 +2652,41 @@ function BillingModule() {
                                         No Associated Devices
                                     </div>
                                 ) : (
-                                    <Collapse expandIconPosition="right">
+                                    <>
                                         {patchArray.map((item, index) => (
-                                            <Panel
-                                                header={
-                                                    <div
-                                                        style={{
-                                                            width: "100%",
-                                                            display: "flex",
-                                                            alignItems: "center",
-                                                            height: "40px",
-                                                            fontSize: "1rem"
-                                                        }}
-                                                    >
-                                                        <div className="bm-item-body" style={{ width: "20%" }}>
-                                                            {item["patches.patch_mac"]}
-                                                        </div>
-                                                        <div className="bm-item-body" style={{ width: "20%" }}>
-                                                            {item["patches.patch_serial"]}
-                                                        </div>
-                                                        <div className="bm-item-body" style={{ width: "17%" }}>
-                                                            {item["patches.patch_type"]}
-                                                        </div>
-                                                        <div className="bm-item-body" style={{ width: "15%" }}>
-                                                            {getFirstDateMonitored(item)}
-                                                        </div>
-                                                        <div className="bm-item-body" style={{ width: "15%" }}>
-                                                            {getLastDateMonitored(item)}
-                                                        </div>
-                                                        <div className="bm-item-body" style={{ width: "13%" }}>
-                                                            {getTotalNumberDay(item)}
-                                                        </div>
-                                                    </div>
-                                                }
+                                            <div
                                                 key={index}
-                                                style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
+                                                style={{
+                                                    width: "100%",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    height: "55px",
+                                                    fontSize: "1rem",
+                                                    background: "#ffb300c2",
+                                                    margin: "0.5% 0%"
+                                                }}
                                             >
-
-                                            </Panel>
+                                                <div className="bm-item-body" style={{ width: "20%" }}>
+                                                    {item["patches.patch_mac"]}
+                                                </div>
+                                                <div className="bm-item-body" style={{ width: "20%" }}>
+                                                    {item["patches.patch_serial"]}
+                                                </div>
+                                                <div className="bm-item-body" style={{ width: "17%" }}>
+                                                    {item["patches.patch_type"]}
+                                                </div>
+                                                <div className="bm-item-body" style={{ width: "15%" }}>
+                                                    {getFirstDateMonitored(item)}
+                                                </div>
+                                                <div className="bm-item-body" style={{ width: "15%" }}>
+                                                    {getLastDateMonitored(item)}
+                                                </div>
+                                                <div className="bm-item-body" style={{ width: "13%" }}>
+                                                    {item?.totalDay || 0}
+                                                </div>
+                                            </div>
                                         ))}
-                                    </Collapse>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -2652,7 +2773,7 @@ function BillingModule() {
                                     </div>
                                 ) : (
                                     <div style={{ fontSize: "1.2rem" }}>
-                                        {`CPT code: 99457 has not been enabled yet`}
+                                        {``}
                                     </div>
                                 )}
                                 <div
@@ -2667,16 +2788,16 @@ function BillingModule() {
                                         <div
                                             className="bm-sensor-monitored-bar-two"
                                             style={{
-                                                width: `${(firstTotalTimeDisplay / 20) * 100 > 100 ? 100 : (firstTotalTimeDisplay / 20) * 100}%`,
+                                                width: `${(Math.floor(firstTotalTimeDisplay / 60) / 20) * 100 > 100 ? 100 : (Math.floor(firstTotalTimeDisplay/ 60) / 20) * 100}%`,
                                             }}
                                         ></div>
                                     </div>
                                     <div>
                                         <div style={{ fontSize: "1.2rem" }}>
-                                            {`Mins Monitored: ${firstTotalTimeDisplay}/20`}
+                                            {`Mins Monitored: ${Math.floor(firstTotalTimeDisplay / 60)}/20`}
                                         </div>
                                         <div style={{ color: "#00000085" }}>
-                                            <b>{`${20 - firstTotalTimeDisplay} mins`}</b> left to
+                                            <b>{`${20 - (Math.floor(firstTotalTimeDisplay / 60))} mins`}</b> left to
                                             enable the next CPT code.
                                         </div>
                                     </div>
@@ -2706,7 +2827,9 @@ function BillingModule() {
                                         </div>
                                         <CusBtn
                                             onClick={() => {
+                                                timeCount = 0;
                                                 setAddTaskState(true);
+                                                startCountTimer('add-task-timer');
                                             }}
                                             className="primary"
                                         >
@@ -2723,41 +2846,36 @@ function BillingModule() {
                                             <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
                                         </div>
                                         <div style={{ overflowY: "scroll", height: "70%", marginRight: "-6px" }}>
-                                            <Collapse expandIconPosition="right">
-                                                {firstTwentyTasks.map((item, index) => (
-                                                    <Panel
-                                                        header={
-                                                            <div
-                                                                style={{
-                                                                    width: "100%",
-                                                                    display: "flex",
-                                                                    alignItems: "center",
-                                                                    height: "40px",
-                                                                    fontSize: "1rem"
-                                                                }}
-                                                            >
-                                                                <div className="bm-item-body" style={{ width: "20%" }}>
-                                                                    {moment(item["task_date"]).format("YYYY-MM-DD")}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "30%" }}>
-                                                                    {item["staff_name"]}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "30%" }}>
-                                                                    {item["task_note"]}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "20%" }}>
-                                                                    {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99457)}
-                                                                </div>
-                                                            </div>
-                                                        }
-                                                        key={index}
-                                                        style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
-                                                    >
-
-                                                    </Panel>
-                                                ))}
-                                            </Collapse>
-
+                                            {firstTwentyTasks.map((item, index) => (
+                                                <div
+                                                    key={index}
+                                                    style={{
+                                                        width: "100%",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        height: "60px",
+                                                        fontSize: "1rem",
+                                                        background: "#ffb300c2",
+                                                        margin: "0.5% 0%"
+                                                    }}
+                                                >
+                                                    <div className="bm-item-body" style={{ width: "20%" }}>
+                                                        {moment(item["task_date"]).format("YYYY-MM-DD")}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "30%" }}>
+                                                        {item["staff_name"]}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "30%" }}>
+                                                        {item["task_note"]}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "20%" }}>
+                                                        <span style={{paddingRight: "10px"}} id={`item-99457-time-spent-${item.task_id}`}>
+                                                            {`${renderTimeDisplay(item['task_time_spend'])}`} 
+                                                        </span>
+                                                        {renderTimerClock(item, CPT_CODE.CPT_99457)}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
@@ -2768,7 +2886,9 @@ function BillingModule() {
                                     >
                                         <CusBtn
                                             onClick={() => {
+                                                timeCount = 0;
                                                 setAddTaskState(true);
+                                                startCountTimer('add-task-timer');
                                             }}
                                             style={{ padding: "1% 5%" }}
                                             disabled={disabledBtnAddTask(firstTwentyTasks) || firstTotalTime >= 1200 ? true : false}
@@ -2922,7 +3042,9 @@ function BillingModule() {
                                         </div>
                                         <CusBtn
                                             onClick={() => {
+                                                timeCount = 0;
                                                 setAddTaskState(true);
+                                                startCountTimer('add-task-timer')
                                             }}
                                             className="primary"
                                         >
@@ -2940,40 +3062,33 @@ function BillingModule() {
 
                                         </div>
                                         <div style={{ overflowY: "scroll", height: "70%", marginRight: "-6px" }}>
-                                            <Collapse expandIconPosition="right">
-                                                {secondTwentyTasks.map((item, index) => (
-                                                    <Panel
-                                                        header={
-                                                            <div
-                                                                style={{
-                                                                    width: "100%",
-                                                                    display: "flex",
-                                                                    alignItems: "center",
-                                                                    height: "40px",
-                                                                    fontSize: "1rem"
-                                                                }}
-                                                            >
-                                                                <div className="bm-item-body" style={{ width: "20%" }}>
-                                                                    {moment(item["task_date"]).format("YYYY-MM-DD")}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "30%" }}>
-                                                                    {item["staff_name"]}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "30%" }}>
-                                                                    {item["task_note"]}
-                                                                </div>
-                                                                <div className="bm-item-body" style={{ width: "20%" }}>
-                                                                    {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99458)}
-                                                                </div>
-                                                            </div>
-                                                        }
-                                                        key={index}
-                                                        style={{ background: "#ffb300c2", margin: "0.5% 0%" }}
-                                                    >
-
-                                                    </Panel>
-                                                ))}
-                                            </Collapse>
+                                            {secondTwentyTasks.map((item, index) => (
+                                                <div
+                                                    key={index}
+                                                    style={{
+                                                        width: "100%",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        height: "65px",
+                                                        fontSize: "1rem",
+                                                        background: "#ffb300c2",
+                                                        margin: "0.5% 0%"
+                                                    }}
+                                                >
+                                                    <div className="bm-item-body" style={{ width: "20%" }}>
+                                                        {moment(item["task_date"]).format("YYYY-MM-DD")}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "30%" }}>
+                                                        {item["staff_name"]}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "30%" }}>
+                                                        {item["task_note"]}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "20%" }}>
+                                                        {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99458)}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
@@ -3063,9 +3178,9 @@ function BillingModule() {
                         >
                             <div>
                                 <div style={{ fontSize: "1.2rem" }}>
-                                    CPT code: 99457 has not been enabled yet
+                                    CPT code: 99091 has not been enabled yet
                                 </div>
-                                <p>30 Minutes of Monitoring Each 30 days .....</p>
+                                <p>30 Minutes of Monitoring Each 30 Days without Interactive Communication</p>
                             </div>
 
                             <Row>
@@ -3120,7 +3235,7 @@ function BillingModule() {
 
                                 <Col span={12} style={{ paddingLeft: "5%" }}>
                                     <div>
-                                        
+
                                         <div style={{
                                             background: "#ddd",
                                             borderRadius: "1rem",
@@ -3131,23 +3246,23 @@ function BillingModule() {
                                             </div>
                                             <div>
                                                 <div
-                                                    style={{ 
+                                                    style={{
                                                         display: "flex",
                                                         alignItems: "center"
                                                     }}
                                                 >
-                                                    <div style={{ width: "45%"}}>Status: Active</div>
-                                                    <div style={{ width: "55%"}}>Enrollment: 25/02/21</div>
+                                                    <div style={{ width: "45%" }}>Status: Active</div>
+                                                    <div style={{ width: "55%" }}>Enrollment: 25/02/21</div>
                                                 </div>
 
                                                 <div
-                                                    style={{ 
+                                                    style={{
                                                         display: "flex",
                                                         alignItems: "center"
                                                     }}
                                                 >
-                                                    <div style={{ width: "45%"}}>Months of CMM: 2</div>
-                                                    <div style={{ width: "55%"}}>Next followup: NA</div>
+                                                    <div style={{ width: "45%" }}>Months of CMM: 2</div>
+                                                    <div style={{ width: "55%" }}>Next followup: NA</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -3167,15 +3282,15 @@ function BillingModule() {
                                                 Notes
                                             </div>
 
-                                            <div style={{ 
+                                            <div style={{
                                                 display: "flex",
                                                 padding: "1rem 0.5rem"
                                             }}>
-                                                <div style={{ width: "5%"}}>
+                                                <div style={{ width: "5%" }}>
                                                     1
                                                 </div>
                                                 <div style={{ width: "25%" }}>
-                                                    12/12/12 12:00 
+                                                    12/12/12 12:00
                                                 </div>
                                                 <div style={{ width: "50%" }}>
                                                     Note
@@ -3184,7 +3299,14 @@ function BillingModule() {
                                                     2mins
                                                 </div>
                                                 <div style={{ width: "5%" }}>
-                                                    edit
+                                                <CusBtn
+                                                    onClick={() => {
+                                                        setAddTaskState(true);
+                                                    }}
+                                                    style={{ padding: "1% 5%" }}
+                                                >
+                                                    Add
+                                                </CusBtn>
                                                 </div>
                                             </div>
                                         </div>
