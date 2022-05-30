@@ -258,7 +258,10 @@ function BillingModule() {
                         <CloseOutlined />
                     </CusBtn>
                 </div>
-                <div style={{ fontSize: "1.5rem", textAlign: "center" }}>Add Task</div>
+                <div style={{ fontSize: "1.5rem", textAlign: "center" }}>
+                    Add Task
+                    <p id="add-task-timer"></p>
+                </div>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <div style={{ width: "17.7%" }}>Date</div>
                     <DatePicker onChange={handleAddTaskDateChange} />
@@ -278,9 +281,13 @@ function BillingModule() {
                 <CusBtn
                     className="primary"
                     onClick={() => {
+                        let itemTmp = {}
+                        itemTmp.task_time_spend = timeCount;
+                        timeCount = 0;
+                        stopCountTimer();
                         setTasksLoadingState(true);
                         setAddTaskState(false);
-                        callUpdateBillingTasks(taskCodeActive);
+                        callUpdateBillingTasks(taskCodeActive, itemTmp);
                     }}
                 >
                     Task completed
@@ -320,27 +327,35 @@ function BillingModule() {
             });
 
     }
+    const renderTimeDisplay = (timeCount) => {
+        let hours = Math.floor(timeCount / 3600)
+        let minutes = Math.floor(timeCount / 60) % 60
+        let seconds = timeCount % 60
+        let timeDs = [hours, minutes, seconds]
+            .map(v => v < 10 ? "0" + v : v)
+            .filter((v, i) => v !== "00" || i > 0)
+            .join(":")
+        return timeDs;    
+    }
     const startCountTimer = (elementId) => {
         clockCounter = setInterval(function () {
             timeCount = timeCount + 1;
-            let hours = Math.floor(timeCount / 3600)
-            let minutes = Math.floor(timeCount / 60) % 60
-            let seconds = timeCount % 60
-            let timeDs = [hours, minutes, seconds]
-                .map(v => v < 10 ? "0" + v : v)
-                .filter((v, i) => v !== "00" || i > 0)
-                .join(":")
+            let timeDs = renderTimeDisplay(timeCount);
             document.getElementById(elementId).innerText = timeDs;
         }, 1000);
     }
 
     const renderTimerClock = (item, cptCode) => {
-        console.log("item", item);
         const elementId = `task-${cptCode}-timer`;
         if (!timerTask) {
             return (
                 <CusBtn
                     onClick={() => {
+                        if(cptCode == CPT_CODE.CPT_99457){
+                            if(document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)){
+                                document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "none";
+                            }
+                        }
                         startCountTimer(elementId);
                         setTimerTask(true);
                     }}
@@ -354,11 +369,16 @@ function BillingModule() {
                 <div className="task-timer-wrapper" style={{ display: "flex", alignItems: "center" }}>
                     <CusBtn
                         onClick={() => {
-                            item.task_time_spent = Math.floor(timeCount / 60);
+                            item.task_time_spend += timeCount;
                             timeCount = 0;
                             stopCountTimer();
                             setTimerTask(false);
                             callUpdateBillingTasks(cptCode, item)
+                            if(cptCode == CPT_CODE.CPT_99457){
+                                if(document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)){
+                                    document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "initial";
+                                }
+                            }
                         }}
                         className="primary"
                     >
@@ -725,7 +745,7 @@ function BillingModule() {
                     setSecondTwentyTasks(tempSecondTwentyTasks);
 
                     setFirstTotalTime(firstTotalTime);
-                    setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
+                    setFirstTotalTimeDisplay(firstTotalTime);
 
                     if (firstTotalTime >= 1200) {
                         setTaskCodeActive("99458");
@@ -868,7 +888,7 @@ function BillingModule() {
                     setSecondTwentyTasks(tempSecondTwentyTasks);
 
                     setFirstTotalTime(firstTotalTime);
-                    setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
+                    setFirstTotalTimeDisplay(firstTotalTime);
 
                     if (firstTotalTime === 1200) {
                         setTaskCodeActive(CPT_CODE.CPT_99458);
@@ -1175,7 +1195,7 @@ function BillingModule() {
                         task_id: item.task_id,
                         staff_name: item.staff_name,
                         task_note: item.task_note,
-                        task_time_spent: item.task_time_spent
+                        task_time_spend: item.task_time_spend
                     }
                 } else {
                     updateData = {
@@ -1185,7 +1205,8 @@ function BillingModule() {
                         billing_id: billingId,
                         task_date: taskDateVal,
                         staff_name: taskNameVal,
-                        task_note: taskNoteVal
+                        task_note: taskNoteVal,
+                        task_time_spend: item.task_time_spend
                     }
                 }
 
@@ -1215,7 +1236,8 @@ function BillingModule() {
                             add_task_id: date.getTime(),
                             add_task_date: taskDateVal,
                             add_task_staff_name: taskNameVal,
-                            add_task_note: taskNoteVal
+                            add_task_note: taskNoteVal,
+                            task_time_spend: item.task_time_spend
                         }
                     )
                     .then((res) => {
@@ -1529,7 +1551,7 @@ function BillingModule() {
                                             firstTotalTime += item.task_time_spend;
                                         }
                                     })
-                                    firstTotalTime = firstTotalTime * 60;
+                                    firstTotalTime = firstTotalTime;
                                 }
                             }
                             if (item.code == CPT_CODE.CPT_99458) {
@@ -1590,7 +1612,7 @@ function BillingModule() {
 
                     setFirstTotalTime(firstTotalTime);
                     setSecondTotalTime(secondTotalTime);
-                    setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
+                    setFirstTotalTimeDisplay(firstTotalTime);
                     if (firstTotalTime >= 1200) {
                         setTaskCodeActive(CPT_CODE.CPT_99458);
                     } else {
@@ -1929,7 +1951,7 @@ function BillingModule() {
                                             : null
                                     }
                                 ></div>
-                                <div className="bm-header-below">{`${firstTotalTimeDisplay} mins monitored`}</div>
+                                <div className="bm-header-below">{`${Math.floor(firstTotalTimeDisplay / 60)} mins monitored`}</div>
                             </div>
                         </div>
                         <div className="bm-cptcode-container">
@@ -2652,7 +2674,7 @@ function BillingModule() {
                                     </div>
                                 ) : (
                                     <div style={{ fontSize: "1.2rem" }}>
-                                        {`CPT code: 99457 has not been enabled yet`}
+                                        {``}
                                     </div>
                                 )}
                                 <div
@@ -2667,16 +2689,16 @@ function BillingModule() {
                                         <div
                                             className="bm-sensor-monitored-bar-two"
                                             style={{
-                                                width: `${(firstTotalTimeDisplay / 20) * 100 > 100 ? 100 : (firstTotalTimeDisplay / 20) * 100}%`,
+                                                width: `${(Math.floor(firstTotalTimeDisplay / 60) / 20) * 100 > 100 ? 100 : (Math.floor(firstTotalTimeDisplay/ 60) / 20) * 100}%`,
                                             }}
                                         ></div>
                                     </div>
                                     <div>
                                         <div style={{ fontSize: "1.2rem" }}>
-                                            {`Mins Monitored: ${firstTotalTimeDisplay}/20`}
+                                            {`Mins Monitored: ${Math.floor(firstTotalTimeDisplay / 60)}/20`}
                                         </div>
                                         <div style={{ color: "#00000085" }}>
-                                            <b>{`${20 - firstTotalTimeDisplay} mins`}</b> left to
+                                            <b>{`${20 - (Math.floor(firstTotalTimeDisplay / 60))} mins`}</b> left to
                                             enable the next CPT code.
                                         </div>
                                     </div>
@@ -2706,7 +2728,9 @@ function BillingModule() {
                                         </div>
                                         <CusBtn
                                             onClick={() => {
+                                                timeCount = 0;
                                                 setAddTaskState(true);
+                                                startCountTimer('add-task-timer');
                                             }}
                                             className="primary"
                                         >
@@ -2746,7 +2770,10 @@ function BillingModule() {
                                                                     {item["task_note"]}
                                                                 </div>
                                                                 <div className="bm-item-body" style={{ width: "20%" }}>
-                                                                    {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99457)}
+                                                                    <span style={{paddingRight: "10px"}} id={`item-99457-time-spent-${item.task_id}`}>
+                                                                        {`${renderTimeDisplay(item['task_time_spend'])}`} 
+                                                                    </span>
+                                                                    {renderTimerClock(item, CPT_CODE.CPT_99457)}
                                                                 </div>
                                                             </div>
                                                         }
@@ -2922,7 +2949,9 @@ function BillingModule() {
                                         </div>
                                         <CusBtn
                                             onClick={() => {
+                                                timeCount = 0;
                                                 setAddTaskState(true);
+                                                startCountTimer('add-task-timer')
                                             }}
                                             className="primary"
                                         >
@@ -3063,9 +3092,9 @@ function BillingModule() {
                         >
                             <div>
                                 <div style={{ fontSize: "1.2rem" }}>
-                                    CPT code: 99457 has not been enabled yet
+                                    CPT code: 99091 has not been enabled yet
                                 </div>
-                                <p>30 Minutes of Monitoring Each 30 days .....</p>
+                                <p>30 Minutes of Monitoring Each 30 Days without Interactive Communication</p>
                             </div>
 
                             <Row>
@@ -3184,7 +3213,14 @@ function BillingModule() {
                                                     2mins
                                                 </div>
                                                 <div style={{ width: "5%" }}>
-                                                    edit
+                                                <CusBtn
+                                                    onClick={() => {
+                                                        setAddTaskState(true);
+                                                    }}
+                                                    style={{ padding: "1% 5%" }}
+                                                >
+                                                    Add
+                                                </CusBtn>
                                                 </div>
                                             </div>
                                         </div>
