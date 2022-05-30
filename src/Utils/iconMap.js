@@ -33,6 +33,9 @@ import UploadNote from "../Assets/Icons/uploadNote";
 import GreenDotIcon from "../Assets/Icons/greenDotIcon";
 import RedDotIcon from "../Assets/Icons/redDotIcon";
 import LocationTag from "../Assets/Icons/locationTag";
+import BloodPressure from "../Assets/Icons/bloodPressure";
+import HouseIcon from "../Assets/Icons/houseIcon";
+
 import {
   TeamOutlined,
   AppstoreAddOutlined,
@@ -124,6 +127,12 @@ const Icons = {
   ),
   heroIcon: ({ Style: style, ...rest }) => (
     <Icon component={Hero} style={style} {...rest} />
+  ),
+  bloodPressure: ({ Style: style, ...rest }) => (
+    <Icon component={BloodPressure} style={style} {...rest} />
+  ),
+  houseIcon: ({ Style: style, ...rest }) => (
+    <Icon component={HouseIcon} style={style} {...rest} />
   ),
 
   // motion icons

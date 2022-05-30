@@ -748,7 +748,7 @@ export default function PatientDetails(props) {
                                                     >
                                                         Summary
                                                     </Buttons>
-                                                    <Buttons
+                                                    {/* <Buttons
                                                         style={
                                                             activeTab === "quickInfo"
                                                                 ? activeButtonStyle
@@ -760,7 +760,7 @@ export default function PatientDetails(props) {
                                                         type="text"
                                                     >
                                                         Trends
-                                                    </Buttons>
+                                                    </Buttons> */}
                                                     <Buttons
                                                         style={
                                                             activeTab === "liveMonitor"
