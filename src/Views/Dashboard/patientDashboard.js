@@ -228,10 +228,9 @@ export default function PatientDashboard(props) {
     // });
 
     const timeIntervalOptions = [
-        { name: "12 Hours", val: "12h" },
         { name: "24 Hours", val: "24h" },
-        { name: "2 days", val: "2d" },
         { name: "7 Days", val: "7d" },
+        { name: "14 Days", val: "14d" },
         { name: "30 Days", val: "30d" },
     ];
 
@@ -320,7 +319,10 @@ export default function PatientDashboard(props) {
                 setPatient({ isLoading: false, list: data });
                 // filterBasedonPatientType(data);
                 setPatientList(data);
-                props.location.state.dataFilterHeader = null;
+
+                if (props.location.state?.dataFilterHeader) {
+                    props.location.state.dataFilterHeader = null;
+                }
             })
             .catch((err) => {
                 setPatient({ isLoading: false });
@@ -375,6 +377,15 @@ export default function PatientDashboard(props) {
             valDuration,
         };
     }, [currentPageVal, valuePageLength, valSearch, valDuration]);
+
+    const onSelectValDuration = (val) => {
+        setValDuration(val);
+        setPatient({ isLoading: true });
+
+        setTimeout(() => {
+            setPatient({ isLoading: false });
+        }, 3000);
+    };
 
     return (
         <>
@@ -451,7 +462,8 @@ export default function PatientDashboard(props) {
                         <TrendTimeSelector
                             timeIntervalOptions={timeIntervalOptions}
                             valDuration={valDuration}
-                            setValDuration={setValDuration}
+                            // setValDuration={setValDuration}
+                            onSelectValDuration={onSelectValDuration}
                         />
                     </>
                 }

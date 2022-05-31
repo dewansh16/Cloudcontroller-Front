@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Table } from "antd";
 import { InfluxDB } from "@influxdata/influxdb-client";
+import { isJsonString } from "../../../Utils/utils";
 
 import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
 import VitalGraphs from "./vitalGraphs.patientJourney";
 
-// import { arrDataChart } from "../../arrayChart";
-
 import "./vitals.patientJourney.css";
 
-function Vitals({ activeStep, wardArray, patient, pid }) {
-    // console.log("Vitals", arrDataChart);
+function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     const [stepArray, setStepArray] = useState(wardArray);
 
     useEffect(() => {
@@ -398,16 +396,17 @@ function Vitals({ activeStep, wardArray, patient, pid }) {
         const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: -48h)
+                |> range(start: -${valDuration})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${key}")
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
+        let val_bpd = 0;
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 if (key === "alphamed_bpd" || key === "ihealth_bpd") {
-                    chart.val_bpd = dataQueryInFlux?._value;
+                    val_bpd = dataQueryInFlux?._value;
                 } else {
                     let value = dataQueryInFlux?._value || 0;
                     if (key === "weight") {
@@ -421,12 +420,13 @@ function Vitals({ activeStep, wardArray, patient, pid }) {
                 console.log('nFinished ERROR')
             },
             complete() {
-                // console.log('nFinished SUCCESS');
-                if (key !== "alphamed_bpd" && key !== "ihealth_bpd") {
+                if ((key !== "alphamed_bpd" && key !== "ihealth_bpd")) {
                     chart.trendData = arrayRes || [];
                     chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-                    setChartBlockData([...newArrChart]);
+                } else {
+                    chart.val_bpd = val_bpd;
                 }
+                setChartBlockData([...newArrChart]);
             },
         })
     }
@@ -434,10 +434,10 @@ function Vitals({ activeStep, wardArray, patient, pid }) {
     const getDataSensorFromInfluxDB = () => {
         let associatedList = [];
 
-        // const isString = isJsonString(props?.data?.demographic_map?.associated_list);
-        // if (isString) {
-        //     associatedList = JSON.parse(props?.data?.demographic_map?.associated_list);
-        // }
+        const isString = isJsonString(patient?.demographic_map?.associated_list);
+        if (isString) {
+            associatedList = JSON.parse(patient?.demographic_map?.associated_list);
+        }
 
         const newArrChart = [...arrDataChart];
         for (let index = 0; index < newArrChart.length; index++) {
@@ -461,85 +461,18 @@ function Vitals({ activeStep, wardArray, patient, pid }) {
         }
     };
 
-    // useEffect(() => {
-    //     getDataSensorFromInfluxDB();
+    useEffect(() => {
+        // getDataSensorFromInfluxDB();
 
-    //     const timeInterval = setInterval(() => {
-    //         getDataSensorFromInfluxDB();
-    //     }, 10000);
+        // const timeInterval = setInterval(() => {
+        //     getDataSensorFromInfluxDB();
+        // }, 10000);
 
-    //     return () => {
-    //         clearInterval(timeInterval);
-    //     }
-    // }, [props.dataFilterOnHeader]);
+        // return () => {
+        //     clearInterval(timeInterval);
+        // }
+    }, [pid]);
     
-    // React.useEffect(() => {
-    //     const dummyBPData = patient.trend_map[1]?.temp?.map((item) => {
-    //         return {
-    //             date: item.date,
-    //             value: 50 + Math.floor(Math.random() * 30),
-    //             // value: item.value,
-    //         };
-    //     });
-    //     setChartBlockData([
-    //         {
-    //             name: "Temperature",
-    //             icon: Icons.thermometerIcon({
-    //                 Style: { color: Colors.purple },
-    //             }),
-    //             val:
-    //                 parseInt(patient.ews_map?.temp) === -1 ? "NA" : patient.ews_map?.temp,
-    //             trendData: patient.trend_map[1]?.temp?.reverse(),
-    //             color: Colors.purple,
-    //         },
-    //         {
-    //             name: "SPO2",
-    //             icon: Icons.o2({ Style: { color: Colors.green } }),
-    //             val:
-    //                 parseInt(patient.ews_map?.spo2) === -1 ? "NA" : patient.ews_map?.spo2,
-    //             trendData: patient.trend_map[0]?.spo2?.reverse(),
-    //             color: Colors.green,
-    //         },
-    //         {
-    //             name: "Heart Rate",
-    //             icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
-    //             val: parseInt(patient.ews_map?.hr) === -1 ? "NA" : patient.ews_map?.hr,
-    //             trendData: patient.trend_map[3]?.hr?.reverse(),
-    //             color: Colors.darkPink,
-    //         },
-    //         {
-    //             name: "Respiration Rate",
-    //             icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
-    //             val: parseInt(patient.ews_map?.rr) === -1 ? "NA" : patient.ews_map?.rr,
-    //             trendData: patient.trend_map[2]?.rr?.reverse(),
-    //             color: Colors.orange,
-    //         },
-    //         {
-    //             name: "Blood Pressure",
-    //             icon: Icons.bpIcon({
-    //                 Style: { color: Colors.darkPurple, fontSize: "24px" },
-    //             }),
-    //             val:
-    //             parseInt(patient.ews_map?.rr) === -1
-    //               ? "NA"
-    //               : patient.ews_map?.rr,
-    //             trendData: dummyBPData,
-    //             color: Colors.darkPurple,
-    //         },
-    //         {
-    //             name: "Weight",
-    //             icon: Icons.bpIcon({
-    //                 Style: { color: Colors.yellow, fontSize: "24px" },
-    //             }),
-    //             val:
-    //             parseInt(patient.ews_map?.rr) === -1
-    //               ? "NA"
-    //               : patient.ews_map?.rr,
-    //             color: Colors.yellow,
-    //         },
-    //     ]);
-    // }, []);
-
     return (
         <div style={{ width: "100%", height: "100%" }}>
             <div className="vitals-body">

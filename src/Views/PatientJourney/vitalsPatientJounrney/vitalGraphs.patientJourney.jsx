@@ -7,10 +7,12 @@ function VitalGraphs({ item }) {
     const dataKey = "value";
 
     const toolTipConfig = {
-        Temperature: `${item.val}° F`,
-        SPO2: `${item.val} %`,
+        "Temperature": `${item.val}° F`,
+        // SPO2: `${value}`,
         "Heart Rate": `${item.val} bpm`,
         "Respiration Rate": `${item.val} bpm`,
+        "Weight": `${Math.round(item.val * 100) / 100} lbs`,
+        "Blood Pressure": `${item.val} - ${item.val_bpd} mmHg`
     };
 
     return (
@@ -47,7 +49,7 @@ function VitalGraphs({ item }) {
                                     textAlign: "center",
                                 }}
                             >
-                                {item.val}
+                                {Math.round(item.val * 100) / 100}
                             </h3>
                             <Divider style={{ margin: "0px" }} />
                             <h3
@@ -57,11 +59,11 @@ function VitalGraphs({ item }) {
                                     textAlign: "center",
                                 }}
                             >
-                                NA
+                                {Math.round(item?.val_bpd * 100) / 100}
                             </h3>
                         </div>
                     ) : (
-                        <h3 style={{ color: item.color }}>{item.val}</h3>
+                        <h3 style={{ color: item.color }}>{Math.round(item?.val * 100) / 100}</h3>
                     )}
                 </Col>
             </Tooltip>

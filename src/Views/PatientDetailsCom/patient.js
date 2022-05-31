@@ -6,7 +6,7 @@ import { isJsonString } from "../../Utils/utils";
 
 import { Col, Row, Tabs, notification } from "antd";
 import { Button } from "../../Theme/Components/Button/button";
-import { arrDataChart } from "../arrayChart";
+// import { arrDataChart } from "../arrayChart";
 
 import alertApi from "../../Apis/alertApis";
 import patientApi from "../../Apis/patientApis";
@@ -44,6 +44,61 @@ function GetPatientOTP(pid, setOtp, setOtpLoading, callback = () => { }) {
 
 function PatientParticular(props) {
     const [chartBlockData, setChartBlockData] = React.useState([]);
+    // const newArrayDataChart = [...arrDataChart];
+
+    const arrDataChart = [
+        {
+            _key: 'temp',
+            name: "Temperature",
+            icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
+            val: 0,
+            color: Colors.purple,
+            trendData: []
+        },
+        {
+            _key: 'spo2',
+            name: "SPO2",
+            icon: Icons.o2({ Style: { color: Colors.green } }),
+            val: 0,
+            color: Colors.green,
+            trendData: []
+        },
+        {
+            _key: 'ecg_hr',
+            name: "Heart Rate",
+            icon:  Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
+            val: 0,
+            color: Colors.darkPink,
+            trendData: []
+        },
+        {
+            _key: 'ecg_rr',
+            name: "Respiration Rate",
+            icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
+            val: 0,
+            color: Colors.orange,
+            trendData: []
+        },
+        {
+            _key: "blood_pressuer",
+            name: "Blood Pressure",
+            icon: Icons.bloodPressure({ Style: { color: Colors.darkPurple, transform: 'scale(0.75)' } }),
+            val: 0,
+            val_bpd: 0,
+            color: Colors.darkPurple,
+            trendData: []
+        },
+        {
+            _key: 'weight',
+            name: "Weight",
+            icon: Icons.bpIcon({
+                Style: { color: Colors.yellow, fontSize: "24px" },
+            }),
+            val: 0,
+            color: Colors.yellow,
+            trendData: []
+        },
+    ];
 
     const processDataForSensor = (key, newArrChart, chart) => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
@@ -58,16 +113,14 @@ function PatientParticular(props) {
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
+        let val_bpd = 0;
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 if (key === "alphamed_bpd" || key === "ihealth_bpd") {
-                    chart.val_bpd = dataQueryInFlux?._value;
+                    val_bpd = dataQueryInFlux?._value;
                 } else {
                     arrayRes.push({ value: dataQueryInFlux?._value || 0 });
-                    // if (arrayRes?.length > 200) {
-                    //     arrayRes.splice(0, 1);
-                    // }
                 }
             },
             error(error) {
@@ -75,13 +128,13 @@ function PatientParticular(props) {
                 console.log('nFinished ERROR')
             },
             complete() {
-                // console.log('nFinished SUCCESS');
                 if ((key !== "alphamed_bpd" && key !== "ihealth_bpd")) {
                     chart.trendData = arrayRes || [];
                     chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-
-                    setChartBlockData([...newArrChart]);
+                } else {
+                    chart.val_bpd = val_bpd;
                 }
+                setChartBlockData([...newArrChart]);
             },
         })
     }
@@ -222,7 +275,7 @@ function PatientParticular(props) {
                 return `${val} - ${val_bpd} mmHg`;
             case "weight": 
                 const lbs = val * 2.2046;
-                return `${val} kg / ${lbs.toFixed(1)} lbs`
+                return `${lbs.toFixed(1)} lbs / ${val} kg`
             default:
                 break;
         }
@@ -287,100 +340,12 @@ function PatientParticular(props) {
                                             <Col span={24} className="patientscoredata">
                                                 <p>
                                                     {renderValueByKey(itemSensor)}
-                                                    {/* {itemSensor?.val}
-                                                    {itemSensor?._key === "blood_pressuer" && (
-                                                        ` - ${itemSensor?.val_bpd}`
-                                                    )} */}
                                                 </p>
                                             </Col>
                                         </Row>
                                     </Col>
                                 )
                             })}
-                            {/* <Col span={8}>
-                                <Row>
-                                    <Col span={24} className="patientscoreHead">
-                                        <p>Heart Rate</p>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col span={24} className="patientscoredata">
-                                        <p>
-                                            0
-                                        </p>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col span={8}>
-                                <Row>
-                                    <Col span={24} className="patientscoreHead">
-                                        <p>Temp</p>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col span={24} className="patientscoredata">
-                                        <p>
-                                            0
-                                        </p>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col span={8}>
-                                <Row>
-                                    <Col span={24} className="patientscoreHead">
-                                        <p>SPO2</p>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col span={24} className="patientscoredata">
-                                        <p>
-                                            0
-                                        </p>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col span={8}>
-                                <Row>
-                                    <Col span={24} className="patientscoreHead">
-                                        <p>Respiration Rate</p>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col span={24} className="patientscoredata">
-                                        <p>
-                                            0
-                                        </p>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col span={8}>
-                                <Row>
-                                    <Col span={24} className="patientscoreHead">
-                                        <p>Pain Index</p>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col span={24} className="patientscoredata">
-                                        <p>
-                                            0
-                                        </p>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col span={8}>
-                                <Row>
-                                    <Col span={24} className="patientscoreHead">
-                                        <p>Motion</p>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col span={24} className="patientscoredata">
-                                        <p>
-                                            0
-                                        </p>
-                                    </Col>
-                                </Row>
-                            </Col> */}
                         </Row>
                     </TabPane>
 

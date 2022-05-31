@@ -583,7 +583,7 @@ export default function PatientDetails(props) {
                                             >
                                                 Alerts
                                             </Buttons>
-                                            <Buttons
+                                            {/* <Buttons
                                                 style={{ marginRight: "3%" }}
                                                 type="secondary"
                                                 onClick={() =>
@@ -605,7 +605,7 @@ export default function PatientDetails(props) {
                                                 }
                                             >
                                                 Visualizer
-                                            </Buttons>
+                                            </Buttons> */}
 
                                             <Buttons
                                                 style={{ marginRight: "3%" }}
@@ -735,7 +735,7 @@ export default function PatientDetails(props) {
                                                     >
                                                         Vitals
                                                     </Buttons>
-                                                    <Buttons
+                                                    {/* <Buttons
                                                         style={
                                                             activeTab === "summary"
                                                                 ? activeButtonStyle
@@ -747,7 +747,7 @@ export default function PatientDetails(props) {
                                                         type="text"
                                                     >
                                                         Summary
-                                                    </Buttons>
+                                                    </Buttons> */}
                                                     {/* <Buttons
                                                         style={
                                                             activeTab === "quickInfo"
@@ -786,6 +786,29 @@ export default function PatientDetails(props) {
                                                         type="text"
                                                     >
                                                         Files
+                                                    </Buttons>
+                                                    <Buttons
+                                                        style={buttonStyle}
+                                                        type="text"
+                                                        onClick={() =>
+                                                            history.push({
+                                                                pathname: `/dashboard/patient/${pid}/graphvisualizer`,
+                                                                state: {
+                                                                    name:
+                                                                        `${patient.demographic_map.title === undefined
+                                                                            ? ""
+                                                                            : patient.demographic_map.title
+                                                                        }` +
+                                                                        " " +
+                                                                        patient.demographic_map.fname +
+                                                                        " " +
+                                                                        patient.demographic_map.lname,
+                                                                    mr: patient.demographic_map.med_record,
+                                                                },
+                                                            })
+                                                        }
+                                                    >
+                                                        Visualizer
                                                     </Buttons>
                                                 </Row>
                                             </Col>
@@ -942,6 +965,7 @@ export default function PatientDetails(props) {
                                                                     refreshFileView={refreshFileView}
                                                                     summaryModal={summaryModal}
                                                                     openSummaryModal={openSummaryModal}
+                                                                    valDuration={props?.location?.state?.dataFilterHeader?.valDuration || "7d"}
                                                                 />
                                                             );
                                                     }

@@ -13,7 +13,8 @@ function WardDetails({
     patient,
     summaryModal,
     openSummaryModal,
-    pid
+    pid,
+    valDuration
 }) {
     const [stepArray, setStepArray] = useState(wardArray);
 
@@ -104,6 +105,7 @@ function WardDetails({
                                         stepArray={stepArray}
                                         wardArray={stepArray}
                                         patient={patient}
+                                        valDuration={valDuration}
                                     />
                                 </React.Fragment>
                             );

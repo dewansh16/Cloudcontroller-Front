@@ -12,12 +12,13 @@ import Icons from "../../../Utils/iconMap";
 import ChartsBlock from "./listComponent/chartsBlock";
 import { Button } from "../../../Theme/Components/Button/button";
 
-import { arrDataChart } from "../../arrayChart";
+// import { arrDataChart } from "../../arrayChart";
 
 const { useBreakpoint } = Grid;
 
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
+    // const newArrayDataChart = [...arrDataChart];
 
     const dividerColor = "black";
     const listThemeColor = "#444444";
@@ -79,6 +80,60 @@ const PatientListItem = (props) => {
 
     const [isChartSectionVisible, setChartSectionVisibility] = React.useState(false);
 
+    const arrDataChart = [
+        {
+            _key: 'temp',
+            name: "Temperature",
+            icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
+            val: 0,
+            color: Colors.purple,
+            trendData: []
+        },
+        {
+            _key: 'spo2',
+            name: "SPO2",
+            icon: Icons.o2({ Style: { color: Colors.green } }),
+            val: 0,
+            color: Colors.green,
+            trendData: []
+        },
+        {
+            _key: 'ecg_hr',
+            name: "Heart Rate",
+            icon:  Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
+            val: 0,
+            color: Colors.darkPink,
+            trendData: []
+        },
+        {
+            _key: 'ecg_rr',
+            name: "Respiration Rate",
+            icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
+            val: 0,
+            color: Colors.orange,
+            trendData: []
+        },
+        {
+            _key: "blood_pressuer",
+            name: "Blood Pressure",
+            icon: Icons.bloodPressure({ Style: { color: Colors.darkPurple, transform: 'scale(0.75)' } }),
+            val: 0,
+            val_bpd: 0,
+            color: Colors.darkPurple,
+            trendData: []
+        },
+        {
+            _key: 'weight',
+            name: "Weight",
+            icon: Icons.bpIcon({
+                Style: { color: Colors.yellow, fontSize: "24px" },
+            }),
+            val: 0,
+            color: Colors.yellow,
+            trendData: []
+        },
+    ];
+
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
 
     const processDataForSensor = (key, newArrChart, chart) => {
@@ -94,11 +149,12 @@ const PatientListItem = (props) => {
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
+        let val_bpd = 0;
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 if (key === "alphamed_bpd" || key === "ihealth_bpd") {
-                    chart.val_bpd = dataQueryInFlux?._value;
+                    val_bpd = dataQueryInFlux?._value;
                 } else {
                     let value = dataQueryInFlux?._value || 0;
                     if (key === "weight") {
@@ -112,12 +168,13 @@ const PatientListItem = (props) => {
                 console.log('nFinished ERROR')
             },
             complete() {
-                // console.log('nFinished SUCCESS');
                 if (key !== "alphamed_bpd" && key !== "ihealth_bpd") {
                     chart.trendData = arrayRes || [];
                     chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-                    setChartBlockData([...newArrChart]);
+                } else {
+                    chart.val_bpd = val_bpd;
                 }
+                setChartBlockData([...newArrChart]);
             },
         })
     }
@@ -162,7 +219,7 @@ const PatientListItem = (props) => {
         return () => {
             clearInterval(timeInterval);
         }
-    }, [props.dataFilterOnHeader]);
+    }, [props.pid, props.dataFilterOnHeader.valDuration]);
 
     // React.useEffect(() => {
     //     var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });

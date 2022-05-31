@@ -5,8 +5,8 @@ const { Option } = Select;
 
 export default function TrendTimeSelector({
     timeIntervalOptions,
-    setValDuration,
-    valDuration
+    valDuration,
+    onSelectValDuration
 }) {
     return (
         <div
@@ -24,7 +24,7 @@ export default function TrendTimeSelector({
                 </p>
             </div>
             <Select
-                onSelect={(val) => setValDuration(val)}
+                onSelect={onSelectValDuration}
                 value={valDuration}
                 style={{ fontWeight: "600", borderRadius: "6px", width: "100%" }}
                 suffixIcon={Icons.downArrowFilled({
