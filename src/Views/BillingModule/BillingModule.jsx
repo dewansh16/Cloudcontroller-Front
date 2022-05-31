@@ -82,6 +82,7 @@ const columns = [
 
 let clockCounter = null;
 let timeCount = 0;
+let currentIdTimerClockActive = null;
 
 function BillingModule() {
     const pid = useParams().pid;
@@ -348,7 +349,7 @@ function BillingModule() {
 
     const renderTimerClock = (item, cptCode) => {
         const elementId = `task-${cptCode}-timer`;
-        if (!timerTask) {
+        if (!timerTask || item.task_id != currentIdTimerClockActive) {
             return (
                 <CusBtn
                     onClick={() => {
@@ -356,9 +357,11 @@ function BillingModule() {
                             if(document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)){
                                 document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "none";
                             }
+                            currentIdTimerClockActive = item.task_id;
                         }
                         startCountTimer(elementId);
                         setTimerTask(true);
+                        
                     }}
                     className="primary"
                 >
@@ -604,7 +607,7 @@ function BillingModule() {
                     setSecondTwentyTasks(tempSecondTwentyTasks);
 
                     setFirstTotalTime(firstTotalTime);
-                    setFirstTotalTimeDisplay(Math.floor(firstTotalTime / 60));
+                    setFirstTotalTimeDisplay(firstTotalTime);
 
                     if (firstTotalTime === 1200) {
                         setTaskCodeActive("99458");
@@ -1149,12 +1152,22 @@ function BillingModule() {
             .then((res) => {
                 var tempFirstTwentyTasks = [];
                 var tempSecondTwentyTasks = [];
-
+                let tmpTotalTime = 0;
                 res.data.response.billingData.map(
                     (item) => {
                         if (item.code == CPT_CODE.CPT_99457) {
                             tempFirstTwentyTasks = JSON.parse(item.params);
                             if (!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
+                            if (tempFirstTwentyTasks.length > 0) {
+                                tempFirstTwentyTasks.map(item => {
+                                    if (item.task_time_spend) {
+                                        tmpTotalTime += item.task_time_spend;
+                                    }
+                                })
+                            }
+                            setFirstTwentyTasks(tempFirstTwentyTasks);
+                            setFirstTotalTime(tmpTotalTime);
+                            setFirstTotalTimeDisplay(tmpTotalTime);
                         }
 
                         if (item.code == CPT_CODE.CPT_99458) {
@@ -1165,7 +1178,7 @@ function BillingModule() {
                 );
 
 
-                setFirstTwentyTasks(tempFirstTwentyTasks);
+                
                 setSecondTwentyTasks(tempSecondTwentyTasks);
             })
     }
@@ -1403,8 +1416,6 @@ function BillingModule() {
             })
 
         }
-
-        console.log("FINAL JSON : ", temp)
 
         billingApi.deleteBillingTask({
             "pid": pid,
@@ -2860,7 +2871,9 @@ function BillingModule() {
                                     >
                                         <CusBtn
                                             onClick={() => {
+                                                timeCount = 0;
                                                 setAddTaskState(true);
+                                                startCountTimer('add-task-timer');
                                             }}
                                             style={{ padding: "1% 5%" }}
                                             disabled={disabledBtnAddTask(firstTwentyTasks) || firstTotalTime >= 1200 ? true : false}
