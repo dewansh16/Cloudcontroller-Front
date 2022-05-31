@@ -430,8 +430,8 @@ animation: pulse 1s infinite;
 }
 
 .btn-row-one-disabled {
-    /* pointer-events: none;
+    pointer-events: none;
     cursor: text;
     background: #c2babac4;
-    opacity: 0.5; */
+    opacity: 0.5;
 }

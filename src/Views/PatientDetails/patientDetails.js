@@ -583,7 +583,7 @@ export default function PatientDetails(props) {
                                             >
                                                 Alerts
                                             </Buttons>
-                                            <Buttons
+                                            {/* <Buttons
                                                 style={{ marginRight: "3%" }}
                                                 type="secondary"
                                                 onClick={() =>
@@ -605,7 +605,7 @@ export default function PatientDetails(props) {
                                                 }
                                             >
                                                 Visualizer
-                                            </Buttons>
+                                            </Buttons> */}
 
                                             <Buttons
                                                 style={{ marginRight: "3%" }}
@@ -735,7 +735,7 @@ export default function PatientDetails(props) {
                                                     >
                                                         Vitals
                                                     </Buttons>
-                                                    <Buttons
+                                                    {/* <Buttons
                                                         style={
                                                             activeTab === "summary"
                                                                 ? activeButtonStyle
@@ -747,7 +747,7 @@ export default function PatientDetails(props) {
                                                         type="text"
                                                     >
                                                         Summary
-                                                    </Buttons>
+                                                    </Buttons> */}
                                                     {/* <Buttons
                                                         style={
                                                             activeTab === "quickInfo"
@@ -787,7 +787,7 @@ export default function PatientDetails(props) {
                                                     >
                                                         Files
                                                     </Buttons>
-                                                    {/* <Buttons
+                                                    <Buttons
                                                         style={buttonStyle}
                                                         type="text"
                                                         onClick={() =>
@@ -809,7 +809,7 @@ export default function PatientDetails(props) {
                                                         }
                                                     >
                                                         Visualizer
-                                                    </Buttons> */}
+                                                    </Buttons>
                                                 </Row>
                                             </Col>
                                             {
