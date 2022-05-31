@@ -1968,7 +1968,7 @@ function GraphVisualizer() {
                                     <GraphAlertIcon />
                                     Alerts
                                 </div>
-                                <div className="gv-graph-action-btn" style={medState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
+                                <div className="gv-graph-action-btn btn-row-one-disabled" style={medState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
                                     setMedState(true)
                                     setAlertState(false)
                                     setPieState(false)
@@ -1981,7 +1981,7 @@ function GraphVisualizer() {
                                     <div style={{ height: '3vh', width: '0.8vw', backgroundColor: '#D7A862' }} ></div>
                                     Medicine
                                 </div>
-                                <div className="gv-graph-action-btn" style={pieState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
+                                <div className="gv-graph-action-btn btn-row-one-disabled" style={pieState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
                                     setMedState(false)
                                     setAlertState(false)
                                     setPieState(true)
@@ -1993,7 +1993,7 @@ function GraphVisualizer() {
                                     <div style={{ height: '3vh', width: '0.8vw', backgroundColor: '#0D3962' }} ></div>
                                     Motion
                                 </div>
-                                <div className="gv-graph-action-btn" style={labState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
+                                <div className="gv-graph-action-btn btn-row-one-disabled" style={labState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
                                     setMedState(false)
                                     setAlertState(false)
                                     setPieState(false)
@@ -2005,7 +2005,7 @@ function GraphVisualizer() {
                                     <div style={{ height: '3vh', width: '0.8vw', backgroundColor: '#D0859C' }} ></div>
                                     Lab Report
                                 </div>
-                                <div className="gv-graph-action-btn" style={procedureState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
+                                <div className="gv-graph-action-btn btn-row-one-disabled" style={procedureState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
                                     setMedState(false)
                                     setAlertState(false)
                                     setPieState(false)
@@ -2017,7 +2017,7 @@ function GraphVisualizer() {
                                     <div style={{ height: '3vh', width: '0.8vw', backgroundColor: '#978671' }} ></div>
                                     Procedure
                                 </div>
-                                <div className="gv-graph-action-btn" style={intakeState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
+                                <div className="gv-graph-action-btn btn-row-one-disabled" style={intakeState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
                                     setMedState(false)
                                     setAlertState(false)
                                     setPieState(false)
@@ -2029,7 +2029,7 @@ function GraphVisualizer() {
                                     <div style={{ height: '3vh', width: '0.8vw', backgroundColor: '#3F660E' }} ></div>
                                     Intake
                                 </div>
-                                <div className="gv-graph-action-btn" style={outputState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
+                                <div className="gv-graph-action-btn btn-row-one-disabled" style={outputState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
                                     setMedState(false)
                                     setAlertState(false)
                                     setPieState(false)
@@ -2042,9 +2042,40 @@ function GraphVisualizer() {
                                     Output
                                 </div>
                             </div>
+
                             <div className="gv-bottom-left-container" >
                                 <div className="gv-graph-info-container" >
                                     <div className="gv-trend-btns" >
+                                        <div onClick={() => {
+                                            var flag = true
+                                            activeTrendsArray.map((trend, index) => {
+                                                if (trend.name === 'TEMP') {
+                                                    flag = false
+                                                    var temp = activeTrendsArray
+                                                    temp.splice(index, 1)
+                                                    // console.log("SPLICED ARRAY : ", temp)
+                                                    setActiveTrendsArray(temp)
+                                                }
+                                            })
+                                            if (flag) {
+                                                var temp = activeTrendsArray
+                                                temp.push({
+                                                    name: 'TEMP',
+                                                    data: temp_data,
+                                                    color1: '#0C70A3',
+                                                    color2: '#A8CBDE',
+                                                    max: tempmaxval,
+                                                    min: tempminval,
+                                                })
+                                                setActiveTrendsArray(temp)
+                                            }
+                                            setGraphLoading(true)
+                                        }} className="trend-btn" style={
+                                            activeTrendsArray.some(e => e.name === 'TEMP') ? { border: '2px solid #0C70A3', color: '#0C70A3' } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                        } >
+                                            TEMP
+                                        </div>
+
                                         <div onClick={() => {
                                             var flag = true
                                             activeTrendsArray.map((trend, index) => {
@@ -2052,7 +2083,6 @@ function GraphVisualizer() {
                                                     flag = false
                                                     var temp = activeTrendsArray
                                                     temp.splice(index, 1)
-                                                    // console.log("SPLICED ARRAY : ", temp)
                                                     setActiveTrendsArray(temp)
                                                 }
                                             })
@@ -2066,13 +2096,17 @@ function GraphVisualizer() {
                                                     max: spo2maxval,
                                                     min: spo2minval,
                                                 })
-                                                console.log("SPO2 Pushed : ", temp)
                                                 setActiveTrendsArray(temp)
                                             }
                                             setGraphLoading(true)
-                                        }} className="trend-btn" style={
-                                            activeTrendsArray.some(e => e.name === 'SpO2') ? { border: '2px solid #FF7529', color: '#FF7529' } : { border: '1px solid #BABABA', color: '#BABABA' }
-                                        } >
+                                        }}
+                                            className="trend-btn"
+                                            style={
+                                                activeTrendsArray.some(e => e.name === 'SpO2')
+                                                    ? { border: '2px solid #FF7529', color: '#FF7529' }
+                                                    : { border: '1px solid #BABABA', color: '#BABABA' }
+                                            }
+                                        >
                                             SpO2
                                         </div>
 
@@ -2106,6 +2140,7 @@ function GraphVisualizer() {
                                             } >
                                             HR
                                         </div>
+
                                         <div onClick={() => {
                                             var flag = true
                                             activeTrendsArray.map((trend, index) => {
@@ -2135,10 +2170,11 @@ function GraphVisualizer() {
                                         } >
                                             RR
                                         </div>
-                                        <div onClick={() => {
+
+                                        {/* <div onClick={() => {
                                             var flag = true
                                             activeTrendsArray.map((trend, index) => {
-                                                if (trend.name === 'TEMP') {
+                                                if (trend.name === 'RR') {
                                                     flag = false
                                                     var temp = activeTrendsArray
                                                     temp.splice(index, 1)
@@ -2149,21 +2185,84 @@ function GraphVisualizer() {
                                             if (flag) {
                                                 var temp = activeTrendsArray
                                                 temp.push({
-                                                    name: 'TEMP',
-                                                    data: temp_data,
-                                                    color1: '#0C70A3',
-                                                    color2: '#A8CBDE',
-                                                    max: tempmaxval,
-                                                    min: tempminval,
+                                                    name: 'RR',
+                                                    data: rr_data,
+                                                    color1: '#9e00c2',
+                                                    color2: '#C4AAFD',
+                                                    max: rrmaxval,
+                                                    min: rrminval,
                                                 })
                                                 setActiveTrendsArray(temp)
                                             }
                                             setGraphLoading(true)
                                         }} className="trend-btn" style={
-                                            activeTrendsArray.some(e => e.name === 'TEMP') ? { border: '2px solid #0C70A3', color: '#0C70A3' } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                            activeTrendsArray.some(e => e.name === 'RR') ? { border: '2px solid #9e00c2', color: '#9e00c2' } : { border: '1px solid #BABABA', color: '#BABABA' }
                                         } >
-                                            TEMP
+                                            BPD
                                         </div>
+
+                                        <div onClick={() => {
+                                            var flag = true
+                                            activeTrendsArray.map((trend, index) => {
+                                                if (trend.name === 'RR') {
+                                                    flag = false
+                                                    var temp = activeTrendsArray
+                                                    temp.splice(index, 1)
+                                                    // console.log("SPLICED ARRAY : ", temp)
+                                                    setActiveTrendsArray(temp)
+                                                }
+                                            })
+                                            if (flag) {
+                                                var temp = activeTrendsArray
+                                                temp.push({
+                                                    name: 'RR',
+                                                    data: rr_data,
+                                                    color1: '#9e00c2',
+                                                    color2: '#C4AAFD',
+                                                    max: rrmaxval,
+                                                    min: rrminval,
+                                                })
+                                                setActiveTrendsArray(temp)
+                                            }
+                                            setGraphLoading(true)
+                                        }} className="trend-btn" style={
+                                            activeTrendsArray.some(e => e.name === 'RR') ? { border: '2px solid #9e00c2', color: '#9e00c2' } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                        } >
+                                            BPS
+                                        </div>
+
+                                        <div onClick={() => {
+                                            var flag = true
+                                            activeTrendsArray.map((trend, index) => {
+                                                if (trend.name === 'RR') {
+                                                    flag = false
+                                                    var temp = activeTrendsArray
+                                                    temp.splice(index, 1)
+                                                    // console.log("SPLICED ARRAY : ", temp)
+                                                    setActiveTrendsArray(temp)
+                                                }
+                                            })
+                                            if (flag) {
+                                                var temp = activeTrendsArray
+                                                temp.push({
+                                                    name: 'RR',
+                                                    data: rr_data,
+                                                    color1: '#9e00c2',
+                                                    color2: '#C4AAFD',
+                                                    max: rrmaxval,
+                                                    min: rrminval,
+                                                })
+                                                setActiveTrendsArray(temp)
+                                            }
+                                            setGraphLoading(true)
+                                        }} className="trend-btn" style={
+                                            activeTrendsArray.some(e => e.name === 'RR') ? { border: '2px solid #9e00c2', color: '#9e00c2' } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                        } >
+                                            WEI
+                                        </div> */}
+
+
+
                                         {/* <div onClick={() => {
                                             var flag = true
                                             activeTrendsArray.map((trend, index) => {
@@ -2217,8 +2316,8 @@ function GraphVisualizer() {
                                             )
                                             :
                                             (
-                                                activeTrendsArray.map((trend) => (
-                                                    <div style={{ height: `${100 / activeTrendsArray.length}%`, width: "100%", position: "relative" }} >
+                                                activeTrendsArray.map((trend, idx) => (
+                                                    <div key={`${idx}-${trend.name}`} style={{ height: `${100 / activeTrendsArray.length}%`, width: "100%", position: "relative" }} >
                                                         <div className="gv-bg-container" style={{ left: "0", top: "0" }} >
                                                             <div className="gv-graph-lable" style={{ color: trend.color1 }} >
                                                                 {trend.name}
@@ -2322,6 +2421,7 @@ function GraphVisualizer() {
                                 </div>
                             </div>
                         </div>
+
                         <div className="gv-bottom-right-container" >
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginTop: '5%', marginBottom: '5%' }} >
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.2rem' }} >

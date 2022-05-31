@@ -353,7 +353,7 @@ function BillingModule() {
             return (
                 <CusBtn
                     onClick={() => {
-                        if(cptCode == CPT_CODE.CPT_99457){
+                        if(cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458){
                             if(document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)){
                                 document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "none";
                             }
@@ -378,7 +378,7 @@ function BillingModule() {
                             stopCountTimer();
                             setTimerTask(false);
                             callUpdateBillingTasks(cptCode, item)
-                            if(cptCode == CPT_CODE.CPT_99457){
+                            if(cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458){
                                 if(document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)){
                                     document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "initial";
                                 }
@@ -1157,6 +1157,7 @@ function BillingModule() {
                     (item) => {
                         if (item.code == CPT_CODE.CPT_99457) {
                             tempFirstTwentyTasks = JSON.parse(item.params);
+                            tmpTotalTime = 0;
                             if (!isArray(tempFirstTwentyTasks)) tempFirstTwentyTasks = [];
                             if (tempFirstTwentyTasks.length > 0) {
                                 tempFirstTwentyTasks.map(item => {
@@ -1172,14 +1173,24 @@ function BillingModule() {
 
                         if (item.code == CPT_CODE.CPT_99458) {
                             tempSecondTwentyTasks = JSON.parse(item.params);
+                            tmpTotalTime = 0;
                             if (!isArray(tempSecondTwentyTasks)) tempSecondTwentyTasks = [];
+                            setSecondTwentyTasks(tempSecondTwentyTasks);
+                            if (tempSecondTwentyTasks.length > 0) {
+                                tempSecondTwentyTasks.map(item => {
+                                    if (item.task_time_spend) {
+                                        tmpTotalTime += item.task_time_spend;
+                                    }
+                                })
+                            }
+                            setSecondTotalTime(tmpTotalTime);
                         }
                     }
                 );
 
 
                 
-                setSecondTwentyTasks(tempSecondTwentyTasks);
+                
             })
     }
 
@@ -1483,11 +1494,11 @@ function BillingModule() {
             case "spo2":
                 return "spo2"
             case "ecg":
-                return "ecg"
+                return "ecg_hr"
             case "alphamed":
-                return "alphamed"
+                return "alphamed_bpd"
             case "ihealth":
-                return "ihealth"
+                return "ihealth_bpd"
 
             default:
                 break;
@@ -1635,21 +1646,8 @@ function BillingModule() {
                             const endDate = getLastDateMonitored(patch) || "";
                             const typeQuery = shortTypeQueryOfSensor(patch["patches.patch_type"]);
 
-                            let arrKeyChild = [];
-                            if (typeQuery === "alphamed") {
-                                arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
-                            } else if (typeQuery === "ihealth") {
-                                arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
-                            }
-
                             if (!!startDate && !!endDate && !!typeQuery) {
-                                if (arrKeyChild?.length > 0) {
-                                    arrKeyChild.forEach((itemKey) => {
-                                        checkTotalNumberDateHaveDataFromInflux(startDate, endDate, itemKey, patch);
-                                    })
-                                } else {
-                                    checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
-                                }
+                                checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
                             }
                         })
 
@@ -1836,8 +1834,6 @@ function BillingModule() {
 
         return dayCount
     }
-
-    console.log("patchArray", patchArray);
 
     const checkTotalNumberDateHaveDataFromInflux = (startDate = "", endDate = "", sensorType = "", patch) => {
         const start = new Date(startDate);
@@ -2106,11 +2102,11 @@ function BillingModule() {
                                             : null
                                     }
                                 ></div>
-                                <div className="bm-header-below">{`${secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED} mins monitored`}</div>
+                                <div className="bm-header-below">{`${Math.floor(secondTotalTime/60) % TOTAL_HOURS_FOR_EACH_99458_BILLED} mins monitored`}</div>
                             </div>
                             {/* <div className="bm-cptcode-b-header">
                                 <div
-                                    className="bm-header-line"
+                                    className="bm-header-line
                                     style={{ background: "#ffcd00" }}
                                 ></div>
                             </div> */}
@@ -3003,14 +2999,14 @@ function BillingModule() {
                                         ></div>
                                         <div style={{ marginTop: "10px" }}>
                                             <div style={{ fontSize: "1.2rem" }}>
-                                                {`Mins Monitored: ${secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED}/${TOTAL_HOURS_FOR_EACH_99458_BILLED}`}
+                                                {`Mins Monitored: ${Math.floor(secondTotalTime / 60) % TOTAL_HOURS_FOR_EACH_99458_BILLED}/${TOTAL_HOURS_FOR_EACH_99458_BILLED}`}
                                             </div>
-                                            {Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0 && (
-                                                <p>{Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED)} Unit Billed</p>
+                                            {Math.floor(secondTotalTime / 60 / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0 && (
+                                                <p>{Math.floor(secondTotalTime / 60 / TOTAL_HOURS_FOR_EACH_99458_BILLED)} Unit Billed</p>
                                             )}
 
                                             <div style={{ color: "#00000085" }}>
-                                                <b>{`${TOTAL_HOURS_FOR_EACH_99458_BILLED - (secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED)} mins`}</b> left to
+                                                <b>{`${TOTAL_HOURS_FOR_EACH_99458_BILLED - (Math.floor(secondTotalTime / 60) % TOTAL_HOURS_FOR_EACH_99458_BILLED)} mins`}</b> left to
                                                 enable the next CPT code.
                                             </div>
                                         </div>
@@ -3085,7 +3081,10 @@ function BillingModule() {
                                                         {item["task_note"]}
                                                     </div>
                                                     <div className="bm-item-body" style={{ width: "20%" }}>
-                                                        {item['task_time_spend'] ? `${item['task_time_spend']} min` : renderTimerClock(item, CPT_CODE.CPT_99458)}
+                                                        <span style={{paddingRight: "10px"}} id={`item-99458-time-spent-${item.task_id}`}>
+                                                            {`${renderTimeDisplay(item['task_time_spend'])}`} 
+                                                        </span>
+                                                        {renderTimerClock(item, CPT_CODE.CPT_99458)}
                                                     </div>
                                                 </div>
                                             ))}

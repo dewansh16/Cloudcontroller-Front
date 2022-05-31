@@ -1,11 +1,15 @@
-import { Table } from "antd";
 import React, { useState, useEffect } from "react";
-import "./vitals.patientJourney.css";
+import { Table } from "antd";
+import { InfluxDB } from "@influxdata/influxdb-client";
+import { isJsonString } from "../../../Utils/utils";
+
 import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
 import VitalGraphs from "./vitalGraphs.patientJourney";
 
-function Vitals({ activeStep, wardArray, patient }) {
+import "./vitals.patientJourney.css";
+
+function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     const [stepArray, setStepArray] = useState(wardArray);
 
     useEffect(() => {
@@ -328,206 +332,147 @@ function Vitals({ activeStep, wardArray, patient }) {
         ]);
     }, [activeStep, stepArray]);
 
-    const demoChartData = [
+    const arrDataChart = [
         {
-            date: "2021-10-03T17:20:01.000Z",
-            value: "86",
+            _key: 'temp',
+            name: "Temperature",
+            icon: Icons.thermometerIcon({ Style: { color: Colors.purple } }),
+            val: 0,
+            color: Colors.purple,
+            trendData: []
         },
         {
-            date: "2021-10-03T17:05:01.000Z",
-            value: "95",
+            _key: 'spo2',
+            name: "SPO2",
+            icon: Icons.o2({ Style: { color: Colors.green } }),
+            val: 0,
+            color: Colors.green,
+            trendData: []
         },
         {
-            date: "2021-10-03T16:50:01.000Z",
-            value: "90",
+            _key: 'ecg_hr',
+            name: "Heart Rate",
+            icon:  Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
+            val: 0,
+            color: Colors.darkPink,
+            trendData: []
         },
         {
-            date: "2021-10-03T16:35:01.000Z",
-            value: "89",
+            _key: 'ecg_rr',
+            name: "Respiration Rate",
+            icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
+            val: 0,
+            color: Colors.orange,
+            trendData: []
         },
         {
-            date: "2021-10-03T16:20:01.000Z",
-            value: "88",
+            _key: "blood_pressuer",
+            name: "Blood Pressure",
+            icon: Icons.bloodPressure({ Style: { color: Colors.darkPurple, transform: 'scale(0.75)' } }),
+            val: 0,
+            val_bpd: 0,
+            color: Colors.darkPurple,
+            trendData: []
         },
         {
-            date: "2021-10-03T16:05:01.000Z",
-            value: "87",
+            _key: 'weight',
+            name: "Weight",
+            icon: Icons.bpIcon({
+                Style: { color: Colors.yellow, fontSize: "24px" },
+            }),
+            val: 0,
+            color: Colors.yellow,
+            trendData: []
         },
-        {
-            date: "2021-10-03T15:50:01.000Z",
-            value: "85",
-        },
-        {
-            date: "2021-10-03T15:35:01.000Z",
-            value: "80",
-        },
-        {
-            date: "2021-10-03T15:20:01.000Z",
-            value: "89",
-        },
-        {
-            date: "2021-10-03T15:05:01.000Z",
-            value: "90",
-        },
-        {
-            date: "2021-10-03T14:50:01.000Z",
-            value: "96",
-        },
-        {
-            date: "2021-10-03T14:35:01.000Z",
-            value: "95",
-        },
-        {
-            date: "2021-10-03T14:20:01.000Z",
-            value: "88",
-        },
-        {
-            date: "2021-10-03T14:05:01.000Z",
-            value: "92",
-        },
-        {
-            date: "2021-10-03T13:50:01.000Z",
-            value: "85",
-        },
-        {
-            date: "2021-10-03T13:35:01.000Z",
-            value: "84",
-        },
-        {
-            date: "2021-10-03T13:20:01.000Z",
-            value: "80",
-        },
-        {
-            date: "2021-10-03T13:05:01.000Z",
-            value: "79",
-        },
-        {
-            date: "2021-10-03T12:50:01.000Z",
-            value: "75",
-        },
-        {
-            date: "2021-10-03T12:35:01.000Z",
-            value: "80",
-        },
-        {
-            date: "2021-10-03T12:20:01.000Z",
-            value: "88",
-        },
-        {
-            date: "2021-10-03T12:05:01.000Z",
-            value: "89",
-        },
-        {
-            date: "2021-10-03T11:50:01.000Z",
-            value: "90",
-        },
-        {
-            date: "2021-10-03T11:35:01.000Z",
-            value: "92",
-        },
-        {
-            date: "2021-10-03T11:20:01.000Z",
-            value: "96",
-        },
-        {
-            date: "2021-10-03T11:05:01.000Z",
-            value: "94",
-        },
-        {
-            date: "2021-10-03T10:50:01.000Z",
-            value: "95",
-        },
-        {
-            date: "2021-10-03T10:35:01.000Z",
-            value: "92",
-        },
-        {
-            date: "2021-10-03T10:20:01.000Z",
-            value: "86",
-        },
-        {
-            date: "2021-10-03T10:05:01.000Z",
-            value: "97",
-        },
-        {
-            date: "2021-10-03T09:50:01.000Z",
-            value: "93",
-        },
-        {
-            date: "2021-10-03T09:35:01.000Z",
-            value: "88",
-        },
-    ];
+    ]
 
-    const [chartBlockData, setChartBlockData] = React.useState([]);
+    const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
+
+    const processDataForSensor = (key, newArrChart, chart) => {
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
+
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+
+        const query = `from(bucket: "emr_dev")
+                |> range(start: -${valDuration})
+                |> filter(fn: (r) => r["_measurement"] == "${pid}_${key}")
+                |> yield(name: "mean")`;
+
+        const arrayRes = [];
+        let val_bpd = 0;
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                if (key === "alphamed_bpd" || key === "ihealth_bpd") {
+                    val_bpd = dataQueryInFlux?._value;
+                } else {
+                    let value = dataQueryInFlux?._value || 0;
+                    if (key === "weight") {
+                        value = value * 2.2046
+                    }
+                    arrayRes.push({ value });
+                }
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+                if ((key !== "alphamed_bpd" && key !== "ihealth_bpd")) {
+                    chart.trendData = arrayRes || [];
+                    chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
+                } else {
+                    chart.val_bpd = val_bpd;
+                }
+                setChartBlockData([...newArrChart]);
+            },
+        })
+    }
+
+    const getDataSensorFromInfluxDB = () => {
+        let associatedList = [];
+
+        const isString = isJsonString(patient?.demographic_map?.associated_list);
+        if (isString) {
+            associatedList = JSON.parse(patient?.demographic_map?.associated_list);
+        }
+
+        const newArrChart = [...arrDataChart];
+        for (let index = 0; index < newArrChart.length; index++) {
+            const chart = newArrChart[index];
+
+            const key = chart?._key;
+            if (key !== "blood_pressuer") {
+                processDataForSensor(key, newArrChart, chart)
+            } else {
+                let arrKeyChild = [];
+                if (associatedList?.includes("alphamed")) {
+                    arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
+                } else {
+                    arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
+                }
+
+                for (let j = 0; j < arrKeyChild.length; j++) {
+                    processDataForSensor(arrKeyChild[j], newArrChart, chart);
+                }
+            }
+        }
+    };
+
+    useEffect(() => {
+        // getDataSensorFromInfluxDB();
+
+        // const timeInterval = setInterval(() => {
+        //     getDataSensorFromInfluxDB();
+        // }, 10000);
+
+        // return () => {
+        //     clearInterval(timeInterval);
+        // }
+    }, [pid]);
     
-    React.useEffect(() => {
-        const dummyBPData = patient.trend_map[1]?.temp?.map((item) => {
-            return {
-                date: item.date,
-                value: 50 + Math.floor(Math.random() * 30),
-                // value: item.value,
-            };
-        });
-        setChartBlockData([
-            {
-                name: "Temperature",
-                icon: Icons.thermometerIcon({
-                    Style: { color: Colors.purple },
-                }),
-                val:
-                    parseInt(patient.ews_map?.temp) === -1 ? "NA" : patient.ews_map?.temp,
-                trendData: patient.trend_map[1]?.temp?.reverse(),
-                color: Colors.purple,
-            },
-            {
-                name: "SPO2",
-                icon: Icons.o2({ Style: { color: Colors.green } }),
-                val:
-                    parseInt(patient.ews_map?.spo2) === -1 ? "NA" : patient.ews_map?.spo2,
-                trendData: patient.trend_map[0]?.spo2?.reverse(),
-                color: Colors.green,
-            },
-            {
-                name: "Heart Rate",
-                icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
-                val: parseInt(patient.ews_map?.hr) === -1 ? "NA" : patient.ews_map?.hr,
-                trendData: patient.trend_map[3]?.hr?.reverse(),
-                color: Colors.darkPink,
-            },
-            {
-                name: "Respiration Rate",
-                icon: Icons.lungsIcon({ Style: { color: Colors.orange } }),
-                val: parseInt(patient.ews_map?.rr) === -1 ? "NA" : patient.ews_map?.rr,
-                trendData: patient.trend_map[2]?.rr?.reverse(),
-                color: Colors.orange,
-            },
-            {
-                name: "Blood Pressure",
-                icon: Icons.bpIcon({
-                    Style: { color: Colors.darkPurple, fontSize: "24px" },
-                }),
-                val:
-                parseInt(patient.ews_map?.rr) === -1
-                  ? "NA"
-                  : patient.ews_map?.rr,
-                trendData: dummyBPData,
-                color: Colors.darkPurple,
-            },
-            {
-                name: "Weight",
-                icon: Icons.bpIcon({
-                    Style: { color: Colors.yellow, fontSize: "24px" },
-                }),
-                val:
-                parseInt(patient.ews_map?.rr) === -1
-                  ? "NA"
-                  : patient.ews_map?.rr,
-                color: Colors.yellow,
-            },
-        ]);
-    }, []);
-
     return (
         <div style={{ width: "100%", height: "100%" }}>
             <div className="vitals-body">

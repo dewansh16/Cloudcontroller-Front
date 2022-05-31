@@ -23,7 +23,6 @@ import NotesSection from "../PatientDetails/components/notesSection";
 import TrendTimeSelector from "../PatientIcu/components/trendTimeSelector";
 import getAge from "../../Utils/getAge";
 
-import { dataFake } from './constant';
 import patientApi from "../../Apis/patientApis";
 import { UserStore } from "../../Stores/userStore";
 
@@ -153,9 +152,13 @@ export default function PatientDashboard(props) {
         list: [],
     });
 
+    const dataFilterHeader = props?.location?.state?.dataFilterHeader || null;
+
     // const pageSize = 5;
-    const [currentPageVal, setCurrentPageVal] = useState(1);
-    const [valuePageLength, setValuePageLength] = useState(10);
+    const [currentPageVal, setCurrentPageVal] = useState(dataFilterHeader?.currentPageVal || 1);
+    const [valuePageLength, setValuePageLength] = useState(dataFilterHeader?.valuePageLength || 10);
+    const [valSearch, setValSearch] = useState(dataFilterHeader?.valSearch || "");
+    const [valDuration, setValDuration] = useState(dataFilterHeader?.valDuration || "7d");
 
     const [totalPages, setTotalPages] = useState(1);
     const [patientDetails, setPatientDetails] = useState(null);
@@ -163,7 +166,6 @@ export default function PatientDashboard(props) {
     const [showNotes, setShowNotes] = useState(false);
     const [wardDetails, setWardDetails] = useState({ text: null, value: null });
     const [patientType, setSelectedPatient] = useState("remote");
-    const [arrDataSensorPopupDetail, setDataSensorPopupDetail] = useState([]);
     // const [showModal, setShowModal] = useState(false);
 
     //animation config
@@ -218,29 +220,18 @@ export default function PatientDashboard(props) {
     };
     
     // filtering options
-    const [filters, setFilters] = useState(filtersConfig);
+    // const [filters, setFilters] = useState(filtersConfig);
 
-    const [searchOptions, setSearchOptions] = useState({
-        locationUuid: null,
-        name: null,
-        duration: 3,
-
-        // ---- old code ---- //
-        // locationUuid: null,
-        // fname: null,
-        // lname: null,
-        // duration: 3,
-        // medRecord: null,
-    });
+    // const [searchOptions, setSearchOptions] = useState({
+    //     // locationUuid: null,
+    //     // name: null,
+    // });
 
     const timeIntervalOptions = [
-        { name: "8 Hours", val: 1 },
-        { name: "12 Hours", val: 2 },
-        { name: "24 Hours", val: 3 },
-        { name: "48 Hours", val: 4 },
-        { name: "76 Hours", val: 5 },
-        { name: "7 Days", val: 6 },
-        { name: "14 Days", val: 7 },
+        { name: "24 Hours", val: "24h" },
+        { name: "7 Days", val: "7d" },
+        { name: "14 Days", val: "14d" },
+        { name: "30 Days", val: "30d" },
     ];
 
     const filterPatients = (data) => {
@@ -269,20 +260,8 @@ export default function PatientDashboard(props) {
     };
 
     const searchPatient = (val) => {
-        setSearchOptions({
-            ...searchOptions,
-            name: val
-        })
-
-        // ---- old code ---- //
-        // let name = val.split(" ");
-        // let medRecord = val;
-        // setSearchOptions({
-        // ...searchOptions,
-        // fname: name[0].length > 0 ? name[0] : null,
-        // lname: name[1]?.length > 0 ? name[1] : null || null,
-        // medRecord: medRecord,
-        // });
+        setValSearch(val);
+        setCurrentPageVal(1);
     };
 
     // set type of patients -- all, discharged, in care
@@ -319,29 +298,18 @@ export default function PatientDashboard(props) {
     //     setPatientList(filteredPatients);
     // }
 
-    const dataBodyFilter = useMemo(() => {
-        const data = { 
-            tenantId,
-            patientType,
-            EWS: filters.ews,
-            spo2LevelsL: filters.spo2,
-            respirationRate: filters.rr,
-            offset: Number(currentPageVal), limit: Number(valuePageLength),
-        };
-
-        Object.keys(searchOptions).forEach(search => {
-            if (!!searchOptions[search]) {
-                data[search] = searchOptions[search];
-            }
-        })
-
-        return data;
-    }, [searchOptions, filters, currentPageVal, patientType, valuePageLength]);
-
     function fetchPatientList() {
         setPatient({ isLoading: true });
 
-        patientApi.getPatientList(dataBodyFilter)
+        const data = {
+            tenantId,
+            patientType,
+            name: valSearch,
+            offset: Number(currentPageVal), 
+            limit: Number(valuePageLength) 
+        }
+
+        patientApi.getPatientList(data)
             .then((res) => {
                 setTotalPages(
                     computeTotalPages(res.data.response.patientTotalCount, valuePageLength)
@@ -351,6 +319,10 @@ export default function PatientDashboard(props) {
                 setPatient({ isLoading: false, list: data });
                 // filterBasedonPatientType(data);
                 setPatientList(data);
+
+                if (props.location.state?.dataFilterHeader) {
+                    props.location.state.dataFilterHeader = null;
+                }
             })
             .catch((err) => {
                 setPatient({ isLoading: false });
@@ -360,17 +332,9 @@ export default function PatientDashboard(props) {
             });
     }
 
-    useEffect(() => {}, [active]);
-
-    // useInterval(fetchPatientList, 300000);
-
     useEffect(() => {
         fetchPatientList();
-    }, [currentPageVal, searchOptions, patientType, valuePageLength]);
-
-    // useEffect(() => {
-    //   filterBasedonPatientType(patient.list);
-    // }, [patientType]);
+    }, [currentPageVal, valuePageLength, valSearch]);
 
     const showBlur = (type) => {
         setBlur({ ...isBlur, [type]: !isBlur[type] });
@@ -405,7 +369,23 @@ export default function PatientDashboard(props) {
             })
     }
 
-    // console.log("arrDataSensorPopupDetail", arrDataSensorPopupDetail);
+    const dataFilterOnHeader = useMemo(() => {
+        return {
+            currentPageVal,
+            valuePageLength,
+            valSearch,
+            valDuration,
+        };
+    }, [currentPageVal, valuePageLength, valSearch, valDuration]);
+
+    const onSelectValDuration = (val) => {
+        setValDuration(val);
+        setPatient({ isLoading: true });
+
+        setTimeout(() => {
+            setPatient({ isLoading: false });
+        }, 3000);
+    };
 
     return (
         <>
@@ -441,6 +421,7 @@ export default function PatientDashboard(props) {
                             onSearch={searchPatient}
                             enterButton
                             allowClear
+                            defaultValue={valSearch}
                         />
                     </>
                 }
@@ -476,13 +457,14 @@ export default function PatientDashboard(props) {
                             >
                                 {Icons.filterIcon({ Style: { fontSize: "1.257rem" } })}
                             </Button>
-                        </Dropdown>
+                        </Dropdown>*/}
 
                         <TrendTimeSelector
                             timeIntervalOptions={timeIntervalOptions}
-                            searchOptions={searchOptions}
-                            setFilters={setSearchOptions}
-                        /> */}
+                            valDuration={valDuration}
+                            // setValDuration={setValDuration}
+                            onSelectValDuration={onSelectValDuration}
+                        />
                     </>
                 }
                 endChildren={
@@ -525,7 +507,8 @@ export default function PatientDashboard(props) {
                         setShowTrend={setShowTrend}
                         setActive={setActive}
                         onDeletePatient={onDeletePatient}
-                        arrDataSensorPopupDetail={arrDataSensorPopupDetail}
+                        // valDuration={valDuration}
+                        dataFilterOnHeader={dataFilterOnHeader}
                     />
                 </motion.div>
             )}
@@ -584,7 +567,7 @@ export default function PatientDashboard(props) {
                                         setPatientDetails={setPatientDetails}
                                         active={active}
                                         setActive={setActive}
-                                        setDataSensorPopupDetail={setDataSensorPopupDetail}
+                                        dataFilterOnHeader={dataFilterOnHeader}
                                     />
                                 )}
                             ></List>

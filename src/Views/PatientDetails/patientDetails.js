@@ -466,10 +466,10 @@ export default function PatientDetails(props) {
                                                 style={{ border: "none", boxShadow: "none" }}
                                                 className="back-buttons utility"
                                                 onClick={() => {
-                                                    history.push('/dashboard/patient/list');
-                                                    // state: {
-                                                    //     name:
-                                                    // },
+                                                    history.push({ 
+                                                        pathname: '/dashboard/patient/list',
+                                                        state: { dataFilterHeader: props?.location?.state?.dataFilterHeader || null }
+                                                    });
                                                 }}
                                             >
                                                 {Icons.headerBackArrow({})}
@@ -787,6 +787,29 @@ export default function PatientDetails(props) {
                                                     >
                                                         Files
                                                     </Buttons>
+                                                    {/* <Buttons
+                                                        style={buttonStyle}
+                                                        type="text"
+                                                        onClick={() =>
+                                                            history.push({
+                                                                pathname: `/dashboard/patient/${pid}/graphvisualizer`,
+                                                                state: {
+                                                                    name:
+                                                                        `${patient.demographic_map.title === undefined
+                                                                            ? ""
+                                                                            : patient.demographic_map.title
+                                                                        }` +
+                                                                        " " +
+                                                                        patient.demographic_map.fname +
+                                                                        " " +
+                                                                        patient.demographic_map.lname,
+                                                                    mr: patient.demographic_map.med_record,
+                                                                },
+                                                            })
+                                                        }
+                                                    >
+                                                        Visualizer
+                                                    </Buttons> */}
                                                 </Row>
                                             </Col>
                                             {
@@ -942,6 +965,7 @@ export default function PatientDetails(props) {
                                                                     refreshFileView={refreshFileView}
                                                                     summaryModal={summaryModal}
                                                                     openSummaryModal={openSummaryModal}
+                                                                    valDuration={props?.location?.state?.dataFilterHeader?.valDuration || "7d"}
                                                                 />
                                                             );
                                                     }

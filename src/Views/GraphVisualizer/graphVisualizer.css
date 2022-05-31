@@ -216,7 +216,7 @@
 
 .gv-trend-btns{
     height: 100%;
-    width: 50%;
+    width: 70%;
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 6px;
     display: flex;
@@ -229,7 +229,7 @@
     font-size: 14px;
     cursor: pointer;
     padding: 1% 0%;
-    width: 16%;
+    width: 12%;
     text-align: center;
 }
 
@@ -427,4 +427,11 @@ animation: pulse 1s infinite;
     background: rgb(255, 117, 41);
     border-radius: 6px !important;
     margin-bottom: 5%;
+}
+
+.btn-row-one-disabled {
+    /* pointer-events: none;
+    cursor: text;
+    background: #c2babac4;
+    opacity: 0.5; */
 }
