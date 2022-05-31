@@ -1494,11 +1494,11 @@ function BillingModule() {
             case "spo2":
                 return "spo2"
             case "ecg":
-                return "ecg"
+                return "ecg_hr"
             case "alphamed":
-                return "alphamed"
+                return "alphamed_bpd"
             case "ihealth":
-                return "ihealth"
+                return "ihealth_bpd"
 
             default:
                 break;
@@ -1646,21 +1646,8 @@ function BillingModule() {
                             const endDate = getLastDateMonitored(patch) || "";
                             const typeQuery = shortTypeQueryOfSensor(patch["patches.patch_type"]);
 
-                            let arrKeyChild = [];
-                            if (typeQuery === "alphamed") {
-                                arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
-                            } else if (typeQuery === "ihealth") {
-                                arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
-                            }
-
                             if (!!startDate && !!endDate && !!typeQuery) {
-                                if (arrKeyChild?.length > 0) {
-                                    arrKeyChild.forEach((itemKey) => {
-                                        checkTotalNumberDateHaveDataFromInflux(startDate, endDate, itemKey, patch);
-                                    })
-                                } else {
-                                    checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
-                                }
+                                checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
                             }
                         })
 
@@ -1847,8 +1834,6 @@ function BillingModule() {
 
         return dayCount
     }
-
-    console.log("patchArray", patchArray);
 
     const checkTotalNumberDateHaveDataFromInflux = (startDate = "", endDate = "", sensorType = "", patch) => {
         const start = new Date(startDate);
@@ -2121,7 +2106,7 @@ function BillingModule() {
                             </div>
                             {/* <div className="bm-cptcode-b-header">
                                 <div
-                                    className="bm-header-line"
+                                    className="bm-header-line
                                     style={{ background: "#ffcd00" }}
                                 ></div>
                             </div> */}

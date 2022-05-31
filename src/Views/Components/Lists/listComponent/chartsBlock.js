@@ -18,7 +18,7 @@ export default function ChartsBlock({
         // SPO2: `${value}`,
         "Heart Rate": `${value} bpm`,
         "Respiration Rate": `${value} bpm`,
-        "Weight": `${value} kg`,
+        "Weight": `${Math.round(value * 100) / 100} lbs`,
         "Blood Pressure": `${value} - ${valueBpd} mmHg`
     };
 

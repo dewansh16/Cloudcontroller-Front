@@ -1,21 +1,24 @@
 import React, { useEffect, useRef } from "react";
+
 import { motion } from "framer-motion";
 import { io } from "socket.io-client";
 import { InfluxDB } from "@influxdata/influxdb-client";
 import { isJsonString } from "../../../Utils/utils";
 
 import { Row, Col, Divider, Grid, Tooltip } from "antd";
+
 import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
 import ChartsBlock from "./listComponent/chartsBlock";
 import { Button } from "../../../Theme/Components/Button/button";
-const { useBreakpoint } = Grid;
 
+// import { arrDataChart } from "../../arrayChart";
+
+const { useBreakpoint } = Grid;
 
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
-
-    // console.log("props", props);
+    // const newArrayDataChart = [...arrDataChart];
 
     const dividerColor = "black";
     const listThemeColor = "#444444";
@@ -129,7 +132,7 @@ const PatientListItem = (props) => {
             color: Colors.yellow,
             trendData: []
         },
-    ]
+    ];
 
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
 
@@ -141,21 +144,23 @@ const PatientListItem = (props) => {
         const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: -4d)
+                |> range(start: -${props.dataFilterOnHeader.valDuration})
                 |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
+        let val_bpd = 0;
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 if (key === "alphamed_bpd" || key === "ihealth_bpd") {
-                    chart.val_bpd = dataQueryInFlux?._value;
+                    val_bpd = dataQueryInFlux?._value;
                 } else {
-                    arrayRes.push({ value: dataQueryInFlux?._value || 0 });
-                    // if (arrayRes?.length > 200) {
-                    //     arrayRes.splice(0, 1);
-                    // }
+                    let value = dataQueryInFlux?._value || 0;
+                    if (key === "weight") {
+                        value = value * 2.2046
+                    }
+                    arrayRes.push({ value });
                 }
             },
             error(error) {
@@ -163,12 +168,13 @@ const PatientListItem = (props) => {
                 console.log('nFinished ERROR')
             },
             complete() {
-                // console.log('nFinished SUCCESS');
-                if (arrayRes?.length > 0 && key !== "alphamed_bpd") {
+                if (key !== "alphamed_bpd" && key !== "ihealth_bpd") {
                     chart.trendData = arrayRes || [];
                     chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-                    setChartBlockData([...newArrChart]);
+                } else {
+                    chart.val_bpd = val_bpd;
                 }
+                setChartBlockData([...newArrChart]);
             },
         })
     }
@@ -196,8 +202,6 @@ const PatientListItem = (props) => {
                     arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
                 }
 
-                // console.log("arrKeyChild", arrKeyChild);
-
                 for (let j = 0; j < arrKeyChild.length; j++) {
                     processDataForSensor(arrKeyChild[j], newArrChart, chart);
                 }
@@ -208,14 +212,14 @@ const PatientListItem = (props) => {
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        // const timeInterval = setInterval(() => {
-        //     getDataSensorFromInfluxDB();
-        // }, 10000);
+        const timeInterval = setInterval(() => {
+            getDataSensorFromInfluxDB();
+        }, 10000);
 
-        // return () => {
-        //     clearInterval(timeInterval);
-        // }
-    }, []);
+        return () => {
+            clearInterval(timeInterval);
+        }
+    }, [props.pid, props.dataFilterOnHeader.valDuration]);
 
     // React.useEffect(() => {
     //     var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
@@ -232,7 +236,12 @@ const PatientListItem = (props) => {
     // }, []);
 
     const pushToPatientDetails = () => {
-        props.parentProps.history.push(`/dashboard/patient/details/${props.pid}`);
+        props.parentProps.history.push({
+            pathname: `/dashboard/patient/details/${props.pid}`,
+            state: {
+                dataFilterHeader: props.dataFilterOnHeader,
+            },
+        });
     };
 
     const pushToEdit = () => {

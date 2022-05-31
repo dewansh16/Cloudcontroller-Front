@@ -983,7 +983,6 @@ function AddPatient() {
                             <TabPane 
                                 tab={patientId ? "Edit Patient" : "Add Patient"} 
                                 key="1"
-                                disabled={!!patientId}
                             >
                                 <AddPatientModal
                                     patientData={patientData}
@@ -1007,14 +1006,17 @@ function AddPatient() {
                                     >
                                         Cancel
                                     </Button>
-                                    <Button
-                                        loading={isButtonLoading}
-                                        type="primary"
-                                        style={{ marginRight: "2em" }}
-                                        onClick={addPatient}
-                                    >
-                                        {patientId ? "Save Patient" : "Add Patient"}
-                                    </Button>
+
+                                    {!patientId && (
+                                        <Button
+                                            loading={isButtonLoading}
+                                            type="primary"
+                                            style={{ marginRight: "2em" }}
+                                            onClick={addPatient}
+                                        >
+                                            {patientId ? "Save Patient" : "Add Patient"}
+                                        </Button>
+                                    )}
                                 </div>
                             </TabPane>
 
