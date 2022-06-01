@@ -83,7 +83,7 @@ const columns = [
 let clockCounter = null;
 let timeCount = 0;
 let currentIdTimerClockActive = null;
-let currentItem99091Active = null;
+
 
 function BillingModule() {
     const pid = useParams().pid;
@@ -93,7 +93,7 @@ function BillingModule() {
     const [billProcessedLoading, setBillProcessedLoading] = useState(false);
 
     const [initialBillDate, setInitialBillDate] = useState('')
-
+    const [currentItem99091Active, setCurrentItem99091Active] = useState(null);
     const [taskDeleteArray, setTaskDeleteArray] = useState([])
     const [billingInformation, setBillingInformation] = useState([])
 
@@ -1255,10 +1255,11 @@ function BillingModule() {
                             if(!isArray(temp99091Task)) temp99091Task = [];
                             setTask99091(temp99091Task);
                             if(temp99091Task.length > 0) {
-                                currentItem99091Active = temp99091Task[temp99091Task.length - 1].task_id;
+                                setCurrentItem99091Active(temp99091Task[temp99091Task.length - 1].task_id);
                                 temp99091Task.map(item => {
                                     tmpTime +=  Number(item.time_spent);
                                 })
+                                setKeyNoteActive(temp99091Task[temp99091Task.length - 1].task_id)
                             }
                             setTotalTime99091(tmpTime);
                         }
@@ -1780,11 +1781,11 @@ function BillingModule() {
                                 if (!isArray(temp99091Task)) temp99091Task = [];
                                 setTask99091(temp99091Task);
                                 if (temp99091Task.length > 0) {
-                                    currentItem99091Active = temp99091Task[temp99091Task.length - 1].task_id;
+                                    setCurrentItem99091Active(temp99091Task[temp99091Task.length - 1].task_id);
                                     temp99091Task.map(item => {
                                         tmpTime += Number(item.time_spent);
                                     })
-                                    setKeyNoteActive(temp99091Task.length - 1);
+                                    setKeyNoteActive(temp99091Task[temp99091Task.length - 1].task_id);
                                 }
                                 setTotalTime99091(tmpTime);
                             }
@@ -3376,13 +3377,16 @@ function BillingModule() {
                                     <Collapse
                                         accordion
                                         className="collapse-table-99091"
-                                        onChange={(val) => setKeyNoteActive(val)}
-                                        // defaultActiveKey={[task99091?.length - 1]}
+                                        onChange={(val) => {
+                                            setKeyNoteActive(val);
+                                            setCurrentItem99091Active(val);
+                                        }}
+                                        defaultActiveKey={task99091[task99091?.length - 1].task_id}
                                         activeKey={keyNoteActive}
                                     >
                                         {task99091?.map((item, index) => (
                                             <Panel 
-                                                key={index}
+                                                key={item.task_id}
                                                 header={(
                                                     <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                                                         <div style={{ width: "50%" }}>Vitals</div>
@@ -3497,7 +3501,9 @@ function BillingModule() {
                                             >
                                                 Notes
                                             </div>
-                                            {getNoteForItem99091()}
+                                            {currentItem99091Active && 
+                                                getNoteForItem99091()
+                                            }
                                             <div style={{
                                                 display: "flex",
                                                 padding: "1rem 0.5rem"
