@@ -408,56 +408,82 @@ function AddPatient() {
 
     const deboardPatches = () => {
         setDeboardButtonLoading(true);
-        deviceApi
-            .deboardPatch(patientId)
-            .then((res) => {
+        const { tenant } = UserStore.getUser();
+
+        const data = {
+            list: [ { pid } ],
+            tenantId: tenant
+        }
+        patientApi
+            .deletePatient(data)
+            .then(res => {
                 setDeboardButtonLoading(false);
                 setDeboarded(true);
-                addPatchBundleForm.setFieldsValue({
-                    gateway_duration: null,
-                    gateway_patch_serial: null,
-                });
-                addPatchForm.setFieldsValue({
-                    [`ecg_duration`]: null,
-                    [`ecg_patch_serial`]: null,
-                    [`spo2_duration`]: null,
-                    [`spo2_patch_serial`]: null,
-                    [`temperature_duration`]: null,
-                    [`temperature_patch_serial`]: null,
-                    [`gateway_duration`]: null,
-                    [`gateway_patch_serial`]: null,
-                });
-                setPatchData({
-                    ecg: null,
-                    spo2: null,
-                    temperature: null,
-                    gateway: null,
-                    alphamed: null,
-                    ihealth: null,
-                    digital: null
-                });
-                setBundleData({
-                    ecg: null,
-                    spo2: null,
-                    temperature: null,
-                    gateway: null,
-                });
-                let newTitle = "Sensor successfully Deboarded from ";
-                setSummary({
-                    ...summary,
-                    isVisible: true,
-                    status: "success",
-                    title: newTitle + summary.name,
-                });
+
+                // let newTitle = "Sensor successfully Deboarded from ";
+                // setSummary({
+                //     ...summary,
+                //     isVisible: true,
+                //     status: "success",
+                //     title: newTitle + summary.name,
+                // })
             })
-            .catch((err) => {
-                setDeboardButtonLoading(false);
-                setSummary({
-                    isVisible: true,
-                    status: "error",
-                    title: `couldn't deboard Sensor`,
-                });
-            });
+            .catch(() => {
+                notification.error({
+                    message: "Delete",
+                    description: "Delete patient failed!",
+                })
+            })
+        // deviceApi
+        //     .deboardPatch(patientId)
+        //     .then((res) => {
+        //         setDeboardButtonLoading(false);
+        //         setDeboarded(true);
+        //         addPatchBundleForm.setFieldsValue({
+        //             gateway_duration: null,
+        //             gateway_patch_serial: null,
+        //         });
+        //         addPatchForm.setFieldsValue({
+        //             [`ecg_duration`]: null,
+        //             [`ecg_patch_serial`]: null,
+        //             [`spo2_duration`]: null,
+        //             [`spo2_patch_serial`]: null,
+        //             [`temperature_duration`]: null,
+        //             [`temperature_patch_serial`]: null,
+        //             [`gateway_duration`]: null,
+        //             [`gateway_patch_serial`]: null,
+        //         });
+        //         setPatchData({
+        //             ecg: null,
+        //             spo2: null,
+        //             temperature: null,
+        //             gateway: null,
+        //             alphamed: null,
+        //             ihealth: null,
+        //             digital: null
+        //         });
+        //         setBundleData({
+        //             ecg: null,
+        //             spo2: null,
+        //             temperature: null,
+        //             gateway: null,
+        //         });
+        //         let newTitle = "Sensor successfully Deboarded from ";
+        //         setSummary({
+        //             ...summary,
+        //             isVisible: true,
+        //             status: "success",
+        //             title: newTitle + summary.name,
+        //         });
+        //     })
+        //     .catch((err) => {
+        //         setDeboardButtonLoading(false);
+        //         setSummary({
+        //             isVisible: true,
+        //             status: "error",
+        //             title: `couldn't deboard Sensor`,
+        //         });
+        //     });
     };
 
     // React.useEffect(() => { setPatientData(patientBiographicData) }, [patientBiographicData])
@@ -1007,16 +1033,14 @@ function AddPatient() {
                                         Cancel
                                     </Button>
 
-                                    {!patientId && (
-                                        <Button
-                                            loading={isButtonLoading}
-                                            type="primary"
-                                            style={{ marginRight: "2em" }}
-                                            onClick={addPatient}
-                                        >
-                                            {patientId ? "Save Patient" : "Add Patient"}
-                                        </Button>
-                                    )}
+                                    <Button
+                                        loading={isButtonLoading}
+                                        type="primary"
+                                        style={{ marginRight: "2em" }}
+                                        onClick={addPatient}
+                                    >
+                                        {patientId ? "Save Patient" : "Add Patient"}
+                                    </Button>
                                 </div>
                             </TabPane>
 
