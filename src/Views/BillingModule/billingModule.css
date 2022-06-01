@@ -285,3 +285,7 @@
 .bm-twenty-bottom-container .bm-sensor-bottom-container {
     margin-top: 1rem;
 }
+
+.collapse-table-99091 .ant-collapse-arrow {
+    display: none!important;
+}
