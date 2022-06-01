@@ -1647,7 +1647,7 @@ function BillingModule() {
                             const startDate = getFirstDateMonitored(patch) || "";
                             const endDate = getLastDateMonitored(patch) || "";
                             const typeQuery = shortTypeQueryOfSensor(patch["patches.patch_type"]);
-
+                          
                             if (!!startDate && !!typeQuery) {
                                 checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
                             }
@@ -1842,13 +1842,13 @@ function BillingModule() {
                 |> filter(fn: (r) => r["_measurement"] == "${location.state.pid}_${sensorType}")
                 |> yield(name: "mean")
             `
-
         const arrDateQuery = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const o = tableMeta.toObject(row);
                 let time = new Date(o._time);
                 time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
+                
                 if (!arrDateQuery.includes(time)) {
                     arrDateQuery.push(time);
                 }
