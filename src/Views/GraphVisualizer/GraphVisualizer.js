@@ -2073,8 +2073,6 @@ function GraphVisualizer() {
                                                 //     setActiveTrendsArray(temp)
                                                 // }
                                                 // setGraphLoading(true)
-                                                handleToggle
-                                                setSensorsActive();
                                             }} 
                                             className="trend-btn" 
                                             style={
