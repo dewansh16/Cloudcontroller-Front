@@ -819,8 +819,6 @@ function BillingModule() {
         var billDateStr = getDateFromISO(billDate.toISOString());
         setBillDateString(billDateStr);
 
-        console.log("DATE 3 : ", currentDateApi)
-
         if (!location.state) {
             history.push(`/dashboard/patient/details/${pid}`);
         } else {
@@ -1248,6 +1246,20 @@ function BillingModule() {
                                 })
                             }
                             setSecondTotalTime(tmpTotalTime);
+                        }
+                        
+                        if (item.code == CPT_CODE.CPT_99091) {
+                            let temp99091Task = JSON.parse(item.params);
+                            let tmpTime = 0;
+                            if(!isArray(temp99091Task)) temp99091Task = [];
+                            setTask99091(temp99091Task);
+                            if(temp99091Task.length > 0) {
+                                currentItem99091Active = temp99091Task[temp99091Task.length - 1].task_id;
+                                temp99091Task.map(item => {
+                                    tmpTime +=  Number(item.time_spent);
+                                })
+                            }
+                            setTotalTime99091(tmpTime);
                         }
                     }
                 );
