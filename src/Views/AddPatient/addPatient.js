@@ -1007,16 +1007,14 @@ function AddPatient() {
                                         Cancel
                                     </Button>
 
-                                    {!patientId && (
-                                        <Button
-                                            loading={isButtonLoading}
-                                            type="primary"
-                                            style={{ marginRight: "2em" }}
-                                            onClick={addPatient}
-                                        >
-                                            {patientId ? "Save Patient" : "Add Patient"}
-                                        </Button>
-                                    )}
+                                    <Button
+                                        loading={isButtonLoading}
+                                        type="primary"
+                                        style={{ marginRight: "2em" }}
+                                        onClick={addPatient}
+                                    >
+                                        {patientId ? "Save Patient" : "Add Patient"}
+                                    </Button>
                                 </div>
                             </TabPane>
 

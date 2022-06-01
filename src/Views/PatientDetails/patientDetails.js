@@ -99,7 +99,7 @@ export default function PatientDetails(props) {
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [doctorDrawerVisible, setDoctorDrawerVisible] = useState(false);
     const [refreshFileView, refreshFileViewAgain] = useState(false);
-    const [openPatientJourney, setPatientJourney] = useState(true);
+    const [openPatientJourney, setPatientJourney] = useState(false);
     const [activeInfoSection, setInfoSection] = useState("notes");
     const [activeTab, setActiveTab] = useState("vitals");
     const [detailsBox, setDetailBox] = useState(false);
@@ -667,7 +667,7 @@ export default function PatientDetails(props) {
                         <Row style={{ height: "68px", alignItems: "center" }}>
                             <Col span={7}>
                                 <Row style={{ justifyContent: "flex-start" }}>
-                                    <Col span={10} offset={2}>
+                                    {/* <Col span={10} offset={2}>
                                         <Buttons
                                             style={
                                                 openPatientJourney ? activeButtonStyle : buttonStyle
@@ -679,7 +679,7 @@ export default function PatientDetails(props) {
                                         >
                                             Patient Journey
                                         </Buttons>
-                                    </Col>
+                                    </Col> */}
                                     {
                                         // <Col span={7}>
                                         // <Buttons
@@ -698,7 +698,7 @@ export default function PatientDetails(props) {
                                         // </Buttons>
                                         // </Col>
                                     }
-                                    <Col span={5}>
+                                    <Col span={10} offset={2}>
                                         <Buttons
                                             style={
                                                 !openPatientJourney && activeInfoSection === "notes"
@@ -944,7 +944,7 @@ export default function PatientDetails(props) {
                                     </Drawer>
 
 
-                                    <Col style={{ marginBottom: "8%" }} span={22}>
+                                    <Col style={{ marginBottom: "6%" }} span={22}>
                                         <Row
                                             span={24}
                                             style={{ margin: "0em 0 0 0", minHeight: "500px" }}
