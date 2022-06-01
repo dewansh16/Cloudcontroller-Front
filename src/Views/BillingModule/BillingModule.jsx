@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
 import { Button as CusBtn } from "../../Theme/Components/Button/button";
 import {
@@ -127,7 +127,7 @@ function BillingModule() {
     const [secondTwentyState, setSecondTwentyState] = useState(false);
     const [lastBillingState, setLastBillingState] = useState(false);
     const [billProcessedState, setBillProcessedState] = useState(false);
-    const [summaryState, setSummaryState] = useState(false)
+    const [summaryState, setSummaryState] = useState(false);
 
     const [initialStepDoneState, setInitialStepDoneState] = useState(false);
     const [enrollPatchState, setEnrollPatchState] = useState(false);
@@ -177,50 +177,50 @@ function BillingModule() {
         console.log(dateString);
 
         setCurrentDateApi(dateString);
-        setCurrentActiveMonth(monthNames[Number(dateString.substring(5, 7)) - 1]);
-        // setRightSideLoading(true);
+        // setCurrentActiveMonth(monthNames[Number(dateString.substring(5, 7)) - 1]);
+        // // setRightSideLoading(true);
 
-        setEnrolledState(false);
-        setInitialSetupState(false);
-        setAssociatedSensorsState(false);
-        setFirstTwentyState(false);
-        setSecondTwentyState(false);
-        setLastBillingState(false);
-        setBillProcessedState(false);
+        // setEnrolledState(false);
+        // setInitialSetupState(false);
+        // setAssociatedSensorsState(false);
+        // setFirstTwentyState(false);
+        // setSecondTwentyState(false);
+        // setLastBillingState(false);
+        // setBillProcessedState(false);
 
-        setInitialStepDoneState(false);
-        setEnrollPatchState(false);
-        setLastStateDone(false);
-        setLastStateData({});
-        setLastStateLoading(false);
-        setAddTaskState(false);
-        // setTasksLoadingState(true);
-        setInitialSetupLoading(false);
-        setInitialSetupData({});
-        setFirstTwentyData({});
-        setSecondTwentyData({});
-        setPatchLoading(false);
-        setPatchEnrolled(false);
-        setPatchData({});
-        setPatchArray([]);
-        setPatchInformation({});
-        setFirstTotalTime(0);
-        setSecondTotalTime(0);
-        setFirstTotalTimeDisplay(0);
-        setStageOneState(true);
-        setStageTwoState(false);
-        setTaskDateVal();
-        setTaskTimeVal();
-        setTaskNameVal();
-        setTaskNoteVal();
-        setTaskCodeActive("99457");
-        setTaskCodeInternalActive("");
-        setFirstTwentyTasks([]);
-        setSecondTwentyTasks([]);
+        // setInitialStepDoneState(false);
+        // setEnrollPatchState(false);
+        // setLastStateDone(false);
+        // setLastStateData({});
+        // setLastStateLoading(false);
+        // setAddTaskState(false);
+        // // setTasksLoadingState(true);
+        // setInitialSetupLoading(false);
+        // setInitialSetupData({});
+        // setFirstTwentyData({});
+        // setSecondTwentyData({});
+        // setPatchLoading(false);
+        // setPatchEnrolled(false);
+        // setPatchData({});
+        // setPatchArray([]);
+        // setPatchInformation({});
+        // setFirstTotalTime(0);
+        // setSecondTotalTime(0);
+        // setFirstTotalTimeDisplay(0);
+        // setStageOneState(true);
+        // setStageTwoState(false);
+        // setTaskDateVal();
+        // setTaskTimeVal();
+        // setTaskNameVal();
+        // setTaskNoteVal();
+        // setTaskCodeActive("99457");
+        // setTaskCodeInternalActive("");
+        // setFirstTwentyTasks([]);
+        // setSecondTwentyTasks([]);
 
-        var temp = runUseEffect;
-        temp = temp + 1;
-        setRunUseEffect(temp);
+        // var temp = runUseEffect;
+        // temp = temp + 1;
+        // setRunUseEffect(temp);
     }
 
     function findDateIndex(month) {
@@ -1712,6 +1712,8 @@ function BillingModule() {
         }
     }
 
+    console.log("currentDateApi", currentDateApi);
+
     useEffect(() => {
         if (isTableScroll === false && pdfState === "receipt") {
             const handleDownloadPdf = async () => {
@@ -1825,16 +1827,6 @@ function BillingModule() {
         },
     ];
 
-    const numberOfNightsBetweenDates = (start, end) => {
-        let dayCount = 0;
-        while (end > start) {
-            dayCount++;
-            start.setDate(start.getDate() + 1);
-        };
-
-        return dayCount
-    }
-
     const checkTotalNumberDateHaveDataFromInflux = (startDate = "", endDate = "", sensorType = "", patch) => {
         const start = new Date(startDate);
         const end = new Date();
@@ -1870,6 +1862,47 @@ function BillingModule() {
             },
         })
     };
+
+    const filterDeviceAssociatedByDate = useMemo(() => {
+        const newArr = [];
+        let dayMonitored = 0;
+        let minDate = null;
+        let maxDate = null;
+
+        for (let index = 0; index < patchArray.length; index++) {
+            const patch = patchArray[index];
+
+            if (!!patch.totalDay && !!patch.datesInflux) {
+                const firstDateMonitored = new Date(patch.datesInflux[0]);
+                const lastDateMonitored = new Date(patch.datesInflux[patch.datesInflux?.length - 1])
+                
+                const timer = new Date(currentDateApi);
+                timer.setHours(0, 0, 1);
+
+                if (firstDateMonitored.getTime() > timer.getTime()) {
+                    if (minDate === null || minDate > firstDateMonitored) {
+                        minDate = firstDateMonitored;
+                    } 
+                    
+                    if (maxDate === null || maxDate < lastDateMonitored) {
+                        maxDate = lastDateMonitored;
+                    }
+
+                    console.log("minDate", minDate, "maxDate", maxDate);
+                    newArr.push(patch);
+                }
+            }
+        }
+
+      
+        for (let idx = 0; idx < newArr.length; idx++) {
+            const element = newArr[idx];
+            
+        }
+
+
+        return newArr;
+    }, [patchArray, currentDateApi]);
 
     return rightSideLoading ? (
         <div
@@ -2633,7 +2666,7 @@ function BillingModule() {
                                 <div className="bm-item-header" style={{ width: "13%" }}>Total Number Of Day</div>
                             </div>
                             <div style={{ overflowY: "scroll", height: "70%", marginRight: '-6px' }}>
-                                {patchArray.length === 0 ? (
+                                {filterDeviceAssociatedByDate.length === 0 ? (
                                     <div
                                         style={{
                                             height: "100%",
@@ -2649,7 +2682,7 @@ function BillingModule() {
                                     </div>
                                 ) : (
                                     <>
-                                        {patchArray.map((item, index) => (
+                                        {filterDeviceAssociatedByDate.map((item, index) => (
                                             <div
                                                 key={index}
                                                 style={{
