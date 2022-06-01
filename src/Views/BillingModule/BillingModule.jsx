@@ -83,6 +83,7 @@ const columns = [
 let clockCounter = null;
 let timeCount = 0;
 let currentIdTimerClockActive = null;
+let currentItem99091Active = null;
 
 function BillingModule() {
     const pid = useParams().pid;
@@ -114,8 +115,6 @@ function BillingModule() {
     const [currentDateApi, setCurrentDateApi] = useState("");
 
     const [presentMonth, setPresentMonth] = useState("")
-
-    const format = "mm:ss";
 
     const location = useLocation();
     const history = useHistory();
@@ -155,6 +154,7 @@ function BillingModule() {
     const [firstTotalTime, setFirstTotalTime] = useState(0);
     const [firstTotalTimeDisplay, setFirstTotalTimeDisplay] = useState(0);
     const [secondTotalTime, setSecondTotalTime] = useState(0);
+    const [totalTime99091, setTotalTime99091] = useState(0);
 
     const [stageOneState, setStageOneState] = useState(true);
     const [stageTwoState, setStageTwoState] = useState(false);
@@ -163,6 +163,14 @@ function BillingModule() {
     const [taskTimeVal, setTaskTimeVal] = useState();
     const [taskNameVal, setTaskNameVal] = useState();
     const [taskNoteVal, setTaskNoteVal] = useState();
+    const [temperatureVal, setTemperatureVal] = useState();
+    const [spo2Val, setSpo2Val] = useState();
+    const [heartRateVal, setHeartRateVal] = useState();
+    const [bloodPressureVal, setBloodPressureVal] = useState();
+    const [respirationRateVal, setRespirationRateVal] = useState();
+    const [task99091, setTask99091] = useState([]);
+    
+
 
     const [taskCodeActive, setTaskCodeActive] = useState(CPT_CODE.CPT_99453);
     const [taskCodeInternalActive, setTaskCodeInternalActive] = useState("");
@@ -262,7 +270,9 @@ function BillingModule() {
                 </div>
                 <div style={{ fontSize: "1.5rem", textAlign: "center" }}>
                     Add Task
-                    <p id="add-task-timer"></p>
+                    {cptCode != CPT_CODE.CPT_99091 && (
+                         <p id="add-task-timer"></p>
+                    )}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <div style={{ width: "17.7%" }}>Date</div>
@@ -272,6 +282,46 @@ function BillingModule() {
                     <div style={{ width: "21.7%" }}>Staff Name</div>
                     <Input placeholder="Name" onChange={handleAddTaskNameChange} />
                 </div>
+                {cptCode == CPT_CODE.CPT_99091 && (
+                    <>
+                    <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                      <div style={{ width: "21.7%" }}>Temperature</div>
+                      <Input placeholder="Temperature" onChange={(e) => {
+                          setTemperatureVal(e.target.value)
+                      }} />
+                    </div>
+                     <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                     <div style={{ width: "21.7%" }}>Spo2</div>
+                     <Input placeholder="Spo2" onChange={(e) => {
+                         setSpo2Val(e.target.value)
+                     }} />
+                   </div>
+                    <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                    <div style={{ width: "21.7%" }}>Heart Rate</div>
+                    <Input placeholder="Heart Rate" onChange={(e) => {
+                        setHeartRateVal(e.target.value)
+                    }} />
+                  </div>
+                   <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                     <div style={{ width: "21.7%" }}>Blood Pressure</div>
+                     <Input placeholder="Blood Pressure" onChange={(e) => {
+                         setBloodPressureVal(e.target.value)
+                     }} />
+                   </div>
+                   <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                     <div style={{ width: "21.7%" }}>Respiration Rate</div>
+                     <Input placeholder="Respiration Rate" onChange={(e) => {
+                         setRespirationRateVal(e.target.value)
+                     }} />
+                   </div>
+                   <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                     <div style={{ width: "21.7%" }}>Time Spend</div>
+                     <Input placeholder="Time Spend" onChange={(e) => {
+                         setTaskTimeVal(e.target.value)
+                     }} />
+                   </div>
+                   </>
+                )}
                 <div>
                     Note
                     <TextArea
@@ -955,7 +1005,21 @@ function BillingModule() {
         }
         return '';
     }
+    const getLastUpdatedAt99091 = () => {
+        if(task99091.length > 0){
+            let lastItem = task99091[task99091.length - 1];
+            return moment(lastItem['date']).format('YYYY-MM-DD H:mm a');
+        }
+        return '';
+    }
 
+    const getFirst99091 = () => {
+        if(task99091.length > 0){
+            let firstItem = task99091[0];
+            return moment(firstItem['date']).format('YYYY-MM-DD H:mm a');
+        }
+        return '';
+    }
     const getTotalNumberDay = (item) => {
         let result = 0;
         let currentDate = moment();
@@ -1193,12 +1257,38 @@ function BillingModule() {
                 
             })
     }
+    const getNoteForItem99091 = () => {
+        if(task99091.length > 0){
+            let findItem = task99091.filter(item => item.task_id == currentItem99091Active);
+            if(isArray(findItem) && findItem.length > 0){
+                findItem = findItem[0];
+                return (
+                    <div style={{display: "flex"}} >
+                    <div style={{ width: "5%" }}>
+                                                    1
+                                                </div>
+                                                <div style={{ width: "25%" }}>
+                                                    {moment(findItem['date']).format('YYYY-MM-DD H:mm a')}
+                                                </div>
+                                                <div style={{ width: "50%" }}>
+                <p style={{margin: "0"}}>{findItem['staff_name']}</p>
+                <p>{findItem['note']}</p>
+                                                </div>
+                                                <div style={{ width: "15%" }}>
+                                                    {findItem['time_spent']} {Number(findItem['time_spent']) > 1 ? 'mins' : 'min'}
+                                                </div>
+                                                <div style={{ width: "5%" }}></div>
+                    </div>
+                )
+            }
+        }
+        return '';
 
+    }
     function callUpdateBillingTasks(cptCode, item = {}) {
         var date = new Date();
         var date_string = date.toISOString();
-        if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
-            let isCodeExist = false;
+        let isCodeExist = false;
             let billingId = null;
 
             billingInformation.map(item => {
@@ -1207,7 +1297,7 @@ function BillingModule() {
                     billingId = item.id
                 }
             })
-
+        if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
             if (isCodeExist) {
                 // update
                 let updateData = {};
@@ -1273,6 +1363,68 @@ function BillingModule() {
                     .catch((err) => {
                         console.log(err);
                     });
+            }
+        }
+        if(cptCode == CPT_CODE.CPT_99091){
+            if(isCodeExist){
+                let updateData = {
+                    code: cptCode,
+                    bill_date: date_string,
+                    pid: location.state.pid,
+                    billing_id: billingId,
+                    date: taskDateVal,
+                    temperature: temperatureVal,
+                    spo2: spo2Val,
+                    heart_rate: heartRateVal,
+                    blood_pressure: bloodPressureVal,
+                    respiration_rate: respirationRateVal,
+                    staff_name: taskNameVal,
+                    note: taskNoteVal,
+                    time_spent: taskTimeVal
+                    
+                }
+                billingApi
+                .updateBillingTask(
+                    updateData
+                )
+                .then((res) => {
+                    setTasksLoadingState(false);
+                    getListFirstTwentyTasks();
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+            } else {
+                billingApi
+                .addBillingTask(
+                    {
+                        code_type: CPT,
+                        code: cptCode,
+                        bill_date: date_string,
+                        pid: location.state.pid,
+                        revenue_code: 123,
+                        notecodes: "pending",
+                        bill_process: 0,
+                        fee: 40,
+                        task_id: date.getTime(),
+                        date: taskDateVal,
+                        temperature: temperatureVal,
+                        spo2: spo2Val,
+                        heart_rate: heartRateVal,
+                        blood_pressure: bloodPressureVal,
+                        respiration_rate: respirationRateVal,
+                        staff_name: taskNameVal,
+                        note: taskNoteVal,
+                        time_spent: taskTimeVal
+                    }
+                )
+                .then((res) => {
+                    setTasksLoadingState(false);
+                    getListFirstTwentyTasks();
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
             }
         }
     }
@@ -1609,12 +1761,18 @@ function BillingModule() {
                                     })
                                 }
                             }
-                            if (item.code === "99091") {
-                                lastState = true;
-                                lastData = {
-                                    date: getDateFromISO(item.date_time),
-                                    time: getTimeFromISO(item.date_time),
-                                };
+                            if (item.code == CPT_CODE.CPT_99091) {
+                                let temp99091Task = JSON.parse(item.params);
+                                let tmpTime = 0;
+                                if(!isArray(temp99091Task)) temp99091Task = [];
+                                setTask99091(temp99091Task);
+                                if(temp99091Task.length > 0) {
+                                    currentItem99091Active = temp99091Task[temp99091Task.length - 1].task_id;
+                                    temp99091Task.map(item => {
+                                        tmpTime +=  Number(item.time_spent);
+                                    })
+                                }
+                                setTotalTime99091(tmpTime);
                             }
                         }
                     );
@@ -1797,34 +1955,36 @@ function BillingModule() {
         return array.some(even);
     };
 
-    const arrayTable99091 = [
-        {
-            _key: "temp",
-            name: "Temperature",
-            value: 98.4
-        },
-        {
-            _key: "spo2",
-            name: "SPO2",
-            value: 96
-        },
-        {
-            _key: "hear_rate",
-            name: "Hear Rate",
-            value: 80
-        },
-        {
-            _key: "blood_pressure",
-            name: "Blood Pressure",
-            value: "137 / 82"
-        },
-        {
-            _key: "res_rate",
-            name: "Respiration Rate",
-            value: 12
-        },
-    ];
-
+ 
+    const getDataSourceByItem99091 = (item) => {
+        return [
+            {
+                _key: "temp",
+                name: "Temperature",
+                value: item['temperature'] || ''
+            },
+            {
+                _key: "spo2",
+                name: "SPO2",
+                value: item['spo2'] || ''
+            },
+            {
+                _key: "hear_rate",
+                name: "Hear Rate",
+                value: item['heart_rate'] || ''
+            },
+            {
+                _key: "blood_pressure",
+                name: "Blood Pressure",
+                value: item['blood_pressure'] || ''
+            },
+            {
+                _key: "res_rate",
+                name: "Respiration Rate",
+                value: item['respiration_rate'] || ''
+            },
+        ]
+    }
     const numberOfNightsBetweenDates = (start, end) => {
         let dayCount = 0;
         while (end > start) {
@@ -2125,6 +2285,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
+                                        setTaskCodeActive(CPT_CODE.CPT_99091)
                                     }}
                                     className={
                                         lastBillingState ? "bm-selected-active" : "bm-selected"
@@ -3176,61 +3337,75 @@ function BillingModule() {
                             }}
                         >
                             <div>
-                                <div style={{ fontSize: "1.2rem" }}>
-                                    CPT code: 99091 has not been enabled yet
-                                </div>
-                                <p>30 Minutes of Monitoring Each 30 Days without Interactive Communication</p>
-                            </div>
-
-                            <Row>
-                                <Col span={12}>
-                                    <div style={{ width: "100%" }}>
-                                        <Table
-                                            size="small"
-                                            className="vital-table"
-                                            columns={[
-                                                {
-                                                    width: "40%",
-                                                    title: (
-                                                        <div
-                                                            style={{
-                                                                fontFamily: "Lexend",
-                                                                fontWeight: "500",
-                                                                fontSize: "14px",
-                                                                color: "#727272",
-                                                            }}
-                                                        >
-                                                            Vitals
-                                                        </div>
-                                                    ),
-                                                    dataIndex: "name",
-                                                    key: "name",
-                                                },
-                                                {
-                                                    width: "30%",
-                                                    title: (
-                                                        <div
-                                                            style={{
-                                                                textAlign: "center",
-                                                                fontFamily: "Lexend",
-                                                                fontWeight: "500",
-                                                                fontSize: "14px",
-                                                                color: "#727272",
-                                                            }}
-                                                        >
-                                                            12.12.12 3:00PM
-                                                        </div>
-                                                    ),
-                                                    dataIndex: "value",
-                                                    key: "value",
-                                                },
-                                            ]}
-                                            dataSource={arrayTable99091}
-                                            pagination={false}
-                                            bordered
-                                        />
+                                {totalTime99091 < 30 && (
+                                    <div style={{ fontSize: "1.2rem" }}>
+                                        CPT code: 99091 has not been enabled yet
                                     </div>
-                                </Col>
+                                )}
+
+                                {totalTime99091 > 30 && (
+                                    <div style={{ fontSize: "1.2rem" }}>
+                                        CPT code: 99091 has been enabled
+                                    </div>
+                                )}
+                          
+                        <p>{totalTime99091} {totalTime99091 > 1 ? 'Minutes' : 'Minute'} of Monitoring Each 30 Days without Interactive Communication</p>
+                            </div>
+                            {addTaskState ? addTaskComponent(CPT_CODE.CPT_99091) : null}
+                       
+                            <Row>
+                            {task99091.map((item, index) => (
+                                <Col span={12}>
+                                <div style={{ width: "100%" }}>
+
+                                    <Table
+                                        size="small"
+                                        className="vital-table"
+                                        columns={[
+                                            {
+                                                width: "40%",
+                                                title: (
+                                                    <div
+                                                        style={{
+                                                            fontFamily: "Lexend",
+                                                            fontWeight: "500",
+                                                            fontSize: "14px",
+                                                            color: "#727272",
+                                                        }}
+                                                    >
+                                                        Vitals
+                                                    </div>
+                                                ),
+                                                dataIndex: "name",
+                                                key: "name",
+                                            },
+                                            {
+                                                width: "30%",
+                                                title: (
+                                                    <div
+                                                        style={{
+                                                            textAlign: "center",
+                                                            fontFamily: "Lexend",
+                                                            fontWeight: "500",
+                                                            fontSize: "14px",
+                                                            color: "#727272",
+                                                        }}
+                                                    >
+                                                        {moment(item['date']).format('YYYY-MM-DD H:mm a')}
+                                                    </div>
+                                                ),
+                                                dataIndex: "value",
+                                                key: "value",
+                                            },
+                                        ]}
+                                        dataSource={getDataSourceByItem99091(item)}
+                                        pagination={false}
+                                        bordered
+                                    />
+                                </div>
+                            </Col>
+                            ))}
+                            
 
                                 <Col span={12} style={{ paddingLeft: "5%" }}>
                                     <div>
@@ -3241,7 +3416,7 @@ function BillingModule() {
                                             padding: "3% 7%"
                                         }}>
                                             <div style={{ textAlign: "center" }}>
-                                                Last updated at 12/12/12 8:00 pm
+                                                Last updated at {getLastUpdatedAt99091()}
                                             </div>
                                             <div>
                                                 <div
@@ -3251,7 +3426,7 @@ function BillingModule() {
                                                     }}
                                                 >
                                                     <div style={{ width: "45%" }}>Status: Active</div>
-                                                    <div style={{ width: "55%" }}>Enrollment: 25/02/21</div>
+                                                <div style={{ width: "55%" }}>Enrollment: {getFirst99091()}</div>
                                                 </div>
 
                                                 <div
@@ -3280,33 +3455,22 @@ function BillingModule() {
                                             >
                                                 Notes
                                             </div>
-
+                                            {getNoteForItem99091()}
                                             <div style={{
                                                 display: "flex",
                                                 padding: "1rem 0.5rem"
                                             }}>
-                                                <div style={{ width: "5%" }}>
-                                                    1
-                                                </div>
-                                                <div style={{ width: "25%" }}>
-                                                    12/12/12 12:00
-                                                </div>
-                                                <div style={{ width: "50%" }}>
-                                                    Note
-                                                </div>
-                                                <div style={{ width: "15%" }}>
-                                                    2mins
-                                                </div>
-                                                <div style={{ width: "5%" }}>
+                                                
                                                 <CusBtn
                                                     onClick={() => {
                                                         setAddTaskState(true);
                                                     }}
-                                                    style={{ padding: "1% 5%" }}
+                                                    style={{ padding: "10px 45px" }}
+                                                    disabled={totalTime99091 < 30 ? false : true}
                                                 >
                                                     Add
                                                 </CusBtn>
-                                                </div>
+                                        
                                             </div>
                                         </div>
                                     </div>
