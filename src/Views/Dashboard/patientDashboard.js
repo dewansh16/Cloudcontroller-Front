@@ -556,7 +556,7 @@ export default function PatientDashboard(props) {
                                             item.PatientState.state === "CRITICAL" ? true : false
                                         }
                                         bedNumber={item.location_map?.ward || "NA"}
-                                        Name={`${item.demographic_map.fname} ${item.demographic_map.lname[0]}.`}
+                                        Name={`${item.demographic_map.fname} ${item.demographic_map.lname}.`}
                                         age={getAge(new Date(), new Date(item.demographic_map.DOB)) || 0}
                                         sex={item.demographic_map.sex}
                                         //pid is passed to set active element

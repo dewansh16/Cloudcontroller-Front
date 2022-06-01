@@ -14,12 +14,12 @@ export default function ChartsBlock({
     keyChart
 }) {
     const toolTipConfig = {
-        "Temperature": `${value}° F`,
-        // SPO2: `${value}`,
-        "Heart Rate": `${value} bpm`,
-        "Respiration Rate": `${value} bpm`,
-        "Weight": `${Math.round(value * 100) / 100} lbs`,
-        "Blood Pressure": `${value} - ${valueBpd} mmHg`
+        // "Temperature": `${value}° F`,
+        // // SPO2: `${value}`,
+        // "Heart Rate": `${value} bpm`,
+        // "Respiration Rate": `${value} bpm`,
+        // "Weight": `${Math.round(value * 100) / 100} lbs`,
+        // "Blood Pressure": `${value} - ${valueBpd} mmHg`
     };
 
     return (
