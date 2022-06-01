@@ -1584,11 +1584,11 @@ function BillingModule() {
             case "spo2":
                 return "spo2"
             case "ecg":
-                return "ecg"
+                return "ecg_hr"
             case "alphamed":
-                return "alphamed"
+                return "alphamed_bpd"
             case "ihealth":
-                return "ihealth"
+                return "ihealth_bpd"
 
             default:
                 break;
@@ -1728,7 +1728,7 @@ function BillingModule() {
                         setPatchEnrolled(true);
                         setPatchData(tempPatchdata);
                     }
-                    setPatchLoading(false);
+                    
 
                     if (res.data.response.patchData) {
                         res.data.response.patchData?.forEach((patch) => {
@@ -1736,24 +1736,11 @@ function BillingModule() {
                             const endDate = getLastDateMonitored(patch) || "";
                             const typeQuery = shortTypeQueryOfSensor(patch["patches.patch_type"]);
 
-                            let arrKeyChild = [];
-                            if (typeQuery === "alphamed") {
-                                arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
-                            } else if (typeQuery === "ihealth") {
-                                arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
-                            }
-
-                            if (!!startDate && !!endDate && !!typeQuery) {
-                                if (arrKeyChild?.length > 0) {
-                                    arrKeyChild.forEach((itemKey) => {
-                                        checkTotalNumberDateHaveDataFromInflux(startDate, endDate, itemKey, patch);
-                                    })
-                                } else {
-                                    checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
-                                }
+                            if (!!startDate && !!typeQuery) {
+                                checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
                             }
                         })
-
+                        
                         setPatchArray(
                             res.data.response.patchData
                         );
@@ -1938,11 +1925,9 @@ function BillingModule() {
         return dayCount
     }
 
-    console.log("patchArray", patchArray);
-
     const checkTotalNumberDateHaveDataFromInflux = (startDate = "", endDate = "", sensorType = "", patch) => {
         const start = new Date(startDate);
-        const end = new Date(endDate);
+        const end = new Date();
 
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
@@ -1952,7 +1937,7 @@ function BillingModule() {
 
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
-                |> filter(fn: (r) => r["_measurement"] == "patient0f32e7d0-fe65-4d8b-894f-a5be26484ff3_${sensorType}")
+                |> filter(fn: (r) => r["_measurement"] == "${location.state.pid}_${sensorType}")
                 |> yield(name: "mean")
             `
 
@@ -2211,7 +2196,7 @@ function BillingModule() {
                             </div>
                             {/* <div className="bm-cptcode-b-header">
                                 <div
-                                    className="bm-header-line"
+                                    className="bm-header-line
                                     style={{ background: "#ffcd00" }}
                                 ></div>
                             </div> */}
@@ -2777,10 +2762,10 @@ function BillingModule() {
                                                     {item["patches.patch_type"]}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "15%" }}>
-                                                    {getFirstDateMonitored(item)}
+                                                    {item?.datesInflux?.[0]}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "15%" }}>
-                                                    {getLastDateMonitored(item)}
+                                                    {item?.datesInflux?.[item?.datesInflux?.length - 1]}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "13%" }}>
                                                     {item?.totalDay || 0}

@@ -24,7 +24,7 @@ const controlButtonStyle = {
 function computeTotalPages(maxItems, pageSize) {
     // storage.setItem('pageSize', value)
     let val = Math.ceil(maxItems / parseInt(pageSize))
-    return val;
+    return val > 0 ? val : 1;
 }
 
 const PaginationBox = ({ totalPages, currentPageVal, setCurrentPageVal, valuePageLength, setValuePageLength }) => {
@@ -45,7 +45,8 @@ const PaginationBox = ({ totalPages, currentPageVal, setCurrentPageVal, valuePag
     }
 
     const setValPageLengthOnSelect = (val) => {
-        setValuePageLength(val)
+        setValuePageLength(val);
+        setCurrentPageVal(1);
     }
 
     return <div className='pagination-box'>

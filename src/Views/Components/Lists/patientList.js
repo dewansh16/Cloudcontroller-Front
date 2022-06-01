@@ -1,21 +1,24 @@
 import React, { useEffect, useRef } from "react";
+
 import { motion } from "framer-motion";
 import { io } from "socket.io-client";
 import { InfluxDB } from "@influxdata/influxdb-client";
 import { isJsonString } from "../../../Utils/utils";
 
 import { Row, Col, Divider, Grid, Tooltip } from "antd";
+
 import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
 import ChartsBlock from "./listComponent/chartsBlock";
 import { Button } from "../../../Theme/Components/Button/button";
-const { useBreakpoint } = Grid;
 
+// import { arrDataChart } from "../../arrayChart";
+
+const { useBreakpoint } = Grid;
 
 const PatientListItem = (props) => {
     const screens = useBreakpoint();
-
-    // console.log("props", props);
+    // const newArrayDataChart = [...arrDataChart];
 
     const dividerColor = "black";
     const listThemeColor = "#444444";
@@ -49,7 +52,7 @@ const PatientListItem = (props) => {
     const listStyle = {
         borderRadius: "0.3em",
         height: "75px",
-        margin: "0 0 20px 0",
+        margin: "0 0 8px 0",
         padding: "0.2em 2em",
         background: "white",
         display: "flex",
@@ -97,7 +100,7 @@ const PatientListItem = (props) => {
         {
             _key: 'ecg_hr',
             name: "Heart Rate",
-            icon:  Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
+            icon: Icons.ecgIcon({ Style: { color: Colors.darkPink } }),
             val: 0,
             color: Colors.darkPink,
             trendData: []
@@ -129,7 +132,7 @@ const PatientListItem = (props) => {
             color: Colors.yellow,
             trendData: []
         },
-    ]
+    ];
 
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
 
@@ -141,21 +144,23 @@ const PatientListItem = (props) => {
         const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: -4d)
+                |> range(start: -${props.dataFilterOnHeader.valDuration})
                 |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
+        let val_bpd = 0;
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 if (key === "alphamed_bpd" || key === "ihealth_bpd") {
-                    chart.val_bpd = dataQueryInFlux?._value;
+                    val_bpd = dataQueryInFlux?._value;
                 } else {
-                    arrayRes.push({ value: dataQueryInFlux?._value || 0 });
-                    // if (arrayRes?.length > 200) {
-                    //     arrayRes.splice(0, 1);
-                    // }
+                    let value = dataQueryInFlux?._value || 0;
+                    if (key === "weight") {
+                        value = value * 2.2046
+                    }
+                    arrayRes.push({ value });
                 }
             },
             error(error) {
@@ -163,12 +168,13 @@ const PatientListItem = (props) => {
                 console.log('nFinished ERROR')
             },
             complete() {
-                // console.log('nFinished SUCCESS');
-                if (arrayRes?.length > 0 && key !== "alphamed_bpd") {
+                if (key !== "alphamed_bpd" && key !== "ihealth_bpd") {
                     chart.trendData = arrayRes || [];
                     chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-                    setChartBlockData([...newArrChart]);
+                } else {
+                    chart.val_bpd = val_bpd;
                 }
+                setChartBlockData([...newArrChart]);
             },
         })
     }
@@ -196,8 +202,6 @@ const PatientListItem = (props) => {
                     arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
                 }
 
-                // console.log("arrKeyChild", arrKeyChild);
-
                 for (let j = 0; j < arrKeyChild.length; j++) {
                     processDataForSensor(arrKeyChild[j], newArrChart, chart);
                 }
@@ -215,7 +219,7 @@ const PatientListItem = (props) => {
         // return () => {
         //     clearInterval(timeInterval);
         // }
-    }, []);
+    }, [props.pid, props.dataFilterOnHeader.valDuration]);
 
     // React.useEffect(() => {
     //     var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
@@ -232,7 +236,12 @@ const PatientListItem = (props) => {
     // }, []);
 
     const pushToPatientDetails = () => {
-        props.parentProps.history.push(`/dashboard/patient/details/${props.pid}`);
+        props.parentProps.history.push({
+            pathname: `/dashboard/patient/details/${props.pid}`,
+            state: {
+                dataFilterHeader: props.dataFilterOnHeader,
+            },
+        });
     };
 
     const pushToEdit = () => {
@@ -260,35 +269,35 @@ const PatientListItem = (props) => {
         <div
             style={{
                 display: "flex",
-                flexDirection: "column",
-                width: width,
                 alignItems: "center",
+                width: width,
             }}
         >
-            <div
-                style={{
-                    width: "4em",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    textAlign: "center",
-                }}
-            >
-                {Icons.houseIcon({
-                    Style: { color: `${activeTheme}`, width: "2em", opacity: "0.75" },
-                })}
-                {/* <span
-                    style={{
-                        color: `${activeTheme}`,
-                        fontWeight: "bold",
-                        marginTop: "-0.3em",
-                    }}
-                >
-                    {props.bedNumber}
-                </span> */}
-            </div>
-            <div>
-                <span
+            {Icons.houseIcon({
+                Style: { fill: `${activeTheme}`, width: "2em", opacity: "0.75" },
+            })}
+            <div style={{
+                marginLeft: "1.25rem",
+                textAlign: "center"
+            }}>
+                <div>
+                    <div style={{ color: `${activeTheme}`, fontWeight: "bold" }}>
+                        {props.Name}
+                    </div>
+                    <div style={{ lineHeight: "16px" }}>
+                        <span style={{ color: `${activeTheme}` }}>{props.age} Y</span>
+                        <span
+                            style={{
+                                color: `${activeTheme}`,
+                                paddingLeft: "1.4em",
+                                textTransform: "uppercase",
+                            }}
+                        >
+                            {props.sex[0]}
+                        </span>
+                    </div>
+                </div>
+                <div
                     style={{
                         color: `${activeTheme}`,
                         opacity: "0.6",
@@ -296,8 +305,7 @@ const PatientListItem = (props) => {
                     }}
                 >
                     MR: {props.data.demographic_map.med_record}
-                    {/* MR: {props.data.med_record} */}
-                </span>
+                </div>
             </div>
         </div>
     );
@@ -424,8 +432,9 @@ const PatientListItem = (props) => {
                 }
             >
                 <BedDetailsSection width="10%" />
-                <CustomDivider />
-                <NameSection width="10%" />
+                {/* <CustomDivider />
+                <NameSection width="10%" /> */}
+
                 <CustomDivider />
                 <div
                     style={{
@@ -477,16 +486,16 @@ const PatientListItem = (props) => {
                             })}
                         </Button>
                     </div>
-                    <BedDetailsSection width="13%" />
+                    <BedDetailsSection width="15%" />
 
-                    <CustomDivider />
-                    <NameSection width="10%" />
+                    {/* <CustomDivider />
+                    <NameSection width="10%" /> */}
 
                     {/* <CustomDivider />
                     <EwsSection width="5%" /> */}
 
                     <CustomDivider />
-                    <ChartSection width="72%" />
+                    <ChartSection width="83%" />
                 </div>
             );
         } else {
@@ -500,7 +509,7 @@ const PatientListItem = (props) => {
                         }
                         onClick={pushToPatientDetails}
                     >
-                        <div style={{ width: "5%" }}>
+                        <div>
                             <Button
                                 style={{ padding: "0em" }}
                                 onClick={ShowPatientDetails}
@@ -512,13 +521,13 @@ const PatientListItem = (props) => {
                             </Button>
                         </div>
 
-                        <BedDetailsSection width="20%" />
+                        <BedDetailsSection />
 
-                        <CustomDivider />
+                        {/* <CustomDivider />
                         <NameSection width="25%" />
 
                         <CustomDivider />
-                        <EwsSection width="10%" />
+                        <EwsSection width="10%" /> */}
 
                         <CustomDivider />
                         {/* eslint-disable-next-line */}
@@ -542,12 +551,12 @@ const PatientListItem = (props) => {
                                 ...listStyle,
                                 ...selectedListItemBorder,
                                 position: "relative",
-                                top: "-1.5rem",
+                                top: "0rem",
                             } : {
                                 ...listStyle,
                                 ...listItemBorder,
                                 position: "relative",
-                                top: "-1.5rem",
+                                top: "0rem",
                             }
                         }
                         initial={"hidden"}
