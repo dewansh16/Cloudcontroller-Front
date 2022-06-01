@@ -163,6 +163,13 @@ function BillingModule() {
     const [taskTimeVal, setTaskTimeVal] = useState();
     const [taskNameVal, setTaskNameVal] = useState();
     const [taskNoteVal, setTaskNoteVal] = useState();
+    const [temperatureVal, setTemperatureVal] = useState();
+    const [spo2Val, setSpo2Val] = useState();
+    const [heartRateVal, setHeartRateVal] = useState();
+    const [bloodPressureVal, setBloodPressureVal] = useState();
+    const [respirationRateVal, setRespirationRateVal] = useState();
+
+
 
     const [taskCodeActive, setTaskCodeActive] = useState(CPT_CODE.CPT_99453);
     const [taskCodeInternalActive, setTaskCodeInternalActive] = useState("");
@@ -262,7 +269,9 @@ function BillingModule() {
                 </div>
                 <div style={{ fontSize: "1.5rem", textAlign: "center" }}>
                     Add Task
-                    <p id="add-task-timer"></p>
+                    {cptCode != CPT_CODE.CPT_99091 && (
+                         <p id="add-task-timer"></p>
+                    )}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <div style={{ width: "17.7%" }}>Date</div>
@@ -272,6 +281,52 @@ function BillingModule() {
                     <div style={{ width: "21.7%" }}>Staff Name</div>
                     <Input placeholder="Name" onChange={handleAddTaskNameChange} />
                 </div>
+                {cptCode == CPT_CODE.CPT_99091 && (
+                    <>
+                    <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                      <div style={{ width: "21.7%" }}>Temperature</div>
+                      <Input placeholder="Temperature" onChange={(e) => {
+                          setTemperatureVal(e.target.value)
+                      }} />
+                    </div>
+                     <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                     <div style={{ width: "21.7%" }}>Spo2</div>
+                     <Input placeholder="Spo2" onChange={(e) => {
+                         setSpo2Val(e.target.value)
+                     }} />
+                   </div>
+                    <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                    <div style={{ width: "21.7%" }}>Heart Rate</div>
+                    <Input placeholder="Heart Rate" onChange={(e) => {
+                        setHeartRateVal(e.target.value)
+                    }} />
+                  </div>
+                    <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                     <div style={{ width: "21.7%" }}>Heart Rate</div>
+                     <Input placeholder="Heart Rate" onChange={(e) => {
+                         setHeartRateVal(e.target.value)
+                     }} />
+                   </div>
+                   <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                     <div style={{ width: "21.7%" }}>Blood Pressure</div>
+                     <Input placeholder="Blood Pressure" onChange={(e) => {
+                         setBloodPressureVal(e.target.value)
+                     }} />
+                   </div>
+                   <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                     <div style={{ width: "21.7%" }}>Respiration Rate</div>
+                     <Input placeholder="Respiration Rate" onChange={(e) => {
+                         setRespirationRateVal(e.target.value)
+                     }} />
+                   </div>
+                   <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                     <div style={{ width: "21.7%" }}>Time Spend</div>
+                     <Input placeholder="Time Spend" onChange={(e) => {
+                         setTaskTimeVal(e.target.value)
+                     }} />
+                   </div>
+                   </>
+                )}
                 <div>
                     Note
                     <TextArea
@@ -1197,8 +1252,7 @@ function BillingModule() {
     function callUpdateBillingTasks(cptCode, item = {}) {
         var date = new Date();
         var date_string = date.toISOString();
-        if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
-            let isCodeExist = false;
+        let isCodeExist = false;
             let billingId = null;
 
             billingInformation.map(item => {
@@ -1207,7 +1261,7 @@ function BillingModule() {
                     billingId = item.id
                 }
             })
-
+        if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
             if (isCodeExist) {
                 // update
                 let updateData = {};
@@ -1273,6 +1327,42 @@ function BillingModule() {
                     .catch((err) => {
                         console.log(err);
                     });
+            }
+        }
+        if(cptCode == CPT_CODE.CPT_99091){
+            if(isCodeExist){
+
+            } else {
+                billingApi
+                .addBillingTask(
+                    {
+                        code_type: CPT,
+                        code: cptCode,
+                        bill_date: date_string,
+                        pid: location.state.pid,
+                        revenue_code: 123,
+                        notecodes: "pending",
+                        bill_process: 0,
+                        fee: 40,
+                        id: date.getTime(),
+                        date: taskDateVal,
+                        temperature: temperatureVal,
+                        spo2: spo2Val,
+                        heart_rate: heartRateVal,
+                        blood_pressure: bloodPressureVal,
+                        respiration_rate: respirationRateVal,
+                        staff_name: taskNameVal,
+                        note: taskNoteVal,
+                        time_spent: taskTimeVal
+                    }
+                )
+                .then((res) => {
+                    setTasksLoadingState(false);
+                    getListFirstTwentyTasks();
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
             }
         }
     }
@@ -3196,7 +3286,7 @@ function BillingModule() {
                                 </div>
                                 <p>30 Minutes of Monitoring Each 30 Days without Interactive Communication</p>
                             </div>
-
+                            {addTaskState ? addTaskComponent(CPT_CODE.CPT_99091) : null}
                             <Row>
                                 <Col span={12}>
                                     <div style={{ width: "100%" }}>
@@ -3317,7 +3407,7 @@ function BillingModule() {
                                                     onClick={() => {
                                                         setAddTaskState(true);
                                                     }}
-                                                    style={{ padding: "1% 5%" }}
+                                                    style={{ padding: "10px 45px" }}
                                                 >
                                                     Add
                                                 </CusBtn>
