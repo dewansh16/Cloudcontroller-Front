@@ -173,6 +173,8 @@ function BillingModule() {
     const [runUseEffect, setRunUseEffect] = useState(0);
     const [timerTask, setTimerTask] = useState(false);
 
+    const [activeCode99454, setActiveCode99454] = useState(false);
+
     function handleMonthChange(date, dateString) {
         console.log(dateString);
 
@@ -1712,8 +1714,6 @@ function BillingModule() {
         }
     }
 
-    console.log("currentDateApi", currentDateApi);
-
     useEffect(() => {
         if (isTableScroll === false && pdfState === "receipt") {
             const handleDownloadPdf = async () => {
@@ -1863,11 +1863,23 @@ function BillingModule() {
         })
     };
 
+    const numberOfNightsBetweenDates = (start, end) => {
+        let dayCount = 0;
+        while (end >= start) {
+            dayCount++;
+            start.setDate(start.getDate() + 1);
+        };
+
+        return dayCount
+    }
+
     const filterDeviceAssociatedByDate = useMemo(() => {
         const newArr = [];
-        let dayMonitored = 0;
+        let totalDayMonitored = 0;
+
         let minDate = null;
         let maxDate = null;
+        const timeFilter = new Date(currentDateApi);
 
         for (let index = 0; index < patchArray.length; index++) {
             const patch = patchArray[index];
@@ -1875,11 +1887,11 @@ function BillingModule() {
             if (!!patch.totalDay && !!patch.datesInflux) {
                 const firstDateMonitored = new Date(patch.datesInflux[0]);
                 const lastDateMonitored = new Date(patch.datesInflux[patch.datesInflux?.length - 1])
-                
-                const timer = new Date(currentDateApi);
-                timer.setHours(0, 0, 1);
 
-                if (firstDateMonitored.getTime() > timer.getTime()) {
+                if (
+                    Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear()) 
+                    && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
+                ) {
                     if (minDate === null || minDate > firstDateMonitored) {
                         minDate = firstDateMonitored;
                     } 
@@ -1888,20 +1900,29 @@ function BillingModule() {
                         maxDate = lastDateMonitored;
                     }
 
-                    console.log("minDate", minDate, "maxDate", maxDate);
                     newArr.push(patch);
                 }
             }
         }
 
-      
-        for (let idx = 0; idx < newArr.length; idx++) {
-            const element = newArr[idx];
-            
+        if (minDate !== null && maxDate !== null) {
+            totalDayMonitored = numberOfNightsBetweenDates(new Date(minDate), new Date(maxDate));
         }
 
+        let result = 0;
+        if (totalDayMonitored > TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
+            result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
+        }
 
-        return newArr;
+        if (result > 0 
+                && Number(new Date().getFullYear()) === Number(timeFilter.getFullYear()) 
+                && Number(new Date().getMonth()) === Number(timeFilter.getMonth())
+                && !activeCode99454
+        ) {
+            setActiveCode99454(true);
+        }
+
+        return { newArr, totalDayMonitored, billedUnit: result };
     }, [patchArray, currentDateApi]);
 
     return rightSideLoading ? (
@@ -2009,7 +2030,7 @@ function BillingModule() {
                                     className="bm-header-dot"
                                     style={
                                         initialStepDoneState
-                                            ? getUnitBilledSensor()
+                                            ? activeCode99454
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -2027,7 +2048,7 @@ function BillingModule() {
                                     className="bm-header-line"
                                     style={
                                         initialStepDoneState
-                                            ? getUnitBilledSensor()
+                                            ? activeCode99454
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -2637,15 +2658,15 @@ function BillingModule() {
                                 <div className="bm-sensor-monitored-bar">
                                     <div className="bm-sensor-monitored-bar-two"
                                         style={{
-                                            width: `${(getHoursProcessSensor() / 16) * 100}%`,
+                                            width: `${(filterDeviceAssociatedByDate?.totalDayMonitored / 16) * 100}%`,
                                         }}>
                                     </div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: "1.2rem" }}>Days Monitored: {getHoursProcessSensor()}/{TOTAL_HOURS_FOR_EACH_SENSOR_BILLED}</div>
-                                    {getUnitBilledSensor() > 0 && (
+                                    <div style={{ fontSize: "1.2rem" }}>Days Monitored: {filterDeviceAssociatedByDate?.totalDayMonitored}/{TOTAL_HOURS_FOR_EACH_SENSOR_BILLED}</div>
+                                    {filterDeviceAssociatedByDate?.billedUnit > 0 && (
                                         <div style={{ color: "#00000085" }}>
-                                            {`${getUnitBilledSensor()} billed unit.`}
+                                            {`${filterDeviceAssociatedByDate?.billedUnit} billed unit.`}
                                         </div>
                                     )}
 
@@ -2666,7 +2687,7 @@ function BillingModule() {
                                 <div className="bm-item-header" style={{ width: "13%" }}>Total Number Of Day</div>
                             </div>
                             <div style={{ overflowY: "scroll", height: "70%", marginRight: '-6px' }}>
-                                {filterDeviceAssociatedByDate.length === 0 ? (
+                                {filterDeviceAssociatedByDate?.newArr?.length === 0 ? (
                                     <div
                                         style={{
                                             height: "100%",
@@ -2682,7 +2703,7 @@ function BillingModule() {
                                     </div>
                                 ) : (
                                     <>
-                                        {filterDeviceAssociatedByDate.map((item, index) => (
+                                        {filterDeviceAssociatedByDate?.newArr?.map((item, index) => (
                                             <div
                                                 key={index}
                                                 style={{
