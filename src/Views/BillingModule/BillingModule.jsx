@@ -2134,6 +2134,8 @@ function BillingModule() {
     }
 
     const filterDeviceAssociatedByDate = useMemo(() => {
+        if (!associatedSensorsState) return false;
+
         const newArr = [];
         let totalDayMonitored = 0;
 
@@ -2144,10 +2146,9 @@ function BillingModule() {
         for (let index = 0; index < patchArray.length; index++) {
             const patch = patchArray[index];
 
-            if (!!patch.totalDay && !!patch.datesInflux) {
+            if (patch?.datesInflux?.length > 0) {
                 const firstDateMonitored = new Date(patch.datesInflux[0]);
                 const lastDateMonitored = new Date(patch.datesInflux[patch.datesInflux?.length - 1])
-
                 if (
                     Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear()) 
                     && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
@@ -2163,7 +2164,7 @@ function BillingModule() {
                     newArr.push(patch);
                 }
             }
-        }
+        } 
 
         if (minDate !== null && maxDate !== null) {
             totalDayMonitored = numberOfNightsBetweenDates(new Date(minDate), new Date(maxDate));
@@ -2182,8 +2183,10 @@ function BillingModule() {
             setActiveCode99454(true);
         }
 
+        setPatchLoading(false);
+
         return { list: newArr, totalDayMonitored, billedUnit: result };
-    }, [patchArray, currentDateApi]);
+    }, [patchArray, currentDateApi, associatedSensorsState]);
 
     return rightSideLoading ? (
         <div
@@ -2277,6 +2280,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
+                                        setPatchLoading(true);
                                     }}
                                     className={
                                         associatedSensorsState
@@ -2987,10 +2991,10 @@ function BillingModule() {
                                                     {item["patches.patch_type"]}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "15%" }}>
-                                                    {item?.datesInflux?.[0]}
+                                                    {moment(item?.datesInflux?.[0]).format('YYYY-MM-DD')}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "15%" }}>
-                                                    {item?.datesInflux?.[item?.datesInflux?.length - 1]}
+                                                    {moment(item?.datesInflux?.[item?.datesInflux?.length - 1]).format('YYYY-MM-DD')}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "13%" }}>
                                                     {item?.totalDay || 0}
