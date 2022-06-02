@@ -1,5 +1,6 @@
 import React from "react";
 import { Col, Divider, Tooltip } from "antd";
+import { takeDecimalNumber } from "../../../../Utils/utils";
 import SmallLineChart from "../../Charts/smallCharts/lineChart";
 
 export default function ChartsBlock({
@@ -22,6 +23,31 @@ export default function ChartsBlock({
         // "Blood Pressure": `${value} - ${valueBpd} mmHg`
     };
 
+    // const renderValueByKey = (key) => {
+    //     switch (key) {
+    //         case "temp":
+    //             const celsius = 5 / 9 * (value - 32);
+    //             return (
+    //                 <div style={{ textAlign: "center", color: strokeColor }}>
+    //                     <div>{`${takeDecimalNumber(value)}°F`}</div>
+    //                     <Divider style={{ margin: "0px" }} />
+    //                     <div>{`${takeDecimalNumber(celsius)}°C`}</div>
+    //                 </div>
+    //             )    
+    //         case "blood_pressuer":
+    //             return (
+    //                 <div style={{ textAlign: "center", color: strokeColor }}>
+    //                     <div>{`${takeDecimalNumber(value)}mmHg`}</div>
+    //                     <Divider style={{ margin: "0px" }} />
+    //                     <div>{`${takeDecimalNumber(valueBpd)}mmHg`}</div>
+    //                 </div>
+    //             )               
+        
+    //         default:
+    //             break;
+    //     }
+    // };
+
     return (
         <>
             <Tooltip title={name}>
@@ -32,7 +58,7 @@ export default function ChartsBlock({
                         alignItems: "center",
                         justifyContent: "center",
                     }}
-                    flex={1}
+                    flex={0.5}
                 >
                     {Icon}
                 </Col>
@@ -47,6 +73,7 @@ export default function ChartsBlock({
                     }}
                     flex={1}
                 >
+                    {/* {renderValueByKey(keyChart)} */}
                     {name === "Blood Pressure" ? (
                         <div>
                             <h3

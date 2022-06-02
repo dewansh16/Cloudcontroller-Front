@@ -30,11 +30,12 @@ import "./DeviceManagement.css";
 //     return [response, loading]
 // }
 
-function DeviceManagement({ pid, associated_list }) {
+function DeviceManagement({ pid, associated_list, valDuration }) {
     const [deviceClass, setClass] = useState({
         isLoading: true,
         list: [],
     });
+    
     const [menuState, setMenuState] = useState();
 
     const handleMenuState = ({ item, key }) => {
@@ -183,6 +184,7 @@ function DeviceManagement({ pid, associated_list }) {
                                             pid={pid}
                                             deviceType={Item["patches.patch_type"]}
                                             onDetach={onDetachAssociate}
+                                            valDuration={valDuration}
                                         />
                                     )
                             )}
