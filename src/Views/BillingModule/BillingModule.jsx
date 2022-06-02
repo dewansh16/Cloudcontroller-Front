@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
 import { Button as CusBtn } from "../../Theme/Components/Button/button";
 import {
@@ -13,7 +13,8 @@ import {
     Table,
     Checkbox,
     Row,
-    Col
+    Col,
+    notification
 } from "antd";
 import {
     CloseOutlined,
@@ -55,7 +56,9 @@ const monthNames = [
 ];
 
 const TOTAL_HOURS_FOR_EACH_SENSOR_BILLED = 16;
-const TOTAL_HOURS_FOR_EACH_99458_BILLED = 30;
+const TOTAL_HOURS_FOR_EACH_99458_BILLED = 20;
+const TOTAL_HOURS_FOR_CODE_99457_BILLED = 20;
+const TOTAL_HOURS_FOR_EACH_99091_BILLED = 30;
 
 const columns = [
     {
@@ -84,6 +87,7 @@ let clockCounter = null;
 let timeCount = 0;
 let currentIdTimerClockActive = null;
 
+
 function BillingModule() {
     const pid = useParams().pid;
     // console.log("pid is here....", pid);
@@ -92,7 +96,7 @@ function BillingModule() {
     const [billProcessedLoading, setBillProcessedLoading] = useState(false);
 
     const [initialBillDate, setInitialBillDate] = useState('')
-
+    const [currentItem99091Active, setCurrentItem99091Active] = useState(null);
     const [taskDeleteArray, setTaskDeleteArray] = useState([])
     const [billingInformation, setBillingInformation] = useState([])
 
@@ -115,8 +119,6 @@ function BillingModule() {
 
     const [presentMonth, setPresentMonth] = useState("")
 
-    const format = "mm:ss";
-
     const location = useLocation();
     const history = useHistory();
 
@@ -127,7 +129,7 @@ function BillingModule() {
     const [secondTwentyState, setSecondTwentyState] = useState(false);
     const [lastBillingState, setLastBillingState] = useState(false);
     const [billProcessedState, setBillProcessedState] = useState(false);
-    const [summaryState, setSummaryState] = useState(false)
+    const [summaryState, setSummaryState] = useState(false);
 
     const [initialStepDoneState, setInitialStepDoneState] = useState(false);
     const [enrollPatchState, setEnrollPatchState] = useState(false);
@@ -155,14 +157,22 @@ function BillingModule() {
     const [firstTotalTime, setFirstTotalTime] = useState(0);
     const [firstTotalTimeDisplay, setFirstTotalTimeDisplay] = useState(0);
     const [secondTotalTime, setSecondTotalTime] = useState(0);
+    const [totalTime99091, setTotalTime99091] = useState(0);
 
     const [stageOneState, setStageOneState] = useState(true);
     const [stageTwoState, setStageTwoState] = useState(false);
 
-    const [taskDateVal, setTaskDateVal] = useState();
+    const [taskDateVal, setTaskDateVal] = useState(new Date());
     const [taskTimeVal, setTaskTimeVal] = useState();
     const [taskNameVal, setTaskNameVal] = useState();
     const [taskNoteVal, setTaskNoteVal] = useState();
+    const [temperatureVal, setTemperatureVal] = useState();
+    const [spo2Val, setSpo2Val] = useState();
+    const [heartRateVal, setHeartRateVal] = useState();
+    const [bloodPressureVal, setBloodPressureVal] = useState();
+    const [respirationRateVal, setRespirationRateVal] = useState();
+    const [task99091, setTask99091] = useState([]);
+
 
     const [taskCodeActive, setTaskCodeActive] = useState(CPT_CODE.CPT_99453);
     const [taskCodeInternalActive, setTaskCodeInternalActive] = useState("");
@@ -173,54 +183,59 @@ function BillingModule() {
     const [runUseEffect, setRunUseEffect] = useState(0);
     const [timerTask, setTimerTask] = useState(false);
 
+    const [activeCode99454, setActiveCode99454] = useState(false);
+    const [keyNoteActive, setKeyNoteActive] = useState(0); 
+
+    const [requiredAddTask, setRequiredAddTask] = useState([]);
+
     function handleMonthChange(date, dateString) {
         console.log(dateString);
 
         setCurrentDateApi(dateString);
-        setCurrentActiveMonth(monthNames[Number(dateString.substring(5, 7)) - 1]);
-        // setRightSideLoading(true);
+        // setCurrentActiveMonth(monthNames[Number(dateString.substring(5, 7)) - 1]);
+        // // setRightSideLoading(true);
 
-        setEnrolledState(false);
-        setInitialSetupState(false);
-        setAssociatedSensorsState(false);
-        setFirstTwentyState(false);
-        setSecondTwentyState(false);
-        setLastBillingState(false);
-        setBillProcessedState(false);
+        // setEnrolledState(false);
+        // setInitialSetupState(false);
+        // setAssociatedSensorsState(false);
+        // setFirstTwentyState(false);
+        // setSecondTwentyState(false);
+        // setLastBillingState(false);
+        // setBillProcessedState(false);
 
-        setInitialStepDoneState(false);
-        setEnrollPatchState(false);
-        setLastStateDone(false);
-        setLastStateData({});
-        setLastStateLoading(false);
-        setAddTaskState(false);
-        // setTasksLoadingState(true);
-        setInitialSetupLoading(false);
-        setInitialSetupData({});
-        setFirstTwentyData({});
-        setSecondTwentyData({});
-        setPatchLoading(false);
-        setPatchEnrolled(false);
-        setPatchData({});
-        setPatchArray([]);
-        setPatchInformation({});
-        setFirstTotalTime(0);
-        setSecondTotalTime(0);
-        setFirstTotalTimeDisplay(0);
-        setStageOneState(true);
-        setStageTwoState(false);
-        setTaskDateVal();
-        setTaskTimeVal();
-        setTaskNameVal();
-        setTaskNoteVal();
-        setTaskCodeActive("99457");
-        setTaskCodeInternalActive("");
-        setFirstTwentyTasks([]);
-        setSecondTwentyTasks([]);
+        // setInitialStepDoneState(false);
+        // setEnrollPatchState(false);
+        // setLastStateDone(false);
+        // setLastStateData({});
+        // setLastStateLoading(false);
+        // setAddTaskState(false);
+        // // setTasksLoadingState(true);
+        // setInitialSetupLoading(false);
+        // setInitialSetupData({});
+        // setFirstTwentyData({});
+        // setSecondTwentyData({});
+        // setPatchLoading(false);
+        // setPatchEnrolled(false);
+        // setPatchData({});
+        // setPatchArray([]);
+        // setPatchInformation({});
+        // setFirstTotalTime(0);
+        // setSecondTotalTime(0);
+        // setFirstTotalTimeDisplay(0);
+        // setStageOneState(true);
+        // setStageTwoState(false);
+        // setTaskDateVal();
+        // setTaskTimeVal();
+        // setTaskNameVal();
+        // setTaskNoteVal();
+        // setTaskCodeActive("99457");
+        // setTaskCodeInternalActive("");
+        // setFirstTwentyTasks([]);
+        // setSecondTwentyTasks([]);
 
-        var temp = runUseEffect;
-        temp = temp + 1;
-        setRunUseEffect(temp);
+        // var temp = runUseEffect;
+        // temp = temp + 1;
+        // setRunUseEffect(temp);
     }
 
     function findDateIndex(month) {
@@ -228,8 +243,12 @@ function BillingModule() {
     }
 
     function handleAddTaskDateChange(date, dateString) {
-        var temp_date = new Date(dateString);
-        setTaskDateVal(temp_date.toISOString());
+        if (dateString) {
+            var temp_date = new Date(dateString);
+            setTaskDateVal(temp_date.toISOString());
+        } else {
+            setTaskDateVal();
+        }
     }
 
     function handleAddTaskTimeChange(time, timeString) {
@@ -241,19 +260,30 @@ function BillingModule() {
 
     function handleAddTaskNameChange(e) {
         setTaskNameVal(e.target.value);
+        if (requiredAddTask?.includes("staff_name")) {
+            const newArr = requiredAddTask.filter(item => item !== "staff_name");
+            setRequiredAddTask([...newArr]);
+        }
     }
 
     function handleAddTaskNoteChange(e) {
         setTaskNoteVal(e.target.value);
+        if (requiredAddTask?.includes("task_note")) {
+            const newArr = requiredAddTask.filter(item => item !== "task_note")
+            setRequiredAddTask([...newArr]);
+        }
     }
 
     function addTaskComponent(cptCode) {
+        const dateFormat = 'YYYY-MM-DD';
+
         return (
             <div className="bm-add-task-container">
                 <div style={{ width: "100%", textAlign: "right" }}>
                     <CusBtn
                         onClick={() => {
                             setAddTaskState(false);
+                            setRequiredAddTask([]);
                         }}
                         className="secondary"
                     >
@@ -262,22 +292,78 @@ function BillingModule() {
                 </div>
                 <div style={{ fontSize: "1.5rem", textAlign: "center" }}>
                     Add Task
-                    <p id="add-task-timer"></p>
+                    {cptCode != CPT_CODE.CPT_99091 && (
+                        <p id="add-task-timer"></p>
+                    )}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <div style={{ width: "17.7%" }}>Date</div>
-                    <DatePicker onChange={handleAddTaskDateChange} />
+                    <DatePicker 
+                        allowClear={false}
+                        onChange={handleAddTaskDateChange} 
+                        defaultValue={moment(taskDateVal, dateFormat)} 
+                        format={dateFormat} 
+                    />
                 </div>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <div style={{ width: "21.7%" }}>Staff Name</div>
-                    <Input placeholder="Name" onChange={handleAddTaskNameChange} />
+                    <div style={{ width: "21.7%" }}>
+                        {cptCode != CPT_CODE.CPT_99091 && (
+                            <span className="text-required">*</span>
+                        )}
+                        Staff Name
+                    </div>
+                    <Input status={requiredAddTask?.includes("staff_name") && "error"} placeholder="Name" onChange={handleAddTaskNameChange} />
                 </div>
+                {cptCode == CPT_CODE.CPT_99091 && (
+                    <>
+                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                            <div style={{ width: "21.7%" }}>Temperature</div>
+                            <Input placeholder="Temperature" onChange={(e) => {
+                                setTemperatureVal(e.target.value)
+                            }} />
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                            <div style={{ width: "21.7%" }}>Spo2</div>
+                            <Input placeholder="Spo2" onChange={(e) => {
+                                setSpo2Val(e.target.value)
+                            }} />
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                            <div style={{ width: "21.7%" }}>Heart Rate</div>
+                            <Input placeholder="Heart Rate" onChange={(e) => {
+                                setHeartRateVal(e.target.value)
+                            }} />
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                            <div style={{ width: "21.7%" }}>Blood Pressure</div>
+                            <Input placeholder="Blood Pressure" onChange={(e) => {
+                                setBloodPressureVal(e.target.value)
+                            }} />
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                            <div style={{ width: "21.7%" }}>Respiration Rate</div>
+                            <Input placeholder="Respiration Rate" onChange={(e) => {
+                                setRespirationRateVal(e.target.value)
+                            }} />
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                            <div style={{ width: "21.7%" }}>Time Spend</div>
+                            <Input placeholder="Time Spend" onChange={(e) => {
+                                setTaskTimeVal(e.target.value)
+                            }} />
+                        </div>
+                    </>
+                )}
                 <div>
+                    {cptCode != CPT_CODE.CPT_99091 && (
+                        <span className="text-required">*</span>
+                    )}
                     Note
                     <TextArea
                         onChange={handleAddTaskNoteChange}
                         placeholder="Controlled autosize"
                         autoSize={{ minRows: 3, maxRows: 3 }}
+                        status={requiredAddTask?.includes("task_note") && "error"}
                     />
                 </div>
                 <CusBtn
@@ -286,9 +372,7 @@ function BillingModule() {
                         let itemTmp = {}
                         itemTmp.task_time_spend = timeCount;
                         timeCount = 0;
-                        stopCountTimer();
-                        setTasksLoadingState(true);
-                        setAddTaskState(false);
+                      
                         callUpdateBillingTasks(taskCodeActive, itemTmp);
                     }}
                 >
@@ -337,13 +421,14 @@ function BillingModule() {
             .map(v => v < 10 ? "0" + v : v)
             .filter((v, i) => v !== "00" || i > 0)
             .join(":")
-        return timeDs;    
+        return timeDs;
     }
     const startCountTimer = (elementId) => {
         clockCounter = setInterval(function () {
             timeCount = timeCount + 1;
             let timeDs = renderTimeDisplay(timeCount);
-            document.getElementById(elementId).innerText = timeDs;
+            const element = document.getElementById(elementId);
+            if (element) { element.innerText = timeDs; }
         }, 1000);
     }
 
@@ -353,17 +438,18 @@ function BillingModule() {
             return (
                 <CusBtn
                     onClick={() => {
-                        if(cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458){
-                            if(document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)){
+                        if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
+                            if (document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)) {
                                 document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "none";
                             }
                             currentIdTimerClockActive = item.task_id;
                         }
                         startCountTimer(elementId);
                         setTimerTask(true);
-                        
+
                     }}
                     className="primary"
+                    style={{ paddingBottom: "0.5rem", paddingTop: "0.5rem" }}
                 >
                     Start
                 </CusBtn>
@@ -378,13 +464,14 @@ function BillingModule() {
                             stopCountTimer();
                             setTimerTask(false);
                             callUpdateBillingTasks(cptCode, item)
-                            if(cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458){
-                                if(document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)){
+                            if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
+                                if (document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)) {
                                     document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "initial";
                                 }
                             }
                         }}
                         className="primary"
+                        style={{ paddingBottom: "0.5rem", paddingTop: "0.5rem" }}
                     >
                         Stop
                     </CusBtn>
@@ -769,8 +856,6 @@ function BillingModule() {
         var billDateStr = getDateFromISO(billDate.toISOString());
         setBillDateString(billDateStr);
 
-        console.log("DATE 3 : ", currentDateApi)
-
         if (!location.state) {
             history.push(`/dashboard/patient/details/${pid}`);
         } else {
@@ -955,7 +1040,21 @@ function BillingModule() {
         }
         return '';
     }
+    const getLastUpdatedAt99091 = () => {
+        if (task99091.length > 0) {
+            let lastItem = task99091[task99091.length - 1];
+            return moment(lastItem['date']).format('YYYY-MM-DD H:mm a');
+        }
+        return '';
+    }
 
+    const getFirst99091 = () => {
+        if (task99091.length > 0) {
+            let firstItem = task99091[0];
+            return moment(firstItem['date']).format('YYYY-MM-DD H:mm a');
+        }
+        return '';
+    }
     const getTotalNumberDay = (item) => {
         let result = 0;
         let currentDate = moment();
@@ -1153,8 +1252,18 @@ function BillingModule() {
                 var tempFirstTwentyTasks = [];
                 var tempSecondTwentyTasks = [];
                 let tmpTotalTime = 0;
+                let tempDataSource = [];
                 res.data.response.billingData.map(
                     (item) => {
+                        tempDataSource.push({
+                            date: `${getDateFromISO(item.bill_date)} ${getTimeFromISO(
+                                item.bill_date
+                            )}`,
+                            code: item.code,
+                            desc: getReportDes(item),
+                            duration: getReportTotalDuration(item),
+                        });
+                        setDataSource(tempDataSource);
                         if (item.code == CPT_CODE.CPT_99457) {
                             tempFirstTwentyTasks = JSON.parse(item.params);
                             tmpTotalTime = 0;
@@ -1185,29 +1294,127 @@ function BillingModule() {
                             }
                             setSecondTotalTime(tmpTotalTime);
                         }
+                        
+                        if (item.code == CPT_CODE.CPT_99091) {
+                            let temp99091Task = JSON.parse(item.params);
+                            let tmpTime = 0;
+                            if(!isArray(temp99091Task)) temp99091Task = [];
+                            setTask99091(temp99091Task);
+                            if(temp99091Task.length > 0) {
+                                setCurrentItem99091Active(temp99091Task[temp99091Task.length - 1].task_id);
+                                temp99091Task.map(item => {
+                                    tmpTime +=  Number(item.time_spent);
+                                })
+                                setKeyNoteActive(temp99091Task[temp99091Task.length - 1].task_id)
+                            }
+                            setTotalTime99091(tmpTime);
+                        }
                     }
                 );
 
 
-                
-                
+
+
             })
     }
+    const getNoteForItem99091 = () => {
+        if (task99091.length > 0) {
+            let findItem = task99091.filter(item => item.task_id == currentItem99091Active);
+            if (isArray(findItem) && findItem.length > 0) {
+                findItem = findItem[0];
+                return (
+                    <div style={{ display: "flex" }} >
+                        <div style={{ width: "5%" }}>
+                            1
+                        </div>
+                        <div style={{ width: "25%" }}>
+                            {moment(findItem['date']).format('YYYY-MM-DD H:mm a')}
+                        </div>
+                        <div style={{ width: "50%" }}>
+                            <p style={{ margin: "0" }}>{findItem['staff_name']}</p>
+                            <p>{findItem['note']}</p>
+                        </div>
+                        <div style={{ width: "15%" }}>
+                            {findItem['time_spent']} {Number(findItem['time_spent']) > 1 ? 'mins' : 'min'}
+                        </div>
+                        <div style={{ width: "5%" }}></div>
+                    </div>
+                )
+            }
+        }
+        return '';
+
+    }
+
+    const validateFormAddTask = (taskNameVal, taskNoteVal) => {
+        if (!taskNameVal?.trim() || !taskNoteVal?.trim()) {
+            if (!taskNameVal) {
+                requiredAddTask.push("staff_name");
+            } 
+
+            if (!taskNoteVal) {
+                requiredAddTask.push("task_note");
+            }
+
+            notification.warn({
+                message: "Fill mandatory values",
+                description: "Mandatory values are marked with *",
+                placement: "topRight",
+            });
+
+            setRequiredAddTask([...requiredAddTask]);
+            return false;
+        } else {
+            return true;
+        }
+    };
 
     function callUpdateBillingTasks(cptCode, item = {}) {
         var date = new Date();
         var date_string = date.toISOString();
-        if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
-            let isCodeExist = false;
-            let billingId = null;
+        let isCodeExist = false;
+        let billingId = null;
+        let currentTotalTime99457 = 0;
+        let addNewLine99458 = null;
 
-            billingInformation.map(item => {
-                if (item.code == cptCode) {
-                    isCodeExist = true;
-                    billingId = item.id
+        let valiSuccess = false;
+
+        billingInformation.map(item => {
+            if (item.code == cptCode) {
+                isCodeExist = true;
+                billingId = item.id
+            }
+            if (item.code == CPT_CODE.CPT_99457){
+                let taskData = JSON.parse(item.params);
+                taskData.map(item => {
+                    currentTotalTime99457 += item.task_time_spend;
+                })
+            }
+        })
+
+        if(cptCode == CPT_CODE.CPT_99457){
+            if((currentTotalTime99457 + item.task_time_spend) >= TOTAL_HOURS_FOR_CODE_99457_BILLED * 60){
+                let timeReduce = currentTotalTime99457 + item.task_time_spend - TOTAL_HOURS_FOR_CODE_99457_BILLED * 60;
+                item.task_time_spend = item.task_time_spend - timeReduce;
+                addNewLine99458 = {
+                    code_type: CPT,
+                            code: CPT_CODE.CPT_99458,
+                            bill_date: date_string,
+                            pid: location.state.pid,
+                            revenue_code: 123,
+                            notecodes: "pending",
+                            bill_process: 0,
+                            fee: 40,
+                            add_task_id: date.getTime(),
+                            add_task_date: taskDateVal,
+                            add_task_staff_name: taskNameVal,
+                            add_task_note: taskNoteVal,
+                            task_time_spend: timeReduce
                 }
-            })
-
+            }
+        }
+       
+        if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
             if (isCodeExist) {
                 // update
                 let updateData = {};
@@ -1224,6 +1431,8 @@ function BillingModule() {
                         task_time_spend: item.task_time_spend
                     }
                 } else {
+                    valiSuccess = validateFormAddTask(taskNameVal, taskNoteVal);
+
                     updateData = {
                         code: cptCode,
                         bill_date: date_string,
@@ -1236,6 +1445,117 @@ function BillingModule() {
                     }
                 }
 
+                if (valiSuccess) {
+                    setTasksLoadingState(true);
+                    billingApi
+                        .updateBillingTask(
+                            updateData
+                        )
+                        .then((res) => {
+                            stopCountTimer();
+                            setAddTaskState(false);
+                            setTasksLoadingState(false);
+                            getListFirstTwentyTasks();
+                            if(cptCode == CPT_CODE.CPT_99457 && addNewLine99458 != null){
+                                billingApi
+                                    .addBillingTask(
+                                        addNewLine99458
+                                    )
+                                    .then((res) => {
+                                        setTasksLoadingState(false);
+                                        getListFirstTwentyTasks();
+                                    })
+                                    .catch((err) => {
+                                        console.log(err);
+                                    });
+                            }
+                        })
+                        .catch((err) => {
+                            notification.error({
+                                message: "Add Task ",
+                                description: "Add task falied!",
+                                placement: "topRight",
+                            });
+                            stopCountTimer();
+                            setAddTaskState(false);
+                            setTasksLoadingState(false);
+                        });
+                }
+
+            } else {
+                valiSuccess = validateFormAddTask(taskNameVal, taskNoteVal);
+                if (valiSuccess) {
+                    setTasksLoadingState(true);
+
+                    billingApi
+                        .addBillingTask(
+                            {
+                                code_type: CPT,
+                                code: cptCode,
+                                bill_date: date_string,
+                                pid: location.state.pid,
+                                revenue_code: 123,
+                                notecodes: "pending",
+                                bill_process: 0,
+                                fee: 40,
+                                add_task_id: date.getTime(),
+                                add_task_date: taskDateVal,
+                                add_task_staff_name: taskNameVal,
+                                add_task_note: taskNoteVal,
+                                task_time_spend: item.task_time_spend
+                            }
+                        )
+                        .then((res) => {
+                            stopCountTimer();
+                            setAddTaskState(false);
+                            setTasksLoadingState(false);
+                            getListFirstTwentyTasks();
+                            if(cptCode == CPT_CODE.CPT_99457 && addNewLine99458 != null){
+                                billingApi
+                                    .addBillingTask(
+                                        addNewLine99458
+                                    )
+                                    .then((res) => {
+                                        setTasksLoadingState(false);
+                                        getListFirstTwentyTasks();
+                                    })
+                                    .catch((err) => {
+                                        console.log(err);
+                                    });
+                            }
+                        })
+                        .catch((err) => {
+                            notification.error({
+                                message: "Add Task ",
+                                description: "Add task falied!",
+                                placement: "topRight",
+                            });
+                            stopCountTimer();
+                            setAddTaskState(false);
+                            setTasksLoadingState(false);
+                        });
+                }
+
+            }
+        }
+        if (cptCode == CPT_CODE.CPT_99091) {
+            if (isCodeExist) {
+                let updateData = {
+                    code: cptCode,
+                    bill_date: date_string,
+                    pid: location.state.pid,
+                    billing_id: billingId,
+                    date: taskDateVal,
+                    temperature: temperatureVal,
+                    spo2: spo2Val,
+                    heart_rate: heartRateVal,
+                    blood_pressure: bloodPressureVal,
+                    respiration_rate: respirationRateVal,
+                    staff_name: taskNameVal,
+                    note: taskNoteVal,
+                    time_spent: taskTimeVal
+
+                }
                 billingApi
                     .updateBillingTask(
                         updateData
@@ -1259,11 +1579,16 @@ function BillingModule() {
                             notecodes: "pending",
                             bill_process: 0,
                             fee: 40,
-                            add_task_id: date.getTime(),
-                            add_task_date: taskDateVal,
-                            add_task_staff_name: taskNameVal,
-                            add_task_note: taskNoteVal,
-                            task_time_spend: item.task_time_spend
+                            task_id: date.getTime(),
+                            date: taskDateVal,
+                            temperature: temperatureVal,
+                            spo2: spo2Val,
+                            heart_rate: heartRateVal,
+                            blood_pressure: bloodPressureVal,
+                            respiration_rate: respirationRateVal,
+                            staff_name: taskNameVal,
+                            note: taskNoteVal,
+                            time_spent: taskTimeVal
                         }
                     )
                     .then((res) => {
@@ -1505,6 +1830,105 @@ function BillingModule() {
         }
     };
 
+    const getReportDes = (item) => {
+        if(item.code == CPT_CODE.CPT_99453){
+            return '1 billed';
+        }
+
+        if(item.code == CPT_CODE.CPT_99457){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.task_time_spend)
+            })
+            tempTotal = Math.floor(tempTotal / 60);
+            if(tempTotal >= 20){
+                return '1 billed';
+            } else {
+                return '';
+            }
+        }
+
+        if(item.code == CPT_CODE.CPT_99458){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.task_time_spend)
+            })
+            tempTotal = Math.floor(tempTotal / 60);
+            if(tempTotal >= TOTAL_HOURS_FOR_EACH_99458_BILLED){
+                return `${Math.floor(tempTotal / TOTAL_HOURS_FOR_EACH_99458_BILLED)} billed`;
+            } else {
+                return '';
+            }
+        }
+
+        if(item.code == CPT_CODE.CPT_99091){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.time_spent)
+            })
+            if(tempTotal >= TOTAL_HOURS_FOR_EACH_99091_BILLED){
+                return `1 billed`;
+            } else {
+                return '';
+            }
+        }
+    }
+
+    const getReportTotalDuration = (item) => {
+        if(item.code == CPT_CODE.CPT_99453){
+            return '';
+        }
+
+        if(item.code == CPT_CODE.CPT_99457){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.task_time_spend)
+            })
+            tempTotal = Math.floor(tempTotal / 60);
+            if(tempTotal >= 20){
+                return '20 Mins'
+            } else {
+                if(tempTotal > 1) {
+                    return `${tempTotal} Mins`
+                } else {
+                    return `${tempTotal} Min`
+                }
+            }
+        }
+
+        if(item.code == CPT_CODE.CPT_99458){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.task_time_spend)
+            })
+            tempTotal = Math.floor(tempTotal / 60);
+            if(tempTotal > 1) {
+                return `${tempTotal} Mins`
+            } else {
+                return `${tempTotal} Min`
+            }
+        }
+
+        if(item.code == CPT_CODE.CPT_99091){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.time_spent)
+            })
+            if(tempTotal > 1) {
+                return `${tempTotal} Mins`
+            } else {
+                return `${tempTotal} Min`
+            }
+        }
+
+    }
+
     useEffect(() => {
         var billDate = new Date();
         var billDateStr = getDateFromISO(billDate.toISOString());
@@ -1564,8 +1988,8 @@ function BillingModule() {
                                     item.bill_date
                                 )}`,
                                 code: item.code,
-                                desc: '',
-                                duration: getMinutesFromSeconds(item.timeConsidered),
+                                desc: getReportDes(item),
+                                duration: getReportTotalDuration(item),
                             });
 
                             if (item.code == CPT_CODE.CPT_99453) {
@@ -1609,12 +2033,19 @@ function BillingModule() {
                                     })
                                 }
                             }
-                            if (item.code === "99091") {
-                                lastState = true;
-                                lastData = {
-                                    date: getDateFromISO(item.date_time),
-                                    time: getTimeFromISO(item.date_time),
-                                };
+                            if (item.code == CPT_CODE.CPT_99091) {
+                                let temp99091Task = JSON.parse(item.params);
+                                let tmpTime = 0;
+                                if (!isArray(temp99091Task)) temp99091Task = [];
+                                setTask99091(temp99091Task);
+                                if (temp99091Task.length > 0) {
+                                    setCurrentItem99091Active(temp99091Task[temp99091Task.length - 1].task_id);
+                                    temp99091Task.map(item => {
+                                        tmpTime += Number(item.time_spent);
+                                    })
+                                    setKeyNoteActive(temp99091Task[temp99091Task.length - 1].task_id);
+                                }
+                                setTotalTime99091(tmpTime);
                             }
                         }
                     );
@@ -1638,19 +2069,19 @@ function BillingModule() {
                         setPatchEnrolled(true);
                         setPatchData(tempPatchdata);
                     }
-                    
+
 
                     if (res.data.response.patchData) {
                         res.data.response.patchData?.forEach((patch) => {
                             const startDate = getFirstDateMonitored(patch) || "";
                             const endDate = getLastDateMonitored(patch) || "";
                             const typeQuery = shortTypeQueryOfSensor(patch["patches.patch_type"]);
-
+                          
                             if (!!startDate && !!typeQuery) {
                                 checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
                             }
                         })
-                        
+
                         setPatchArray(
                             res.data.response.patchData
                         );
@@ -1797,42 +2228,35 @@ function BillingModule() {
         return array.some(even);
     };
 
-    const arrayTable99091 = [
-        {
-            _key: "temp",
-            name: "Temperature",
-            value: 98.4
-        },
-        {
-            _key: "spo2",
-            name: "SPO2",
-            value: 96
-        },
-        {
-            _key: "hear_rate",
-            name: "Hear Rate",
-            value: 80
-        },
-        {
-            _key: "blood_pressure",
-            name: "Blood Pressure",
-            value: "137 / 82"
-        },
-        {
-            _key: "res_rate",
-            name: "Respiration Rate",
-            value: 12
-        },
-    ];
 
-    const numberOfNightsBetweenDates = (start, end) => {
-        let dayCount = 0;
-        while (end > start) {
-            dayCount++;
-            start.setDate(start.getDate() + 1);
-        };
-
-        return dayCount
+    const getDataSourceByItem99091 = (item) => {
+        return [
+            {
+                _key: "temp",
+                name: "Temperature",
+                value: item['temperature'] || ''
+            },
+            {
+                _key: "spo2",
+                name: "SPO2",
+                value: item['spo2'] || ''
+            },
+            {
+                _key: "hear_rate",
+                name: "Hear Rate",
+                value: item['heart_rate'] || ''
+            },
+            {
+                _key: "blood_pressure",
+                name: "Blood Pressure",
+                value: item['blood_pressure'] || ''
+            },
+            {
+                _key: "res_rate",
+                name: "Respiration Rate",
+                value: item['respiration_rate'] || ''
+            },
+        ]
     }
 
     const checkTotalNumberDateHaveDataFromInflux = (startDate = "", endDate = "", sensorType = "", patch) => {
@@ -1850,13 +2274,13 @@ function BillingModule() {
                 |> filter(fn: (r) => r["_measurement"] == "${location.state.pid}_${sensorType}")
                 |> yield(name: "mean")
             `
-
         const arrDateQuery = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const o = tableMeta.toObject(row);
                 let time = new Date(o._time);
                 time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
+                
                 if (!arrDateQuery.includes(time)) {
                     arrDateQuery.push(time);
                 }
@@ -1870,6 +2294,71 @@ function BillingModule() {
             },
         })
     };
+
+    const numberOfNightsBetweenDates = (start, end) => {
+        let dayCount = 0;
+        while (end >= start) {
+            dayCount++;
+            start.setDate(start.getDate() + 1);
+        };
+
+        return dayCount
+    }
+
+    const filterDeviceAssociatedByDate = useMemo(() => {
+        if (!associatedSensorsState) return false;
+
+        const newArr = [];
+        let totalDayMonitored = 0;
+
+        let minDate = null;
+        let maxDate = null;
+        const timeFilter = new Date(currentDateApi);
+
+        for (let index = 0; index < patchArray.length; index++) {
+            const patch = patchArray[index];
+
+            if (patch?.datesInflux?.length > 0) {
+                const firstDateMonitored = new Date(patch.datesInflux[0]);
+                const lastDateMonitored = new Date(patch.datesInflux[patch.datesInflux?.length - 1])
+                if (
+                    Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear()) 
+                    && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
+                ) {
+                    if (minDate === null || minDate > firstDateMonitored) {
+                        minDate = firstDateMonitored;
+                    } 
+                    
+                    if (maxDate === null || maxDate < lastDateMonitored) {
+                        maxDate = lastDateMonitored;
+                    }
+
+                    newArr.push(patch);
+                }
+            }
+        } 
+
+        if (minDate !== null && maxDate !== null) {
+            totalDayMonitored = numberOfNightsBetweenDates(new Date(minDate), new Date(maxDate));
+        }
+
+        let result = 0;
+        if (totalDayMonitored > TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
+            result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
+        }
+
+        if (result > 0 
+                && Number(new Date().getFullYear()) === Number(timeFilter.getFullYear()) 
+                && Number(new Date().getMonth()) === Number(timeFilter.getMonth())
+                && !activeCode99454
+        ) {
+            setActiveCode99454(true);
+        }
+
+        setPatchLoading(false);
+
+        return { list: newArr, totalDayMonitored, billedUnit: result };
+    }, [patchArray, currentDateApi, associatedSensorsState]);
 
     return rightSideLoading ? (
         <div
@@ -1963,6 +2452,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
+                                        setPatchLoading(true);
                                     }}
                                     className={
                                         associatedSensorsState
@@ -1976,7 +2466,7 @@ function BillingModule() {
                                     className="bm-header-dot"
                                     style={
                                         initialStepDoneState
-                                            ? getUnitBilledSensor()
+                                            ? activeCode99454
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -1994,7 +2484,7 @@ function BillingModule() {
                                     className="bm-header-line"
                                     style={
                                         initialStepDoneState
-                                            ? getUnitBilledSensor()
+                                            ? activeCode99454
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -2102,7 +2592,7 @@ function BillingModule() {
                                             : null
                                     }
                                 ></div>
-                                <div className="bm-header-below">{`${Math.floor(secondTotalTime/60) % TOTAL_HOURS_FOR_EACH_99458_BILLED} mins monitored`}</div>
+                                <div className="bm-header-below">{`${Math.floor(secondTotalTime / 60) % TOTAL_HOURS_FOR_EACH_99458_BILLED} mins monitored`}</div>
                             </div>
                             {/* <div className="bm-cptcode-b-header">
                                 <div
@@ -2125,6 +2615,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
+                                        setTaskCodeActive(CPT_CODE.CPT_99091)
                                     }}
                                     className={
                                         lastBillingState ? "bm-selected-active" : "bm-selected"
@@ -2604,15 +3095,15 @@ function BillingModule() {
                                 <div className="bm-sensor-monitored-bar">
                                     <div className="bm-sensor-monitored-bar-two"
                                         style={{
-                                            width: `${(getHoursProcessSensor() / 16) * 100}%`,
+                                            width: `${(filterDeviceAssociatedByDate?.totalDayMonitored / 16) * 100}%`,
                                         }}>
                                     </div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: "1.2rem" }}>Days Monitored: {getHoursProcessSensor()}/{TOTAL_HOURS_FOR_EACH_SENSOR_BILLED}</div>
-                                    {getUnitBilledSensor() > 0 && (
+                                    <div style={{ fontSize: "1.2rem" }}>Days Monitored: {filterDeviceAssociatedByDate?.totalDayMonitored}/{TOTAL_HOURS_FOR_EACH_SENSOR_BILLED}</div>
+                                    {filterDeviceAssociatedByDate?.billedUnit > 0 && (
                                         <div style={{ color: "#00000085" }}>
-                                            {`${getUnitBilledSensor()} billed unit.`}
+                                            {`${filterDeviceAssociatedByDate?.billedUnit} billed unit.`}
                                         </div>
                                     )}
 
@@ -2633,7 +3124,7 @@ function BillingModule() {
                                 <div className="bm-item-header" style={{ width: "13%" }}>Total Number Of Day</div>
                             </div>
                             <div style={{ overflowY: "scroll", height: "70%", marginRight: '-6px' }}>
-                                {patchArray.length === 0 ? (
+                                {filterDeviceAssociatedByDate?.list?.length === 0 ? (
                                     <div
                                         style={{
                                             height: "100%",
@@ -2649,7 +3140,7 @@ function BillingModule() {
                                     </div>
                                 ) : (
                                     <>
-                                        {patchArray.map((item, index) => (
+                                        {filterDeviceAssociatedByDate?.list?.map((item, index) => (
                                             <div
                                                 key={index}
                                                 style={{
@@ -2672,10 +3163,10 @@ function BillingModule() {
                                                     {item["patches.patch_type"]}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "15%" }}>
-                                                    {item?.datesInflux?.[0]}
+                                                    {moment(item?.datesInflux?.[0]).format('YYYY-MM-DD')}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "15%" }}>
-                                                    {item?.datesInflux?.[item?.datesInflux?.length - 1]}
+                                                    {moment(item?.datesInflux?.[item?.datesInflux?.length - 1]).format('YYYY-MM-DD')}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "13%" }}>
                                                     {item?.totalDay || 0}
@@ -2784,7 +3275,7 @@ function BillingModule() {
                                         <div
                                             className="bm-sensor-monitored-bar-two"
                                             style={{
-                                                width: `${(Math.floor(firstTotalTimeDisplay / 60) / 20) * 100 > 100 ? 100 : (Math.floor(firstTotalTimeDisplay/ 60) / 20) * 100}%`,
+                                                width: `${(Math.floor(firstTotalTimeDisplay / 60) / 20) * 100 > 100 ? 100 : (Math.floor(firstTotalTimeDisplay / 60) / 20) * 100}%`,
                                             }}
                                         ></div>
                                     </div>
@@ -2849,10 +3340,12 @@ function BillingModule() {
                                                         width: "100%",
                                                         display: "flex",
                                                         alignItems: "center",
-                                                        height: "60px",
+                                                        height: "auto",
                                                         fontSize: "1rem",
                                                         background: "#ffb300c2",
-                                                        margin: "0.5% 0%"
+                                                        margin: "0.5% 0%",
+                                                        paddingTop: "0.5rem",
+                                                        paddingBottom: "0.5rem"
                                                     }}
                                                 >
                                                     <div className="bm-item-body" style={{ width: "20%" }}>
@@ -2865,8 +3358,8 @@ function BillingModule() {
                                                         {item["task_note"]}
                                                     </div>
                                                     <div className="bm-item-body" style={{ width: "20%" }}>
-                                                        <span style={{paddingRight: "10px"}} id={`item-99457-time-spent-${item.task_id}`}>
-                                                            {`${renderTimeDisplay(item['task_time_spend'])}`} 
+                                                        <span style={{ paddingRight: "10px" }} id={`item-99457-time-spent-${item.task_id}`}>
+                                                            {`${renderTimeDisplay(item['task_time_spend'])}`}
                                                         </span>
                                                         {renderTimerClock(item, CPT_CODE.CPT_99457)}
                                                     </div>
@@ -3065,10 +3558,12 @@ function BillingModule() {
                                                         width: "100%",
                                                         display: "flex",
                                                         alignItems: "center",
-                                                        height: "65px",
+                                                        height: "auto",
                                                         fontSize: "1rem",
                                                         background: "#ffb300c2",
-                                                        margin: "0.5% 0%"
+                                                        margin: "0.5% 0%",
+                                                        paddingTop: "0.5rem",
+                                                        paddingBottom: "0.5rem"
                                                     }}
                                                 >
                                                     <div className="bm-item-body" style={{ width: "20%" }}>
@@ -3081,8 +3576,8 @@ function BillingModule() {
                                                         {item["task_note"]}
                                                     </div>
                                                     <div className="bm-item-body" style={{ width: "20%" }}>
-                                                        <span style={{paddingRight: "10px"}} id={`item-99458-time-spent-${item.task_id}`}>
-                                                            {`${renderTimeDisplay(item['task_time_spend'])}`} 
+                                                        <span style={{ paddingRight: "10px" }} id={`item-99458-time-spent-${item.task_id}`}>
+                                                            {`${renderTimeDisplay(item['task_time_spend'])}`}
                                                         </span>
                                                         {renderTimerClock(item, CPT_CODE.CPT_99458)}
                                                     </div>
@@ -3176,18 +3671,63 @@ function BillingModule() {
                             }}
                         >
                             <div>
-                                <div style={{ fontSize: "1.2rem" }}>
-                                    CPT code: 99091 has not been enabled yet
-                                </div>
-                                <p>30 Minutes of Monitoring Each 30 Days without Interactive Communication</p>
+                                {totalTime99091 < 30 && (
+                                    <div style={{ fontSize: "1.2rem" }}>
+                                        CPT code: 99091 has not been enabled yet
+                                    </div>
+                                )}
+
+                                {totalTime99091 > 30 && (
+                                    <div style={{ fontSize: "1.2rem" }}>
+                                        CPT code: 99091 has been enabled
+                                    </div>
+                                )}
+
+                                <p>{totalTime99091} {totalTime99091 > 1 ? 'Minutes' : 'Minute'} of Monitoring Each 30 Days without Interactive Communication</p>
                             </div>
+                            {addTaskState ? addTaskComponent(CPT_CODE.CPT_99091) : null}
 
                             <Row>
-                                <Col span={12}>
-                                    <div style={{ width: "100%" }}>
-                                        <Table
+                                {task99091?.length > 0 && (
+                                    <Col span={14} style={{ paddingRight: "5%" }}>
+                                        <Collapse
+                                            accordion
+                                            className="collapse-table-99091"
+                                            onChange={(val) => {
+                                                setKeyNoteActive(val);
+                                                setCurrentItem99091Active(val);
+                                            }}
+                                            defaultActiveKey={task99091[task99091?.length - 1]?.task_id}
+                                            activeKey={keyNoteActive}
+                                        >
+                                            {task99091?.map((item, index) => (
+                                                <Panel 
+                                                    key={item.task_id}
+                                                    header={(
+                                                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                            <div style={{ width: "50%" }}>Vitals</div>
+                                                            <div style={{ width: "50%" }}>{moment(item['date']).format('YYYY-MM-DD H:mm a')}</div>
+                                                        </div>
+                                                    )}
+                                                >
+                                                    {getDataSourceByItem99091(item).map(data => {
+                                                        return (
+                                                            <div key={data?._key} style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                                <div style={{ width: "50%" }}>{data?.name}</div>
+                                                                <div style={{ width: "50%" }}>{data?.value}</div>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </Panel>
+                                            ))}
+                                        </Collapse>
+                                    </Col>
+                                )}
+
+                                        {/* <Table
                                             size="small"
                                             className="vital-table"
+                                            style={{ marginBottom: "1.25rem" }}
                                             columns={[
                                                 {
                                                     width: "40%",
@@ -3218,21 +3758,19 @@ function BillingModule() {
                                                                 color: "#727272",
                                                             }}
                                                         >
-                                                            12.12.12 3:00PM
+                                                            {moment(item['date']).format('YYYY-MM-DD H:mm a')}
                                                         </div>
                                                     ),
                                                     dataIndex: "value",
                                                     key: "value",
                                                 },
                                             ]}
-                                            dataSource={arrayTable99091}
+                                            dataSource={getDataSourceByItem99091(item)}
                                             pagination={false}
                                             bordered
-                                        />
-                                    </div>
-                                </Col>
+                                        /> */}
 
-                                <Col span={12} style={{ paddingLeft: "5%" }}>
+                                <Col span={10}>
                                     <div>
 
                                         <div style={{
@@ -3241,7 +3779,7 @@ function BillingModule() {
                                             padding: "3% 7%"
                                         }}>
                                             <div style={{ textAlign: "center" }}>
-                                                Last updated at 12/12/12 8:00 pm
+                                                Last updated at {getLastUpdatedAt99091()}
                                             </div>
                                             <div>
                                                 <div
@@ -3251,7 +3789,7 @@ function BillingModule() {
                                                     }}
                                                 >
                                                     <div style={{ width: "45%" }}>Status: Active</div>
-                                                    <div style={{ width: "55%" }}>Enrollment: 25/02/21</div>
+                                                    <div style={{ width: "55%" }}>Enrollment: {getFirst99091()}</div>
                                                 </div>
 
                                                 <div
@@ -3280,33 +3818,24 @@ function BillingModule() {
                                             >
                                                 Notes
                                             </div>
-
+                                            {currentItem99091Active && 
+                                                getNoteForItem99091()
+                                            }
                                             <div style={{
                                                 display: "flex",
                                                 padding: "1rem 0.5rem"
                                             }}>
-                                                <div style={{ width: "5%" }}>
-                                                    1
-                                                </div>
-                                                <div style={{ width: "25%" }}>
-                                                    12/12/12 12:00
-                                                </div>
-                                                <div style={{ width: "50%" }}>
-                                                    Note
-                                                </div>
-                                                <div style={{ width: "15%" }}>
-                                                    2mins
-                                                </div>
-                                                <div style={{ width: "5%" }}>
+
                                                 <CusBtn
                                                     onClick={() => {
                                                         setAddTaskState(true);
                                                     }}
-                                                    style={{ padding: "1% 5%" }}
+                                                    style={{ padding: "10px 45px" }}
+                                                    disabled={totalTime99091 < 30 ? false : true}
                                                 >
                                                     Add
                                                 </CusBtn>
-                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
