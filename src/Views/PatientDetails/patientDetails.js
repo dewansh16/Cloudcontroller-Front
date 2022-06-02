@@ -985,7 +985,7 @@ export default function PatientDetails(props) {
                                 onCancel={closeQuickInfo}
                                 bodyStyle={{ backgroundColor: "white", padding: "2em 4em" }}
                             >
-                                <DeviceManagement pid={pid} associated_list={patient?.demographic_map?.associated_list} />
+                                <DeviceManagement pid={pid} associated_list={patient?.demographic_map?.associated_list} valDuration={props?.location?.state?.dataFilterHeader?.valDuration || "7d"} />
                             </Modal>
                         </Row>{" "}
                         {
