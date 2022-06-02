@@ -17,6 +17,7 @@ import VisualWalkingIcon from '../../Assets/Icons/visualWalking';
 import EditIcon from '../../Assets/Icons/editIcon';
 import { Button } from '../../Theme/Components/Button/button'
 
+import Colors from "../../Theme/Colors/colors";
 
 import {
     LineChart,
@@ -36,6 +37,8 @@ import {
     ReferenceDot
 } from "recharts";
 import { nullableTypeAnnotation } from '@babel/types';
+
+import { InfluxDB } from "@influxdata/influxdb-client";
 
 const { TextArea } = Input;
 const { Panel } = Collapse;
@@ -77,6 +80,8 @@ function GraphVisualizer() {
     const rrAlertRef = useRef()
     const tempAlertRef = useRef()
     const ewsAlertRef = useRef()
+    const timerTimeout = useRef()
+
     var alertFlag = true
     var bpAlertFlag = true
     var rrAlertFlag = true
@@ -110,7 +115,7 @@ function GraphVisualizer() {
     const { pid } = useParams();
     // console.log("PID : ", pid);
     const dateFormat = 'YYYY/MM/DD';
-    const [antd_selected_date_val, setAntd_selected_date_val] = useState()
+    const [antd_selected_date_val, setAntd_selected_date_val] = useState(new Date())
 
     const [activeTrendsArray, setActiveTrendsArray] = useState([])
     const [graphLoading, setGraphLoading] = useState(false)
@@ -1638,7 +1643,7 @@ function GraphVisualizer() {
         else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() >= 10) {
             current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-${current_date.getDate()}`
         }
-        console.log(current_date_string)
+        console.log("current_date_string", current_date_string)
         setAntd_selected_date_val(current_date_string)
 
         // getReqData(current_date_string)
@@ -1646,7 +1651,15 @@ function GraphVisualizer() {
     }, [])
 
     useEffect(() => {
-        setGraphLoading(false)
+        if (graphLoading) {
+            timerTimeout.current = setTimeout(() => {
+                setGraphLoading(false)
+            }, 750);
+        }
+        
+        return () => {
+            clearTimeout(timerTimeout.current);
+        }
     }, [graphLoading])
 
     useEffect(() => {
@@ -1674,33 +1687,58 @@ function GraphVisualizer() {
 
     }, [observationAddState])
 
+    const getDataChartsActive = (valDate) => {
+        activeTrendsArray.forEach((chart, index) => {
+            chart.list = [];
+            onGetDataSensorFromInfluxByKey(valDate, chart._key, chart, "change_date", index);
+        });
+    };
 
     function handleDateChange(date, dateString) {
-        // console.log("DATE PAYLOAD---", dateString)
+        setGraphLoading(true);
+
         var temp = dateString.replace(/\//g, "-");
-        // console.log("UPDATED STR---", temp)
+        getDataChartsActive(temp);
         setAntd_selected_date_val(temp)
-        getReqData(temp)
+
+         // getReqData(temp)
         // getDataEfficiently(temp)
     }
 
     const CustomTooltip = (payload) => {
         try {
             if (payload.active && payload.payload && payload.payload.length) {
+                const sensorFound = activeTrendsArray[payload.indexSensor];
+                const time = new Date(sensorFound.data[hoverActiveTooltipIndex].time);
+                
                 return (
-                    <div className="custom-tooltip">
-                        <p className="tooltip-label" >{`Time : ${payload.label}`}</p>
-                        <p>
-                            <span className="tooltip-label" style={{ color: "#FF7529" }} >{`SpO2 : ${spo2_data[hoverActiveTooltipIndex].value}`}</span>
-                            <span className="tooltip-label" style={{ color: "#2ACA44" }} >{`HR : ${bp_data[hoverActiveTooltipIndex].value}`}</span>
-                            <span className="tooltip-label" style={{ color: "#9e00c2" }} >{`RR : ${rr_data[hoverActiveTooltipIndex].value}`}</span>
-                        </p>
-                        <p>
-                            <span className="tooltip-label" style={{ color: "#0C70A3" }} >{`TEMP : ${temp_data[hoverActiveTooltipIndex].value}`}</span>
-                            {/* <span className="tooltip-label" style={{ color: "#9e00c2" }} >{`EWS : ${ews_data[hoverActiveTooltipIndex].value}`}</span> */}
-                        </p>
-                        {/* <p className="desc">{console.log(payload)}</p> */}
+                    <div className="custom-tooltip" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <span className="tooltip-label" style={{ color: sensorFound.color1 }} >
+                            {`${sensorFound?.name} : ${sensorFound.data[hoverActiveTooltipIndex].value}`}
+                        </span>
                     </div>
+
+                    // <div className="custom-tooltip">
+                    //     {/* <p className="tooltip-label" >{`Time : ${payload.label}`}</p> */}
+                    //     <p>
+                    //         <span className="tooltip-label" style={{ color: "#0C70A3" }} >
+                    //             {`TEMP : ${activeTrendsArray[hoverActiveTooltipIndex].value}`}
+                    //         </span>
+                    //         <span className="tooltip-label" style={{ color: "#FF7529" }} >
+                    //             {`SpO2 : ${spo2_data[hoverActiveTooltipIndex].value}`}
+                    //         </span>
+                    //         <span className="tooltip-label" style={{ color: "#2ACA44" }} >
+                    //             {`HR : ${bp_data[hoverActiveTooltipIndex].value}`}
+                    //         </span>
+                    //     </p>
+                    //     <p>
+                    //         <span className="tooltip-label" style={{ color: "#9e00c2" }} >
+                    //             {`RR : ${rr_data[hoverActiveTooltipIndex].value}`}
+                    //         </span>
+                    //         {/* <span className="tooltip-label" style={{ color: "#9e00c2" }} >{`EWS : ${ews_data[hoverActiveTooltipIndex].value}`}</span> */}
+                    //     </p>
+                    //     {/* <p className="desc">{console.log(payload)}</p> */}
+                    // </div>
                 );
             }
 
@@ -1736,6 +1774,47 @@ function GraphVisualizer() {
                 cy={props.cy}
             />
         );
+    };
+
+    const onGetDataSensorFromInfluxByKey = (dateSelected, keySensor, data, type, index) => {
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
+
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+
+        const dateQuery = dateSelected ? new Date(dateSelected) : new Date();
+        const start = new Date(dateQuery.setHours(0, 0, 1));
+        const end = new Date(dateQuery.setHours(23, 59, 59));
+
+        const query = `from(bucket: "emr_dev")
+                |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
+                |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
+                |> yield(name: "mean")`;
+
+        const arrayRes = [];
+        const newArrayData = [...activeTrendsArray];
+
+        if (type === "change_date") {
+            newArrayData.splice(index, 1);
+        }
+
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                const value = dataQueryInFlux?._value || 0;
+                arrayRes.push({ value, time: dataQueryInFlux?._time });
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+                data.data = arrayRes;
+                newArrayData.push(data);
+                setActiveTrendsArray(newArrayData);
+            },
+        })
     };
 
     return (
@@ -1910,8 +1989,8 @@ function GraphVisualizer() {
                             <div>Sample taken : 16/01/2021</div>
                         </div>
                     </div> */}
-                    <div className="gv-header-container" >
-                        <div style={{ display: 'flex', alignItems: 'center' }} >
+                    <div className="gv-header-container">
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
                             <LeftOutlined
                                 onClick={() => {
                                     history.goBack()
@@ -1919,7 +1998,7 @@ function GraphVisualizer() {
                                 className="gv-back-btn"
                             />
                             <Button onClick={() => { history.goBack() }} className='secondary' style={{ marginLeft: '10%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0% 10%' }} >
-                                <div className="gv-patient-name" style={{ fontSize: '1.4rem' }} >
+                                <div className="gv-patient-name" style={{ fontSize: '1.4rem' }}>
                                     {
                                         location.state
                                             ?
@@ -1928,12 +2007,12 @@ function GraphVisualizer() {
                                             history.goBack()
                                     }
                                 </div>
-                                <div className="gv-patient-mr" style={{ fontSize: '0.9rem', color: 'rgba(0, 0, 0, 0.5)' }} >
+                                <div className="gv-patient-mr" style={{ fontSize: '0.9rem', color: 'rgba(0, 0, 0, 0.5)' }}>
                                     {'MR: '}{location.state ? location.state.mr : history.goBack()}
                                 </div>
                             </Button>
                         </div>
-                        <div className="gv-header" >
+                        <div className="gv-header">
                             Visualizer
                         </div>
                         <div
@@ -1953,7 +2032,7 @@ function GraphVisualizer() {
                             Observation
                         </div>
                     </div>
-                    <div style={observationState || patientInfoState ? { filter: 'blur(4px)' } : null} className="gv-bottom-container" >
+                    <div style={observationState || patientInfoState ? { filter: 'blur(4px)' } : null} className="gv-bottom-container">
                         <div className="gv-bottom-left-whole-container" >
                             <div className="gv-graph-action-btn-container" >
                                 <div className="gv-graph-action-btn" style={alertState ? { border: "1px solid orange", color: "orange" } : null} onClick={() => {
@@ -2046,38 +2125,44 @@ function GraphVisualizer() {
                             <div className="gv-bottom-left-container" >
                                 <div className="gv-graph-info-container" >
                                     <div className="gv-trend-btns" >
-                                        <div onClick={() => {
-                                            var flag = true
-                                            activeTrendsArray.map((trend, index) => {
-                                                if (trend.name === 'TEMP') {
-                                                    flag = false
-                                                    var temp = activeTrendsArray
-                                                    temp.splice(index, 1)
-                                                    // console.log("SPLICED ARRAY : ", temp)
-                                                    setActiveTrendsArray(temp)
-                                                }
-                                            })
-                                            if (flag) {
-                                                var temp = activeTrendsArray
-                                                temp.push({
-                                                    name: 'TEMP',
-                                                    data: temp_data,
-                                                    color1: '#0C70A3',
-                                                    color2: '#A8CBDE',
-                                                    max: tempmaxval,
-                                                    min: tempminval,
+                                        <div 
+                                            onClick={() => {
+                                                setGraphLoading(true);
+                                                var flag = true;
+                                                activeTrendsArray.map((trend, index) => {
+                                                    if (trend.name === 'TEMP') {
+                                                        flag = false
+                                                        var temp = activeTrendsArray
+                                                        temp.splice(index, 1)
+                                                        setActiveTrendsArray(temp)
+                                                    }
                                                 })
-                                                setActiveTrendsArray(temp)
+                                                if (flag) {
+                                                    const temp = {
+                                                        _key: "temp",
+                                                        name: 'TEMP',
+                                                        data: [],
+                                                        color1: Colors.purple,
+                                                        color2: '#A8CBDE',
+                                                        max: tempmaxval,
+                                                        min: tempminval,
+                                                    }
+                                                    onGetDataSensorFromInfluxByKey(antd_selected_date_val, "temp", temp);
+                                                }
+                                            }} 
+                                            className="trend-btn" 
+                                            style={
+                                                activeTrendsArray.some(e => e.name === 'TEMP') 
+                                                    ? { border: `2px solid ${Colors.purple}`, color: Colors.purple } 
+                                                    : { border: '1px solid #BABABA', color: '#BABABA' }
                                             }
-                                            setGraphLoading(true)
-                                        }} className="trend-btn" style={
-                                            activeTrendsArray.some(e => e.name === 'TEMP') ? { border: '2px solid #0C70A3', color: '#0C70A3' } : { border: '1px solid #BABABA', color: '#BABABA' }
-                                        } >
+                                        >
                                             TEMP
                                         </div>
 
                                         <div onClick={() => {
-                                            var flag = true
+                                            setGraphLoading(true);
+                                            var flag = true;
                                             activeTrendsArray.map((trend, index) => {
                                                 if (trend.name === 'SpO2') {
                                                     flag = false
@@ -2087,23 +2172,22 @@ function GraphVisualizer() {
                                                 }
                                             })
                                             if (flag) {
-                                                var temp = activeTrendsArray
-                                                temp.push({
+                                                const spo2 = {
+                                                    _key: "spo2",
                                                     name: 'SpO2',
-                                                    data: spo2_data,
-                                                    color1: '#FF7529',
+                                                    data: [],
+                                                    color1: Colors.green,
                                                     color2: '#FFD0B6',
                                                     max: spo2maxval,
                                                     min: spo2minval,
-                                                })
-                                                setActiveTrendsArray(temp)
+                                                }
+                                                onGetDataSensorFromInfluxByKey(antd_selected_date_val, "spo2", spo2);
                                             }
-                                            setGraphLoading(true)
                                         }}
                                             className="trend-btn"
                                             style={
                                                 activeTrendsArray.some(e => e.name === 'SpO2')
-                                                    ? { border: '2px solid #FF7529', color: '#FF7529' }
+                                                    ? { border: `2px solid ${Colors.green}`, color: Colors.green }
                                                     : { border: '1px solid #BABABA', color: '#BABABA' }
                                             }
                                         >
@@ -2111,7 +2195,8 @@ function GraphVisualizer() {
                                         </div>
 
                                         <div onClick={() => {
-                                            var flag = true
+                                            setGraphLoading(true);
+                                            var flag = true;
                                             activeTrendsArray.map((trend, index) => {
                                                 if (trend.name === 'HR') {
                                                     flag = false
@@ -2122,57 +2207,56 @@ function GraphVisualizer() {
                                                 }
                                             })
                                             if (flag) {
-                                                var temp = activeTrendsArray
-                                                temp.push({
+                                                const hr = {
+                                                    _key: "ecg_hr",
                                                     name: 'HR',
-                                                    data: bp_data,
-                                                    color1: '#2ACA44',
+                                                    data: [],
+                                                    color1: Colors.darkPink,
                                                     color2: '#FFEEBA',
                                                     max: bpmaxval,
                                                     min: bpminval,
-                                                })
-                                                setActiveTrendsArray(temp)
+                                                }
+                                                onGetDataSensorFromInfluxByKey(antd_selected_date_val, "ecg_hr", hr);
                                             }
-                                            setGraphLoading(true)
                                         }}
                                             className="trend-btn" style={
-                                                activeTrendsArray.some(e => e.name === 'HR') ? { border: '2px solid #2ACA44', color: '#2ACA44' } : { border: '1px solid #BABABA', color: '#BABABA' }
-                                            } >
+                                                activeTrendsArray.some(e => e.name === 'HR') ? { border: `2px solid ${Colors.darkPink}`, color: Colors.darkPink } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                            }>
                                             HR
                                         </div>
 
                                         <div onClick={() => {
-                                            var flag = true
+                                            setGraphLoading(true);
+                                            var flag = true;
                                             activeTrendsArray.map((trend, index) => {
                                                 if (trend.name === 'RR') {
                                                     flag = false
                                                     var temp = activeTrendsArray
                                                     temp.splice(index, 1)
-                                                    // console.log("SPLICED ARRAY : ", temp)
                                                     setActiveTrendsArray(temp)
                                                 }
                                             })
                                             if (flag) {
-                                                var temp = activeTrendsArray
-                                                temp.push({
+                                                const rr = {
+                                                    _key: "ecg_rr",
                                                     name: 'RR',
-                                                    data: rr_data,
-                                                    color1: '#9e00c2',
+                                                    data: [],
+                                                    color1: Colors.orange,
                                                     color2: '#C4AAFD',
                                                     max: rrmaxval,
                                                     min: rrminval,
-                                                })
-                                                setActiveTrendsArray(temp)
+                                                }
+                                                onGetDataSensorFromInfluxByKey(antd_selected_date_val, "ecg_rr", rr);
                                             }
-                                            setGraphLoading(true)
                                         }} className="trend-btn" style={
-                                            activeTrendsArray.some(e => e.name === 'RR') ? { border: '2px solid #9e00c2', color: '#9e00c2' } : { border: '1px solid #BABABA', color: '#BABABA' }
-                                        } >
+                                            activeTrendsArray.some(e => e.name === 'RR') ? { border: `2px solid ${Colors.orange}`, color: Colors.orange } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                        }>
                                             RR
                                         </div>
 
                                         {/* <div onClick={() => {
-                                            var flag = true
+                                            setGraphLoading(true);
+                                            var flag = true;
                                             activeTrendsArray.map((trend, index) => {
                                                 if (trend.name === 'RR') {
                                                     flag = false
@@ -2202,7 +2286,8 @@ function GraphVisualizer() {
                                         </div>
 
                                         <div onClick={() => {
-                                            var flag = true
+                                            setGraphLoading(true);
+                                            var flag = true;
                                             activeTrendsArray.map((trend, index) => {
                                                 if (trend.name === 'RR') {
                                                     flag = false
@@ -2229,37 +2314,36 @@ function GraphVisualizer() {
                                             activeTrendsArray.some(e => e.name === 'RR') ? { border: '2px solid #9e00c2', color: '#9e00c2' } : { border: '1px solid #BABABA', color: '#BABABA' }
                                         } >
                                             BPS
-                                        </div>
+                                        </div> */}
 
                                         <div onClick={() => {
-                                            var flag = true
+                                            setGraphLoading(true);
+                                            var flag = true;
                                             activeTrendsArray.map((trend, index) => {
-                                                if (trend.name === 'RR') {
+                                                if (trend.name === 'WEI') {
                                                     flag = false
                                                     var temp = activeTrendsArray
                                                     temp.splice(index, 1)
-                                                    // console.log("SPLICED ARRAY : ", temp)
                                                     setActiveTrendsArray(temp)
                                                 }
                                             })
                                             if (flag) {
-                                                var temp = activeTrendsArray
-                                                temp.push({
-                                                    name: 'RR',
-                                                    data: rr_data,
-                                                    color1: '#9e00c2',
+                                                const weight = {
+                                                    _key: "weight",
+                                                    name: 'WEI',
+                                                    data: [],
+                                                    color1: Colors.yellow,
                                                     color2: '#C4AAFD',
                                                     max: rrmaxval,
                                                     min: rrminval,
-                                                })
-                                                setActiveTrendsArray(temp)
+                                                }
+                                                onGetDataSensorFromInfluxByKey(antd_selected_date_val, "weight", weight);
                                             }
-                                            setGraphLoading(true)
                                         }} className="trend-btn" style={
-                                            activeTrendsArray.some(e => e.name === 'RR') ? { border: '2px solid #9e00c2', color: '#9e00c2' } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                            activeTrendsArray.some(e => e.name === 'WEI') ? { border: `2px solid ${Colors.yellow}`, color: Colors.yellow } : { border: '1px solid #BABABA', color: '#BABABA' }
                                         } >
                                             WEI
-                                        </div> */}
+                                        </div>
 
 
 
@@ -2294,28 +2378,28 @@ function GraphVisualizer() {
                                         </div> */}
                                     </div>
                                     <div className="gv-date" >
-                                        <DatePicker style={{ fontSize: "16px" }} defaultValue={moment(antd_selected_date_val, dateFormat)} format={dateFormat} onChange={(date, dateString) => {
-                                            setIsLoading(true);
-                                            setMedMorningLoading(true)
-                                            setMedNoonLoading(true)
-                                            setMedEveningLoading(true)
-                                            setAlertsLoading(true)
-                                            setTrendsLoading(true)
-                                            handleDateChange(date, dateString)
-                                        }} />
+                                        <DatePicker 
+                                            style={{ fontSize: "16px" }} 
+                                            defaultValue={moment(antd_selected_date_val, dateFormat)} 
+                                            format={dateFormat} 
+                                            onChange={(date, dateString) => {
+                                                // setIsLoading(true);
+                                                // setMedMorningLoading(true)
+                                                // setMedNoonLoading(true)
+                                                // setMedEveningLoading(true)
+                                                // setAlertsLoading(true)
+                                                // setTrendsLoading(true)
+                                                handleDateChange(date, dateString)
+                                            }} 
+                                        />
                                     </div>
                                 </div>
                                 <div className="graphs-container" >
                                     {
                                         graphLoading
-                                            ?
-                                            (
-                                                <div>
-                                                    <Spin />
-                                                </div>
-                                            )
-                                            :
-                                            (
+                                            ? (
+                                                <div><Spin /></div>
+                                            ) : (
                                                 activeTrendsArray.map((trend, idx) => (
                                                     <div key={`${idx}-${trend.name}`} style={{ height: `${100 / activeTrendsArray.length}%`, width: "100%", position: "relative" }} >
                                                         <div className="gv-bg-container" style={{ left: "0", top: "0" }} >
@@ -2326,11 +2410,9 @@ function GraphVisualizer() {
                                                         </div>
                                                         <ResponsiveContainer width="100%" height="100%" >
                                                             <LineChart
-
                                                                 onMouseMove={(payload) => setHoverActiveTooltipIndex(payload.activeTooltipIndex)}
 
                                                                 onClick={(gvdata) => {
-
                                                                     console.log(gvdata)
                                                                     try {
                                                                         if (gvdata.activeTooltipIndex) {
@@ -2372,11 +2454,14 @@ function GraphVisualizer() {
                                                                         // });
                                                                     }
 
-                                                                }} width="100%" height="100%" data={trend.data}
-                                                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                                                }} 
+                                                                width="100%" height="100%" 
+                                                                data={trend.data}
+                                                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                                            >
                                                                 <XAxis dataKey="date" hide />
                                                                 <YAxis dataKey="value" domain={[trend.min, trend.max]} axisLine={false} tickLine={false} width={20} tick={{ fill: trend.color1, stroke: trend.color1, strokeWidth: 0.5 }} />
-                                                                <Tooltip content={<CustomTooltip />} />
+                                                                <Tooltip content={<CustomTooltip indexSensor={idx} />} />
                                                                 {
                                                                     trend.data.map((ele) => (
                                                                         ele.med

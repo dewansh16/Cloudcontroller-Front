@@ -27,7 +27,7 @@ function getCurrentDate(dateTime) {
     return `${dateInstance.getHours()}:${dateInstance.getMinutes() < 10 ? '0' + dateInstance.getMinutes() : dateInstance.getMinutes()} Hrs`
 }
 
-function CreateGraphData(pid, deviceType) {
+function CreateGraphData(pid, deviceType, valDuration) {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState([]);
 
@@ -60,10 +60,10 @@ function CreateGraphData(pid, deviceType) {
         const queryApi = client.getQueryApi(org);
     
         const query = `from(bucket: "emr_dev")
-                |> range(start: -48h)
+                |> range(start: -${valDuration})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${newDeviceType}_battery")
                 |> yield(name: "mean")`;
-    
+
         const arrBattery = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {
@@ -126,8 +126,8 @@ function GetPatientOTP(pid, setOtp, setOtpLoading, callback = () => { }) {
     })
 }
 
-function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach,  }) {
-    const [data, isLoading] = CreateGraphData(pid, deviceType);
+function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach, valDuration }) {
+    const [data, isLoading] = CreateGraphData(pid, deviceType, valDuration);
 
     const config = {
         data,

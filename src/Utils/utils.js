@@ -16,3 +16,7 @@ export const isJsonString = (str) => {
     }
     return true;
 }
+
+export const takeDecimalNumber = (val, digits = 10) => {
+    return Math.round(val * digits) / digits;
+};
