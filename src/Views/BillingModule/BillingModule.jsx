@@ -14,6 +14,7 @@ import {
     Checkbox,
     Row,
     Col,
+    notification
 } from "antd";
 import {
     CloseOutlined,
@@ -159,7 +160,7 @@ function BillingModule() {
     const [stageOneState, setStageOneState] = useState(true);
     const [stageTwoState, setStageTwoState] = useState(false);
 
-    const [taskDateVal, setTaskDateVal] = useState();
+    const [taskDateVal, setTaskDateVal] = useState(new Date());
     const [taskTimeVal, setTaskTimeVal] = useState();
     const [taskNameVal, setTaskNameVal] = useState();
     const [taskNoteVal, setTaskNoteVal] = useState();
@@ -182,6 +183,8 @@ function BillingModule() {
 
     const [activeCode99454, setActiveCode99454] = useState(false);
     const [keyNoteActive, setKeyNoteActive] = useState(0); 
+
+    const [requiredAddTask, setRequiredAddTask] = useState([]);
 
     function handleMonthChange(date, dateString) {
         console.log(dateString);
@@ -238,8 +241,12 @@ function BillingModule() {
     }
 
     function handleAddTaskDateChange(date, dateString) {
-        var temp_date = new Date(dateString);
-        setTaskDateVal(temp_date.toISOString());
+        if (dateString) {
+            var temp_date = new Date(dateString);
+            setTaskDateVal(temp_date.toISOString());
+        } else {
+            setTaskDateVal();
+        }
     }
 
     function handleAddTaskTimeChange(time, timeString) {
@@ -251,19 +258,30 @@ function BillingModule() {
 
     function handleAddTaskNameChange(e) {
         setTaskNameVal(e.target.value);
+        if (requiredAddTask?.includes("staff_name")) {
+            const newArr = requiredAddTask.filter(item => item !== "staff_name");
+            setRequiredAddTask([...newArr]);
+        }
     }
 
     function handleAddTaskNoteChange(e) {
         setTaskNoteVal(e.target.value);
+        if (requiredAddTask?.includes("task_note")) {
+            const newArr = requiredAddTask.filter(item => item !== "task_note")
+            setRequiredAddTask([...newArr]);
+        }
     }
 
     function addTaskComponent(cptCode) {
+        const dateFormat = 'YYYY-MM-DD';
+
         return (
             <div className="bm-add-task-container">
                 <div style={{ width: "100%", textAlign: "right" }}>
                     <CusBtn
                         onClick={() => {
                             setAddTaskState(false);
+                            setRequiredAddTask([]);
                         }}
                         className="secondary"
                     >
@@ -278,11 +296,19 @@ function BillingModule() {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <div style={{ width: "17.7%" }}>Date</div>
-                    <DatePicker onChange={handleAddTaskDateChange} />
+                    <DatePicker 
+                        allowClear={false}
+                        onChange={handleAddTaskDateChange} 
+                        defaultValue={moment(taskDateVal, dateFormat)} 
+                        format={dateFormat} 
+                    />
                 </div>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <div style={{ width: "21.7%" }}>Staff Name</div>
-                    <Input placeholder="Name" onChange={handleAddTaskNameChange} />
+                    <div style={{ width: "21.7%" }}>
+                        <span className="text-required">*</span>
+                        Staff Name
+                    </div>
+                    <Input status={requiredAddTask?.includes("staff_name") && "error"} placeholder="Name" onChange={handleAddTaskNameChange} />
                 </div>
                 {cptCode == CPT_CODE.CPT_99091 && (
                     <>
@@ -325,11 +351,13 @@ function BillingModule() {
                     </>
                 )}
                 <div>
+                    <span className="text-required">*</span>
                     Note
                     <TextArea
                         onChange={handleAddTaskNoteChange}
                         placeholder="Controlled autosize"
                         autoSize={{ minRows: 3, maxRows: 3 }}
+                        status={requiredAddTask?.includes("task_note") && "error"}
                     />
                 </div>
                 <CusBtn
@@ -338,9 +366,7 @@ function BillingModule() {
                         let itemTmp = {}
                         itemTmp.task_time_spend = timeCount;
                         timeCount = 0;
-                        stopCountTimer();
-                        setTasksLoadingState(true);
-                        setAddTaskState(false);
+                      
                         callUpdateBillingTasks(taskCodeActive, itemTmp);
                     }}
                 >
@@ -395,7 +421,8 @@ function BillingModule() {
         clockCounter = setInterval(function () {
             timeCount = timeCount + 1;
             let timeDs = renderTimeDisplay(timeCount);
-            document.getElementById(elementId).innerText = timeDs;
+            const element = document.getElementById(elementId);
+            if (element) { element.innerText = timeDs; }
         }, 1000);
     }
 
@@ -416,6 +443,7 @@ function BillingModule() {
 
                     }}
                     className="primary"
+                    style={{ paddingBottom: "0.5rem", paddingTop: "0.5rem" }}
                 >
                     Start
                 </CusBtn>
@@ -437,6 +465,7 @@ function BillingModule() {
                             }
                         }}
                         className="primary"
+                        style={{ paddingBottom: "0.5rem", paddingTop: "0.5rem" }}
                     >
                         Stop
                     </CusBtn>
@@ -1300,11 +1329,37 @@ function BillingModule() {
         return '';
 
     }
+
+    const validateFormAddTask = (taskNameVal, taskNoteVal) => {
+        if (!taskNameVal?.trim() || !taskNoteVal?.trim()) {
+            if (!taskNameVal) {
+                requiredAddTask.push("staff_name");
+            } 
+
+            if (!taskNoteVal) {
+                requiredAddTask.push("task_note");
+            }
+
+            notification.warn({
+                message: "Fill mandatory values",
+                description: "Mandatory values are marked with *",
+                placement: "topRight",
+            });
+
+            setRequiredAddTask([...requiredAddTask]);
+            return false;
+        } else {
+            return true;
+        }
+    };
+
     function callUpdateBillingTasks(cptCode, item = {}) {
         var date = new Date();
         var date_string = date.toISOString();
         let isCodeExist = false;
         let billingId = null;
+
+        let valiSuccess = false;
 
         billingInformation.map(item => {
             if (item.code == cptCode) {
@@ -1329,6 +1384,8 @@ function BillingModule() {
                         task_time_spend: item.task_time_spend
                     }
                 } else {
+                    valiSuccess = validateFormAddTask(taskNameVal, taskNoteVal);
+
                     updateData = {
                         code: cptCode,
                         bill_date: date_string,
@@ -1341,43 +1398,71 @@ function BillingModule() {
                     }
                 }
 
-                billingApi
-                    .updateBillingTask(
-                        updateData
-                    )
-                    .then((res) => {
-                        setTasksLoadingState(false);
-                        getListFirstTwentyTasks();
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
+                if (valiSuccess) {
+                    setTasksLoadingState(true);
+                    billingApi
+                        .updateBillingTask(
+                            updateData
+                        )
+                        .then((res) => {
+                            stopCountTimer();
+                            setAddTaskState(false);
+                            setTasksLoadingState(false);
+                            getListFirstTwentyTasks();
+                        })
+                        .catch((err) => {
+                            notification.error({
+                                message: "Add Task ",
+                                description: "Add task falied!",
+                                placement: "topRight",
+                            });
+                            stopCountTimer();
+                            setAddTaskState(false);
+                            setTasksLoadingState(false);
+                        });
+                }
+
             } else {
-                billingApi
-                    .addBillingTask(
-                        {
-                            code_type: CPT,
-                            code: cptCode,
-                            bill_date: date_string,
-                            pid: location.state.pid,
-                            revenue_code: 123,
-                            notecodes: "pending",
-                            bill_process: 0,
-                            fee: 40,
-                            add_task_id: date.getTime(),
-                            add_task_date: taskDateVal,
-                            add_task_staff_name: taskNameVal,
-                            add_task_note: taskNoteVal,
-                            task_time_spend: item.task_time_spend
-                        }
-                    )
-                    .then((res) => {
-                        setTasksLoadingState(false);
-                        getListFirstTwentyTasks();
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
+                valiSuccess = validateFormAddTask(taskNameVal, taskNoteVal);
+                if (valiSuccess) {
+                    setTasksLoadingState(true);
+
+                    billingApi
+                        .addBillingTask(
+                            {
+                                code_type: CPT,
+                                code: cptCode,
+                                bill_date: date_string,
+                                pid: location.state.pid,
+                                revenue_code: 123,
+                                notecodes: "pending",
+                                bill_process: 0,
+                                fee: 40,
+                                add_task_id: date.getTime(),
+                                add_task_date: taskDateVal,
+                                add_task_staff_name: taskNameVal,
+                                add_task_note: taskNoteVal,
+                                task_time_spend: item.task_time_spend
+                            }
+                        )
+                        .then((res) => {
+                            stopCountTimer();
+                            setAddTaskState(false);
+                            setTasksLoadingState(false);
+                            getListFirstTwentyTasks();
+                        })
+                        .catch((err) => {
+                            notification.error({
+                                message: "Add Task ",
+                                description: "Add task falied!",
+                                placement: "topRight",
+                            });
+                            stopCountTimer();
+                            setAddTaskState(false);
+                            setTasksLoadingState(false);
+                        });
+                }
+
             }
         }
         if (cptCode == CPT_CODE.CPT_99091) {
@@ -2097,7 +2182,7 @@ function BillingModule() {
             setActiveCode99454(true);
         }
 
-        return { newArr, totalDayMonitored, billedUnit: result };
+        return { list: newArr, totalDayMonitored, billedUnit: result };
     }, [patchArray, currentDateApi]);
 
     return rightSideLoading ? (
@@ -2863,7 +2948,7 @@ function BillingModule() {
                                 <div className="bm-item-header" style={{ width: "13%" }}>Total Number Of Day</div>
                             </div>
                             <div style={{ overflowY: "scroll", height: "70%", marginRight: '-6px' }}>
-                                {filterDeviceAssociatedByDate?.newArr?.length === 0 ? (
+                                {filterDeviceAssociatedByDate?.list?.length === 0 ? (
                                     <div
                                         style={{
                                             height: "100%",
@@ -2879,7 +2964,7 @@ function BillingModule() {
                                     </div>
                                 ) : (
                                     <>
-                                        {filterDeviceAssociatedByDate?.newArr?.map((item, index) => (
+                                        {filterDeviceAssociatedByDate?.list?.map((item, index) => (
                                             <div
                                                 key={index}
                                                 style={{
@@ -3079,10 +3164,12 @@ function BillingModule() {
                                                         width: "100%",
                                                         display: "flex",
                                                         alignItems: "center",
-                                                        height: "60px",
+                                                        height: "auto",
                                                         fontSize: "1rem",
                                                         background: "#ffb300c2",
-                                                        margin: "0.5% 0%"
+                                                        margin: "0.5% 0%",
+                                                        paddingTop: "0.5rem",
+                                                        paddingBottom: "0.5rem"
                                                     }}
                                                 >
                                                     <div className="bm-item-body" style={{ width: "20%" }}>
@@ -3295,10 +3382,12 @@ function BillingModule() {
                                                         width: "100%",
                                                         display: "flex",
                                                         alignItems: "center",
-                                                        height: "65px",
+                                                        height: "auto",
                                                         fontSize: "1rem",
                                                         background: "#ffb300c2",
-                                                        margin: "0.5% 0%"
+                                                        margin: "0.5% 0%",
+                                                        paddingTop: "0.5rem",
+                                                        paddingBottom: "0.5rem"
                                                     }}
                                                 >
                                                     <div className="bm-item-body" style={{ width: "20%" }}>
@@ -3431,7 +3520,7 @@ function BillingModule() {
                                             setKeyNoteActive(val);
                                             setCurrentItem99091Active(val);
                                         }}
-                                        defaultActiveKey={task99091[task99091?.length - 1].task_id}
+                                        defaultActiveKey={task99091[task99091?.length - 1]?.task_id}
                                         activeKey={keyNoteActive}
                                     >
                                         {task99091?.map((item, index) => (
