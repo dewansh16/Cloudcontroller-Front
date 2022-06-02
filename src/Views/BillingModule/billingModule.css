@@ -127,7 +127,8 @@
     border-radius: 6px;
     width: 100%;
     font-size: 1.6rem;
-    height: 70%;
+    /* height: 70%; */
+    height: 3rem;
     text-align: center;
     display: flex;
     justify-content: center;
@@ -146,7 +147,7 @@
 .bm-sensor-mid{
     width: 90%;
     height: 14%;
-    margin: 5%;
+    margin: 3rem 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -178,7 +179,7 @@
 
 .bm-sensor-bottom-header{
     background: #ffa000a1;
-    height: 10%;
+    height: 2.75rem;
     font-size: 1.3rem;
     display: flex;
     justify-content: center;
@@ -192,7 +193,8 @@
     font-size: 1.1rem;
     display: flex;
     width: 100%;
-    height: 20%;
+    /* height: 20%; */
+    height: 4.75rem;
     align-items: center;
     /* padding-right: 5%; */
     /* padding: 0% 5%; */

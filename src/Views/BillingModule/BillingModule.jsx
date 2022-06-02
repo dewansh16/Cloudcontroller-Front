@@ -2761,7 +2761,7 @@ function BillingModule() {
                                         display: "flex",
                                         flexDirection: "column",
                                         justifyContent: "center",
-                                        padding: "1% 5%",
+                                        padding: "1rem 5%",
                                     }}
                                 >
                                     <div
@@ -2850,7 +2850,7 @@ function BillingModule() {
                                         display: "flex",
                                         flexDirection: "column",
                                         justifyContent: "center",
-                                        padding: "1% 5%",
+                                        padding: "1rem 5%",
                                     }}
                                 >
                                     <div
@@ -2934,7 +2934,7 @@ function BillingModule() {
                                     display: "flex",
                                     flexDirection: "column",
                                     justifyContent: "center",
-                                    padding: "1% 5%",
+                                    padding: "1rem 5%",
                                 }}
                             >
                                 <div className="gv-patient-name" style={{ fontSize: "1.4rem" }}>
@@ -3047,7 +3047,7 @@ function BillingModule() {
                                     display: "flex",
                                     flexDirection: "column",
                                     justifyContent: "center",
-                                    padding: "1% 5%",
+                                    padding: "1rem 5%",
                                 }}
                             >
                                 <div className="gv-patient-name" style={{ fontSize: "1.4rem" }}>
@@ -3227,7 +3227,7 @@ function BillingModule() {
                                         display: "flex",
                                         flexDirection: "column",
                                         justifyContent: "center",
-                                        padding: "1% 5%",
+                                        padding: "1rem 5%",
                                     }}
                                 >
                                     <div
@@ -3438,7 +3438,7 @@ function BillingModule() {
                                         display: "flex",
                                         flexDirection: "column",
                                         justifyContent: "center",
-                                        padding: "1% 5%",
+                                        padding: "1rem 5%",
                                     }}
                                 >
                                     <div
@@ -3641,7 +3641,7 @@ function BillingModule() {
                                     display: "flex",
                                     flexDirection: "column",
                                     justifyContent: "center",
-                                    padding: "1% 5%",
+                                    padding: "1rem 5%",
                                 }}
                             >
                                 <div className="gv-patient-name" style={{ fontSize: "1.4rem" }}>
@@ -4247,7 +4247,7 @@ function BillingModule() {
                                             display: "flex",
                                             flexDirection: "column",
                                             justifyContent: "center",
-                                            padding: "1% 5%",
+                                            padding: "1rem 5%",
                                         }}
                                     >
                                         <div
