@@ -305,7 +305,9 @@ function BillingModule() {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <div style={{ width: "21.7%" }}>
-                        <span className="text-required">*</span>
+                        {cptCode != CPT_CODE.CPT_99091 && (
+                            <span className="text-required">*</span>
+                        )}
                         Staff Name
                     </div>
                     <Input status={requiredAddTask?.includes("staff_name") && "error"} placeholder="Name" onChange={handleAddTaskNameChange} />
@@ -351,7 +353,9 @@ function BillingModule() {
                     </>
                 )}
                 <div>
-                    <span className="text-required">*</span>
+                    {cptCode != CPT_CODE.CPT_99091 && (
+                        <span className="text-required">*</span>
+                    )}
                     Note
                     <TextArea
                         onChange={handleAddTaskNoteChange}
@@ -3516,39 +3520,41 @@ function BillingModule() {
                             {addTaskState ? addTaskComponent(CPT_CODE.CPT_99091) : null}
 
                             <Row>
-                                <Col span={12}>
-                                    <Collapse
-                                        accordion
-                                        className="collapse-table-99091"
-                                        onChange={(val) => {
-                                            setKeyNoteActive(val);
-                                            setCurrentItem99091Active(val);
-                                        }}
-                                        defaultActiveKey={task99091[task99091?.length - 1]?.task_id}
-                                        activeKey={keyNoteActive}
-                                    >
-                                        {task99091?.map((item, index) => (
-                                            <Panel 
-                                                key={item.task_id}
-                                                header={(
-                                                    <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                                        <div style={{ width: "50%" }}>Vitals</div>
-                                                        <div style={{ width: "50%" }}>{moment(item['date']).format('YYYY-MM-DD H:mm a')}</div>
-                                                    </div>
-                                                )}
-                                            >
-                                                {getDataSourceByItem99091(item).map(data => {
-                                                    return (
-                                                        <div key={data?._key} style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                                            <div style={{ width: "50%" }}>{data?.name}</div>
-                                                            <div style={{ width: "50%" }}>{data?.value}</div>
+                                {task99091?.length > 0 && (
+                                    <Col span={14} style={{ paddingRight: "5%" }}>
+                                        <Collapse
+                                            accordion
+                                            className="collapse-table-99091"
+                                            onChange={(val) => {
+                                                setKeyNoteActive(val);
+                                                setCurrentItem99091Active(val);
+                                            }}
+                                            defaultActiveKey={task99091[task99091?.length - 1]?.task_id}
+                                            activeKey={keyNoteActive}
+                                        >
+                                            {task99091?.map((item, index) => (
+                                                <Panel 
+                                                    key={item.task_id}
+                                                    header={(
+                                                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                            <div style={{ width: "50%" }}>Vitals</div>
+                                                            <div style={{ width: "50%" }}>{moment(item['date']).format('YYYY-MM-DD H:mm a')}</div>
                                                         </div>
-                                                    )
-                                                })}
-                                            </Panel>
-                                        ))}
-                                    </Collapse>
-                                </Col>
+                                                    )}
+                                                >
+                                                    {getDataSourceByItem99091(item).map(data => {
+                                                        return (
+                                                            <div key={data?._key} style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                                <div style={{ width: "50%" }}>{data?.name}</div>
+                                                                <div style={{ width: "50%" }}>{data?.value}</div>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </Panel>
+                                            ))}
+                                        </Collapse>
+                                    </Col>
+                                )}
 
                                         {/* <Table
                                             size="small"
@@ -3596,7 +3602,7 @@ function BillingModule() {
                                             bordered
                                         /> */}
 
-                                <Col span={12} style={{ paddingLeft: "5%" }}>
+                                <Col span={10}>
                                     <div>
 
                                         <div style={{
