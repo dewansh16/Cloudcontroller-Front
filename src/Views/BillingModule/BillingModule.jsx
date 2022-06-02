@@ -56,7 +56,9 @@ const monthNames = [
 ];
 
 const TOTAL_HOURS_FOR_EACH_SENSOR_BILLED = 16;
-const TOTAL_HOURS_FOR_EACH_99458_BILLED = 30;
+const TOTAL_HOURS_FOR_EACH_99458_BILLED = 20;
+const TOTAL_HOURS_FOR_CODE_99457_BILLED = 20;
+const TOTAL_HOURS_FOR_EACH_99091_BILLED = 30;
 
 const columns = [
     {
@@ -1250,8 +1252,18 @@ function BillingModule() {
                 var tempFirstTwentyTasks = [];
                 var tempSecondTwentyTasks = [];
                 let tmpTotalTime = 0;
+                let tempDataSource = [];
                 res.data.response.billingData.map(
                     (item) => {
+                        tempDataSource.push({
+                            date: `${getDateFromISO(item.bill_date)} ${getTimeFromISO(
+                                item.bill_date
+                            )}`,
+                            code: item.code,
+                            desc: getReportDes(item),
+                            duration: getReportTotalDuration(item),
+                        });
+                        setDataSource(tempDataSource);
                         if (item.code == CPT_CODE.CPT_99457) {
                             tempFirstTwentyTasks = JSON.parse(item.params);
                             tmpTotalTime = 0;
@@ -1362,6 +1374,8 @@ function BillingModule() {
         var date_string = date.toISOString();
         let isCodeExist = false;
         let billingId = null;
+        let currentTotalTime99457 = 0;
+        let addNewLine99458 = null;
 
         let valiSuccess = false;
 
@@ -1370,7 +1384,36 @@ function BillingModule() {
                 isCodeExist = true;
                 billingId = item.id
             }
+            if (item.code == CPT_CODE.CPT_99457){
+                let taskData = JSON.parse(item.params);
+                taskData.map(item => {
+                    currentTotalTime99457 += item.task_time_spend;
+                })
+            }
         })
+
+        if(cptCode == CPT_CODE.CPT_99457){
+            if((currentTotalTime99457 + item.task_time_spend) >= TOTAL_HOURS_FOR_CODE_99457_BILLED * 60){
+                let timeReduce = currentTotalTime99457 + item.task_time_spend - TOTAL_HOURS_FOR_CODE_99457_BILLED * 60;
+                item.task_time_spend = item.task_time_spend - timeReduce;
+                addNewLine99458 = {
+                    code_type: CPT,
+                            code: CPT_CODE.CPT_99458,
+                            bill_date: date_string,
+                            pid: location.state.pid,
+                            revenue_code: 123,
+                            notecodes: "pending",
+                            bill_process: 0,
+                            fee: 40,
+                            add_task_id: date.getTime(),
+                            add_task_date: taskDateVal,
+                            add_task_staff_name: taskNameVal,
+                            add_task_note: taskNoteVal,
+                            task_time_spend: timeReduce
+                }
+            }
+        }
+       
         if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
             if (isCodeExist) {
                 // update
@@ -1413,6 +1456,19 @@ function BillingModule() {
                             setAddTaskState(false);
                             setTasksLoadingState(false);
                             getListFirstTwentyTasks();
+                            if(cptCode == CPT_CODE.CPT_99457 && addNewLine99458 != null){
+                                billingApi
+                                    .addBillingTask(
+                                        addNewLine99458
+                                    )
+                                    .then((res) => {
+                                        setTasksLoadingState(false);
+                                        getListFirstTwentyTasks();
+                                    })
+                                    .catch((err) => {
+                                        console.log(err);
+                                    });
+                            }
                         })
                         .catch((err) => {
                             notification.error({
@@ -1454,6 +1510,19 @@ function BillingModule() {
                             setAddTaskState(false);
                             setTasksLoadingState(false);
                             getListFirstTwentyTasks();
+                            if(cptCode == CPT_CODE.CPT_99457 && addNewLine99458 != null){
+                                billingApi
+                                    .addBillingTask(
+                                        addNewLine99458
+                                    )
+                                    .then((res) => {
+                                        setTasksLoadingState(false);
+                                        getListFirstTwentyTasks();
+                                    })
+                                    .catch((err) => {
+                                        console.log(err);
+                                    });
+                            }
                         })
                         .catch((err) => {
                             notification.error({
@@ -1761,6 +1830,105 @@ function BillingModule() {
         }
     };
 
+    const getReportDes = (item) => {
+        if(item.code == CPT_CODE.CPT_99453){
+            return '1 billed';
+        }
+
+        if(item.code == CPT_CODE.CPT_99457){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.task_time_spend)
+            })
+            tempTotal = Math.floor(tempTotal / 60);
+            if(tempTotal >= 20){
+                return '1 billed';
+            } else {
+                return '';
+            }
+        }
+
+        if(item.code == CPT_CODE.CPT_99458){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.task_time_spend)
+            })
+            tempTotal = Math.floor(tempTotal / 60);
+            if(tempTotal >= TOTAL_HOURS_FOR_EACH_99458_BILLED){
+                return `${Math.floor(tempTotal / TOTAL_HOURS_FOR_EACH_99458_BILLED)} billed`;
+            } else {
+                return '';
+            }
+        }
+
+        if(item.code == CPT_CODE.CPT_99091){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.time_spent)
+            })
+            if(tempTotal >= TOTAL_HOURS_FOR_EACH_99091_BILLED){
+                return `1 billed`;
+            } else {
+                return '';
+            }
+        }
+    }
+
+    const getReportTotalDuration = (item) => {
+        if(item.code == CPT_CODE.CPT_99453){
+            return '';
+        }
+
+        if(item.code == CPT_CODE.CPT_99457){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.task_time_spend)
+            })
+            tempTotal = Math.floor(tempTotal / 60);
+            if(tempTotal >= 20){
+                return '20 Mins'
+            } else {
+                if(tempTotal > 1) {
+                    return `${tempTotal} Mins`
+                } else {
+                    return `${tempTotal} Min`
+                }
+            }
+        }
+
+        if(item.code == CPT_CODE.CPT_99458){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.task_time_spend)
+            })
+            tempTotal = Math.floor(tempTotal / 60);
+            if(tempTotal > 1) {
+                return `${tempTotal} Mins`
+            } else {
+                return `${tempTotal} Min`
+            }
+        }
+
+        if(item.code == CPT_CODE.CPT_99091){
+            let taskData = JSON.parse(item.params);
+            let tempTotal = 0;
+            taskData.map(item => {
+                tempTotal += Number(item.time_spent)
+            })
+            if(tempTotal > 1) {
+                return `${tempTotal} Mins`
+            } else {
+                return `${tempTotal} Min`
+            }
+        }
+
+    }
+
     useEffect(() => {
         var billDate = new Date();
         var billDateStr = getDateFromISO(billDate.toISOString());
@@ -1820,8 +1988,8 @@ function BillingModule() {
                                     item.bill_date
                                 )}`,
                                 code: item.code,
-                                desc: '',
-                                duration: getMinutesFromSeconds(item.timeConsidered),
+                                desc: getReportDes(item),
+                                duration: getReportTotalDuration(item),
                             });
 
                             if (item.code == CPT_CODE.CPT_99453) {
