@@ -2735,7 +2735,7 @@ function BillingModule() {
                 {!enrolledState ? (
                     currentDateApi === presentMonth ? (
                         <div className="bm-right-container">
-                            <div
+                            {/* <div
                                 style={
                                     addTaskState
                                         ? {
@@ -2788,7 +2788,10 @@ function BillingModule() {
                                     </div>
                                 </CusBtn>
                                 {placeDatePicker()}
-                            </div>
+                            </div> */}
+
+                            <HeaderBilling addTask={addTaskState} currentDate={currentDateApi} onChangeDate={handleMonthChange} />
+                            
                             <div className="bm-notenroll-container">
                                 <div style={{ fontSize: "4rem" }}>Billing</div>
                                 <div
@@ -2824,7 +2827,7 @@ function BillingModule() {
                         </div>
                     ) : (
                         <div className="bm-right-container">
-                            <div
+                            {/* <div
                                 style={
                                     addTaskState
                                         ? {
@@ -2877,7 +2880,10 @@ function BillingModule() {
                                     </div>
                                 </CusBtn>
                                 {placeDatePicker()}
-                            </div>
+                            </div> */}
+
+                            <HeaderBilling addTask={addTaskState} currentDate={currentDateApi} onChangeDate={handleMonthChange} />
+
                             <div className="bm-notenroll-container">
                                 <div style={{ fontSize: "4rem" }}>No Billing Info</div>
                                 <div
