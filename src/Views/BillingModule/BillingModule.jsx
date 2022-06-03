@@ -1253,6 +1253,7 @@ function BillingModule() {
                 var tempSecondTwentyTasks = [];
                 let tmpTotalTime = 0;
                 let tempDataSource = [];
+                setBillingInformation(res.data.response.billingData)
                 res.data.response.billingData.map(
                     (item) => {
                         tempDataSource.push({
