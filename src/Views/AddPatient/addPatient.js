@@ -41,6 +41,8 @@ import Summary from "./summary/summary";
 // import PatientStore from '../../Stores/PatientStore';
 import PractitionerDetails from "./addPatientDetails/forms/practitionerDetails";
 
+import { isJsonString } from "../../Utils/utils";
+
 import "./addPatient.css";
 
 const { TabPane } = Tabs;
@@ -628,6 +630,8 @@ function AddPatient() {
                         patient_data?.demographic_map?.pid || patientId
                     );
 
+                    setPatientData(patient_data.demographic_map);
+
                     let practitionersData = {
                         ...practitioners,
                         tenant_id: tenantId,
@@ -821,7 +825,7 @@ function AddPatient() {
         const dataBody = {
             tenantId,
             pid: patientId,
-            associated_list: JSON.parse(patientData.associated_list),
+            associated_list: isJsonString(patientData?.associated_list) ? JSON.parse(patientData?.associated_list) : [],
             list: payload
         }
 
