@@ -42,6 +42,11 @@ const billingApi = {
             url: `/tasks/`,
             withCredentials: true,
         }),
+    getBillingSummary: (bill_date) => 
+        axiosInstance.request({
+            method: "GET",
+            url: `/billing/total-summary?bill_date=${bill_date}&limit=10&offset=0&filter=0`,
+        }),
 };
 
 export default billingApi;
