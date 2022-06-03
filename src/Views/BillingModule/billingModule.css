@@ -146,7 +146,9 @@
 
 .bm-sensor-mid{
     width: 90%;
-    height: 14%;
+    /* height: 14%; */
+    height: 7rem;
+    min-height: 110px;
     margin: 3rem 5%;
     display: flex;
     justify-content: space-between;
@@ -172,9 +174,10 @@
 }
 
 .bm-sensor-bottom-container{
-    height: 59%;
+    /* height: 59%; */
     width: 90%;
     margin: 0% 5%;
+    height: calc(100% - 5.5rem);
 }
 
 .bm-sensor-bottom-header{
@@ -194,21 +197,27 @@
     display: flex;
     width: 100%;
     /* height: 20%; */
-    height: 4.75rem;
+    /* height: 4.75rem; */
     align-items: center;
     /* padding-right: 5%; */
     /* padding: 0% 5%; */
     background: #ffc30042;
     border-top-right-radius: 30px;
+    padding: 1rem 0;
 }
 
 .bm-twenty-bottom-container{
     position: relative;
     background: #ff9e001f;
     margin: 0% 5%;
-    height: 59%;
+    /* height: 59%; */
     width: 90%;
     border-radius: 10px;
+    /* max-height: 100vh;
+    min-height: 40vh; */
+    height: calc(100vh - 20rem);
+    min-height: 500px;
+    margin-bottom: 1.5rem;
 }
 
 .bm-bottom-add-btn{
@@ -227,7 +236,8 @@
     border-bottom: 1px solid #00000026;
     justify-content: center;
     align-items: center;
-    height: 15%;
+    /* height: 15%; */
+    height: 4.5rem;
 }
 
 .bm-add-task-container{
@@ -279,10 +289,10 @@
     width: 5%;
 }
 
-.bm-sensor-bottom-container .title-table {
+/* .bm-sensor-bottom-container .title-table {
     height: auto;
     padding: 0.25rem 0;
-}
+} */
 
 .bm-twenty-bottom-container .bm-sensor-bottom-container {
     margin-top: 1rem;
