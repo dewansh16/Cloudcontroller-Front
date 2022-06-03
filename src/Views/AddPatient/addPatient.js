@@ -628,6 +628,8 @@ function AddPatient() {
                         patient_data?.demographic_map?.pid || patientId
                     );
 
+                    setPatientData(patient_data.demographic_map);
+
                     let practitionersData = {
                         ...practitioners,
                         tenant_id: tenantId,
