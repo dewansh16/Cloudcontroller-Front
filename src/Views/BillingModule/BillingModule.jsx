@@ -375,7 +375,7 @@ function BillingModule() {
                         let itemTmp = {}
                         itemTmp.task_time_spend = timeCount;
                         timeCount = 0;
-                      
+                        
                         callUpdateBillingTasks(taskCodeActive, itemTmp);
                     }}
                 >
@@ -436,7 +436,7 @@ function BillingModule() {
         }, 1000);
     }
 
-    const renderTimerClock = (item, cptCode) => {
+    const renderTimerClock = (item, cptCode, isDisableStartStop) => {
         const elementId = `task-${cptCode}-timer`;
         if (!timerTask || item.task_id != currentIdTimerClockActive) {
             return (
@@ -454,6 +454,7 @@ function BillingModule() {
                     }}
                     className="primary"
                     style={{ paddingBottom: "0.5rem", paddingTop: "0.5rem" }}
+                    disabled={isDisableStartStop}
                 >
                     Start
                 </CusBtn>
@@ -476,6 +477,7 @@ function BillingModule() {
                         }}
                         className="primary"
                         style={{ paddingBottom: "0.5rem", paddingTop: "0.5rem" }}
+                        disabled={isDisableStartStop}
                     >
                         Stop
                     </CusBtn>
@@ -1038,9 +1040,9 @@ function BillingModule() {
         return result;
     }
 
-    const getDateEnable99457 = () => {
-        if (isArray(firstTwentyTasks) && firstTwentyTasks.length > 0) {
-            return moment(firstTwentyTasks[firstTwentyTasks.length - 1]).format('YYYY-MM-DD');
+    const getDateEnable99457 = (dataTask) => {
+        if (isArray(dataTask) && dataTask.length > 0) {
+            return moment(dataTask[dataTask.length - 1]).format('YYYY-MM-DD');
         }
         return '';
     }
@@ -1308,7 +1310,7 @@ function BillingModule() {
                             if(temp99091Task.length > 0) {
                                 setCurrentItem99091Active(temp99091Task[temp99091Task.length - 1].task_id);
                                 temp99091Task.map(item => {
-                                    tmpTime +=  Number(item.time_spent);
+                                    tmpTime +=  Number(item.task_time_spend);
                                 })
                                 setKeyNoteActive(temp99091Task[temp99091Task.length - 1].task_id)
                             }
@@ -1340,7 +1342,7 @@ function BillingModule() {
                             <p>{findItem['note']}</p>
                         </div>
                         <div style={{ width: "15%" }}>
-                            {findItem['time_spent']} {Number(findItem['time_spent']) > 1 ? 'mins' : 'min'}
+                            {findItem['task_time_spend']} {Number(findItem['task_time_spend']) > 1 ? 'mins' : 'min'}
                         </div>
                         <div style={{ width: "5%" }}></div>
                     </div>
@@ -1506,7 +1508,7 @@ function BillingModule() {
                                 add_task_id: date.getTime(),
                                 add_task_date: taskDateVal,
                                 add_task_staff_name: taskNameVal,
-                                add_task_note: taskNoteVal,
+                                task_note: taskNoteVal,
                                 task_time_spend: item.task_time_spend
                             }
                         )
@@ -1551,21 +1553,17 @@ function BillingModule() {
                     pid: location.state.pid,
                     billing_id: billingId,
                     date: taskDateVal,
-                    temperature: temperatureVal,
-                    spo2: spo2Val,
-                    heart_rate: heartRateVal,
-                    blood_pressure: bloodPressureVal,
-                    respiration_rate: respirationRateVal,
                     staff_name: taskNameVal,
-                    note: taskNoteVal,
-                    time_spent: taskTimeVal
-
+                    task_note: taskNoteVal,
+                    task_time_spend: item.task_time_spend
                 }
                 billingApi
                     .updateBillingTask(
                         updateData
                     )
                     .then((res) => {
+                        stopCountTimer();
+                        setAddTaskState(false);
                         setTasksLoadingState(false);
                         getListFirstTwentyTasks();
                     })
@@ -1586,17 +1584,14 @@ function BillingModule() {
                             fee: 40,
                             task_id: date.getTime(),
                             date: taskDateVal,
-                            temperature: temperatureVal,
-                            spo2: spo2Val,
-                            heart_rate: heartRateVal,
-                            blood_pressure: bloodPressureVal,
-                            respiration_rate: respirationRateVal,
                             staff_name: taskNameVal,
-                            note: taskNoteVal,
-                            time_spent: taskTimeVal
+                            task_note: taskNoteVal,
+                            task_time_spend: item.task_time_spend
                         }
                     )
                     .then((res) => {
+                        stopCountTimer();
+                        setAddTaskState(false);
                         setTasksLoadingState(false);
                         getListFirstTwentyTasks();
                     })
@@ -1872,7 +1867,7 @@ function BillingModule() {
             let taskData = JSON.parse(item.params);
             let tempTotal = 0;
             taskData.map(item => {
-                tempTotal += Number(item.time_spent)
+                tempTotal += Number(item.task_time_spend)
             })
             if(tempTotal >= TOTAL_HOURS_FOR_EACH_99091_BILLED){
                 return `1 billed`;
@@ -1923,7 +1918,7 @@ function BillingModule() {
             let taskData = JSON.parse(item.params);
             let tempTotal = 0;
             taskData.map(item => {
-                tempTotal += Number(item.time_spent)
+                tempTotal += Number(item.task_time_spend)
             })
             if(tempTotal > 1) {
                 return `${tempTotal} Mins`
@@ -1988,6 +1983,7 @@ function BillingModule() {
                     var secondTotalTime = 0;
                     res.data.response.billingData.map(
                         (item) => {
+
                             tempDataSource.push({
                                 date: `${getDateFromISO(item.bill_date)} ${getTimeFromISO(
                                     item.bill_date
@@ -1996,7 +1992,16 @@ function BillingModule() {
                                 desc: getReportDes(item),
                                 duration: getReportTotalDuration(item),
                             });
-
+                            const dataCode99454 = filterDeviceAssociatedByDate;
+                            if(isArray(dataCode99454.list) && dataCode99454.list.length > 0){
+                                let lastItem99454 = dataCode99454.list[dataCode99454.list.length - 1];
+                                tempDataSource.push({
+                                    date: moment(lastItem99454.datesInflux?.[lastItem99454?.datesInflux?.length - 1]).format('YYYY-MM-DD'),
+                                    code: CPT_CODE.CPT_99454,
+                                    desc: dataCode99454.billedUnit,
+                                    duration: `${dataCode99454.totalDayMonitored} day(s)`,
+                                });
+                            }
                             if (item.code == CPT_CODE.CPT_99453) {
                                 const d = new Date(item.bill_date);
                                 initialStepDone = true;
@@ -2046,7 +2051,7 @@ function BillingModule() {
                                 if (temp99091Task.length > 0) {
                                     setCurrentItem99091Active(temp99091Task[temp99091Task.length - 1].task_id);
                                     temp99091Task.map(item => {
-                                        tmpTime += Number(item.time_spent);
+                                        tmpTime += Number(item.task_time_spend);
                                     })
                                     setKeyNoteActive(temp99091Task[temp99091Task.length - 1].task_id);
                                 }
@@ -2647,7 +2652,16 @@ function BillingModule() {
                             </div>
                             <div className="bm-cptcode-b-header">
                                 <div className="bm-header-below" style={{ marginLeft: "12%" }}>
-                                    0 mins monitored
+                                {Math.floor(totalTime99091 / 60) >= TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                    <>
+                                              {`${TOTAL_HOURS_FOR_EACH_99091_BILLED}/${TOTAL_HOURS_FOR_EACH_99091_BILLED} mins monitored`}
+                                      </>
+                                        )}
+                                         {Math.floor(totalTime99091 / 60) < TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                              <>
+                                              {`${Math.floor(totalTime99091/60) }/${TOTAL_HOURS_FOR_EACH_99091_BILLED} mins monitored`}
+                                              </>
+                                        )}
                                 </div>
                             </div>
                         </div>
@@ -3165,7 +3179,7 @@ function BillingModule() {
                             >
                                 {firstTotalTime >= 1200 ? (
                                     <div style={{ fontSize: "1.2rem" }}>
-                                        {`CPT code: 99457 enabled at  ${getDateEnable99457()}`}
+                                        {`CPT code: 99457 enabled at  ${getDateEnable99457(firstTwentyTasks)}`}
                                     </div>
                                 ) : (
                                     <div style={{ fontSize: "1.2rem" }}>
@@ -3205,11 +3219,11 @@ function BillingModule() {
                                 timeCount={timeCount}
                                 CPT_CODE={CPT_CODE.CPT_99457}
                                 addTask={addTaskState} 
-                                dataTable={firstTwentyTasks}
+                                dataTable={task99091}
                                 setAddTaskState={setAddTaskState}
                                 startCountTimer={startCountTimer}
                                 renderTimerClock={renderTimerClock}
-                                disabledBtnAdd={disabledBtnAddTask(firstTwentyTasks) || firstTotalTime >= 1200 ? true : false}
+                                disabledBtnAdd={totalTime99091 >= TOTAL_HOURS_FOR_EACH_99458_BILLED * 60 ? true : false}
                             />
 
                             {/* <div
@@ -3511,9 +3525,9 @@ function BillingModule() {
                                 style={addTaskState ? { filter: "blur(4px)" } : null}
                                 className="bm-sensor-mid"
                             >
-                                {secondTwentyData.date ? (
+                                {totalTime99091 >= TOTAL_HOURS_FOR_EACH_99091_BILLED * 60 ? (
                                     <div style={{ fontSize: "1.2rem" }}>
-                                        {`CPT code: 99091 enabled at ${secondTwentyData.date}`}
+                                        {`CPT code: 99091 enabled at ${getDateEnable99457(task99091)}`}
                                     </div>
                                 ) : (
                                     <div style={{ fontSize: "1.2rem" }}>
@@ -3530,25 +3544,39 @@ function BillingModule() {
                                     }}
                                 >
                                     <div className="bm-sensor-monitored-bar">
-                                        <div
+                                        {Math.floor(totalTime99091 / 60) >= TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                            <div
+                                                 className="bm-sensor-monitored-bar-two"
+                                                 style={{
+                                                     width: `${1 * 100}%`,
+                                                 }}
+                                             ></div>
+                                        )}
+                                        {Math.floor(totalTime99091 / 60) < TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                            <div
                                             className="bm-sensor-monitored-bar-two"
                                             style={{
-                                                width: `${(secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED / TOTAL_HOURS_FOR_EACH_99458_BILLED) * 100
-                                                    }%`,
+                                                width: `${Math.floor(totalTime99091 / 60) / TOTAL_HOURS_FOR_EACH_99091_BILLED * 100}%`,
                                             }}
                                         ></div>
+                                        )}
                                         <div style={{ marginTop: "10px" }}>
-                                            <div style={{ fontSize: "1.2rem" }}>
-                                                {`Mins Monitored: ${Math.floor(secondTotalTime / 60) % TOTAL_HOURS_FOR_EACH_99458_BILLED}/${TOTAL_HOURS_FOR_EACH_99458_BILLED}`}
-                                            </div>
-                                            {Math.floor(secondTotalTime / 60 / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0 && (
-                                                <p>{Math.floor(secondTotalTime / 60 / TOTAL_HOURS_FOR_EACH_99458_BILLED)} Unit Billed</p>
-                                            )}
-
-                                            <div style={{ color: "#00000085" }}>
-                                                <b>{`${TOTAL_HOURS_FOR_EACH_99458_BILLED - (Math.floor(secondTotalTime / 60) % TOTAL_HOURS_FOR_EACH_99458_BILLED)} mins`}</b> left to
-                                                enable the next CPT code.
-                                            </div>
+                                        {Math.floor(totalTime99091 / 60) >= TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                              <div style={{ fontSize: "1.2rem" }}>
+                                              {`Mins Monitored: ${TOTAL_HOURS_FOR_EACH_99091_BILLED}/${TOTAL_HOURS_FOR_EACH_99091_BILLED}`}
+                                          </div>
+                                        )}
+                                         {Math.floor(totalTime99091 / 60) < TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                              <div style={{ fontSize: "1.2rem" }}>
+                                              {`Mins Monitored: ${Math.floor(totalTime99091/60) }/${TOTAL_HOURS_FOR_EACH_99091_BILLED}`}
+                                          </div>
+                                        )}
+                                          {Math.floor(totalTime99091 / 60) < TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                               <div style={{ color: "#00000085" }}>
+                                               <b>{`${TOTAL_HOURS_FOR_EACH_99091_BILLED - (Math.floor(totalTime99091 / 60) % TOTAL_HOURS_FOR_EACH_99091_BILLED)} mins`}</b> left to
+                                               enable the next CPT code.
+                                           </div>
+                                          )}
                                         </div>
                                     </div>
                                 </div>
@@ -3558,10 +3586,11 @@ function BillingModule() {
                                 timeCount={timeCount}
                                 CPT_CODE={CPT_CODE.CPT_99091}
                                 addTask={addTaskState} 
-                                dataTable={thirdTwentyTasks}
+                                dataTable={task99091}
                                 setAddTaskState={setAddTaskState}
                                 startCountTimer={startCountTimer}
                                 renderTimerClock={renderTimerClock}
+                                disabledBtnAdd={totalTime99091 >= TOTAL_HOURS_FOR_EACH_99091_BILLED * 60 ? true: false}
                             />
 
                             {/* <div
