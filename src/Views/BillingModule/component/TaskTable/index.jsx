@@ -6,9 +6,10 @@ import { Button as CusBtn } from "../../../../Theme/Components/Button/button";
 const TaskTable = (props) => {
     const { 
         addTask, dataTable, setAddTaskState, startCountTimer, renderTimerClock, 
-        disabledBtnAdd = false, timeCount = 0, CPT_CODE 
+        disabledBtnAdd = false, CPT_CODE 
     } = props;
 
+    let {timeCount = 0} = props;
     const renderTimeDisplay = (time) => {
         let hours = Math.floor(time / 3600)
         let minutes = Math.floor(time / 60) % 60
@@ -90,7 +91,7 @@ const TaskTable = (props) => {
                                     <span style={{ paddingRight: "10px" }} id={`item-99457-time-spent-${item.task_id}`}>
                                         {`${renderTimeDisplay(item['task_time_spend'])}`}
                                     </span>
-                                    {renderTimerClock(item, CPT_CODE)}
+                                    {renderTimerClock(item, CPT_CODE, disabledBtnAdd)}
                                 </div>
                             </div>
                         ))}
