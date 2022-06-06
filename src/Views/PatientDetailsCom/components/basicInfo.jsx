@@ -16,7 +16,7 @@ export default function BasicInfo({ data, handleComponentClose, onDeletePatient 
     return <Row span={24}>
         <Col span={18}>
             <p className="PatientName">
-                {data.demographic_map.fname + " " + data.demographic_map.mname + "" + data.demographic_map.lname}
+                {`${data.demographic_map.fname} ${data.demographic_map.mname || ""} ${data.demographic_map.lname}`}
             </p>
             <p className="PatientMR">
                 MR: {data.demographic_map.med_record}

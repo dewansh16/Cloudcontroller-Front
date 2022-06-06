@@ -216,11 +216,12 @@ const Alerts = (props) => {
                 />
             </div>
 
-            <div style={{ position: 'relative', height: '100vh' }}>
+            <div style={{ position: 'relative', height: "calc(100vh - 88px)" }}>
                 {!isLoading && (data === null || data === undefined || data.length === 0) &&
                     <div className='no-alerts-div'>
                         <h1 style={{ fontSize: "60px" }}>No Alerts</h1>
-                    </div>}
+                    </div>
+                }
                     
                 {!isLoading && data !== null && data !== undefined && data.length !== 0 &&
                     data.map((item, index) => (

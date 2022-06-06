@@ -492,7 +492,7 @@ function BillingModule() {
         clearInterval(clockCounter);
     }
 
-    function enrollForPatch() {
+    function enrollForPatch() { 
         console.log("PATCH INFO : ", patchArray);
         console.log("PATCH INFO : ", patchInformation);
 
@@ -2084,11 +2084,11 @@ function BillingModule() {
                     if (res.data.response.patchData) {
                         res.data.response.patchData?.forEach((patch) => {
                             const startDate = getFirstDateMonitored(patch) || "";
-                            const endDate = getLastDateMonitored(patch) || "";
+                            // const endDate = getLastDateMonitored(patch) || "";
                             const typeQuery = shortTypeQueryOfSensor(patch["patches.patch_type"]);
                           
                             if (!!startDate && !!typeQuery) {
-                                checkTotalNumberDateHaveDataFromInflux(startDate, endDate, typeQuery, patch);
+                                checkTotalNumberDateHaveDataFromInflux(startDate, typeQuery, patch);
                             }
                         })
 
@@ -2269,9 +2269,11 @@ function BillingModule() {
         ]
     }
 
-    const checkTotalNumberDateHaveDataFromInflux = (startDate = "", endDate = "", sensorType = "", patch) => {
+    const checkTotalNumberDateHaveDataFromInflux = (startDate = "", sensorType = "", patch) => {
         const start = new Date(startDate);
         const end = new Date();
+
+        if (start.getTime() > end.getTime()) return;
 
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
@@ -2284,6 +2286,7 @@ function BillingModule() {
                 |> filter(fn: (r) => r["_measurement"] == "${location.state.pid}_${sensorType}")
                 |> yield(name: "mean")
             `
+
         const arrDateQuery = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {

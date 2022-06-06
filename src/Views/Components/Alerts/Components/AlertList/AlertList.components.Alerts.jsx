@@ -17,18 +17,11 @@ const AlertList = (props) => {
 
     return (
         <div className='alert-list'>
-            <div className='alerts-date'>
+            {/* <div className='alerts-date'>
                 <p>{date1}</p>
-            </div>
+            </div> */}
             <div className='alerts-list-body'>
                 <Alert pid={props.pid} props={props.props} data={props.Alerts}></Alert>
-                {/* {
-                    props.Alerts.map(item => (
-                        <Alert pid={props.pid} props={props.props} data={item}></Alert>
-                    )
-                    )
-                } */}
-
             </div>
         </div>
     )

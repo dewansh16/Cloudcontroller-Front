@@ -947,10 +947,11 @@ export default function PatientDetails(props) {
                                     <Col style={{ marginBottom: "6%" }} span={22}>
                                         <Row
                                             span={24}
-                                            style={{ margin: "0em 0 0 0", minHeight: "500px" }}
+                                            style={{ margin: "0em 0 0 0", minHeight: "500px", height: "calc(100vh - 210px)" }}
                                         >
                                             <Col span={24}>
                                                 {tabInventory.map((item, index) => {
+                                                    console.log("item", item);
                                                     if (activeTab === item.name) {
                                                         if (item.name === "liveMonitor") {
                                                             return item.component;

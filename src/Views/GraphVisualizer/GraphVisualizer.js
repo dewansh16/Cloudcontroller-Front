@@ -117,7 +117,54 @@ function GraphVisualizer() {
     const dateFormat = 'YYYY/MM/DD';
     const [antd_selected_date_val, setAntd_selected_date_val] = useState(new Date())
 
-    const [activeTrendsArray, setActiveTrendsArray] = useState([])
+    const [activeTrendsArray, setActiveTrendsArray] = useState([
+        {
+            _key: "temp",
+            name: 'TEMP',
+            data: [],
+            color1: Colors.purple,
+            color2: '#A8CBDE',
+            max: tempmaxval,
+            min: tempminval,
+        },
+        {
+            _key: "spo2",
+            name: 'SpO2',
+            data: [],
+            color1: Colors.green,
+            color2: '#FFD0B6',
+            max: spo2maxval,
+            min: spo2minval,
+        },
+        {
+            _key: "ecg_hr",
+            name: 'HR',
+            data: [],
+            color1: Colors.darkPink,
+            color2: '#FFEEBA',
+            max: bpmaxval,
+            min: bpminval,
+        },
+        {
+            _key: "ecg_rr",
+            name: 'RR',
+            data: [],
+            color1: Colors.orange,
+            color2: '#C4AAFD',
+            max: rrmaxval,
+            min: rrminval,
+        },
+        {
+            _key: "weight",
+            name: 'WEI',
+            data: [],
+            color1: Colors.yellow,
+            color2: '#C4AAFD',
+            max: rrmaxval,
+            min: rrminval,
+        }
+    ]);
+
     const [graphLoading, setGraphLoading] = useState(false)
 
     const [spo2_data, setSpo2_data] = useState([
@@ -1656,7 +1703,7 @@ function GraphVisualizer() {
                 setGraphLoading(false)
             }, 750);
         }
-        
+
         return () => {
             clearTimeout(timerTimeout.current);
         }
@@ -1687,30 +1734,32 @@ function GraphVisualizer() {
 
     }, [observationAddState])
 
-    const getDataChartsActive = (valDate) => {
+    const getDataChartsActive = () => {
         activeTrendsArray.forEach((chart, index) => {
             chart.list = [];
-            onGetDataSensorFromInfluxByKey(valDate, chart._key, chart, "change_date", index);
+            onGetDataSensorFromInfluxByKey(chart._key, chart, "change_date", index);
         });
     };
 
     function handleDateChange(date, dateString) {
-        setGraphLoading(true);
-
         var temp = dateString.replace(/\//g, "-");
-        getDataChartsActive(temp);
         setAntd_selected_date_val(temp)
 
-         // getReqData(temp)
+        // getReqData(temp)
         // getDataEfficiently(temp)
     }
+
+    useEffect(() => {
+        setGraphLoading(true);
+        getDataChartsActive();
+    }, [antd_selected_date_val]);
 
     const CustomTooltip = (payload) => {
         try {
             if (payload.active && payload.payload && payload.payload.length) {
                 const sensorFound = activeTrendsArray[payload.indexSensor];
                 const time = new Date(sensorFound.data[hoverActiveTooltipIndex].time);
-                
+
                 return (
                     <div className="custom-tooltip" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <span className="tooltip-label" style={{ color: sensorFound.color1 }} >
@@ -1776,14 +1825,14 @@ function GraphVisualizer() {
         );
     };
 
-    const onGetDataSensorFromInfluxByKey = (dateSelected, keySensor, data, type, index) => {
+    const onGetDataSensorFromInfluxByKey = (keySensor, data, type, index) => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
 
         const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
         const queryApi = client.getQueryApi(org);
 
-        const dateQuery = dateSelected ? new Date(dateSelected) : new Date();
+        const dateQuery = antd_selected_date_val ? new Date(antd_selected_date_val) : new Date();
         const start = new Date(dateQuery.setHours(0, 0, 1));
         const end = new Date(dateQuery.setHours(23, 59, 59));
 
@@ -2125,7 +2174,7 @@ function GraphVisualizer() {
                             <div className="gv-bottom-left-container" >
                                 <div className="gv-graph-info-container" >
                                     <div className="gv-trend-btns" >
-                                        <div 
+                                        <div
                                             onClick={() => {
                                                 setGraphLoading(true);
                                                 var flag = true;
@@ -2147,13 +2196,13 @@ function GraphVisualizer() {
                                                         max: tempmaxval,
                                                         min: tempminval,
                                                     }
-                                                    onGetDataSensorFromInfluxByKey(antd_selected_date_val, "temp", temp);
+                                                    onGetDataSensorFromInfluxByKey("temp", temp);
                                                 }
-                                            }} 
-                                            className="trend-btn" 
+                                            }}
+                                            className="trend-btn"
                                             style={
-                                                activeTrendsArray.some(e => e.name === 'TEMP') 
-                                                    ? { border: `2px solid ${Colors.purple}`, color: Colors.purple } 
+                                                activeTrendsArray.some(e => e.name === 'TEMP')
+                                                    ? { border: `2px solid ${Colors.purple}`, color: Colors.purple }
                                                     : { border: '1px solid #BABABA', color: '#BABABA' }
                                             }
                                         >
@@ -2181,7 +2230,7 @@ function GraphVisualizer() {
                                                     max: spo2maxval,
                                                     min: spo2minval,
                                                 }
-                                                onGetDataSensorFromInfluxByKey(antd_selected_date_val, "spo2", spo2);
+                                                onGetDataSensorFromInfluxByKey("spo2", spo2);
                                             }
                                         }}
                                             className="trend-btn"
@@ -2216,7 +2265,7 @@ function GraphVisualizer() {
                                                     max: bpmaxval,
                                                     min: bpminval,
                                                 }
-                                                onGetDataSensorFromInfluxByKey(antd_selected_date_val, "ecg_hr", hr);
+                                                onGetDataSensorFromInfluxByKey("ecg_hr", hr);
                                             }
                                         }}
                                             className="trend-btn" style={
@@ -2246,7 +2295,7 @@ function GraphVisualizer() {
                                                     max: rrmaxval,
                                                     min: rrminval,
                                                 }
-                                                onGetDataSensorFromInfluxByKey(antd_selected_date_val, "ecg_rr", rr);
+                                                onGetDataSensorFromInfluxByKey("ecg_rr", rr);
                                             }
                                         }} className="trend-btn" style={
                                             activeTrendsArray.some(e => e.name === 'RR') ? { border: `2px solid ${Colors.orange}`, color: Colors.orange } : { border: '1px solid #BABABA', color: '#BABABA' }
@@ -2337,7 +2386,7 @@ function GraphVisualizer() {
                                                     max: rrmaxval,
                                                     min: rrminval,
                                                 }
-                                                onGetDataSensorFromInfluxByKey(antd_selected_date_val, "weight", weight);
+                                                onGetDataSensorFromInfluxByKey("weight", weight);
                                             }
                                         }} className="trend-btn" style={
                                             activeTrendsArray.some(e => e.name === 'WEI') ? { border: `2px solid ${Colors.yellow}`, color: Colors.yellow } : { border: '1px solid #BABABA', color: '#BABABA' }
@@ -2378,10 +2427,10 @@ function GraphVisualizer() {
                                         </div> */}
                                     </div>
                                     <div className="gv-date" >
-                                        <DatePicker 
-                                            style={{ fontSize: "16px" }} 
-                                            defaultValue={moment(antd_selected_date_val, dateFormat)} 
-                                            format={dateFormat} 
+                                        <DatePicker
+                                            style={{ fontSize: "16px" }}
+                                            defaultValue={moment(antd_selected_date_val, dateFormat)}
+                                            format={dateFormat}
                                             onChange={(date, dateString) => {
                                                 // setIsLoading(true);
                                                 // setMedMorningLoading(true)
@@ -2390,7 +2439,7 @@ function GraphVisualizer() {
                                                 // setAlertsLoading(true)
                                                 // setTrendsLoading(true)
                                                 handleDateChange(date, dateString)
-                                            }} 
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -2454,8 +2503,8 @@ function GraphVisualizer() {
                                                                         // });
                                                                     }
 
-                                                                }} 
-                                                                width="100%" height="100%" 
+                                                                }}
+                                                                width="100%" height="100%"
                                                                 data={trend.data}
                                                                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                                                             >

@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 import moment from "moment";
-import html2canvas from "html2canvas";
 
-import { jsPDF } from "jspdf";
 import { isArray } from 'lodash';
 import { isJsonString } from "../../../Utils/utils";
 import { useHistory } from "react-router-dom";
@@ -33,7 +31,10 @@ const FetchBillingSummary = (valueDate) => {
         billingApi.getBillingSummary(moment(valueDate).format("YYYY-MM-DD"))
             .then((res) => {
                 const newArrPid = [];
-                const arrayResult = [];
+                const result = {
+                    billings: [],
+                    patchData: []
+                };
                 const billingData = res?.data?.response?.billingData || [];
 
                 if (billingData?.length > 0) {
@@ -42,22 +43,23 @@ const FetchBillingSummary = (valueDate) => {
                         if (!!billing?.pid && !!billing?.patient_datum) {
                             if (!newArrPid.includes(billing.pid)) {
                                 newArrPid.push(billing.pid);
-                                arrayResult.push({ ...billing, [billing?.code]: billing?.params });
+                                result.billings.push({ ...billing, [billing?.code]: billing?.params });
                             } else {
-                                const billingFound = arrayResult.find(item => item?.pid === billing.pid);
+                                const billingFound = result.billings.find(item => item?.pid === billing.pid);
                                 billingFound[billing.code] = billing.params;
                             }
                         }
                     }
+                    result.patchData = res?.data?.response?.patchData || [];
                 }
 
                 setLoading(false);
-                setResponse(arrayResult);
+                setResponse(result);
             })
             .catch((error) => {
                 setLoading(false);
                 console.log(error);
-                setResponse([]);
+                setResponse({});
             })
     }, [valueDate]);
 
@@ -140,9 +142,9 @@ const BillingModule = () => {
             dataIndex: "sensorList",
             key: "99454",
             render: (dataIndex, record) => {
-                console.log("dataIndex", dataIndex);
+                const associated = billingSummary?.patchData?.filter(item => item?.pid === record?.pid);
                 return (
-                    <CheckData pid={record?.pid} sensorList={dataIndex} />
+                    <CheckData pid={record?.pid} sensorList={associated} />
                 )
             }
         },
@@ -302,8 +304,6 @@ const BillingModule = () => {
         },
     ];
 
-    console.log("billingSummary", billingSummary);
-
     return (
         <div>
             <ModalSummary pid={pidModalSummary} onClose={onCloseModalSummary} currentDate={valueDate} />
@@ -379,15 +379,21 @@ const BillingModule = () => {
                 justify="start"
                 style={{ padding: "0", backgroundColor: "white", margin: "4px" }}
             >
-                <div style={{ margin: "30px 2%", width: "100%" }}>
-                    <Table
-                        style={{ backgroundColor: "blue" }}
-                        columns={columns}
-                        size="middle"
-                        pagination={false}
-                        dataSource={billingSummary}
-                    />
-                </div>
+                {isLoading ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "calc(100vh - 99px)"}}>
+                        <Spin />
+                    </div>
+                ) : (
+                    <div style={{ margin: "30px 2%", width: "100%" }}>
+                        <Table
+                            style={{ backgroundColor: "blue" }}
+                            columns={columns}
+                            size="middle"
+                            pagination={false}
+                            dataSource={billingSummary?.billings || []}
+                        />
+                    </div>
+                )}
             </Row>
         </div>
     );
