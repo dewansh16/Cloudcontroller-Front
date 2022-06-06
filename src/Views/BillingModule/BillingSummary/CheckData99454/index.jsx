@@ -3,13 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { Spin } from "antd";
 import { InfluxDB } from "@influxdata/influxdb-client";
 
-const CheckData = ({ pid, sensorList, duration }) => {
+const CheckData = ({ pid, sensorList }) => {
     const [loading, setLoading] = useState(true);
-    const [total, setTotal] = useState(0);
+    const [totalDay, setTotalDay] = useState(0);
+    const [effect, setRunEffect] = useState(0);
+
 
     const checkTotalNumberDateHaveDataFromInflux = (startDate = "", sensorType = "", patch) => {
         const start = new Date(startDate);
         const end = new Date();
+
+        if (start.getTime() > end.getTime()) return;
 
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
@@ -22,6 +26,7 @@ const CheckData = ({ pid, sensorList, duration }) => {
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${sensorType}")
                 |> yield(name: "mean")
             `
+
         const arrDateQuery = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {
@@ -37,9 +42,11 @@ const CheckData = ({ pid, sensorList, duration }) => {
                 console.log('ERROR', patch)
             },
             complete() {
-                // patch.totalDay = arrDateQuery?.length;
-                // patch.datesInflux = arrDateQuery;
-                // setTotal(totalDay);
+                patch.totalDay = arrDateQuery?.length;
+                patch.datesInflux = arrDateQuery;
+                let tepm = effect;
+                tepm += 1;
+                setRunEffect(tepm);
             },
         })
     };
@@ -64,19 +71,29 @@ const CheckData = ({ pid, sensorList, duration }) => {
         }
     };
 
+    const getFirstDateMonitored = (item) => {
+        let result = '';
+        if (item.duration) {
+            let arrDur = item.duration.split(',');
+            if (arrDur.length > 0) {
+                result = arrDur[0];
+            }
+        }
+        return result;
+    }
+
     useEffect(() => {
         setLoading(true);
         if (sensorList?.length > 0) {
             sensorList?.forEach((patch) => {
-                const startDate = duration?.[0];
+                const startDate = getFirstDateMonitored(patch);
                 const typeQuery = shortTypeQueryOfSensor(patch["patches.patch_type"]);
-              
                 if (!!startDate && !!typeQuery) {
                     checkTotalNumberDateHaveDataFromInflux(startDate, typeQuery, patch);
                 }
             })
         }
-        
+
         const timer = setTimeout(() => {
             setLoading(false);
         }, 750);
@@ -86,14 +103,24 @@ const CheckData = ({ pid, sensorList, duration }) => {
         }
     }, [pid]);
 
+    useEffect(() => {
+        let total = 0;
+        sensorList.forEach(patch => {
+            if (!!patch?.totalDay && patch?.totalDay > 0) {
+                total += patch?.totalDay;
+            }
+        });
+        setTotalDay(total)
+    }, [effect]);
+
     return (
         <div>
             {loading ? (
                 <Spin style={{ transform: "scale(0.8)", marginBottom: "-4px" }} />
             ) : (
                 <>
-                    {total > 0 ? (
-                        <div>{`${total} ${total > 1 ? "days" : "day"}`}</div>
+                    {totalDay > 0 ? (
+                        <div>{`${totalDay} ${totalDay > 1 ? "days" : "day"}`}</div>
                     ) : null}
                 </>
             )}

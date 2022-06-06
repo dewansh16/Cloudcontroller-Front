@@ -836,6 +836,7 @@ function AddPatient() {
             .associatePatchToPatient(patientId, dataBody)
             .then((res) => {
                 setButtonLoading(false);
+                setPatientData({ ...patientData, associated_list: res?.data?.response?.patch_data?.associated_list });
                 let newTitle = "Sensor successfully associated to ";
                 setSummary({
                     ...summary,

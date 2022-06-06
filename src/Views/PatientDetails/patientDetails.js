@@ -34,6 +34,7 @@ import "../PatientJourney/patientJourney.css";
 import WardDetails from "../PatientJourney/wardDetails/wardDetails.patientJourney";
 import Steps from "../PatientJourney/stepspatientJourney/steps.patientJourney";
 import DetailBox from "./components/detailBox.patientDetails";
+import GraphVisualizer from "../GraphVisualizer/GraphVisualizer";
 
 export default function PatientDetails(props) {
     const { pid } = useParams();
@@ -349,6 +350,10 @@ export default function PatientDetails(props) {
         {
             name: "vitals",
             component: WardDetails,
+        },
+        {
+            name: "visualizer",
+            component: GraphVisualizer,
         },
     ]);
 
@@ -666,55 +671,57 @@ export default function PatientDetails(props) {
 
                         <Row style={{ height: "68px", alignItems: "center" }}>
                             <Col span={7}>
-                                <Row style={{ justifyContent: "flex-start" }}>
-                                    {/* <Col span={10} offset={2}>
-                                        <Buttons
-                                            style={
-                                                openPatientJourney ? activeButtonStyle : buttonStyle
-                                            }
-                                            onClick={() => {
-                                                setPatientJourney(true);
-                                            }}
-                                            type="text"
-                                        >
-                                            Patient Journey
-                                        </Buttons>
-                                    </Col> */}
-                                    {
-                                        // <Col span={7}>
-                                        // <Buttons
-                                        //   style={
-                                        //     !openPatientJourney && activeInfoSection === "summary"
-                                        //       ? activeButtonStyle
-                                        //       : buttonStyle
-                                        //   }
-                                        //   onClick={() => {
-                                        //     setPatientJourney(false);
-                                        //     setInfoSection("summary");
-                                        //   }}
-                                        //   type="text"
-                                        // >
-                                        //   Summary
-                                        // </Buttons>
-                                        // </Col>
-                                    }
-                                    <Col span={10} offset={2}>
-                                        <Buttons
-                                            style={
-                                                !openPatientJourney && activeInfoSection === "notes"
-                                                    ? activeButtonStyle
-                                                    : buttonStyle
-                                            }
-                                            onClick={() => {
-                                                setPatientJourney(false);
-                                                setInfoSection("notes");
-                                            }}
-                                            type="text"
-                                        >
-                                            Notes
-                                        </Buttons>
-                                    </Col>
-                                </Row>
+                                {activeTab !== "visualizer" && (
+                                    <Row style={{ justifyContent: "flex-start" }}>
+                                        {/* <Col span={10} offset={2}>
+                                            <Buttons
+                                                style={
+                                                    openPatientJourney ? activeButtonStyle : buttonStyle
+                                                }
+                                                onClick={() => {
+                                                    setPatientJourney(true);
+                                                }}
+                                                type="text"
+                                            >
+                                                Patient Journey
+                                            </Buttons>
+                                        </Col> */}
+                                        {
+                                            // <Col span={7}>
+                                            // <Buttons
+                                            //   style={
+                                            //     !openPatientJourney && activeInfoSection === "summary"
+                                            //       ? activeButtonStyle
+                                            //       : buttonStyle
+                                            //   }
+                                            //   onClick={() => {
+                                            //     setPatientJourney(false);
+                                            //     setInfoSection("summary");
+                                            //   }}
+                                            //   type="text"
+                                            // >
+                                            //   Summary
+                                            // </Buttons>
+                                            // </Col>
+                                        }
+                                        <Col span={10} offset={2}>
+                                            <Buttons
+                                                style={
+                                                    !openPatientJourney && activeInfoSection === "notes"
+                                                        ? activeButtonStyle
+                                                        : buttonStyle
+                                                }
+                                                onClick={() => {
+                                                    setPatientJourney(false);
+                                                    setInfoSection("notes");
+                                                }}
+                                                type="text"
+                                            >
+                                                Notes
+                                            </Buttons>
+                                        </Col>
+                                    </Row>
+                            )}
                             </Col>
                             <Col span={17}>
                                 <Row style={{ justifyContent: "center" }}>
@@ -788,24 +795,31 @@ export default function PatientDetails(props) {
                                                         Files
                                                     </Buttons>
                                                     <Buttons
-                                                        style={buttonStyle}
+                                                        // style={buttonStyle}
+                                                        style={
+                                                            activeTab === "visualizer"
+                                                                ? activeButtonStyle
+                                                                : buttonStyle
+                                                        }
                                                         type="text"
-                                                        onClick={() =>
-                                                            history.push({
-                                                                pathname: `/dashboard/patient/${pid}/graphvisualizer`,
-                                                                state: {
-                                                                    name:
-                                                                        `${patient.demographic_map.title === undefined
-                                                                            ? ""
-                                                                            : patient.demographic_map.title
-                                                                        }` +
-                                                                        " " +
-                                                                        patient.demographic_map.fname +
-                                                                        " " +
-                                                                        patient.demographic_map.lname,
-                                                                    mr: patient.demographic_map.med_record,
-                                                                },
-                                                            })
+                                                        onClick={() => {
+                                                            setActiveTab("visualizer");
+                                                        }
+                                                            // history.push({
+                                                            //     pathname: `/dashboard/patient/${pid}/graphvisualizer`,
+                                                            //     state: {
+                                                            //         name:
+                                                            //             `${patient.demographic_map.title === undefined
+                                                            //                 ? ""
+                                                            //                 : patient.demographic_map.title
+                                                            //             }` +
+                                                            //             " " +
+                                                            //             patient.demographic_map.fname +
+                                                            //             " " +
+                                                            //             patient.demographic_map.lname,
+                                                            //         mr: patient.demographic_map.med_record,
+                                                            //     },
+                                                            // })
                                                         }
                                                     >
                                                         Visualizer
@@ -863,40 +877,44 @@ export default function PatientDetails(props) {
                         </Row>
 
                         <Row align="top">
-                            {!openPatientJourney ? (
-                                <Col span={7}>
-                                    <Row style={{ justifyContent: "flex-end" }}>
-                                        <Col span={22}>
-                                            <InfoBar
-                                                pid={pid}
-                                                drawerVisible={drawerVisible}
-                                                doctorDrawerVisible={doctorDrawerVisible}
-                                                setDoctorDrawerVisible={setDoctorDrawerVisible}
-                                                setDrawerVisible={setDrawerVisible}
-                                                refreshFileView={refreshFileView}
-                                                refreshFileViewAgain={refreshFileViewAgain}
-                                                patient={patient}
-                                                activeInfoSection={activeInfoSection}
-                                                setInfoSection={setInfoSection}
-                                            />
+                            {activeTab !== "visualizer" && (
+                                <>
+                                    {!openPatientJourney ? (
+                                        <Col span={7}>
+                                            <Row style={{ justifyContent: "flex-end" }}>
+                                                <Col span={22}>
+                                                    <InfoBar
+                                                        pid={pid}
+                                                        drawerVisible={drawerVisible}
+                                                        doctorDrawerVisible={doctorDrawerVisible}
+                                                        setDoctorDrawerVisible={setDoctorDrawerVisible}
+                                                        setDrawerVisible={setDrawerVisible}
+                                                        refreshFileView={refreshFileView}
+                                                        refreshFileViewAgain={refreshFileViewAgain}
+                                                        patient={patient}
+                                                        activeInfoSection={activeInfoSection}
+                                                        setInfoSection={setInfoSection}
+                                                    />
+                                                </Col>
+                                            </Row>
                                         </Col>
-                                    </Row>
-                                </Col>
-                            ) : (
-                                <Col span={7} className="steps-table">
-                                    <div className="steps-table-body">
-                                        <Steps
-                                            setStepArray={setStepArray}
-                                            activeStep={activeStep}
-                                            setActiveStep={setActiveStep}
-                                            stepArray={stepArray}
-                                            durationArray={durationArray}
-                                            setDurationArray={setDurationArray}
-                                        />
-                                    </div>
-                                </Col>
+                                    ) : (
+                                        <Col span={7} className="steps-table">
+                                            <div className="steps-table-body">
+                                                <Steps
+                                                    setStepArray={setStepArray}
+                                                    activeStep={activeStep}
+                                                    setActiveStep={setActiveStep}
+                                                    stepArray={stepArray}
+                                                    durationArray={durationArray}
+                                                    setDurationArray={setDurationArray}
+                                                />
+                                            </div>
+                                        </Col>
+                                    )}
+                                </>
                             )}
-                            <Col span={17}>
+                            <Col span={activeTab !== "visualizer" ? 17 : 24}>
                                 <Row
                                     style={{
                                         justifyContent: "center",
@@ -944,7 +962,7 @@ export default function PatientDetails(props) {
                                     </Drawer>
 
 
-                                    <Col style={{ marginBottom: "6%" }} span={22}>
+                                    <Col style={{ marginBottom: "1rem" }} span={22}>
                                         <Row
                                             span={24}
                                             style={{ margin: "0em 0 0 0", minHeight: "500px" }}
@@ -988,52 +1006,55 @@ export default function PatientDetails(props) {
                                 <DeviceManagement pid={pid} associated_list={patient?.demographic_map?.associated_list} valDuration={props?.location?.state?.dataFilterHeader?.valDuration || "7d"} />
                             </Modal>
                         </Row>{" "}
-                        {
-                            //   (
-                            //   <div>
-                            //     <div>
-                            //       <Row className="patient-journey-main-body">
-                            //         <Col span={7} className="steps-table">
-                            //           <div className="steps-table-body">
-                            //             <Steps
-                            //               setStepArray={setStepArray}
-                            //               activeStep={activeStep}
-                            //               setActiveStep={setActiveStep}
-                            //               stepArray={stepArray}
-                            //               durationArray={durationArray}
-                            //               setDurationArray={setDurationArray}
-                            //             />
-                            //           </div>
-                            //         </Col>
-                            //         {
-                            //           //   <Col span={17} className="steps-info">
-                            //           // <WardDetails
-                            //           //   patient={patient}
-                            //           //   wardArray={stepArray}
-                            //           //   activeStep={activeStep}
-                            //           // />
-                            //           //   </Col>
-                            //         }
-                            //       </Row>
-                            //     </div>
-                            //   </div>
-                            // )
-                        }
-                    </Spin>
+            {
+                //   (
+                //   <div>
+                //     <div>
+                //       <Row className="patient-journey-main-body">
+                //         <Col span={7} className="steps-table">
+                //           <div className="steps-table-body">
+                //             <Steps
+                //               setStepArray={setStepArray}
+                //               activeStep={activeStep}
+                //               setActiveStep={setActiveStep}
+                //               stepArray={stepArray}
+                //               durationArray={durationArray}
+                //               setDurationArray={setDurationArray}
+                //             />
+                //           </div>
+                //         </Col>
+                //         {
+                //           //   <Col span={17} className="steps-info">
+                //           // <WardDetails
+                //           //   patient={patient}
+                //           //   wardArray={stepArray}
+                //           //   activeStep={activeStep}
+                //           // />
+                //           //   </Col>
+                //         }
+                //       </Row>
+                //     </div>
+                //   </div>
+                // )
+            }
+        </Spin>
                 </>
-            )}
-            {(patient === null && isLoading !== true) && (
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "100vh",
-                    }}
-                >
-                    <Empty></Empty>
-                </div>
-            )}
+            )
+}
+{
+    (patient === null && isLoading !== true) && (
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+            }}
+        >
+            <Empty></Empty>
+        </div>
+    )
+}
         </>
     );
 }

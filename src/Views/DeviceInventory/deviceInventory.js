@@ -506,14 +506,35 @@ function PatchInventory() {
             dataIndex: "patch_serial",
             key: "lastSeen",
             ellipsis: true,
-            width: 90,
+            width: 100,
             render: (dataIndex) => {
                 return (
                     <div style={{ fontSize: "16px", fontWeight: "500" }}>
                         <div>
                             <div>
-                                {dataIndex.length > 15
-                                    ? dataIndex.slice(0, 13) + "..."
+                                {dataIndex.length > 25
+                                    ? dataIndex.slice(0, 23) + "..."
+                                    : dataIndex}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        },
+
+        {
+            title: "Mac Address",
+            dataIndex: "patch_mac",
+            key: "lastSeen",
+            ellipsis: true,
+            width: 100,
+            render: (dataIndex) => {
+                return (
+                    <div style={{ fontSize: "16px", fontWeight: "500" }}>
+                        <div>
+                            <div>
+                                {dataIndex.length > 25
+                                    ? dataIndex.slice(0, 23) + "..."
                                     : dataIndex}
                             </div>
                         </div>
@@ -528,7 +549,7 @@ function PatchInventory() {
             key: "patchStatus",
             ellipsis: true,
             align: "center",
-            width: 130,
+            width: 110,
             render: (dataIndex, record) => {
                 // console.log('dataIndex, record', dataIndex, record);
                 return (
@@ -669,7 +690,7 @@ function PatchInventory() {
             dataIndex: "patch_type",
             key: "sensors",
             ellipsis: true,
-            width: 70,
+            width: 90,
             render: (dataIndex, record) => (
                 <div
                     style={{
@@ -720,7 +741,7 @@ function PatchInventory() {
             key: "patchMap",
             ellipsis: true,
             align: "center",
-            width: 100,
+            width: 90,
             render: (dataIndex, record) => (
                 <Row style={{ alignItems: "center", justifyContent: "center" }}>
                     <Col span={16}>
@@ -796,7 +817,7 @@ function PatchInventory() {
             dataIndex: "",
             key: "deleteIcon",
             ellipsis: true,
-            width: 30,
+            width: 35,
             render: (dataIndex, record) => {
                 if (record.AssociatedPatch?.length < 2) {
                     if (record.patch_patient_map !== null) {
@@ -812,7 +833,7 @@ function PatchInventory() {
                         )
                     } else {
                         return <Popconfirm
-                            placement="top"
+                            placement="left"
                             title="Are you sure to delete this device?"
                             onConfirm={() => onDeleteDeviceItem(
                                 record?.patch_uuid, 
@@ -837,7 +858,7 @@ function PatchInventory() {
         //     ellipsis: true,
         //     width: 10,
         // },
-        Table.EXPAND_COLUMN,
+        // Table.EXPAND_COLUMN,
     ];
 
     const customExpandIcon = (props) => {
@@ -1141,10 +1162,10 @@ function PatchInventory() {
                         pagination={{ position: ["bottomRight"] }}
                         scroll={extraDiv === true ? { y: "hidden" } : { y: "100vh" }}
                         rowClassName={setRowClassName}
-                        expandable={{
-                            expandedRowRender: (record) => bundleModel(record),
-                            expandIcon: (props) => customExpandIcon(props)
-                        }}
+                        // expandable={{
+                        //     expandedRowRender: (record) => bundleModel(record),
+                        //     expandIcon: (props) => customExpandIcon(props)
+                        // }}
                         dataSource={filteredlist}
                         onRow={onClickRow}
                     />

@@ -146,7 +146,6 @@ const BillingModule = () => {
             dataIndex: "sensorList",
             key: "99454",
             render: (dataIndex, record) => {
-                console.log("dataIndex", dataIndex);
                 const associated = billingSummary?.patchData?.filter(item => item?.pid === record?.pid);
                 return (
                     <CheckData pid={record?.pid} sensorList={associated} />

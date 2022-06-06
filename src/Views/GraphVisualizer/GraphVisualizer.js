@@ -1989,7 +1989,7 @@ function GraphVisualizer() {
                             <div>Sample taken : 16/01/2021</div>
                         </div>
                     </div> */}
-                    <div className="gv-header-container">
+                    {/* <div className="gv-header-container">
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                             <LeftOutlined
                                 onClick={() => {
@@ -2023,7 +2023,11 @@ function GraphVisualizer() {
                                 borderRadius: '6px',
                                 padding: '0.3% 2%',
                                 width: '',
-                                fontSize: '1.2rem'
+                                fontSize: '1.2rem',
+                                position: "absolute",
+                                top: "0",
+                                right: "0",
+                                marginTop: "-1.5rem"
                             }}
                             className='gv-observation'
                             onClick={() => { observationState ? setObservationState(false) : setObservationState(true) }}
@@ -2031,6 +2035,26 @@ function GraphVisualizer() {
                             <FileSearchOutlined style={{ fontSize: '1.5rem', marginRight: '5%' }} />
                             Observation
                         </div>
+                    </div> */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderRadius: '6px',
+                            padding: '0.3% 2%',
+                            width: '',
+                            fontSize: '1.2rem',
+                            position: "absolute",
+                            top: "0",
+                            right: "0",
+                            marginTop: "-44px"
+                        }}
+                        className='gv-observation'
+                        onClick={() => { observationState ? setObservationState(false) : setObservationState(true) }}
+                    >
+                        <FileSearchOutlined style={{ fontSize: '1.5rem', marginRight: '5%' }} />
+                        Observation
                     </div>
                     <div style={observationState || patientInfoState ? { filter: 'blur(4px)' } : null} className="gv-bottom-container">
                         <div className="gv-bottom-left-whole-container" >
