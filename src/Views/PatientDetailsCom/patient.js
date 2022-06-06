@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { withRouter } from "react-router-dom";
 
 import { InfluxDB } from "@influxdata/influxdb-client";
-import { isJsonString } from "../../Utils/utils";
+import { isJsonString, takeDecimalNumber } from "../../Utils/utils";
 
 import { Col, Row, Tabs, notification } from "antd";
 import { Button } from "../../Theme/Components/Button/button";
@@ -262,20 +262,22 @@ function PatientParticular(props) {
     }, [data.demographic_map.pid]);
 
     const renderValueByKey = ({ _key = "", val = 0, val_bpd = 0}) => {
+        const value = takeDecimalNumber(val);
         switch (_key) {
             case "temp":
-                const celsius = 5 / 9 * (val - 32);
-                return `${val}°F / ${celsius.toFixed(1)}°C`
+                let celsius = 0;
+                if (value !== 0) { celsius = 5 / 9 * (value - 32); }
+                return `${value}°F / ${takeDecimalNumber(celsius)}°C`
             case "spo2": 
-                return `${val}`;
+                return `${value}`;
             case "ecg_hr": 
             case "ecg_rr":
-                return `${val} bpm`;
+                return `${value} bpm`;
             case "blood_pressuer": 
-                return `${val} - ${val_bpd} mmHg`;
+                return `${value} - ${takeDecimalNumber(val_bpd)} mmHg`;
             case "weight": 
-                const lbs = val * 2.2046;
-                return `${lbs.toFixed(1)} lbs / ${val} kg`
+                const lbs = value * 2.2046;
+                return `${takeDecimalNumber(lbs)} lbs / ${value} kg`
             default:
                 break;
         }
