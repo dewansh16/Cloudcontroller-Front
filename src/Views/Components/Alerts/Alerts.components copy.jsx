@@ -19,6 +19,7 @@ import { useParams } from 'react-router-dom'
 
 
 function FetchAlertData(pid, isAttended) {
+    console.log('pid', pid);
     const [response, setResponse] = useState(null)
     const [loading, setLoading] = useState(false)
 
@@ -26,17 +27,17 @@ function FetchAlertData(pid, isAttended) {
         // setLoading(true);
         alertApi.getPatientAlerts(pid).then((res) => {
             console.log("res", res);
-            let alerts = res.data?.response?.data || [];
+            let alerts = res.data?.response.alerts[0].alerts;
             if (isAttended === "attended") {
-                // alerts = alerts.filter((item) => {
-                //     return (item.status === 'close');
-                // })
+                alerts = alerts.filter((item) => {
+                    return (item.status === 'close');
+                })
             }
 
             if (isAttended === "notAttended") {
-                // alerts = alerts.filter((item) => {
-                //     return (item.status === 'open');
-                // })
+                alerts = alerts.filter((item) => {
+                    return (item.status === 'open');
+                })
             }
 
 
@@ -54,31 +55,33 @@ function FetchAlertData(pid, isAttended) {
             let oneDayAlerts = [];
             let allDates = [];
             let allDatesSorted;
-
             if (alerts.length > 0) {
-                // allDates.push(toNormalDate(alerts[0]?.firstRcvTm));
-                // alerts.forEach(item => {
-                //     if (!(allDates.includes(toNormalDate(item.firstRcvTm))))
-                //         allDates.push(toNormalDate(item.firstRcvTm))
-                // })
 
-                // allDatesSorted = allDates.sort(function (a, b) {
-                //     var dateA = new Date(a), dateB = new Date(b);
-                //     return dateB - dateA;
-                // });
+                allDates.push(toNormalDate(alerts[0]?.firstRcvTm));
+                alerts.forEach(item => {
+                    if (!(allDates.includes(toNormalDate(item.firstRcvTm))))
+                        allDates.push(toNormalDate(item.firstRcvTm))
+                })
 
-                // allDatesSorted.forEach(date => {
-                //     alerts.forEach(item => {
-                //         if (toNormalDate(item.firstRcvTm) === date) {
-                //             oneDayAlerts.push(item);
-                //         }
-                //     })
-                //     reqData.push(oneDayAlerts)
-                //     oneDayAlerts = [];
-                // })
+                allDatesSorted = allDates.sort(function (a, b) {
+                    var dateA = new Date(a), dateB = new Date(b);
+                    return dateB - dateA;
+                });
+                console.log(allDatesSorted);
+
+                allDatesSorted.forEach(date => {
+                    alerts.forEach(item => {
+                        if (toNormalDate(item.firstRcvTm) === date) {
+                            oneDayAlerts.push(item);
+                        }
+                    })
+                    reqData.push(oneDayAlerts)
+                    oneDayAlerts = [];
+                })
             }
 
-            setResponse(alerts);
+            console.log(reqData);
+            setResponse(reqData);
             setLoading(false)
         }).catch((err) => {
             if (err) {
@@ -193,8 +196,6 @@ const Alerts = (props) => {
 
     const [data, isLoading] = FetchAlertData(pid, isAttended);
 
-    console.log("data", data);
-
     const toPatientDetails = () => {
         props.history.push(`/dashboard/patient/details/${pid}`);
     }
@@ -224,9 +225,11 @@ const Alerts = (props) => {
                     
                 {!isLoading && data !== null && data !== undefined && data.length !== 0 &&
                     data.map((item, index) => (
-                        <div className='alerts-body' style={{ backgroundColor: 'white' }} key={index}>
-                            <AlertList props={props} pid={pid} userType={userType} isAttended={isAttended} Alerts={item} />
-                        </div>
+                        item.length > 0 ?
+                            <div className='alerts-body' style={{ backgroundColor: 'white' }} key={`${index}-${item.date}`}>
+                                <AlertList props={props} pid={pid} userType={userType} isAttended={isAttended} Alerts={item}/>
+                            </div>
+                            : null
                     ))
                 }
 

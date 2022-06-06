@@ -46,7 +46,7 @@ const Alert = (props) => {
     const [isLoading, setIsLoading] = useState(true);
     const [ecgData, setEcgData] = useState(null);
 
-    const [tags, setTags] = useState(props.data.tags);
+    const [tags, setTags] = useState();
     const [tagLoading, isTagLoading] = useState(true);
     const [doctorList, setDoctorList] = useState(null);
 
@@ -117,35 +117,35 @@ const Alert = (props) => {
     };
 
     useEffect(() => {
-        if (tagBtn === true) {
-            userApi
-                .getUserList()
-                .then((res) => {
-                    console.log(res.data.response);
-                    const doctorsData = res.data.response?.users[0].filter(
-                        (item) => item.role.toLowerCase() === "doctor"
-                    );
-                    const Doctors = [];
-                    if (doctorsData.length > 0) {
-                        for (let i = 0; i < doctorsData.length; i++) {
-                            Doctors.push(
-                                <Option
-                                    value={doctorsData[i].fname + " " + doctorsData[i].lname}
-                                >
-                                    {doctorsData[i].fname + " " + doctorsData[i].lname}
-                                </Option>
-                            );
-                        }
-                    }
-                    console.log(doctorsData, Doctors);
-                    setDoctorList(Doctors);
-                    isTagLoading(false);
-                })
-                .catch((err) => {
-                    console.log(err);
-                    isTagLoading(false);
-                });
-        }
+        // if (tagBtn === true) {
+        //     userApi
+        //         .getUserList()
+        //         .then((res) => {
+        //             console.log(res.data.response);
+        //             const doctorsData = res.data.response?.users[0].filter(
+        //                 (item) => item.role.toLowerCase() === "doctor"
+        //             );
+        //             const Doctors = [];
+        //             if (doctorsData.length > 0) {
+        //                 for (let i = 0; i < doctorsData.length; i++) {
+        //                     Doctors.push(
+        //                         <Option
+        //                             value={doctorsData[i].fname + " " + doctorsData[i].lname}
+        //                         >
+        //                             {doctorsData[i].fname + " " + doctorsData[i].lname}
+        //                         </Option>
+        //                     );
+        //                 }
+        //             }
+        //             console.log(doctorsData, Doctors);
+        //             setDoctorList(Doctors);
+        //             isTagLoading(false);
+        //         })
+        //         .catch((err) => {
+        //             console.log(err);
+        //             isTagLoading(false);
+        //         });
+        // }
     }, [tagBtn]);
 
     const onFinishTagging = (values) => {
@@ -233,12 +233,12 @@ const Alert = (props) => {
         >
             <Button
                 type="text"
-                disabled={
-                    alertData.status === "expired" || alertData.status === "close"
-                        ? true
-                        : false
-                }
-                style={btnStyle(alertData.status)}
+                // disabled={
+                //     alertData.status === "expired" || alertData.status === "close"
+                //         ? true
+                //         : false
+                // }
+                style={btnStyle(alertData?.status)}
                 onClick={editAcknowledged}
             >
                 <CheckOutlined />
@@ -273,11 +273,11 @@ const Alert = (props) => {
         return hours + ":" + minutes + " " + newformat;
     }
 
-    const panelHeader = (alert, time, data) => (
+    const panelHeader = ({ device_type = "", status = "", time = new Date(), value = 0 }) => (
         <div style={{ display: "inline-flex", width: "70%" }}>
             <div className="panel-header">
-                <div className="panel-header-heading">
-                    {alert.slice(0, -11).replaceAll("_", " ")} <br />
+                <div className="panel-header-heading" style={{ textTransform: "uppercase" }}>
+                    {`${device_type} ${status}`}
                 </div>
                 <div className="panel-header-time">
                     Local Time: {to12HourFormat(time)}
@@ -297,57 +297,56 @@ const Alert = (props) => {
             </div>
             <div className="panel-header-info">
                 <div className="panel-header-heading">
-                    {" "}
-                    {data.value ? <span>{data.value}</span> : null}
+                    {`${device_type}: `} {value ? <span>{value}</span> : null}
                     <br />
                 </div>
-                <div className="panel-header-time">{data.lastRcvTm} </div>
+                <div className="panel-header-time">{time}</div>
             </div>
         </div>
     );
     //
 
     useEffect(() => {
-        if (isOpen === true) {
-            const receiveTime = new Date(alertData.firstRcvTm);
-            const startTime = new Date(receiveTime.getTime() - 10000).toISOString();
-            const endTime = new Date(receiveTime.getTime() + 10000).toISOString();
-            patientApi
-                .getEcgValue(props.pid, startTime, endTime)
-                .then((res) => {
-                    setEcgData(res.data?.response);
-                    console.log(res.data?.response);
-                    let reqData = null;
-                    res.data?.response?.patient_sensor_data?.map((item) => {
-                        if (new Date(item.time) <= receiveTime) {
-                            reqData = item;
-                        }
-                    });
-                    setAlertEcgData(reqData);
-                    setIsLoading(false);
-                })
-                .catch((err) => {
-                    console.log(err);
-                    setIsLoading(false);
-                });
-        }
+        // if (isOpen === true) {
+        //     const receiveTime = new Date(alertData.firstRcvTm);
+        //     const startTime = new Date(receiveTime.getTime() - 10000).toISOString();
+        //     const endTime = new Date(receiveTime.getTime() + 10000).toISOString();
+        //     patientApi
+        //         .getEcgValue(props.pid, startTime, endTime)
+        //         .then((res) => {
+        //             setEcgData(res.data?.response);
+        //             console.log(res.data?.response);
+        //             let reqData = null;
+        //             res.data?.response?.patient_sensor_data?.map((item) => {
+        //                 if (new Date(item.time) <= receiveTime) {
+        //                     reqData = item;
+        //                 }
+        //             });
+        //             setAlertEcgData(reqData);
+        //             setIsLoading(false);
+        //         })
+        //         .catch((err) => {
+        //             console.log(err);
+        //             setIsLoading(false);
+        //         });
+        // }
     }, [isOpen]);
 
     let data = [];
     let brushStart = 0;
     if (!isLoading) {
-        ecgData?.patient_sensor_data.map((item, index) => {
-            let array = item.ecg.split(/[ ,]+/);
-            var intArr = [];
-            if (item === alertEcgData) {
-                brushStart = index * 128;
-            }
-            for (let i = 0; i < array.length; i++) {
-                intArr.push(parseInt(array[i]));
-            }
-            data.push(...intArr);
-            // console.log(item.ecg, array, intArr, data);
-        });
+        // ecgData?.patient_sensor_data.map((item, index) => {
+        //     let array = item.ecg.split(/[ ,]+/);
+        //     var intArr = [];
+        //     if (item === alertEcgData) {
+        //         brushStart = index * 128;
+        //     }
+        //     for (let i = 0; i < array.length; i++) {
+        //         intArr.push(parseInt(array[i]));
+        //     }
+        //     data.push(...intArr);
+        //     // console.log(item.ecg, array, intArr, data);
+        // });
     }
 
     let chartData = data.map((value, index) => {
@@ -359,7 +358,7 @@ const Alert = (props) => {
 
     const menu = (
         <Menu>
-            {tags.map((item, index) => {
+            {/* {tags.map((item, index) => {
                 if (index === 0) {
                     return;
                 }
@@ -368,7 +367,7 @@ const Alert = (props) => {
                         <a>Dr . {item}</a>
                     </Menu.Item>
                 );
-            })}
+            })} */}
         </Menu>
     );
 
@@ -376,7 +375,7 @@ const Alert = (props) => {
         return parseFloat(num).toFixed(1);
     };
 
-    console.log(props.data, checkBtn, chartData, alertEcgData, brushStart);
+    console.log("props", props);
 
     return (
         <>
@@ -394,8 +393,8 @@ const Alert = (props) => {
             >
                 <Panel
                     header={panelHeader(
-                        props.data.type,
-                        new Date(props.data.lastRcvTm),
+                        // props.data.type,
+                        // new Date(props.data.lastRcvTm),
                         props.data
                     )}
                     key="1"
@@ -409,6 +408,7 @@ const Alert = (props) => {
                     {isLoading && (
                         <Spin style={{ position: "relative", left: "50%", top: "30%" }} />
                     )}
+
                     {!isLoading && ecgData?.patient_sensor_data.length < 1 && (
                         <div style={{ width: "100%", height: "200px" }}>
                             <div
@@ -419,155 +419,157 @@ const Alert = (props) => {
                             </div>
                         </div>
                     )}
+
                     {!isLoading && ecgData?.patient_sensor_data.length > 1 && (
-                        <>
-                            <div style={{ width: "100%" }}>
-                                <div>
-                                    <Row
-                                        span={24}
-                                        style={{
-                                            width: "90%",
-                                            marginTop: "13px",
-                                            marginLeft: "7%",
-                                        }}
-                                    >
-                                        <Col span={14}>
-                                            <Row style={{ marginBottom: "6px" }}>
-                                                <Col className="alert-chart-infos" span={6}>
-                                                    <p>
-                                                        <span>SpO2 : </span>
-                                                        {alertEcgData.spo2}
-                                                    </p>
-                                                </Col>
-                                                <Col className="alert-chart-infos" span={6}>
-                                                    <p>
-                                                        <span>PI : </span>
-                                                        {alertEcgData.pi}{" "}
-                                                    </p>
-                                                </Col>
-                                                <Col className="alert-chart-infos" span={6}>
-                                                    <p>
-                                                        <span>PR : </span>
-                                                        {alertEcgData.pr}{" "}
-                                                    </p>
-                                                </Col>
-                                                <Col className="alert-chart-infos" span={6}>
-                                                    <p>
-                                                        <span>Temp :</span>{" "}
-                                                        {cropNumbers(
-                                                            alertEcgData.temperature * (9 / 5) + 32
-                                                        )}
-                                                    </p>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col className="alert-chart-infos" span={6}>
-                                                    <p>
-                                                        <span>HRMin :</span> {alertEcgData.hrMin}
-                                                    </p>
-                                                </Col>
-                                                <Col className="alert-chart-infos" span={6}>
-                                                    <p>
-                                                        <span>HRMax :</span> {alertEcgData.hrMax}
-                                                    </p>
-                                                </Col>
-                                                <Col className="alert-chart-infos" span={6}>
-                                                    <p>
-                                                        <span>AvgRR :</span> {alertEcgData.avgRR}
-                                                    </p>
-                                                </Col>
-                                            </Row>
-                                        </Col>
-                                        <Col span={10}>
-                                            <Row>
-                                                <Col className="alert-chart-infos" offset={2} span={4}>
-                                                    <p>
-                                                        <span>Tags :</span>
-                                                    </p>
-                                                </Col>
-                                                {tags.length > 0 && (
-                                                    <>
-                                                        <Col offset={1} span={9}>
-                                                            <Tag
-                                                                className="alert-doctor-tags"
-                                                                color="#E6F1FF"
-                                                            >
-                                                                Dr. {tags[0]}
-                                                            </Tag>
-                                                        </Col>
-                                                        {tags.length > 1 && (
-                                                            <Col
-                                                                span={8}
-                                                                style={{
-                                                                    display: "flex",
-                                                                    alignItems: "center",
-                                                                    justifyContent: "center",
-                                                                }}
-                                                            >
-                                                                <Dropdown
-                                                                    overlay={menu}
-                                                                    placement="bottomCenter"
-                                                                >
-                                                                    <Tag
-                                                                        className="alert-doctor-tags"
-                                                                        color="#E6F1FF"
-                                                                    >
-                                                                        +{`${tags.length - 1} more`}
-                                                                    </Tag>
-                                                                </Dropdown>
-                                                            </Col>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </Row>
-                                        </Col>
-                                    </Row>
-                                </div>
-                                <div
-                                    className="body-chart"
+                        <div style={{ width: "100%" }}>
+                            <div>
+                                <Row
+                                    span={24}
                                     style={{
-                                        margin: "20px auto",
-                                        height: "300px",
-                                        width: "100%",
+                                        width: "90%",
+                                        marginTop: "13px",
+                                        marginLeft: "7%",
                                     }}
                                 >
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <LineChart
-                                            width={200}
-                                            height={200}
-                                            data={chartData}
-                                            margin={{
-                                                top: 5,
-                                                right: 30,
-                                                left: 20,
-                                                bottom: 5,
-                                            }}
-                                        >
-                                            <XAxis dataKey="xData" hide={true} />
-                                            <YAxis
-                                                hide={true}
-                                                domain={["dataMin - 300", "dataMax + 200"]}
-                                            />
-                                            <Brush
-                                                dataKey="name"
-                                                height={30}
-                                                stroke="#686868"
-                                                startIndex={brushStart - 4 * 128}
-                                                endIndex={brushStart + 5 * 128}
-                                            />
-                                            <Line
-                                                type="monotone"
-                                                dataKey="yData"
-                                                dot={false}
-                                                strokeWidth={3}
-                                                animationDuration={8000}
-                                                stroke="#393939"
-                                            />
-                                        </LineChart>
-                                    </ResponsiveContainer>
-                                </div>
+                                    <Col span={14}>
+                                        <Row style={{ marginBottom: "6px" }}>
+                                            <Col className="alert-chart-infos" span={6}>
+                                                <p>
+                                                    <span>SpO2 : </span>
+                                                    {alertEcgData.spo2 || 0}
+                                                </p>
+                                            </Col>
+                                            <Col className="alert-chart-infos" span={6}>
+                                                <p>
+                                                    <span>PI : </span>
+                                                    {alertEcgData.pi}{" "}
+                                                </p>
+                                            </Col>
+                                            <Col className="alert-chart-infos" span={6}>
+                                                <p>
+                                                    <span>PR : </span>
+                                                    {alertEcgData.pr || 0}{" "}
+                                                </p>
+                                            </Col>
+                                            <Col className="alert-chart-infos" span={6}>
+                                                <p>
+                                                    <span>Temp :</span>{" "}
+                                                    {/* {cropNumbers(
+                                                        alertEcgData.temperature * (9 / 5) + 32
+                                                    )} */}
+                                                    0
+                                                </p>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col className="alert-chart-infos" span={6}>
+                                                <p>
+                                                    <span>HRMin :</span> {alertEcgData.hrMin || 0}
+                                                </p>
+                                            </Col>
+                                            <Col className="alert-chart-infos" span={6}>
+                                                <p>
+                                                    <span>HRMax :</span> {alertEcgData.hrMax || 0}
+                                                </p>
+                                            </Col>
+                                            <Col className="alert-chart-infos" span={6}>
+                                                <p>
+                                                    <span>AvgRR :</span> {alertEcgData.avgRR || 0}
+                                                </p>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                    <Col span={10}>
+                                        <Row>
+                                            <Col className="alert-chart-infos" offset={2} span={4}>
+                                                <p>
+                                                    <span>Tags :</span>
+                                                </p>
+                                            </Col>
+                                            {tags.length > 0 && (
+                                                <>
+                                                    <Col offset={1} span={9}>
+                                                        <Tag
+                                                            className="alert-doctor-tags"
+                                                            color="#E6F1FF"
+                                                        >
+                                                            Dr.
+                                                            {/* Dr. {tags[0]} */}
+                                                        </Tag>
+                                                    </Col>
+                                                    {tags.length > 1 && (
+                                                        <Col
+                                                            span={8}
+                                                            style={{
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                justifyContent: "center",
+                                                            }}
+                                                        >
+                                                            <Dropdown
+                                                                overlay={menu}
+                                                                placement="bottomCenter"
+                                                            >
+                                                                <Tag
+                                                                    className="alert-doctor-tags"
+                                                                    color="#E6F1FF"
+                                                                >
+                                                                    {/* +{`${tags.length - 1} more`} */}
+                                                                    more
+                                                                </Tag>
+                                                            </Dropdown>
+                                                        </Col>
+                                                    )}
+                                                </>
+                                            )}
+                                        </Row>
+                                    </Col>
+                                </Row>
                             </div>
-                        </>
+                            <div
+                                className="body-chart"
+                                style={{
+                                    margin: "20px auto",
+                                    height: "300px",
+                                    width: "100%",
+                                }}
+                            >
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart
+                                        width={200}
+                                        height={200}
+                                        data={chartData}
+                                        margin={{
+                                            top: 5,
+                                            right: 30,
+                                            left: 20,
+                                            bottom: 5,
+                                        }}
+                                    >
+                                        <XAxis dataKey="xData" hide={true} />
+                                        <YAxis
+                                            hide={true}
+                                            domain={["dataMin - 300", "dataMax + 200"]}
+                                        />
+                                        <Brush
+                                            dataKey="name"
+                                            height={30}
+                                            stroke="#686868"
+                                            startIndex={brushStart - 4 * 128}
+                                            endIndex={brushStart + 5 * 128}
+                                        />
+                                        <Line
+                                            type="monotone"
+                                            dataKey="yData"
+                                            dot={false}
+                                            strokeWidth={3}
+                                            animationDuration={8000}
+                                            stroke="#393939"
+                                        />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
                     )}
                 </Panel>
             </Collapse>

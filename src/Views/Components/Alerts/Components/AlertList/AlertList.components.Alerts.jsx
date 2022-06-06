@@ -6,14 +6,14 @@ import Alert from '../Alert/Alert.components.Alerts';
 
 
 const AlertList = (props) => {
+    console.log("props AlertList", props);
 
     const monthNames = [
         "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
     ];
-    const date = new Date(props.Alerts[0].lastRcvTm);
+    // const date = new Date(props.Alerts[0].lastRcvTm);
+    const date = new Date();
     const date1 = `${date.getDate()}  ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-
-    console.log(props.Alerts);
 
     return (
         <div className='alert-list'>
@@ -21,13 +21,13 @@ const AlertList = (props) => {
                 <p>{date1}</p>
             </div>
             <div className='alerts-list-body'>
-
-                {
+                <Alert pid={props.pid} props={props.props} data={props.Alerts}></Alert>
+                {/* {
                     props.Alerts.map(item => (
                         <Alert pid={props.pid} props={props.props} data={item}></Alert>
                     )
                     )
-                }
+                } */}
 
             </div>
         </div>
