@@ -13,6 +13,8 @@ import GraphVisualizer from "../../Views/GraphVisualizer/GraphVisualizer";
 import BillingModule from "../../Views/BillingModule/BillingModule";
 import AuditPage from "../../Views/AuditPage/AuditPage";
 import PatientJourney from "../../Views/PatientJourney/patientJourney";
+import BillingSummary from "../../Views/BillingModule/BillingSummary";
+
 import { FaPlusSquare } from "react-icons/fa";
 import { MdAddAlert } from "react-icons/md";
 import { GrAnnounce } from "react-icons/gr";
@@ -157,6 +159,16 @@ const patientRoutes = [
         name: "Audit",
         path: "/audit",
         component: AuditPage,
+        isPrivate: true,
+        exact: true,
+        showOnMenu: true,
+        icon: <AiOutlineAudit style={iconStyle} />,
+    },
+    {
+        id: "00035",
+        name: "Billing Summary",
+        path: "/bliing-summary",
+        component: BillingSummary,
         isPrivate: true,
         exact: true,
         showOnMenu: true,

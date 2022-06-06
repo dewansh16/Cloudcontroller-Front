@@ -37,6 +37,9 @@ import tenantApi from "../../Apis/tenantApis";
 import { CPT_CODE, CPT } from "../../Utils/utils";
 import { isArray } from 'lodash';
 
+import HeaderBilling from "./component/Header";
+import TaskTable from "./component/TaskTable";
+
 const { Panel } = Collapse;
 const { TextArea } = Input;
 
@@ -173,12 +176,12 @@ function BillingModule() {
     const [respirationRateVal, setRespirationRateVal] = useState();
     const [task99091, setTask99091] = useState([]);
 
-
     const [taskCodeActive, setTaskCodeActive] = useState(CPT_CODE.CPT_99453);
     const [taskCodeInternalActive, setTaskCodeInternalActive] = useState("");
 
     const [firstTwentyTasks, setFirstTwentyTasks] = useState([]);
     const [secondTwentyTasks, setSecondTwentyTasks] = useState([]);
+    const [thirdTwentyTasks, setThirdTwentyTasks] = useState([]);
 
     const [runUseEffect, setRunUseEffect] = useState(0);
     const [timerTask, setTimerTask] = useState(false);
@@ -372,7 +375,7 @@ function BillingModule() {
                         let itemTmp = {}
                         itemTmp.task_time_spend = timeCount;
                         timeCount = 0;
-                      
+                        
                         callUpdateBillingTasks(taskCodeActive, itemTmp);
                     }}
                 >
@@ -423,6 +426,7 @@ function BillingModule() {
             .join(":")
         return timeDs;
     }
+
     const startCountTimer = (elementId) => {
         clockCounter = setInterval(function () {
             timeCount = timeCount + 1;
@@ -432,7 +436,7 @@ function BillingModule() {
         }, 1000);
     }
 
-    const renderTimerClock = (item, cptCode) => {
+    const renderTimerClock = (item, cptCode, isDisableStartStop) => {
         const elementId = `task-${cptCode}-timer`;
         if (!timerTask || item.task_id != currentIdTimerClockActive) {
             return (
@@ -450,6 +454,7 @@ function BillingModule() {
                     }}
                     className="primary"
                     style={{ paddingBottom: "0.5rem", paddingTop: "0.5rem" }}
+                    disabled={isDisableStartStop}
                 >
                     Start
                 </CusBtn>
@@ -472,6 +477,7 @@ function BillingModule() {
                         }}
                         className="primary"
                         style={{ paddingBottom: "0.5rem", paddingTop: "0.5rem" }}
+                        disabled={isDisableStartStop}
                     >
                         Stop
                     </CusBtn>
@@ -1034,9 +1040,9 @@ function BillingModule() {
         return result;
     }
 
-    const getDateEnable99457 = () => {
-        if (isArray(firstTwentyTasks) && firstTwentyTasks.length > 0) {
-            return moment(firstTwentyTasks[firstTwentyTasks.length - 1]).format('YYYY-MM-DD');
+    const getDateEnable99457 = (dataTask) => {
+        if (isArray(dataTask) && dataTask.length > 0) {
+            return moment(dataTask[dataTask.length - 1]).format('YYYY-MM-DD');
         }
         return '';
     }
@@ -1304,7 +1310,7 @@ function BillingModule() {
                             if(temp99091Task.length > 0) {
                                 setCurrentItem99091Active(temp99091Task[temp99091Task.length - 1].task_id);
                                 temp99091Task.map(item => {
-                                    tmpTime +=  Number(item.time_spent);
+                                    tmpTime +=  Number(item.task_time_spend);
                                 })
                                 setKeyNoteActive(temp99091Task[temp99091Task.length - 1].task_id)
                             }
@@ -1336,7 +1342,7 @@ function BillingModule() {
                             <p>{findItem['note']}</p>
                         </div>
                         <div style={{ width: "15%" }}>
-                            {findItem['time_spent']} {Number(findItem['time_spent']) > 1 ? 'mins' : 'min'}
+                            {findItem['task_time_spend']} {Number(findItem['task_time_spend']) > 1 ? 'mins' : 'min'}
                         </div>
                         <div style={{ width: "5%" }}></div>
                     </div>
@@ -1502,7 +1508,7 @@ function BillingModule() {
                                 add_task_id: date.getTime(),
                                 add_task_date: taskDateVal,
                                 add_task_staff_name: taskNameVal,
-                                add_task_note: taskNoteVal,
+                                task_note: taskNoteVal,
                                 task_time_spend: item.task_time_spend
                             }
                         )
@@ -1547,21 +1553,17 @@ function BillingModule() {
                     pid: location.state.pid,
                     billing_id: billingId,
                     date: taskDateVal,
-                    temperature: temperatureVal,
-                    spo2: spo2Val,
-                    heart_rate: heartRateVal,
-                    blood_pressure: bloodPressureVal,
-                    respiration_rate: respirationRateVal,
                     staff_name: taskNameVal,
-                    note: taskNoteVal,
-                    time_spent: taskTimeVal
-
+                    task_note: taskNoteVal,
+                    task_time_spend: item.task_time_spend
                 }
                 billingApi
                     .updateBillingTask(
                         updateData
                     )
                     .then((res) => {
+                        stopCountTimer();
+                        setAddTaskState(false);
                         setTasksLoadingState(false);
                         getListFirstTwentyTasks();
                     })
@@ -1582,17 +1584,14 @@ function BillingModule() {
                             fee: 40,
                             task_id: date.getTime(),
                             date: taskDateVal,
-                            temperature: temperatureVal,
-                            spo2: spo2Val,
-                            heart_rate: heartRateVal,
-                            blood_pressure: bloodPressureVal,
-                            respiration_rate: respirationRateVal,
                             staff_name: taskNameVal,
-                            note: taskNoteVal,
-                            time_spent: taskTimeVal
+                            task_note: taskNoteVal,
+                            task_time_spend: item.task_time_spend
                         }
                     )
                     .then((res) => {
+                        stopCountTimer();
+                        setAddTaskState(false);
                         setTasksLoadingState(false);
                         getListFirstTwentyTasks();
                     })
@@ -1868,7 +1867,7 @@ function BillingModule() {
             let taskData = JSON.parse(item.params);
             let tempTotal = 0;
             taskData.map(item => {
-                tempTotal += Number(item.time_spent)
+                tempTotal += Number(item.task_time_spend)
             })
             if(tempTotal >= TOTAL_HOURS_FOR_EACH_99091_BILLED){
                 return `1 billed`;
@@ -1919,7 +1918,7 @@ function BillingModule() {
             let taskData = JSON.parse(item.params);
             let tempTotal = 0;
             taskData.map(item => {
-                tempTotal += Number(item.time_spent)
+                tempTotal += Number(item.task_time_spend)
             })
             if(tempTotal > 1) {
                 return `${tempTotal} Mins`
@@ -1984,6 +1983,7 @@ function BillingModule() {
                     var secondTotalTime = 0;
                     res.data.response.billingData.map(
                         (item) => {
+
                             tempDataSource.push({
                                 date: `${getDateFromISO(item.bill_date)} ${getTimeFromISO(
                                     item.bill_date
@@ -1992,7 +1992,16 @@ function BillingModule() {
                                 desc: getReportDes(item),
                                 duration: getReportTotalDuration(item),
                             });
-
+                            const dataCode99454 = filterDeviceAssociatedByDate;
+                            if(isArray(dataCode99454.list) && dataCode99454.list.length > 0){
+                                let lastItem99454 = dataCode99454.list[dataCode99454.list.length - 1];
+                                tempDataSource.push({
+                                    date: moment(lastItem99454.datesInflux?.[lastItem99454?.datesInflux?.length - 1]).format('YYYY-MM-DD'),
+                                    code: CPT_CODE.CPT_99454,
+                                    desc: dataCode99454.billedUnit,
+                                    duration: `${dataCode99454.totalDayMonitored} day(s)`,
+                                });
+                            }
                             if (item.code == CPT_CODE.CPT_99453) {
                                 const d = new Date(item.bill_date);
                                 initialStepDone = true;
@@ -2042,7 +2051,7 @@ function BillingModule() {
                                 if (temp99091Task.length > 0) {
                                     setCurrentItem99091Active(temp99091Task[temp99091Task.length - 1].task_id);
                                     temp99091Task.map(item => {
-                                        tmpTime += Number(item.time_spent);
+                                        tmpTime += Number(item.task_time_spend);
                                     })
                                     setKeyNoteActive(temp99091Task[temp99091Task.length - 1].task_id);
                                 }
@@ -2643,7 +2652,16 @@ function BillingModule() {
                             </div>
                             <div className="bm-cptcode-b-header">
                                 <div className="bm-header-below" style={{ marginLeft: "12%" }}>
-                                    0 mins monitored
+                                {Math.floor(totalTime99091 / 60) >= TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                    <>
+                                              {`${TOTAL_HOURS_FOR_EACH_99091_BILLED}/${TOTAL_HOURS_FOR_EACH_99091_BILLED} mins monitored`}
+                                      </>
+                                        )}
+                                         {Math.floor(totalTime99091 / 60) < TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                              <>
+                                              {`${Math.floor(totalTime99091/60) }/${TOTAL_HOURS_FOR_EACH_99091_BILLED} mins monitored`}
+                                              </>
+                                        )}
                                 </div>
                             </div>
                         </div>
@@ -2731,7 +2749,7 @@ function BillingModule() {
                 {!enrolledState ? (
                     currentDateApi === presentMonth ? (
                         <div className="bm-right-container">
-                            <div
+                            {/* <div
                                 style={
                                     addTaskState
                                         ? {
@@ -2762,7 +2780,7 @@ function BillingModule() {
                                         display: "flex",
                                         flexDirection: "column",
                                         justifyContent: "center",
-                                        padding: "1% 5%",
+                                        padding: "1rem 5%",
                                     }}
                                 >
                                     <div
@@ -2784,7 +2802,10 @@ function BillingModule() {
                                     </div>
                                 </CusBtn>
                                 {placeDatePicker()}
-                            </div>
+                            </div> */}
+
+                            <HeaderBilling addTask={addTaskState} currentDate={currentDateApi} onChangeDate={handleMonthChange} />
+                            
                             <div className="bm-notenroll-container">
                                 <div style={{ fontSize: "4rem" }}>Billing</div>
                                 <div
@@ -2820,7 +2841,7 @@ function BillingModule() {
                         </div>
                     ) : (
                         <div className="bm-right-container">
-                            <div
+                            {/* <div
                                 style={
                                     addTaskState
                                         ? {
@@ -2851,7 +2872,7 @@ function BillingModule() {
                                         display: "flex",
                                         flexDirection: "column",
                                         justifyContent: "center",
-                                        padding: "1% 5%",
+                                        padding: "1rem 5%",
                                     }}
                                 >
                                     <div
@@ -2873,7 +2894,10 @@ function BillingModule() {
                                     </div>
                                 </CusBtn>
                                 {placeDatePicker()}
-                            </div>
+                            </div> */}
+
+                            <HeaderBilling addTask={addTaskState} currentDate={currentDateApi} onChangeDate={handleMonthChange} />
+
                             <div className="bm-notenroll-container">
                                 <div style={{ fontSize: "4rem" }}>No Billing Info</div>
                                 <div
@@ -2935,7 +2959,7 @@ function BillingModule() {
                                     display: "flex",
                                     flexDirection: "column",
                                     justifyContent: "center",
-                                    padding: "1% 5%",
+                                    padding: "1rem 5%",
                                 }}
                             >
                                 <div className="gv-patient-name" style={{ fontSize: "1.4rem" }}>
@@ -3014,6 +3038,7 @@ function BillingModule() {
                     </div>
                 ) : null}
 
+                {/* -------------- Code 99454 -------------- */}          
                 {patchLoading ? (
                     <div
                         style={{
@@ -3028,66 +3053,13 @@ function BillingModule() {
                     </div>
                 ) : associatedSensorsState ? (
                     <div className="bm-right-container">
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                width: "100%",
-                                height: "11%",
-                            }}
-                        >
-                            <CusBtn
-                                onClick={() => {
-                                    history.push(
-                                        `/dashboard/patient/details/${location.state.pid}`
-                                    );
-                                }}
-                                className="secondary"
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    justifyContent: "center",
-                                    padding: "1% 5%",
-                                }}
-                            >
-                                <div className="gv-patient-name" style={{ fontSize: "1.4rem" }}>
-                                    {location.state
-                                        ? location.state.name
-                                        : history.push(`/dashboard/patient/details/${pid}`)}
-                                </div>
-                                <div
-                                    className="gv-patient-mr"
-                                    style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
-                                >
-                                    {"MR: "}
-                                    {location.state
-                                        ? location.state.mr
-                                        : history.push(`/dashboard/patient/details/${pid}`)}
-                                </div>
-                            </CusBtn>
-                            {placeDatePicker("15%")}
-                            {/* <div className="bm-month-sensor-container">
-                                {placeDatePicker("60%")}
-                                <CusBtn
-                                    onClick={() => {
-                                        // setPatchLoading(true);
-                                        setAssociatedSensorsState(false);
-                                        enrollForPatch();
-                                    }}
-                                    className="primary"
-                                    disabled={
-                                        patchEnrolled || patchArray.length === 0 ? true : false
-                                    }
-                                >
-                                    Enroll
-                                </CusBtn>
-                            </div> */}
-                        </div>
+                        <HeaderBilling addTask={addTaskState} currentDate={currentDateApi} onChangeDate={handleMonthChange} />
+
                         <div className="bm-sensor-mid">
                             <div
                                 style={{
-                                    width: "28%",
+                                    minWidth: "21rem",
+                                    maxWidth: "23rem",
                                     display: "flex",
                                     flexDirection: "column",
                                     justifyContent: "space-between",
@@ -3181,6 +3153,7 @@ function BillingModule() {
                     </div>
                 ) : null}
 
+                {/* -------------- Code 99457 -------------- */}
                 {firstTwentyState ? (
                     tasksLoadingState ? (
                         <div
@@ -3197,67 +3170,16 @@ function BillingModule() {
                     ) : (
                         <div className="bm-right-container">
                             {addTaskState ? addTaskComponent() : null}
-                            <div
-                                style={
-                                    addTaskState
-                                        ? {
-                                            filter: "blur(4px)",
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            width: "100%",
-                                            height: "11%",
-                                        }
-                                        : {
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            width: "100%",
-                                            height: "11%",
-                                        }
-                                }
-                            >
-                                <CusBtn
-                                    onClick={() => {
-                                        history.push(
-                                            `/dashboard/patient/details/${location.state.pid}`
-                                        );
-                                    }}
-                                    className="secondary"
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        padding: "1% 5%",
-                                    }}
-                                >
-                                    <div
-                                        className="gv-patient-name"
-                                        style={{ fontSize: "1.4rem" }}
-                                    >
-                                        {location.state
-                                            ? location.state.name
-                                            : history.push(`/dashboard/patient/details/${pid}`)}
-                                    </div>
-                                    <div
-                                        className="gv-patient-mr"
-                                        style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
-                                    >
-                                        {"MR: "}
-                                        {location.state
-                                            ? location.state.mr
-                                            : history.push(`/dashboard/patient/details/${pid}`)}
-                                    </div>
-                                </CusBtn>
-                                {placeDatePicker()}
-                            </div>
+
+                            <HeaderBilling addTask={addTaskState} currentDate={currentDateApi} onChangeDate={handleMonthChange} />
+
                             <div
                                 style={addTaskState ? { filter: "blur(4px)" } : null}
                                 className="bm-sensor-mid"
                             >
                                 {firstTotalTime >= 1200 ? (
                                     <div style={{ fontSize: "1.2rem" }}>
-                                        {`CPT code: 99457 enabled at  ${getDateEnable99457()}`}
+                                        {`CPT code: 99457 enabled at  ${getDateEnable99457(firstTwentyTasks)}`}
                                     </div>
                                 ) : (
                                     <div style={{ fontSize: "1.2rem" }}>
@@ -3266,7 +3188,8 @@ function BillingModule() {
                                 )}
                                 <div
                                     style={{
-                                        width: "28%",
+                                        minWidth: "21rem",
+                                        maxWidth: "23rem",
                                         display: "flex",
                                         flexDirection: "column",
                                         justifyContent: "space-between",
@@ -3291,13 +3214,24 @@ function BillingModule() {
                                     </div>
                                 </div>
                             </div>
-                            <div
+
+                            <TaskTable 
+                                timeCount={timeCount}
+                                CPT_CODE={CPT_CODE.CPT_99457}
+                                addTask={addTaskState} 
+                                dataTable={task99091}
+                                setAddTaskState={setAddTaskState}
+                                startCountTimer={startCountTimer}
+                                renderTimerClock={renderTimerClock}
+                                disabledBtnAdd={totalTime99091 >= TOTAL_HOURS_FOR_EACH_99458_BILLED * 60 ? true : false}
+                            />
+
+                            {/* <div
                                 style={addTaskState ? { filter: "blur(4px)" } : null}
                                 className="bm-twenty-bottom-container"
                             >
                                 <div className="bm-twenty-header">
                                     Tasks
-                                    {/* <CusBtn onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn>  */}
                                 </div>
                                 {firstTwentyTasks.length === 0 ? (
                                     <div
@@ -3387,11 +3321,12 @@ function BillingModule() {
                                         </CusBtn>
                                     </div>
                                 ) : null}
-                            </div>
+                            </div> */}
                         </div>
                     )
                 ) : null}
 
+                {/* -------------- Code 99458 -------------- */}
                 {secondTwentyState ? (
                     tasksLoadingState ? (
                         <div
@@ -3408,60 +3343,9 @@ function BillingModule() {
                     ) : (
                         <div className="bm-right-container">
                             {addTaskState ? addTaskComponent() : null}
-                            <div
-                                style={
-                                    addTaskState
-                                        ? {
-                                            filter: "blur(4px)",
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            width: "100%",
-                                            height: "11%",
-                                        }
-                                        : {
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            width: "100%",
-                                            height: "11%",
-                                        }
-                                }
-                            >
-                                <CusBtn
-                                    onClick={() => {
-                                        history.push(
-                                            `/dashboard/patient/details/${location.state.pid}`
-                                        );
-                                    }}
-                                    className="secondary"
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        padding: "1% 5%",
-                                    }}
-                                >
-                                    <div
-                                        className="gv-patient-name"
-                                        style={{ fontSize: "1.4rem" }}
-                                    >
-                                        {location.state
-                                            ? location.state.name
-                                            : history.push(`/dashboard/patient/details/${pid}`)}
-                                    </div>
-                                    <div
-                                        className="gv-patient-mr"
-                                        style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
-                                    >
-                                        {"MR: "}
-                                        {location.state
-                                            ? location.state.mr
-                                            : history.push(`/dashboard/patient/details/${pid}`)}
-                                    </div>
-                                </CusBtn>
-                                {placeDatePicker()}
-                            </div>
+
+                            <HeaderBilling addTask={addTaskState} currentDate={currentDateApi} onChangeDate={handleMonthChange} />
+
                             <div
                                 style={addTaskState ? { filter: "blur(4px)" } : null}
                                 className="bm-sensor-mid"
@@ -3477,7 +3361,8 @@ function BillingModule() {
                                 )}
                                 <div
                                     style={{
-                                        width: "28%",
+                                        minWidth: "21rem",
+                                        maxWidth: "23rem",
                                         display: "flex",
                                         flexDirection: "column",
                                         justifyContent: "space-between",
@@ -3508,13 +3393,23 @@ function BillingModule() {
                                 </div>
                             </div>
 
-                            <div
+                            <TaskTable 
+                                timeCount={timeCount}
+                                CPT_CODE={CPT_CODE.CPT_99458}
+                                addTask={addTaskState} 
+                                dataTable={secondTwentyTasks}
+                                setAddTaskState={setAddTaskState}
+                                startCountTimer={startCountTimer}
+                                renderTimerClock={renderTimerClock}
+                                disabledBtnAdd={disabledBtnAddTask(secondTwentyTasks)}
+                            />
+
+                            {/* <div
                                 style={addTaskState ? { filter: "blur(4px)" } : null}
                                 className="bm-twenty-bottom-container"
                             >
                                 <div className="bm-twenty-header">
                                     Tasks
-                                    {/* <CusBtn onClick={() => { setRightSideLoading(true); handleDeleteTasks() }} className="primary" style={{ position: 'absolute', right: '5%', width: '12%', padding: '1%' }} disabled={taskDeleteArray.length === 0 ? true : false} >Delete</CusBtn>  */}
                                 </div>
                                 {secondTwentyTasks.length === 0 ? (
                                     <div
@@ -3603,11 +3498,12 @@ function BillingModule() {
                                         </CusBtn>
                                     </div>
                                 ) : null}
-                            </div>
+                            </div> */}
                         </div>
                     )
                 ) : null}
 
+                {/* -------------- Code 99091 -------------- */}
                 {lastStateLoading ? (
                     <div
                         style={{
@@ -3622,287 +3518,461 @@ function BillingModule() {
                     </div>
                 ) : lastBillingState ? (
                     <div className="bm-right-container">
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                width: "100%",
-                                height: "11%",
-                            }}
-                        >
-                            <CusBtn
-                                onClick={() => {
-                                    history.push(
-                                        `/dashboard/patient/details/${location.state.pid}`
-                                    );
-                                }}
-                                className="secondary"
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    justifyContent: "center",
-                                    padding: "1% 5%",
-                                }}
-                            >
-                                <div className="gv-patient-name" style={{ fontSize: "1.4rem" }}>
-                                    {location.state
-                                        ? location.state.name
-                                        : history.push(`/dashboard/patient/details/${pid}`)}
-                                </div>
-                                <div
-                                    className="gv-patient-mr"
-                                    style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
-                                >
-                                    {"MR: "}
-                                    {location.state
-                                        ? location.state.mr
-                                        : history.push(`/dashboard/patient/details/${pid}`)}
-                                </div>
-                            </CusBtn>
-                            {/* <div className='bm-last-month-date' > */}
-                            {placeDatePicker()}
-                            {/* </div> */}
-                        </div>
-                        <div
-                            style={{
-                                width: "90%",
-                                height: "14%",
-                                margin: "5%"
-                            }}
-                        >
-                            <div>
-                                {totalTime99091 < 30 && (
-                                    <div style={{ fontSize: "1.2rem" }}>
-                                        CPT code: 99091 has not been enabled yet
-                                    </div>
-                                )}
-
-                                {totalTime99091 > 30 && (
-                                    <div style={{ fontSize: "1.2rem" }}>
-                                        CPT code: 99091 has been enabled
-                                    </div>
-                                )}
-
-                                <p>{totalTime99091} {totalTime99091 > 1 ? 'Minutes' : 'Minute'} of Monitoring Each 30 Days without Interactive Communication</p>
-                            </div>
-                            {addTaskState ? addTaskComponent(CPT_CODE.CPT_99091) : null}
-
-                            <Row>
-                                {task99091?.length > 0 && (
-                                    <Col span={14} style={{ paddingRight: "5%" }}>
-                                        <Collapse
-                                            accordion
-                                            className="collapse-table-99091"
-                                            onChange={(val) => {
-                                                setKeyNoteActive(val);
-                                                setCurrentItem99091Active(val);
-                                            }}
-                                            defaultActiveKey={task99091[task99091?.length - 1]?.task_id}
-                                            activeKey={keyNoteActive}
-                                        >
-                                            {task99091?.map((item, index) => (
-                                                <Panel 
-                                                    key={item.task_id}
-                                                    header={(
-                                                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                                            <div style={{ width: "50%" }}>Vitals</div>
-                                                            <div style={{ width: "50%" }}>{moment(item['date']).format('YYYY-MM-DD H:mm a')}</div>
-                                                        </div>
-                                                    )}
-                                                >
-                                                    {getDataSourceByItem99091(item).map(data => {
-                                                        return (
-                                                            <div key={data?._key} style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                                                <div style={{ width: "50%" }}>{data?.name}</div>
-                                                                <div style={{ width: "50%" }}>{data?.value}</div>
-                                                            </div>
-                                                        )
-                                                    })}
-                                                </Panel>
-                                            ))}
-                                        </Collapse>
-                                    </Col>
-                                )}
-
-                                        {/* <Table
-                                            size="small"
-                                            className="vital-table"
-                                            style={{ marginBottom: "1.25rem" }}
-                                            columns={[
-                                                {
-                                                    width: "40%",
-                                                    title: (
-                                                        <div
-                                                            style={{
-                                                                fontFamily: "Lexend",
-                                                                fontWeight: "500",
-                                                                fontSize: "14px",
-                                                                color: "#727272",
-                                                            }}
-                                                        >
-                                                            Vitals
-                                                        </div>
-                                                    ),
-                                                    dataIndex: "name",
-                                                    key: "name",
-                                                },
-                                                {
-                                                    width: "30%",
-                                                    title: (
-                                                        <div
-                                                            style={{
-                                                                textAlign: "center",
-                                                                fontFamily: "Lexend",
-                                                                fontWeight: "500",
-                                                                fontSize: "14px",
-                                                                color: "#727272",
-                                                            }}
-                                                        >
-                                                            {moment(item['date']).format('YYYY-MM-DD H:mm a')}
-                                                        </div>
-                                                    ),
-                                                    dataIndex: "value",
-                                                    key: "value",
-                                                },
-                                            ]}
-                                            dataSource={getDataSourceByItem99091(item)}
-                                            pagination={false}
-                                            bordered
-                                        /> */}
-
-                                <Col span={10}>
-                                    <div>
-
-                                        <div style={{
-                                            background: "#ddd",
-                                            borderRadius: "1rem",
-                                            padding: "3% 7%"
-                                        }}>
-                                            <div style={{ textAlign: "center" }}>
-                                                Last updated at {getLastUpdatedAt99091()}
-                                            </div>
-                                            <div>
-                                                <div
-                                                    style={{
-                                                        display: "flex",
-                                                        alignItems: "center"
-                                                    }}
-                                                >
-                                                    <div style={{ width: "45%" }}>Status: Active</div>
-                                                    <div style={{ width: "55%" }}>Enrollment: {getFirst99091()}</div>
-                                                </div>
-
-                                                <div
-                                                    style={{
-                                                        display: "flex",
-                                                        alignItems: "center"
-                                                    }}
-                                                >
-                                                    <div style={{ width: "45%" }}>Months of CMM: 2</div>
-                                                    <div style={{ width: "55%" }}>Next followup: NA</div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div style={{
-                                            background: "#ddd",
-                                            borderRadius: "1rem",
-                                            padding: "3% 4%",
-                                            marginTop: "1rem"
-                                        }}>
-                                            <div
-                                                style={{
-                                                    borderBottom: "1px solid #00000029",
-                                                    paddingBottom: "6px"
-                                                }}
-                                            >
-                                                Notes
-                                            </div>
-                                            {currentItem99091Active && 
-                                                getNoteForItem99091()
-                                            }
-                                            <div style={{
-                                                display: "flex",
-                                                padding: "1rem 0.5rem"
-                                            }}>
-
-                                                <CusBtn
-                                                    onClick={() => {
-                                                        setAddTaskState(true);
-                                                    }}
-                                                    style={{ padding: "10px 45px" }}
-                                                    disabled={totalTime99091 < 30 ? false : true}
-                                                >
-                                                    Add
-                                                </CusBtn>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Col>
-                            </Row>
-                        </div>
-
-
-                        {/* {lastStateDone ? (
+                            {addTaskState ? addTaskComponent() : null}
+                            <HeaderBilling addTask={addTaskState} currentDate={currentDateApi} onChangeDate={handleMonthChange} />
+                            
                             <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    height: "89%",
-                                }}
+                                style={addTaskState ? { filter: "blur(4px)" } : null}
+                                className="bm-sensor-mid"
                             >
-                                <CheckCircleOutlined
-                                    style={{
-                                        color: "#11c111",
-                                        fontSize: "3rem",
-                                        marginBottom: "3%",
-                                    }}
-                                />
-                                <div style={{ fontSize: "2rem", color: "#11c111" }}>
-                                    Congratulations!
-                                </div>
-                                <div style={{ fontSize: "2rem", marginBottom: "3%" }}>
-                                    CPT code: 99091 enabled
-                                </div>
+                                {totalTime99091 >= TOTAL_HOURS_FOR_EACH_99091_BILLED * 60 ? (
+                                    <div style={{ fontSize: "1.2rem" }}>
+                                        {`CPT code: 99091 enabled at ${getDateEnable99457(task99091)}`}
+                                    </div>
+                                ) : (
+                                    <div style={{ fontSize: "1.2rem" }}>
+                                        {`CPT code: 99091 has not been enabled yet`}
+                                    </div>
+                                )}
                                 <div
-                                    style={{ fontSize: "1rem", marginBottom: "2%" }}
-                                >{`Recorded timestamp: ${lastStateData.date} ${lastStateData.time}`}</div>
+                                    style={{
+                                        minWidth: "21rem",
+                                        maxWidth: "23rem",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "space-between",
+                                    }}
+                                >
+                                    <div className="bm-sensor-monitored-bar">
+                                        {Math.floor(totalTime99091 / 60) >= TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                            <div
+                                                 className="bm-sensor-monitored-bar-two"
+                                                 style={{
+                                                     width: `${1 * 100}%`,
+                                                 }}
+                                             ></div>
+                                        )}
+                                        {Math.floor(totalTime99091 / 60) < TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                            <div
+                                            className="bm-sensor-monitored-bar-two"
+                                            style={{
+                                                width: `${Math.floor(totalTime99091 / 60) / TOTAL_HOURS_FOR_EACH_99091_BILLED * 100}%`,
+                                            }}
+                                        ></div>
+                                        )}
+                                        <div style={{ marginTop: "10px" }}>
+                                        {Math.floor(totalTime99091 / 60) >= TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                              <div style={{ fontSize: "1.2rem" }}>
+                                              {`Mins Monitored: ${TOTAL_HOURS_FOR_EACH_99091_BILLED}/${TOTAL_HOURS_FOR_EACH_99091_BILLED}`}
+                                          </div>
+                                        )}
+                                         {Math.floor(totalTime99091 / 60) < TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                              <div style={{ fontSize: "1.2rem" }}>
+                                              {`Mins Monitored: ${Math.floor(totalTime99091/60) }/${TOTAL_HOURS_FOR_EACH_99091_BILLED}`}
+                                          </div>
+                                        )}
+                                          {Math.floor(totalTime99091 / 60) < TOTAL_HOURS_FOR_EACH_99091_BILLED && (
+                                               <div style={{ color: "#00000085" }}>
+                                               <b>{`${TOTAL_HOURS_FOR_EACH_99091_BILLED - (Math.floor(totalTime99091 / 60) % TOTAL_HOURS_FOR_EACH_99091_BILLED)} mins`}</b> left to
+                                               enable the next CPT code.
+                                           </div>
+                                          )}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        ) : (
-                            // <div className="bm-notenroll-container" style={{ height: "89%" }}>
-                            //     <div style={{ fontSize: "3rem" }}>
-                            //         Enroll to generate CPT Code: 99091
-                            //     </div>
-                            //     <div
-                            //         style={{
-                            //             display: "flex",
-                            //             flexDirection: "column",
-                            //             justifyContent: "center",
-                            //             alignItems: "center",
-                            //         }}
-                            //     >
-                            //         <div style={{ fontSize: "1rem", color: "#7E7979" }}>
-                            //             CPT code 99091 has not been enabled for this month
-                            //         </div>
-                            //     </div>
-                            //     <CusBtn
-                            //         onClick={() => {
-                            //             // setLastStateLoading(true);
-                            //             enrollLastState();
-                            //         }}
-                            //         className="primary"
-                            //         style={{ marginTop: "3%", padding: "1% 5%" }}
-                            //     >
-                            //         Enroll
-                            //     </CusBtn>
-                            // </div>
-                        )} */}
-                    </div>
+
+                            <TaskTable 
+                                timeCount={timeCount}
+                                CPT_CODE={CPT_CODE.CPT_99091}
+                                addTask={addTaskState} 
+                                dataTable={task99091}
+                                setAddTaskState={setAddTaskState}
+                                startCountTimer={startCountTimer}
+                                renderTimerClock={renderTimerClock}
+                                disabledBtnAdd={totalTime99091 >= TOTAL_HOURS_FOR_EACH_99091_BILLED * 60 ? true: false}
+                            />
+
+                            {/* <div
+                                style={addTaskState ? { filter: "blur(4px)" } : null}
+                                className="bm-twenty-bottom-container"
+                            >
+                                <div className="bm-twenty-header">
+                                    Tasks
+                                </div>
+                                {thirdTwentyTasks.length === 0 ? (
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            height: "85%",
+                                            width: "100%",
+                                        }}
+                                    >
+                                        <div style={{ margin: "2%" }}>
+                                            No tasks updated or scheduled yet
+                                        </div>
+                                        <CusBtn
+                                            onClick={() => {
+                                                timeCount = 0;
+                                                setAddTaskState(true);
+                                                startCountTimer('add-task-timer')
+                                            }}
+                                            className="primary"
+                                        >
+                                            Add
+                                        </CusBtn>
+                                    </div>
+                                ) : (
+                                    <div className="bm-sensor-bottom-container">
+                                        <div className="bm-sensor-bottom-header title-table">Task</div>
+                                        <div className="bm-sensor-bottom-table-header">
+                                            <div className="bm-item-header" style={{ width: "20%" }}>Date</div>
+                                            <div className="bm-item-header" style={{ width: "30%" }}>Staff Name</div>
+                                            <div className="bm-item-header" style={{ width: "30%" }}>Note</div>
+                                            <div className="bm-item-header" style={{ width: "20%" }}>Time Spent</div>
+
+                                        </div>
+                                        <div style={{ overflowY: "scroll", height: "70%", marginRight: "-6px" }}>
+                                            {thirdTwentyTasks.map((item, index) => (
+                                                <div
+                                                    key={index}
+                                                    style={{
+                                                        width: "100%",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        height: "auto",
+                                                        fontSize: "1rem",
+                                                        background: "#ffb300c2",
+                                                        margin: "0.5% 0%",
+                                                        paddingTop: "0.5rem",
+                                                        paddingBottom: "0.5rem"
+                                                    }}
+                                                >
+                                                    <div className="bm-item-body" style={{ width: "20%" }}>
+                                                        {moment(item["task_date"]).format("YYYY-MM-DD")}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "30%" }}>
+                                                        {item["staff_name"]}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "30%" }}>
+                                                        {item["task_note"]}
+                                                    </div>
+                                                    <div className="bm-item-body" style={{ width: "20%" }}>
+                                                        <span style={{ paddingRight: "10px" }} id={`item-99458-time-spent-${item.task_id}`}>
+                                                            {`${renderTimeDisplay(item['task_time_spend'])}`}
+                                                        </span>
+                                                        {renderTimerClock(item, CPT_CODE.CPT_99458)}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {thirdTwentyTasks.length !== 0 ? (
+                                    <div
+                                        style={addTaskState ? { filter: "blur(4px)" } : null}
+                                        className="bm-bottom-add-btn"
+                                    >
+                                        <CusBtn
+                                            onClick={() => {
+                                                setAddTaskState(true);
+                                            }}
+                                            style={{ padding: "1% 5%" }}
+                                            disabled={disabledBtnAddTask(thirdTwentyTasks)}
+                                        >
+                                            Add
+                                        </CusBtn>
+                                    </div>
+                                ) : null}
+                            </div> */}
+                        </div>
+
+                    // <div className="bm-right-container">
+                    //     <div
+                    //         style={{
+                    //             display: "flex",
+                    //             justifyContent: "space-between",
+                    //             alignItems: "center",
+                    //             width: "100%",
+                    //             height: "11%",
+                    //         }}
+                    //     >
+                    //         <CusBtn
+                    //             onClick={() => {
+                    //                 history.push(
+                    //                     `/dashboard/patient/details/${location.state.pid}`
+                    //                 );
+                    //             }}
+                    //             className="secondary"
+                    //             style={{
+                    //                 display: "flex",
+                    //                 flexDirection: "column",
+                    //                 justifyContent: "center",
+                    //                 padding: "1rem 5%",
+                    //             }}
+                    //         >
+                    //             <div className="gv-patient-name" style={{ fontSize: "1.4rem" }}>
+                    //                 {location.state
+                    //                     ? location.state.name
+                    //                     : history.push(`/dashboard/patient/details/${pid}`)}
+                    //             </div>
+                    //             <div
+                    //                 className="gv-patient-mr"
+                    //                 style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
+                    //             >
+                    //                 {"MR: "}
+                    //                 {location.state
+                    //                     ? location.state.mr
+                    //                     : history.push(`/dashboard/patient/details/${pid}`)}
+                    //             </div>
+                    //         </CusBtn>
+                    //         {/* <div className='bm-last-month-date' > */}
+                    //         {placeDatePicker()}
+                    //         {/* </div> */}
+                    //     </div>
+                    //     <div
+                    //         style={{
+                    //             width: "90%",
+                    //             height: "14%",
+                    //             margin: "5%"
+                    //         }}
+                    //     >
+                    //         <div>
+                    //             {totalTime99091 < 30 && (
+                    //                 <div style={{ fontSize: "1.2rem" }}>
+                    //                     CPT code: 99091 has not been enabled yet
+                    //                 </div>
+                    //             )}
+
+                    //             {totalTime99091 > 30 && (
+                    //                 <div style={{ fontSize: "1.2rem" }}>
+                    //                     CPT code: 99091 has been enabled
+                    //                 </div>
+                    //             )}
+
+                    //             <p>{totalTime99091} {totalTime99091 > 1 ? 'Minutes' : 'Minute'} of Monitoring Each 30 Days without Interactive Communication</p>
+                    //         </div>
+                    //         {addTaskState ? addTaskComponent(CPT_CODE.CPT_99091) : null}
+
+                    //         <Row>
+                    //             {task99091?.length > 0 && (
+                    //                 <Col span={14} style={{ paddingRight: "5%" }}>
+                    //                     <Collapse
+                    //                         accordion
+                    //                         className="collapse-table-99091"
+                    //                         onChange={(val) => {
+                    //                             setKeyNoteActive(val);
+                    //                             setCurrentItem99091Active(val);
+                    //                         }}
+                    //                         defaultActiveKey={task99091[task99091?.length - 1]?.task_id}
+                    //                         activeKey={keyNoteActive}
+                    //                     >
+                    //                         {task99091?.map((item, index) => (
+                    //                             <Panel 
+                    //                                 key={item.task_id}
+                    //                                 header={(
+                    //                                     <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                    //                                         <div style={{ width: "50%" }}>Vitals</div>
+                    //                                         <div style={{ width: "50%" }}>{moment(item['date']).format('YYYY-MM-DD H:mm a')}</div>
+                    //                                     </div>
+                    //                                 )}
+                    //                             >
+                    //                                 {getDataSourceByItem99091(item).map(data => {
+                    //                                     return (
+                    //                                         <div key={data?._key} style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                    //                                             <div style={{ width: "50%" }}>{data?.name}</div>
+                    //                                             <div style={{ width: "50%" }}>{data?.value}</div>
+                    //                                         </div>
+                    //                                     )
+                    //                                 })}
+                    //                             </Panel>
+                    //                         ))}
+                    //                     </Collapse>
+                    //                 </Col>
+                    //             )}
+
+                    //                     {/* <Table
+                    //                         size="small"
+                    //                         className="vital-table"
+                    //                         style={{ marginBottom: "1.25rem" }}
+                    //                         columns={[
+                    //                             {
+                    //                                 width: "40%",
+                    //                                 title: (
+                    //                                     <div
+                    //                                         style={{
+                    //                                             fontFamily: "Lexend",
+                    //                                             fontWeight: "500",
+                    //                                             fontSize: "14px",
+                    //                                             color: "#727272",
+                    //                                         }}
+                    //                                     >
+                    //                                         Vitals
+                    //                                     </div>
+                    //                                 ),
+                    //                                 dataIndex: "name",
+                    //                                 key: "name",
+                    //                             },
+                    //                             {
+                    //                                 width: "30%",
+                    //                                 title: (
+                    //                                     <div
+                    //                                         style={{
+                    //                                             textAlign: "center",
+                    //                                             fontFamily: "Lexend",
+                    //                                             fontWeight: "500",
+                    //                                             fontSize: "14px",
+                    //                                             color: "#727272",
+                    //                                         }}
+                    //                                     >
+                    //                                         {moment(item['date']).format('YYYY-MM-DD H:mm a')}
+                    //                                     </div>
+                    //                                 ),
+                    //                                 dataIndex: "value",
+                    //                                 key: "value",
+                    //                             },
+                    //                         ]}
+                    //                         dataSource={getDataSourceByItem99091(item)}
+                    //                         pagination={false}
+                    //                         bordered
+                    //                     /> */}
+
+                    //             <Col span={10}>
+                    //                 <div>
+
+                    //                     <div style={{
+                    //                         background: "#ddd",
+                    //                         borderRadius: "1rem",
+                    //                         padding: "3% 7%"
+                    //                     }}>
+                    //                         <div style={{ textAlign: "center" }}>
+                    //                             Last updated at {getLastUpdatedAt99091()}
+                    //                         </div>
+                    //                         <div>
+                    //                             <div
+                    //                                 style={{
+                    //                                     display: "flex",
+                    //                                     alignItems: "center"
+                    //                                 }}
+                    //                             >
+                    //                                 <div style={{ width: "45%" }}>Status: Active</div>
+                    //                                 <div style={{ width: "55%" }}>Enrollment: {getFirst99091()}</div>
+                    //                             </div>
+
+                    //                             <div
+                    //                                 style={{
+                    //                                     display: "flex",
+                    //                                     alignItems: "center"
+                    //                                 }}
+                    //                             >
+                    //                                 <div style={{ width: "45%" }}>Months of CMM: 2</div>
+                    //                                 <div style={{ width: "55%" }}>Next followup: NA</div>
+                    //                             </div>
+                    //                         </div>
+                    //                     </div>
+
+                    //                     <div style={{
+                    //                         background: "#ddd",
+                    //                         borderRadius: "1rem",
+                    //                         padding: "3% 4%",
+                    //                         marginTop: "1rem"
+                    //                     }}>
+                    //                         <div
+                    //                             style={{
+                    //                                 borderBottom: "1px solid #00000029",
+                    //                                 paddingBottom: "6px"
+                    //                             }}
+                    //                         >
+                    //                             Notes
+                    //                         </div>
+                    //                         {currentItem99091Active && 
+                    //                             getNoteForItem99091()
+                    //                         }
+                    //                         <div style={{
+                    //                             display: "flex",
+                    //                             padding: "1rem 0.5rem"
+                    //                         }}>
+
+                    //                             <CusBtn
+                    //                                 onClick={() => {
+                    //                                     setAddTaskState(true);
+                    //                                 }}
+                    //                                 style={{ padding: "10px 45px" }}
+                    //                                 disabled={totalTime99091 < 30 ? false : true}
+                    //                             >
+                    //                                 Add
+                    //                             </CusBtn>
+
+                    //                         </div>
+                    //                     </div>
+                    //                 </div>
+                    //             </Col>
+                    //         </Row>
+                    //     </div>
+
+
+                    //     {/* {lastStateDone ? (
+                    //         <div
+                    //             style={{
+                    //                 display: "flex",
+                    //                 flexDirection: "column",
+                    //                 justifyContent: "center",
+                    //                 alignItems: "center",
+                    //                 height: "89%",
+                    //             }}
+                    //         >
+                    //             <CheckCircleOutlined
+                    //                 style={{
+                    //                     color: "#11c111",
+                    //                     fontSize: "3rem",
+                    //                     marginBottom: "3%",
+                    //                 }}
+                    //             />
+                    //             <div style={{ fontSize: "2rem", color: "#11c111" }}>
+                    //                 Congratulations!
+                    //             </div>
+                    //             <div style={{ fontSize: "2rem", marginBottom: "3%" }}>
+                    //                 CPT code: 99091 enabled
+                    //             </div>
+                    //             <div
+                    //                 style={{ fontSize: "1rem", marginBottom: "2%" }}
+                    //             >{`Recorded timestamp: ${lastStateData.date} ${lastStateData.time}`}</div>
+                    //         </div>
+                    //     ) : (
+                    //         // <div className="bm-notenroll-container" style={{ height: "89%" }}>
+                    //         //     <div style={{ fontSize: "3rem" }}>
+                    //         //         Enroll to generate CPT Code: 99091
+                    //         //     </div>
+                    //         //     <div
+                    //         //         style={{
+                    //         //             display: "flex",
+                    //         //             flexDirection: "column",
+                    //         //             justifyContent: "center",
+                    //         //             alignItems: "center",
+                    //         //         }}
+                    //         //     >
+                    //         //         <div style={{ fontSize: "1rem", color: "#7E7979" }}>
+                    //         //             CPT code 99091 has not been enabled for this month
+                    //         //         </div>
+                    //         //     </div>
+                    //         //     <CusBtn
+                    //         //         onClick={() => {
+                    //         //             // setLastStateLoading(true);
+                    //         //             enrollLastState();
+                    //         //         }}
+                    //         //         className="primary"
+                    //         //         style={{ marginTop: "3%", padding: "1% 5%" }}
+                    //         //     >
+                    //         //         Enroll
+                    //         //     </CusBtn>
+                    //         // </div>
+                    //     )} */}
+                    // </div>
                 ) : null}
+
                 {billProcessedState ? (
                     billProcessedLoading ? (
                         <div
@@ -3918,60 +3988,8 @@ function BillingModule() {
                         </div>
                     ) : (
                         <div className="bm-right-container">
-                            <div
-                                style={
-                                    addTaskState
-                                        ? {
-                                            filter: "blur(4px)",
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            width: "100%",
-                                            height: "11%",
-                                        }
-                                        : {
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            width: "100%",
-                                            height: "11%",
-                                        }
-                                }
-                            >
-                                <CusBtn
-                                    onClick={() => {
-                                        history.push(
-                                            `/dashboard/patient/details/${location.state.pid}`
-                                        );
-                                    }}
-                                    className="secondary"
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        padding: "1% 5%",
-                                    }}
-                                >
-                                    <div
-                                        className="gv-patient-name"
-                                        style={{ fontSize: "1.4rem" }}
-                                    >
-                                        {location.state
-                                            ? location.state.name
-                                            : history.push(`/dashboard/patient/details/${pid}`)}
-                                    </div>
-                                    <div
-                                        className="gv-patient-mr"
-                                        style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
-                                    >
-                                        {"MR: "}
-                                        {location.state
-                                            ? location.state.mr
-                                            : history.push(`/dashboard/patient/details/${pid}`)}
-                                    </div>
-                                </CusBtn>
-                                {placeDatePicker()}
-                            </div>
+                            <HeaderBilling addTask={addTaskState} currentDate={currentDateApi} onChangeDate={handleMonthChange} />
+
                             <div
                                 style={{
                                     display: "flex",
@@ -4217,60 +4235,8 @@ function BillingModule() {
                         ?
                         (
                             <div className="bm-right-container">
-                                <div
-                                    style={
-                                        addTaskState
-                                            ? {
-                                                filter: "blur(4px)",
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "center",
-                                                width: "100%",
-                                                height: "11%",
-                                            }
-                                            : {
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "center",
-                                                width: "100%",
-                                                height: "11%",
-                                            }
-                                    }
-                                >
-                                    <CusBtn
-                                        onClick={() => {
-                                            history.push(
-                                                `/dashboard/patient/details/${location.state.pid}`
-                                            );
-                                        }}
-                                        className="secondary"
-                                        style={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            justifyContent: "center",
-                                            padding: "1% 5%",
-                                        }}
-                                    >
-                                        <div
-                                            className="gv-patient-name"
-                                            style={{ fontSize: "1.4rem" }}
-                                        >
-                                            {location.state
-                                                ? location.state.name
-                                                : history.push(`/dashboard/patient/details/${pid}`)}
-                                        </div>
-                                        <div
-                                            className="gv-patient-mr"
-                                            style={{ fontSize: "0.9rem", color: "rgba(0, 0, 0, 0.5)" }}
-                                        >
-                                            {"MR: "}
-                                            {location.state
-                                                ? location.state.mr
-                                                : history.push(`/dashboard/patient/details/${pid}`)}
-                                        </div>
-                                    </CusBtn>
-                                    {placeDatePicker()}
-                                </div>
+                                <HeaderBilling addTask={addTaskState} currentDate={currentDateApi} onChangeDate={handleMonthChange} />
+
                                 <div
                                     style={{
                                         display: "flex",
