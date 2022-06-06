@@ -6,11 +6,11 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { isArray } from 'lodash';
 import { isJsonString } from "../../../Utils/utils";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import {
     Input as Inputs,
-    Select, DatePicker, Table, Row, Button
+    Select, DatePicker, Table, Row, Button, Spin
 } from "antd";
 
 import billingApi from "../../../Apis/billingApis";
@@ -18,6 +18,7 @@ import billingApi from "../../../Apis/billingApis";
 import Navbar from "../../../Theme/Components/Navbar/navbar";
 import { PaginationBox, computeTotalPages } from "../../Components/PaginationBox/pagination";
 import ModalSummary from "./ModalSummary";
+import CheckData from "./CheckData99454";
 
 import "./report.css";
 
@@ -136,8 +137,14 @@ const BillingModule = () => {
         },
         {
             title: '99454',
-            dataIndex: "99454",
+            dataIndex: "sensorList",
             key: "99454",
+            render: (dataIndex, record) => {
+                console.log("dataIndex", dataIndex);
+                return (
+                    <CheckData pid={record?.pid} sensorList={dataIndex} />
+                )
+            }
         },
         {
             title: '99457',
@@ -294,6 +301,8 @@ const BillingModule = () => {
             }
         },
     ];
+
+    console.log("billingSummary", billingSummary);
 
     return (
         <div>
