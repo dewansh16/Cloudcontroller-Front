@@ -40,7 +40,7 @@
     display: flex;
     height: 89%;
     width: 100%;
-    padding: 0%;
+    padding: 1.5% 3%;
 }
 
 .gv-bottom-left-container{
@@ -311,10 +311,10 @@ animation: pulse 1s infinite;
 }
 
 .gv-graph-action-btn-container{
-    height: 60px;
+    height: 10%;
     width: 100%;
     display: flex;
-    align-items: start;
+    align-items: center;
     justify-content: space-between;
 }
 
@@ -360,8 +360,8 @@ animation: pulse 1s infinite;
 
 .observation-container{
     position: absolute;
-    right: 1%;
-    top: 1%;
+    right: 3%;
+    top: 12%;
     height: 75%;
     width: 60%;
     background-color: white;

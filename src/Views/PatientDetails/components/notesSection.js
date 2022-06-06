@@ -279,7 +279,7 @@ function NotesSection(props) {
     };
 
     useEffect(() => {
-        scrollToBottom();
+        // scrollToBottom();
     }, [notesData1]);
 
     function to12HourFormat(dates) {
@@ -671,7 +671,7 @@ function NotesSection(props) {
                 zIndex: "3",
                 position: "relative",
                 minHeight: "500px",
-                height: "100%"
+                height: "calc(100vh - 210px)"
                 // marginBottom: "20px",
             }}
         >

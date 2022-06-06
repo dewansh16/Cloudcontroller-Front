@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 import moment from "moment";
-import html2canvas from "html2canvas";
 
-import { jsPDF } from "jspdf";
 import { isArray } from 'lodash';
 import { isJsonString } from "../../../Utils/utils";
 import { useHistory } from "react-router-dom";
@@ -79,8 +77,6 @@ const BillingModule = () => {
     const history = useHistory();
 
     const [billingSummary, isLoading] = FetchBillingSummary(valueDate);
-    console.log("billingSummary", billingSummary);
-
 
     const renderTimeDisplay = (time) => {
         let hours = Math.floor(time / 3600)
@@ -383,15 +379,21 @@ const BillingModule = () => {
                 justify="start"
                 style={{ padding: "0", backgroundColor: "white", margin: "4px" }}
             >
-                <div style={{ margin: "30px 2%", width: "100%" }}>
-                    <Table
-                        style={{ backgroundColor: "blue" }}
-                        columns={columns}
-                        size="middle"
-                        pagination={false}
-                        dataSource={billingSummary?.billings || []}
-                    />
-                </div>
+                {isLoading ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "calc(100vh - 99px)"}}>
+                        <Spin />
+                    </div>
+                ) : (
+                    <div style={{ margin: "30px 2%", width: "100%" }}>
+                        <Table
+                            style={{ backgroundColor: "blue" }}
+                            columns={columns}
+                            size="middle"
+                            pagination={false}
+                            dataSource={billingSummary?.billings || []}
+                        />
+                    </div>
+                )}
             </Row>
         </div>
     );

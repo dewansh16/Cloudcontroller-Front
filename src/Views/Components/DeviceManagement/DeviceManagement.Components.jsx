@@ -185,6 +185,7 @@ function DeviceManagement({ pid, associated_list, valDuration }) {
                                             deviceType={Item["patches.patch_type"]}
                                             onDetach={onDetachAssociate}
                                             valDuration={valDuration}
+                                            macAddress={Item["patches.patch_mac"]}
                                         />
                                     )
                             )}
