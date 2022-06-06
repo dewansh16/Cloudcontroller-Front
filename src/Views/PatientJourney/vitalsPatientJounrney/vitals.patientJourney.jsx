@@ -722,7 +722,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                             RR
                         </div>
 
-                        <div onClick={() => {
+                        {/* <div onClick={() => {
                             setGraphLoading(true);
                             var flag = true;
                             activeTrendsArray.map((trend, index) => {
@@ -778,7 +778,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                             activeTrendsArray.some(e => e.name === 'BPS') ? { border: `2px solid ${Colors.yellow}`, color: Colors.yellow } : { border: '1px solid #BABABA', color: '#BABABA' }
                         }>
                             BPS
-                        </div>
+                        </div> */}
 
                         <div onClick={() => {
                             setGraphLoading(true);
