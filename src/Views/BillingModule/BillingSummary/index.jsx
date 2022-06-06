@@ -33,7 +33,10 @@ const FetchBillingSummary = (valueDate) => {
         billingApi.getBillingSummary(moment(valueDate).format("YYYY-MM-DD"))
             .then((res) => {
                 const newArrPid = [];
-                const arrayResult = [];
+                const result = {
+                    billings: [],
+                    patchData: []
+                };
                 const billingData = res?.data?.response?.billingData || [];
 
                 if (billingData?.length > 0) {
@@ -42,22 +45,23 @@ const FetchBillingSummary = (valueDate) => {
                         if (!!billing?.pid && !!billing?.patient_datum) {
                             if (!newArrPid.includes(billing.pid)) {
                                 newArrPid.push(billing.pid);
-                                arrayResult.push({ ...billing, [billing?.code]: billing?.params });
+                                result.billings.push({ ...billing, [billing?.code]: billing?.params });
                             } else {
-                                const billingFound = arrayResult.find(item => item?.pid === billing.pid);
+                                const billingFound = result.billings.find(item => item?.pid === billing.pid);
                                 billingFound[billing.code] = billing.params;
                             }
                         }
                     }
+                    result.patchData = res?.data?.response?.patchData || [];
                 }
 
                 setLoading(false);
-                setResponse(arrayResult);
+                setResponse(result);
             })
             .catch((error) => {
                 setLoading(false);
                 console.log(error);
-                setResponse([]);
+                setResponse({});
             })
     }, [valueDate]);
 
@@ -75,6 +79,8 @@ const BillingModule = () => {
     const history = useHistory();
 
     const [billingSummary, isLoading] = FetchBillingSummary(valueDate);
+    console.log("billingSummary", billingSummary);
+
 
     const renderTimeDisplay = (time) => {
         let hours = Math.floor(time / 3600)
@@ -141,8 +147,9 @@ const BillingModule = () => {
             key: "99454",
             render: (dataIndex, record) => {
                 console.log("dataIndex", dataIndex);
+                const associated = billingSummary?.patchData?.filter(item => item?.pid === record?.pid);
                 return (
-                    <CheckData pid={record?.pid} sensorList={dataIndex} />
+                    <CheckData pid={record?.pid} sensorList={associated} />
                 )
             }
         },
@@ -302,8 +309,6 @@ const BillingModule = () => {
         },
     ];
 
-    console.log("billingSummary", billingSummary);
-
     return (
         <div>
             <ModalSummary pid={pidModalSummary} onClose={onCloseModalSummary} currentDate={valueDate} />
@@ -385,7 +390,7 @@ const BillingModule = () => {
                         columns={columns}
                         size="middle"
                         pagination={false}
-                        dataSource={billingSummary}
+                        dataSource={billingSummary?.billings || []}
                     />
                 </div>
             </Row>

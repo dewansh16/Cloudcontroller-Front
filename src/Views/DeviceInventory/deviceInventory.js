@@ -392,11 +392,6 @@ function PatchInventory() {
 
         deviceApi.deleteDevice(dataBody)
             .then(res => {
-                let newData = [...filteredlist];
-                newData = newData.filter(record => record?.patch_uuid !== patch_uuid);
-                
-                setFilteredList(newData);
-
                 notification.success({
                     message: "Delete",
                     description: `Delete ${type} successfully!`,
@@ -407,6 +402,8 @@ function PatchInventory() {
                     newArr = newArr.filter(item => item !== patch_uuid)
                     setArrayChecked(newArr)
                 }
+
+                fetchPatchList();
             })
             .catch((err) => {
                 console.log(err);
@@ -428,18 +425,14 @@ function PatchInventory() {
 
         deviceApi.deleteDevice(dataBody)
             .then(res => {
-                let newData = [...filteredlist];
-                for(let i = 0; i < arrayChecked?.length; i++) {
-                    newData = newData.filter(record => record?.patch_uuid !== arrayChecked[i]);
-                }
-
                 notification.success({
                     message: "Delete",
                     description: `Delete list item selected successfully!`,
                 })
                 
-                setFilteredList(newData);
+                // setFilteredList(newData);
                 setArrayChecked([]);
+                fetchPatchList();
             })
             .catch((err) => {
                 console.log(err);
