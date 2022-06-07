@@ -317,46 +317,6 @@ function BillingModule() {
                     </div>
                     <Input status={requiredAddTask?.includes("staff_name") && "error"} placeholder="Name" onChange={handleAddTaskNameChange} />
                 </div>
-                {cptCode == CPT_CODE.CPT_99091 && (
-                    <>
-                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                            <div style={{ width: "21.7%" }}>Temperature</div>
-                            <Input placeholder="Temperature" onChange={(e) => {
-                                setTemperatureVal(e.target.value)
-                            }} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                            <div style={{ width: "21.7%" }}>Spo2</div>
-                            <Input placeholder="Spo2" onChange={(e) => {
-                                setSpo2Val(e.target.value)
-                            }} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                            <div style={{ width: "21.7%" }}>Heart Rate</div>
-                            <Input placeholder="Heart Rate" onChange={(e) => {
-                                setHeartRateVal(e.target.value)
-                            }} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                            <div style={{ width: "21.7%" }}>Blood Pressure</div>
-                            <Input placeholder="Blood Pressure" onChange={(e) => {
-                                setBloodPressureVal(e.target.value)
-                            }} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                            <div style={{ width: "21.7%" }}>Respiration Rate</div>
-                            <Input placeholder="Respiration Rate" onChange={(e) => {
-                                setRespirationRateVal(e.target.value)
-                            }} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                            <div style={{ width: "21.7%" }}>Time Spend</div>
-                            <Input placeholder="Time Spend" onChange={(e) => {
-                                setTaskTimeVal(e.target.value)
-                            }} />
-                        </div>
-                    </>
-                )}
                 <div>
                     {cptCode != CPT_CODE.CPT_99091 && (
                         <span className="text-required">*</span>
@@ -2420,6 +2380,7 @@ function BillingModule() {
                                         setLastBillingState(false);
                                         setBillProcessedState(false);
                                         setSummaryState(false);
+                                        
                                         setTaskDeleteArray([]);
 
                                     }}
@@ -2464,6 +2425,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
+                                        setTaskCodeActive(CPT_CODE.CPT_99454)
                                         if (!associatedSensorsState) {
                                             setPatchLoading(true);
                                         }
@@ -2520,6 +2482,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
+                                        setTaskCodeActive(CPT_CODE.CPT_99457)
                                     }}
                                     className={
                                         firstTwentyState ? "bm-selected-active" : "bm-selected"
@@ -2571,6 +2534,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
+                                        setTaskCodeActive(CPT_CODE.CPT_99458)
                                     }}
                                     className={
                                         secondTwentyState ? "bm-selected-active" : "bm-selected"
@@ -2606,7 +2570,7 @@ function BillingModule() {
                                             : null
                                     }
                                 ></div>
-                                <div className="bm-header-below">{`${Math.floor(secondTotalTime / 60) % TOTAL_HOURS_FOR_EACH_99458_BILLED} mins monitored`}</div>
+                                <div className="bm-header-below">{`${Math.floor(secondTotalTime / 60) >= (TOTAL_HOURS_FOR_EACH_99458_BILLED * 2) ? `${TOTAL_HOURS_FOR_EACH_99458_BILLED * 2}` : `${Math.floor(secondTotalTime / 60)}` } mins monitored`}</div>
                             </div>
                             {/* <div className="bm-cptcode-b-header">
                                 <div
@@ -3227,7 +3191,7 @@ function BillingModule() {
                                 setAddTaskState={setAddTaskState}
                                 startCountTimer={startCountTimer}
                                 renderTimerClock={renderTimerClock}
-                                disabledBtnAdd={totalTime99091 >= TOTAL_HOURS_FOR_EACH_99458_BILLED * 60 ? true : false}
+                                disabledBtnAdd={firstTotalTime >= TOTAL_HOURS_FOR_EACH_99458_BILLED * 60 ? true : false}
                             />
 
                             {/* <div
@@ -3373,25 +3337,50 @@ function BillingModule() {
                                     }}
                                 >
                                     <div className="bm-sensor-monitored-bar">
+                                    {Math.floor(secondTotalTime / 60) < (TOTAL_HOURS_FOR_EACH_99458_BILLED *2) &&(
                                         <div
-                                            className="bm-sensor-monitored-bar-two"
-                                            style={{
-                                                width: `${(secondTotalTime % TOTAL_HOURS_FOR_EACH_99458_BILLED / TOTAL_HOURS_FOR_EACH_99458_BILLED) * 100
-                                                    }%`,
-                                            }}
-                                        ></div>
+                                        className="bm-sensor-monitored-bar-two"
+                                        style={{
+                                            width: `${(Math.floor(secondTotalTime / 60) / (TOTAL_HOURS_FOR_EACH_99458_BILLED*2)) * 100
+                                                }%`,
+                                        }}
+                                    ></div>
+                                    )}
+                                    {Math.floor(secondTotalTime / 60) >= (TOTAL_HOURS_FOR_EACH_99458_BILLED *2) &&(
+                                        <div
+                                        className="bm-sensor-monitored-bar-two"
+                                        style={{
+                                            width: `${((TOTAL_HOURS_FOR_EACH_99458_BILLED*2) / (TOTAL_HOURS_FOR_EACH_99458_BILLED*2)) * 100
+                                                }%`,
+                                        }}
+                                    ></div>
+                                    )}
+                                        
                                         <div style={{ marginTop: "10px" }}>
-                                            <div style={{ fontSize: "1.2rem" }}>
-                                                {`Mins Monitored: ${Math.floor(secondTotalTime / 60) % TOTAL_HOURS_FOR_EACH_99458_BILLED}/${TOTAL_HOURS_FOR_EACH_99458_BILLED}`}
+                                            {Math.floor(secondTotalTime / 60) < (TOTAL_HOURS_FOR_EACH_99458_BILLED *2) &&(
+                                                <div style={{ fontSize: "1.2rem" }}>
+                                                {`Mins Monitored: ${Math.floor(secondTotalTime / 60)}/${TOTAL_HOURS_FOR_EACH_99458_BILLED * 2}`}
                                             </div>
+                                            )}
+                                            {Math.floor(secondTotalTime / 60) >= (TOTAL_HOURS_FOR_EACH_99458_BILLED *2) &&(
+                                                <div style={{ fontSize: "1.2rem" }}>
+                                                {`Mins Monitored: ${TOTAL_HOURS_FOR_EACH_99458_BILLED * 2}/${TOTAL_HOURS_FOR_EACH_99458_BILLED * 2}`}
+                                            </div>
+                                            )}
                                             {Math.floor(secondTotalTime / 60 / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0 && (
                                                 <p>{Math.floor(secondTotalTime / 60 / TOTAL_HOURS_FOR_EACH_99458_BILLED)} Unit Billed</p>
                                             )}
-
-                                            <div style={{ color: "#00000085" }}>
-                                                <b>{`${TOTAL_HOURS_FOR_EACH_99458_BILLED - (Math.floor(secondTotalTime / 60) % TOTAL_HOURS_FOR_EACH_99458_BILLED)} mins`}</b> left to
-                                                enable the next CPT code.
-                                            </div>
+                                            {Math.floor(secondTotalTime / 60) < (TOTAL_HOURS_FOR_EACH_99458_BILLED *2) &&(
+                                                 <div style={{ color: "#00000085" }}>
+                                                 <b>{`${TOTAL_HOURS_FOR_EACH_99458_BILLED*2 - (Math.floor(secondTotalTime / 60))} mins`}</b> left to
+                                                 enable the next CPT code.
+                                             </div>
+                                            )}
+                                           {Math.floor(secondTotalTime / 60) >= (TOTAL_HOURS_FOR_EACH_99458_BILLED *2) &&(
+                                                 <div style={{ color: "#00000085" }}>
+                                                 0 left to enable the next CPT code.
+                                             </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -3405,7 +3394,7 @@ function BillingModule() {
                                 setAddTaskState={setAddTaskState}
                                 startCountTimer={startCountTimer}
                                 renderTimerClock={renderTimerClock}
-                                disabledBtnAdd={disabledBtnAddTask(secondTwentyTasks)}
+                                disabledBtnAdd={Math.floor(secondTotalTime / 60) >= (TOTAL_HOURS_FOR_EACH_99458_BILLED * 2) ? true : false}
                             />
 
                             {/* <div
