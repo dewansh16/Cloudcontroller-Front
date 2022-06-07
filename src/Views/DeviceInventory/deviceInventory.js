@@ -59,6 +59,7 @@ function PatchInventory() {
 
     const [currentPageVal, setCurrentPageVal] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [valSearch, setValSearch] = useState(1);
 
     const [extraDiv, setExtraDiv] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -106,14 +107,14 @@ function PatchInventory() {
         return modifiedData;
     };
 
-    function fetchPatchList(serial) {
+    function fetchPatchList() {
         const { tenant } = UserStore.getUser();
 
         const dataBody = {
             limit: 10,
-            offset: 10 * (currentPageVal - 1),
+            offset: currentPageVal,
             tenantId: tenant,
-            page: currentPageVal
+            search: valSearch
         }
 
         deviceApi
@@ -131,7 +132,7 @@ function PatchInventory() {
 
     useEffect(() => {
         return fetchPatchList();
-    }, [updateList, currentPageVal]);
+    }, [updateList, currentPageVal, valSearch]);
 
     const success = () => {
         const key = "warning";
@@ -199,9 +200,9 @@ function PatchInventory() {
             });
     };
 
-    const searchDevice = (value) => {
-        fetchPatchList(value);
-    };
+    // const searchDevice = (value) => {
+    //     fetchPatchList(value);
+    // };
 
     const showModal = () => {
         setVisible(true);
@@ -1112,11 +1113,11 @@ function PatchInventory() {
                         <div style={{ width: "100%" }}>
                             <GlobalSearch
                                 enterButton
-                                onSearch={searchDevice}
+                                onSearch={(val) => setValSearch(val)}
                                 style={{
                                     width: "100%",
                                 }}
-                                placeholder="Type here"
+                                placeholder="Search"
                             />
                         </div>
                     </>
