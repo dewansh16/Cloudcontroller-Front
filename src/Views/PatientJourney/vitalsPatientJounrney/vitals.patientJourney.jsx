@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Table, Spin, DatePicker  } from "antd";
+import { Table, Spin, DatePicker } from "antd";
 import { InfluxDB } from "@influxdata/influxdb-client";
 import { isJsonString } from "../../../Utils/utils";
 
@@ -28,21 +28,27 @@ import {
 
 import "./vitals.patientJourney.css";
 
-
 function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
-    const [spo2maxval, setSpo2maxval] = useState(0)
-    const [spo2minval, setSpo2minval] = useState(0)
-    const [bpmaxval, setBpmaxval] = useState(0)
-    const [bpminval, setBpminval] = useState(0)
-    const [rrmaxval, setRrmaxval] = useState(0)
-    const [rrminval, setRrminval] = useState(0)
-    const [tempmaxval, setTempmaxval] = useState(0)
-    const [tempminval, setTempminval] = useState(0)
+    const tempmaxval = 0;
+    const tempminval = 0;
+    const spo2maxval = 0;
+    const spo2minval = 0;
+    const hrmaxval = 0;
+    const hrminval = 0;
+    const rrmaxval = 0;
+    const rrminval = 0;
+    const bpdmaxval = 0;
+    const bpdminval = 0;
+    const bpsmaxval = 0;
+    const bpsminval = 0;
+    const weimaxval = 0;
+    const weiminval = 0;
 
     const [stepArray, setStepArray] = useState(wardArray);
     const [graphLoading, setGraphLoading] = useState(false);
     const [antd_selected_date_val, setAntd_selected_date_val] = useState(new Date());
     const [hoverActiveTooltipIndex, setHoverActiveTooltipIndex] = useState(0);
+
     const [activeTrendsArray, setActiveTrendsArray] = useState([
         {
             _key: "temp",
@@ -68,8 +74,8 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             data: [],
             color1: Colors.darkPink,
             color2: '#FFEEBA',
-            max: bpmaxval,
-            min: bpminval,
+            max: hrmaxval,
+            min: hrminval,
         },
         {
             _key: "ecg_rr",
@@ -81,340 +87,362 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             min: rrminval,
         },
         {
+            _key: "bpd",
+            name: 'BPD',
+            data: [],
+            color1: Colors.darkPurple,
+            color2: '#C4AAFD',
+            max: bpdmaxval,
+            min: bpdminval,
+        },
+        {
+            _key: "bps",
+            name: 'BPS',
+            data: [],
+            color1: Colors.darkPurple,
+            color2: '#C4AAFD',
+            max: bpsmaxval,
+            min: bpsminval,
+        },
+        {
             _key: "weight",
             name: 'WEI',
             data: [],
             color1: Colors.yellow,
             color2: '#C4AAFD',
-            max: rrmaxval,
-            min: rrminval,
+            max: weimaxval,
+            min: weiminval,
         }
     ]);
 
-    console.log("patient", patient);
-    
+    let associatedList = [];
+    const isString = isJsonString(patient?.demographic_map?.associated_list);
+    if (isString) {
+        associatedList = JSON.parse(patient?.demographic_map?.associated_list);
+    }
+
     const dateFormat = 'YYYY/MM/DD';
-    const timerTimeout = useRef()
+    const timerTimeout = useRef();
 
     useEffect(() => {
         setStepArray(wardArray);
     }, [wardArray]);
 
-    const editWardName = (step) => {
-        if (step?.name === undefined) {
-            return null;
-        } else if (step?.name.length > 12) return step?.name.slice(0, 12) + ".";
-        else return step?.name;
-    };
+    // const editWardName = (step) => {
+    //     if (step?.name === undefined) {
+    //         return null;
+    //     } else if (step?.name.length > 12) return step?.name.slice(0, 12) + ".";
+    //     else return step?.name;
+    // };
 
-    const heading = (name) => {
-        switch (name) {
-            case "temp": {
-                return "Temperature";
-            }
-            case "spo2": {
-                return "SPO2";
-            }
-            case "rr": {
-                return "Respiration Rate";
-            }
-            case "hr": {
-                return "Heart Rate";
-            }
-            case "bph": {
-                return "Bloop Pressure";
-            }
-        }
-    };
+    // const heading = (name) => {
+    //     switch (name) {
+    //         case "temp": {
+    //             return "Temperature";
+    //         }
+    //         case "spo2": {
+    //             return "SPO2";
+    //         }
+    //         case hrr": {
+    //             rhturn "Respiration Rate";
+    //         }
+    //         case "hr": {
+    //             return "Heart Rate";
+    //         }
+    //         case "bph": {
+    //             return "Bloop Pressure";
+    //         }
+    //     }
+    // };
 
-    const configBloodPressure = (item) => {
-        if (item === null || item === undefined) return null;
-        if (item?.deviceData?.bph === null && item?.deviceData?.bpl === null) {
-            return null;
-        } else {
-            return item?.deviceData?.bph + " / " + item?.deviceData?.bpl;
-        }
-    };
+    // const configBloodPressure = (item) => {
+    //     if (item === null || item === undefined) return null;
+    //     if (item?.deviceData?.bph === null && item?.deviceData?.bpl === null) {
+    //         return null;
+    //     } else {
+    //         return item?.deviceData?.bph + " / " + item?.deviceData?.bpl;
+    //     }
+    // };
 
-    const columns = [
-        {
-            width: "40%",
-            title: (
-                <div
-                    style={{
-                        fontFamily: "Lexend",
-                        fontWeight: "500",
-                        fontSize: "14px",
-                        color: "#727272",
-                    }}
-                >
-                    Vitals
-                </div>
-            ),
-            dataIndex: "name",
-            key: "name",
-        },
-        {
-            width: "30%",
-            title: (
-                <div
-                    style={{
-                        textAlign: "center",
-                        fontFamily: "Lexend",
-                        fontWeight: "500",
-                        fontSize: "14px",
-                        color: "#727272",
-                    }}
-                >
-                    {editWardName(stepArray[activeStep])}
-                </div>
-            ),
-            dataIndex: "prevWard",
-            key: "access",
-        },
-        {
-            width: "30%",
-            title: (
-                <div
-                    style={{
-                        textAlign: "center",
-                        fontFamily: "Lexend",
-                        fontWeight: "500",
-                        fontSize: "14px",
-                        color: "#727272",
-                    }}
-                >
-                    {editWardName(stepArray[activeStep + 1])}
-                </div>
-            ),
-            dataIndex: "nextWard",
-            key: "access",
-        },
-    ];
+    // const columns = [
+    //     {
+    //         width: "40%",
+    //         title: (
+    //             <div
+    //                 style={{
+    //                     fontFamily: "Lexend",
+    //                     fontWeight: "500",
+    //                     fontSize: "14px",
+    //                     color: "#727272",
+    //                 }}
+    //             >
+    //                 Vitals
+    //             </div>
+    //         ),
+    //         dataIndex: "name",
+    //         key: "name",
+    //     },
+    //     {
+    //         width: "30%",
+    //         title: (
+    //             <div
+    //                 style={{
+    //                     textAlign: "center",
+    //                     fontFamily: "Lexend",
+    //                     fontWeight: "500",
+    //                     fontSize: "14px",
+    //                     color: "#727272",
+    //                 }}
+    //             >
+    //                 {editWardName(stepArray[activeStep])}
+    //             </div>
+    //         ),
+    //         dataIndex: "prevWard",
+    //         key: "access",
+    //     },
+    //     {
+    //         width: "30%",
+    //         title: (
+    //             <div
+    //                 style={{
+    //                     textAlign: "center",
+    //                     fontFamily: "Lexend",
+    //                     fontWeight: "500",
+    //                     fontSize: "14px",
+    //                     color: "#727272",
+    //                 }}
+    //             >
+    //                 {editWardName(stepArray[activeStep + 1])}
+    //             </div>
+    //         ),
+    //         dataIndex: "nextWard",
+    //         key: "access",
+    //     },
+    // ];
 
-    const [tableData, setTableData] = useState([
-        {
-            key: "11",
-            name: (
-                <div className="vital-tables-row-name">
-                    <p>Temperature</p>
-                </div>
-            ),
-            prevWard: (
-                <div className="vital-table-values">
-                    <p>{stepArray[activeStep]?.deviceData?.temp}</p>
-                </div>
-            ),
-            nextWard: (
-                <div className="vital-table-values">
-                    <p>{stepArray[activeStep + 1]?.deviceData?.temp}</p>
-                </div>
-            ),
-        },
-        {
-            key: "12",
-            name: (
-                <div className="vital-tables-row-name">
-                    <p>Heart Rate</p>
-                </div>
-            ),
-            prevWard: (
-                <div className="vital-table-values">
-                    <p>{stepArray[activeStep]?.deviceData?.hr}</p>
-                </div>
-            ),
-            nextWard: (
-                <div className="vital-table-values">
-                    <p>{stepArray[activeStep + 1]?.deviceData?.hr}</p>
-                </div>
-            ),
-        },
-        {
-            key: "13",
-            name: (
-                <div className="vital-tables-row-name">
-                    <p>SPO2</p>
-                </div>
-            ),
-            prevWard: (
-                <div className="vital-table-values">
-                    <p>{stepArray[activeStep]?.deviceData?.spo2}</p>
-                </div>
-            ),
-            nextWard: (
-                <div className="vital-table-values">
-                    <p>{stepArray[activeStep + 1]?.deviceData?.spo2}</p>
-                </div>
-            ),
-        },
-        {
-            key: "14",
-            name: (
-                <div className="vital-tables-row-name">
-                    <p>Blood Pressure</p>
-                </div>
-            ),
-            prevWard: (
-                <div className="vital-table-values">
-                    <p>{configBloodPressure(stepArray[activeStep])}</p>
-                </div>
-            ),
-            nextWard: (
-                <div className="vital-table-values">
-                    <p>{configBloodPressure(stepArray[activeStep + 1])}</p>
-                </div>
-            ),
-        },
-        {
-            key: "15",
-            name: (
-                <div className="vital-tables-row-name">
-                    <p>Respiration Rate</p>
-                </div>
-            ),
-            prevWard: (
-                <div className="vital-table-values">
-                    <p>{stepArray[activeStep]?.deviceData?.rr}</p>
-                </div>
-            ),
-            nextWard: (
-                <div className="vital-table-values">
-                    <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p>
-                </div>
-            ),
-        },
-        {
-            key: "16",
-            name: (
-                <div className="vital-tables-row-name">
-                    <p>Weight</p>
-                </div>
-            ),
-            prevWard: (
-                <div className="vital-table-values">
-                    {/* <p>{stepArray[activeStep]?.deviceData?.rr}</p> */}
-                </div>
-            ),
-            nextWard: (
-                <div className="vital-table-values">
-                    {/* <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p> */}
-                </div>
-            ),
-        },
-    ]);
+    // const [tableData, setTableData] = useState([
+    //     {
+    //         key: "11",
+    //         name: (
+    //             <div className="vital-tables-row-name">
+    //                 <p>Temperature</p>
+    //             </div>
+    //         ),
+    //         prevWard: (
+    //             <div className="vital-table-values">
+    //                 <p>{stepArray[activeStep]?.deviceData?.temp}</p>
+    //             </div>
+    //         ),
+    //         nextWard: (
+    //             <div className="vital-table-values">
+    //                 <p>{stepArray[activeStep + 1]?.deviceData?.temp}</p>
+    //             </div>
+    //         ),
+    //     },
+    //     {
+    //         key: "12",
+    //         name: (
+    //             <div className="vital-tables-row-name">
+    //                 <p>Heart Rate</p>
+    //             </div>
+    //         ),
+    //         prevWard: (
+    //             <div className="vital-table-values">
+    //                 <p>{stepArray[activeStep]?.deviceData?.hr}</p>
+    //             </div>
+    //         ),
+    //         nextWard: (
+    //             <div className="vital-table-values">
+    //                 <p>{stepArray[activeStep + 1]?.deviceData?.hr}</p>
+    //             </div>
+    //         ),
+    //     },
+    //     {
+    //         key: "13",
+    //         name: (
+    //             <div className="vital-tables-row-name">
+    //                 <p>SPO2</p>
+    //             </div>
+    //         ),
+    //         prevWard: (
+    //             <div className="vital-table-values">
+    //                 <p>{stepArray[activeStep]?.deviceData?.spo2}</p>
+    //             </div>
+    //         ),
+    //         nextWard: (
+    //             <div className="vital-table-values">
+    //                 <p>{stepArray[activeStep + 1]?.deviceData?.spo2}</p>
+    //             </div>
+    //         ),
+    //     },
+    //     {
+    //         key: "14",
+    //         name: (
+    //             <div className="vital-tables-row-name">
+    //                 <p>Blood Pressure</p>
+    //             </div>
+    //         ),
+    //         prevWard: (
+    //             <div className="vital-table-values">
+    //                 <p>{configBloodPressure(stepArray[activeStep])}</p>
+    //             </div>
+    //         ),
+    //         nextWard: (
+    //             <div className="vital-table-values">
+    //                 <p>{configBloodPressure(stepArray[activeStep + 1])}</p>
+    //             </div>
+    //         ),
+    //     },
+    //     {
+    //         key: "15",
+    //         name: (
+    //             <div className="vital-tables-row-name">
+    //                 <p>Respiration Rate</p>
+    //             </div>
+    //         ),
+    //         prevWard: (
+    //             <divh className="vital-table-values">
+    //                 <p>{stepArray[activeStep]?.deviceData?hrr}</p>
+    //             </divh
+    //         ),
+    //         nextWard: (
+    //             <div className="vital-table-values">
+    //                 <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p>
+    //             </div>
+    //         ),
+    //     },
+    //     {
+    //         key: "16",
+    //         name: (
+    //             <div className="vital-tables-row-name">
+    //                 <p>Weight</p>
+    //             </div>
+    //         ),
+    //         prevWard: (
+    //             <div className="vital-table-values">
+    //                 {/* <p>{stepArray[activeStep]?.deviceData?.rr}</p> */}
+    //             </div>
+    //         ),
+    //         nextWard: (
+    //             <div className="vital-table-values">
+    //                 {/* <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p> */}
+    //             </div>
+    //         ),
+    //     },
+    // ]);
 
-    useEffect(() => {
-        setTableData([
-            {
-                key: "11",
-                name: (
-                    <div className="vital-tables-row-name">
-                        <p>Temperature</p>
-                    </div>
-                ),
-                prevWard: (
-                    <div className="vital-table-values">
-                        <p>{stepArray[activeStep]?.deviceData?.temp}</p>
-                    </div>
-                ),
-                nextWard: (
-                    <div className="vital-table-values">
-                        <p>{stepArray[activeStep + 1]?.deviceData?.temp}</p>
-                    </div>
-                ),
-            },
-            {
-                key: "12",
-                name: (
-                    <div className="vital-tables-row-name">
-                        <p>Heart Rate</p>
-                    </div>
-                ),
-                prevWard: (
-                    <div className="vital-table-values">
-                        <p>{stepArray[activeStep]?.deviceData?.hr}</p>
-                    </div>
-                ),
-                nextWard: (
-                    <div className="vital-table-values">
-                        <p>{stepArray[activeStep + 1]?.deviceData?.hr}</p>
-                    </div>
-                ),
-            },
-            {
-                key: "13",
-                name: (
-                    <div className="vital-tables-row-name">
-                        <p>SPO2</p>
-                    </div>
-                ),
-                prevWard: (
-                    <div className="vital-table-values">
-                        <p>{stepArray[activeStep]?.deviceData?.spo2}</p>
-                    </div>
-                ),
-                nextWard: (
-                    <div className="vital-table-values">
-                        <p>{stepArray[activeStep + 1]?.deviceData?.spo2}</p>
-                    </div>
-                ),
-            },
-            {
-                key: "14",
-                name: (
-                    <div className="vital-tables-row-name">
-                        <p>Blood Pressure</p>
-                    </div>
-                ),
-                prevWard: (
-                    <div className="vital-table-values">
-                        <p>{configBloodPressure(stepArray[activeStep])}</p>
-                    </div>
-                ),
-                nextWard: (
-                    <div className="vital-table-values">
-                        <p>{configBloodPressure(stepArray[activeStep + 1])}</p>
-                    </div>
-                ),
-            },
-            {
-                key: "15",
-                name: (
-                    <div className="vital-tables-row-name">
-                        <p>Respiration Rate</p>
-                    </div>
-                ),
-                prevWard: (
-                    <div className="vital-table-values">
-                        <p>{stepArray[activeStep]?.deviceData?.rr}</p>
-                    </div>
-                ),
-                nextWard: (
-                    <div className="vital-table-values">
-                        <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p>
-                    </div>
-                ),
-            },
-            {
-                key: "16",
-                name: (
-                    <div className="vital-tables-row-name">
-                        <p>Weight</p>
-                    </div>
-                ),
-                prevWard: (
-                    <div className="vital-table-values">
-                        {/* <p>{stepArray[activeStep]?.deviceData?.rr}</p> */}
-                    </div>
-                ),
-                nextWard: (
-                    <div className="vital-table-values">
-                        {/* <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p> */}
-                    </div>
-                ),
-            },
-        ]);
-    }, [activeStep, stepArray]);
+    // useEffect(() => {
+    //     setTableData([
+    //         {
+    //             key: "11",
+    //             name: (
+    //                 <div className="vital-tables-row-name">
+    //                     <p>Temperature</p>
+    //                 </div>
+    //             ),
+    //             prevWard: (
+    //                 <div className="vital-table-values">
+    //                     <p>{stepArray[activeStep]?.deviceData?.temp}</p>
+    //                 </div>
+    //             ),
+    //             nextWard: (
+    //                 <div className="vital-table-values">
+    //                     <p>{stepArray[activeStep + 1]?.deviceData?.temp}</p>
+    //                 </div>
+    //             ),
+    //         },
+    //         {
+    //             key: "12",
+    //             name: (
+    //                 <div className="vital-tables-row-name">
+    //                     <p>Heart Rate</p>
+    //                 </div>
+    //             ),
+    //             prevWard: (
+    //                 <div className="vital-table-values">
+    //                     <p>{stepArray[activeStep]?.deviceData?.hr}</p>
+    //                 </div>
+    //             ),
+    //             nextWard: (
+    //                 <div className="vital-table-values">
+    //                     <p>{stepArray[activeStep + 1]?.deviceData?.hr}</p>
+    //                 </div>
+    //             ),
+    //         },
+    //         {
+    //             key: "13",
+    //             name: (
+    //                 <div className="vital-tables-row-name">
+    //                     <p>SPO2</p>
+    //                 </div>
+    //             ),
+    //             prevWard: (
+    //                 <div className="vital-table-values">
+    //                     <p>{stepArray[activeStep]?.deviceData?.spo2}</p>
+    //                 </div>
+    //             ),
+    //             nextWard: (
+    //                 <div className="vital-table-values">
+    //                     <p>{stepArray[activeStep + 1]?.deviceData?.spo2}</p>
+    //                 </div>
+    //             ),
+    //         },
+    //         {
+    //             key: "14",
+    //             name: (
+    //                 <div className="vital-tables-row-name">
+    //                     <p>Blood Pressure</p>
+    //                 </div>
+    //             ),
+    //             prevWard: (
+    //                 <div className="vital-table-values">
+    //                     <p>{configBloodPressure(stepArray[activeStep])}</p>
+    //                 </div>
+    //             ),
+    //             nextWard: (
+    //                 <div className="vital-table-values">
+    //                     <p>{configBloodPressure(stepArray[activeStep + 1])}</p>
+    //                 </div>
+    //             ),
+    //         },
+    //         {
+    //             key: "15",
+    //             name: (
+    //                 <div className="vital-tables-row-name">
+    //                     <p>Respiration Rate</p>
+    //                 </div>
+    //             ),
+    //             prevWard: (
+    //                 <div className="vital-table-values">
+    //                     <p>{stepArray[activeStep]?.deviceData?.rr}</p>
+    //                 </div>
+    //             ),
+    //             nextWard: (
+    //                 <div className="vital-table-values">
+    //                     <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p>
+    //                 </div>
+    //             ),
+    //         },
+    //         {
+    //             key: "16",
+    //             name: (
+    //                 <div className="vital-tables-row-name">
+    //                     <p>Weight</p>
+    //                 </div>
+    //             ),
+    //             prevWard: (
+    //                 <div className="vital-table-values">
+    //                     {/* <p>{stepArray[activeStep]?.deviceData?.rr}</p> */}
+    //                 </div>
+    //             ),
+    //             nextWard: (
+    //                 <div className="vital-table-values">
+    //                     {/* <p>{stepArray[activeStep + 1]?.deviceData?.rr}</p> */}
+    //                 </div>
+    //             ),
+    //         },
+    //     ]);
+    // }, [activeStep, stepArray]);
 
     const onGetDataSensorFromInfluxByKey = (keySensor, data, type, index) => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
@@ -435,7 +463,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
         const arrayRes = [];
         const newArrayData = [...activeTrendsArray];
 
-        if (type === "change_date") {
+        if (type === "delete") {
             newArrayData.splice(index, 1);
         }
 
@@ -459,8 +487,18 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
 
     const getDataChartsActive = () => {
         activeTrendsArray.forEach((chart, index) => {
-            chart.list = [];
-            onGetDataSensorFromInfluxByKey(chart._key, chart, "change_date", index);
+            chart.data = [];
+
+            if (chart?._key === "bpd" || chart?._key === "bps") {
+                let keySensor = "alphamed";
+
+                if (associatedList?.includes("ihealth")) {
+                    keySensor = "ihealth";
+                }
+                onGetDataSensorFromInfluxByKey(`${keySensor}_${chart?._key}`, chart, "delete", index);
+            } else {
+                onGetDataSensorFromInfluxByKey(chart._key, chart, "delete", index);
+            }
         });
     };
 
@@ -482,7 +520,6 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
         else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() >= 10) {
             current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-${current_date.getDate()}`
         }
-        console.log("current_date_string", current_date_string)
         setAntd_selected_date_val(current_date_string)
     }, []);
 
@@ -502,18 +539,6 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
         setGraphLoading(true);
         getDataChartsActive();
     }, [antd_selected_date_val]);
-
-    useEffect(() => {
-        // getDataSensorFromInfluxDB();
-
-        // const timeInterval = setInterval(() => {
-        //     getDataSensorFromInfluxDB();
-        // }, 10000);
-
-        // return () => {
-        //     clearInterval(timeInterval);
-        // }
-    }, [pid]);
 
     function handleDateChange(date, dateString) {
         var temp = dateString.replace(/\//g, "-");
@@ -681,8 +706,8 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                     data: [],
                                     color1: Colors.darkPink,
                                     color2: '#FFEEBA',
-                                    max: bpmaxval,
-                                    min: bpminval,
+                                    max: hrmaxval,
+                                    min: hrminval,
                                 }
                                 onGetDataSensorFromInfluxByKey("ecg_hr", hr);
                             }
@@ -722,63 +747,67 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                             RR
                         </div>
 
-                        {/* <div onClick={() => {
-                            setGraphLoading(true);
-                            var flag = true;
-                            activeTrendsArray.map((trend, index) => {
-                                if (trend.name === 'BPD') {
-                                    flag = false
-                                    var temp = activeTrendsArray
-                                    temp.splice(index, 1)
-                                    setActiveTrendsArray(temp)
-                                }
-                            })
-                            if (flag) {
-                                const weight = {
-                                    _key: "weight",
-                                    name: 'BPD',
-                                    data: [],
-                                    color1: Colors.yellow,
-                                    color2: '#C4AAFD',
-                                    max: rrmaxval,
-                                    min: rrminval,
-                                }
-                                onGetDataSensorFromInfluxByKey("weight", weight);
-                            }
-                        }} className="trend-btn" style={
-                            activeTrendsArray.some(e => e.name === 'BPD') ? { border: `2px solid ${Colors.yellow}`, color: Colors.yellow } : { border: '1px solid #BABABA', color: '#BABABA' }
-                        } >
-                            BPD
-                        </div>
+                        {(associatedList?.includes("alphamed") || associatedList?.includes("ihealth")) && (
+                            <>
+                                <div onClick={() => {
+                                    setGraphLoading(true);
+                                    var flag = true;
+                                    activeTrendsArray.map((trend, index) => {
+                                        if (trend.name === 'BPD') {
+                                            flag = false
+                                            var temp = activeTrendsArray
+                                            temp.splice(index, 1)
+                                            setActiveTrendsArray(temp)
+                                        }
+                                    })
+                                    if (flag) {
+                                        const bpd = {
+                                            _key: "bpd",
+                                            name: 'BPD',
+                                            data: [],
+                                            color1: Colors.darkPurple,
+                                            color2: '#C4AAFD',
+                                            max: bpdmaxval,
+                                            min: bpdminval,
+                                        }
+                                        onGetDataSensorFromInfluxByKey("bpd", bpd);
+                                    }
+                                }} className="trend-btn" style={
+                                    activeTrendsArray.some(e => e.name === 'BPD') ? { border: `2px solid ${Colors.darkPurple}`, color: Colors.darkPurple } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                } >
+                                    BPD
+                                </div>
 
-                        <div onClick={() => {
-                            setGraphLoading(true);
-                            var flag = true;
-                            activeTrendsArray.map((trend, index) => {
-                                if (trend.name === 'WEI') {
-                                    flag = false
-                                    var temp = activeTrendsArray
-                                    temp.splice(index, 1)
-                                    setActiveTrendsArray(temp)
-                                }
-                            })
-                            if (flag) {
-                                const weight = {
-                                    _key: "weight",
-                                    name: 'BPS',
-                                    data: [],
-                                    color1: Colors.yellow,
-                                    color2: '#C4AAFD',
-                                    max: rrmaxval,
-                                    min: rrminval,
-                                }
-                                onGetDataSensorFromInfluxByKey("weight", weight);
-                            }
-                        }} className="trend-btn" style={
-                            activeTrendsArray.some(e => e.name === 'BPS') ? { border: `2px solid ${Colors.yellow}`, color: Colors.yellow } : { border: '1px solid #BABABA', color: '#BABABA' }
-                        }>
-                            BPS
-                        </div> */}
+                                <div onClick={() => {
+                                    setGraphLoading(true);
+                                    var flag = true;
+                                    activeTrendsArray.map((trend, index) => {
+                                        if (trend.name === 'BPS') {
+                                            flag = false
+                                            var temp = activeTrendsArray
+                                            temp.splice(index, 1)
+                                            setActiveTrendsArray(temp)
+                                        }
+                                    })
+                                    if (flag) {
+                                        const bps = {
+                                            _key: "bps",
+                                            name: 'BPS',
+                                            data: [],
+                                            color1: Colors.darkPurple,
+                                            color2: '#C4AAFD',
+                                            max: bpsmaxval,
+                                            min: bpsminval,
+                                        }
+                                        onGetDataSensorFromInfluxByKey("bps", bps);
+                                    }
+                                }} className="trend-btn" style={
+                                    activeTrendsArray.some(e => e.name === 'BPS') ? { border: `2px solid ${Colors.darkPurple}`, color: Colors.darkPurple } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                }>
+                                    BPS
+                                </div>
+                            </>
+                        )}
 
                         <div onClick={() => {
                             setGraphLoading(true);
@@ -798,8 +827,8 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                     data: [],
                                     color1: Colors.yellow,
                                     color2: '#C4AAFD',
-                                    max: rrmaxval,
-                                    min: rrminval,
+                                    max: weimaxval,
+                                    min: weiminval,
                                 }
                                 onGetDataSensorFromInfluxByKey("weight", weight);
                             }
@@ -809,6 +838,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                             WEI
                         </div>
                     </div>
+
                     <div className="gv-date" >
                         <DatePicker
                             style={{ fontSize: "16px" }}

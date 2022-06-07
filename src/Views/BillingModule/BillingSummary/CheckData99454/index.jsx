@@ -3,11 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Spin } from "antd";
 import { InfluxDB } from "@influxdata/influxdb-client";
 
-const CheckData = ({ pid, sensorList }) => {
+const CheckData = ({ pid, sensorList, record, billingSummary }) => {
     const [loading, setLoading] = useState(true);
     const [totalDay, setTotalDay] = useState(0);
     const [effect, setRunEffect] = useState(0);
-
 
     const checkTotalNumberDateHaveDataFromInflux = (startDate = "", sensorType = "", patch) => {
         const start = new Date(startDate);
@@ -33,7 +32,6 @@ const CheckData = ({ pid, sensorList }) => {
                 const o = tableMeta.toObject(row);
                 let time = new Date(o._time);
                 time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
-                
                 if (!arrDateQuery.includes(time)) {
                     arrDateQuery.push(time);
                 }
@@ -42,11 +40,18 @@ const CheckData = ({ pid, sensorList }) => {
                 console.log('ERROR', patch)
             },
             complete() {
-                patch.totalDay = arrDateQuery?.length;
+                patch.total = arrDateQuery?.length;
                 patch.datesInflux = arrDateQuery;
-                let tepm = effect;
-                tepm += 1;
-                setRunEffect(tepm);
+
+                let tepm = totalDay;
+                tepm += arrDateQuery?.length;
+                // setRunEffect(tepm);
+
+                const billFound = billingSummary?.billings?.find(bill => bill?.pid === pid);
+                if (!!billFound) {
+                    billFound.total = tepm;
+                }
+                setTotalDay(tepm);
             },
         })
     };
@@ -96,22 +101,25 @@ const CheckData = ({ pid, sensorList }) => {
 
         const timer = setTimeout(() => {
             setLoading(false);
-        }, 750);
+        }, 1000);
 
         return () => {
             clearTimeout(timer);
         }
-    }, [pid]);
+    }, [pid, billingSummary, sensorList]);
 
-    useEffect(() => {
-        let total = 0;
-        sensorList.forEach(patch => {
-            if (!!patch?.totalDay && patch?.totalDay > 0) {
-                total += patch?.totalDay;
-            }
-        });
-        setTotalDay(total)
-    }, [effect]);
+    // useEffect(() => {
+    //     let total = 0;
+    //     sensorList.forEach(patch => {
+    //         if (!!patch?.totalDay && patch?.totalDay > 0) {
+    //             total += patch?.totalDay;
+    //         }
+    //     });
+    //     if (!!record) {
+    //         record.total = total;
+    //     }
+    //     setTotalDay(total)
+    // }, [effect]);
 
     return (
         <div>

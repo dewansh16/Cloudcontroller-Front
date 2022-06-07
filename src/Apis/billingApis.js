@@ -42,10 +42,10 @@ const billingApi = {
             url: `/tasks/`,
             withCredentials: true,
         }),
-    getBillingSummary: (bill_date) => 
+    getBillingSummary: (bill_date, ofset, search) => 
         axiosInstance.request({
             method: "GET",
-            url: `/billing/total-summary?bill_date=${bill_date}&limit=10&offset=0&filter=0`,
+            url: `/billing/total-summary?bill_date=${bill_date}&limit=10&offset=${ofset - 1}${!!search && `&filter=${search}`} `,
         }),
 };
 
