@@ -1434,7 +1434,7 @@ function BillingModule() {
                         task_date: item.task_date,
                         task_id: item.task_id,
                         staff_name: item.staff_name,
-                        task_note: item.task_note,
+                        add_task_note: item.task_note,
                         task_time_spend: item.task_time_spend
                     }
                 } else {
@@ -1447,7 +1447,7 @@ function BillingModule() {
                         billing_id: billingId,
                         task_date: taskDateVal,
                         staff_name: taskNameVal,
-                        task_note: taskNoteVal,
+                        add_task_note: taskNoteVal,
                         task_time_spend: item.task_time_spend
                     }
                 }
@@ -1508,7 +1508,7 @@ function BillingModule() {
                                 add_task_id: date.getTime(),
                                 add_task_date: taskDateVal,
                                 add_task_staff_name: taskNameVal,
-                                task_note: taskNoteVal,
+                                add_task_note: taskNoteVal,
                                 task_time_spend: item.task_time_spend
                             }
                         )
