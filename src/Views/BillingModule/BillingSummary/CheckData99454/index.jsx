@@ -101,7 +101,7 @@ const CheckData = ({ pid, sensorList, record, billingSummary }) => {
 
         const timer = setTimeout(() => {
             setLoading(false);
-        }, 1000);
+        }, 750);
 
         return () => {
             clearTimeout(timer);

@@ -39,7 +39,7 @@ const BillingModule = () => {
     const history = useHistory();
 
     const getDataBillingSummary = () => {
-        billingApi.getBillingSummary(moment(valueDate).format("YYYY-MM-DD"), currentPageVal, valSearch)
+        billingApi.getBillingSummary(moment(valueDate).format("YYYY-MM-DD"), 10 * (currentPageVal - 1), valSearch)
             .then((res) => {
                 const newArrPid = [];
                 const result = {
