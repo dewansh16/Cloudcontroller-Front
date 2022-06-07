@@ -19,7 +19,7 @@ import { Button } from '../../Theme/Components/Button/button'
 
 import Colors from "../../Theme/Colors/colors";
 
-import { isJsonString } from "../../Utils/utils";
+import { isJsonString, takeDecimalNumber } from "../../Utils/utils";
 
 import {
     LineChart,
@@ -2528,15 +2528,13 @@ function GraphVisualizer() {
                                                             </div>
                                                             <div className="gv-graph-bg" style={{ backgroundColor: trend.color2 }} ></div>
                                                         </div>
-                                                        <ResponsiveContainer width="100%" height="100%" >
+                                                        <ResponsiveContainer width="97%" height="100%" >
                                                             <LineChart
                                                                 onMouseMove={(payload) => setHoverActiveTooltipIndex(payload.activeTooltipIndex)}
 
                                                                 onClick={(gvdata) => {
-                                                                    console.log("gvdata", gvdata)
                                                                     try {
                                                                         if (gvdata.activeTooltipIndex) {
-                                                                            console.log("1 ----------------------- 1", trend.data);
                                                                             trend.data.map((ele, index) => {
                                                                                 if (ele.med === true && index === gvdata.activeTooltipIndex) {
                                                                                     setCurrentMedData(ele.medData)
@@ -2551,7 +2549,6 @@ function GraphVisualizer() {
                                                                             })
                                                                         }
                                                                         if (gvdata.activePayload[0].payload.alert) {
-                                                                            console.log("2 ---------------- 2", gvdata.activePayload);
                                                                             setCurrentAlert(gvdata.activePayload[0].payload.date)
                                                                             alertFlag = true
                                                                             bpAlertFlag = true
@@ -2582,7 +2579,7 @@ function GraphVisualizer() {
                                                                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                                                             >
                                                                 <XAxis dataKey="date" hide />
-                                                                <YAxis dataKey="value" domain={[trend.min, trend.max]} axisLine={false} tickLine={false} width={20} tick={{ fill: trend.color1, stroke: trend.color1, strokeWidth: 0.5 }} />
+                                                                <YAxis dataKey="value" domain={[trend.min, trend.max]} axisLine={false} tickLine={false} width={35} tick={{ fill: trend.color1, stroke: trend.color1, strokeWidth: 0.5 }} />
                                                                 <Tooltip content={<CustomTooltip indexSensor={idx} />} />
                                                                 {
                                                                     trend.data.map((ele) => (

@@ -134,10 +134,10 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
                 return (
                     "<b>" +
                     this.series.name +
-                    "</b><br/>" +
-                    Highcharts.numberFormat(this.x, 2) +
+                    // "</b><br/>" +
+                    // Highcharts.numberFormat(this.x, 0) +
                     "<br/>" +
-                    Highcharts.numberFormat(this.y, 2)
+                    Highcharts.numberFormat(this.y, 1)
                 );
             },
             followTouchMove: false,
