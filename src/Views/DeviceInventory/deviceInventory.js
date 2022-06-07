@@ -59,7 +59,7 @@ function PatchInventory() {
 
     const [currentPageVal, setCurrentPageVal] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [valSearch, setValSearch] = useState(1);
+    const [valSearch, setValSearch] = useState("");
 
     const [extraDiv, setExtraDiv] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
