@@ -870,7 +870,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                             </div>
                                             <div className="gv-graph-bg" style={{ backgroundColor: trend.color2 }} ></div>
                                         </div>
-                                        <ResponsiveContainer width="100%" height="100%" >
+                                        <ResponsiveContainer width="97%" height="100%" >
                                             <LineChart
                                                 onMouseMove={(payload) => setHoverActiveTooltipIndex(payload.activeTooltipIndex)}
                                                 width="100%" height="100%"
@@ -878,7 +878,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                                             >
                                                 <XAxis dataKey="date" hide />
-                                                <YAxis dataKey="value" domain={[trend.min, trend.max]} axisLine={false} tickLine={false} width={20} tick={{ fill: trend.color1, stroke: trend.color1, strokeWidth: 0.5 }} />
+                                                <YAxis dataKey="value" domain={[trend.min, trend.max]} axisLine={false} tickLine={false} width={35} tick={{ fill: trend.color1, stroke: trend.color1, strokeWidth: 0.5 }} />
                                                 <Tooltip content={<CustomTooltip indexSensor={idx} />} />
                                                 {
                                                     trend.data.map((ele) => (
