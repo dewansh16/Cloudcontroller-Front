@@ -5,6 +5,7 @@ import moment from "moment";
 import { isArray } from 'lodash';
 import { isJsonString } from "../../../Utils/utils";
 import { useHistory } from "react-router-dom";
+import { InfluxDB } from "@influxdata/influxdb-client";
 
 import {
     Input as Inputs,
@@ -23,12 +24,22 @@ import "./report.css";
 const { Search } = Inputs;
 const { Option } = Select;
 
-const FetchBillingSummary = (valueDate) => {
-    const [response, setResponse] = useState(null);
-    const [loading, setLoading] = useState(true);
+const BillingModule = () => {
+    const [totalPages, setTotalPages] = useState(1);
+    const [currentPageVal, setCurrentPageVal] = useState(1);
+    const [valSearch, setValSearch] = useState("");
+    const [patientType, setPatientType] = useState("");
+    const [valueDate, setValueDate] = useState(new Date());
 
-    useEffect(() => {
-        billingApi.getBillingSummary(moment(valueDate).format("YYYY-MM-DD"))
+    const [pidModalSummary, setPidModal] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [billingSummary, setBillingSummary] = useState(null);
+    const [billingsFilter, setBillingsFilter] = useState([]);
+
+    const history = useHistory();
+
+    const getDataBillingSummary = () => {
+        billingApi.getBillingSummary(moment(valueDate).format("YYYY-MM-DD"), currentPageVal, valSearch)
             .then((res) => {
                 const newArrPid = [];
                 const result = {
@@ -45,7 +56,7 @@ const FetchBillingSummary = (valueDate) => {
                                 newArrPid.push(billing.pid);
                                 result.billings.push({ ...billing, [billing?.code]: billing?.params });
                             } else {
-                                const billingFound = result.billings.find(item => item?.pid === billing.pid);
+                                const billingFound = result.billings.find(item => item?.pid === billing?.pid);
                                 billingFound[billing.code] = billing.params;
                             }
                         }
@@ -54,29 +65,72 @@ const FetchBillingSummary = (valueDate) => {
                 }
 
                 setLoading(false);
-                setResponse(result);
+                setBillingSummary(result);
             })
             .catch((error) => {
                 setLoading(false);
                 console.log(error);
-                setResponse({});
+                setBillingSummary(null);
             })
-    }, [valueDate]);
+    };
 
-    return [response, loading];
-};
+    useEffect(() => {
+        setLoading(true);
+        getDataBillingSummary();
+    }, [valueDate, currentPageVal, valSearch]);
 
-const BillingModule = () => {
-    const [totalPages, setTotalPages] = useState(1);
-    const [currentPageVal, setCurrentPageVal] = useState(1);
-    const [valSearch, setValSearch] = useState("");
-    const [patientType, setPatientType] = useState("");
-    const [valueDate, setValueDate] = useState(new Date());
-    const [pidModalSummary, setPidModal] = useState(null);
+    const arrayCPT = [
+        {
+            code: 99457,
+            number: 1200
+        },
+        {
+            code: 99458,
+            number: 2400
+        },
+        {
+            code: 99091,
+            number: 1800
+        },
+    ]
 
-    const history = useHistory();
+    useEffect(() => {
+        if (!!patientType) {
+            let newArrBillings = [];
+            const billings = billingSummary?.billings || [];
+            if (patientType === "readings") {
+                billings?.map(billing => {
+                    if (Number(billing.total) < 16 || billing.total === undefined || billing.total === null) {
+                        newArrBillings.push(billing);
+                    };
+                });
+            } 
+            
+            if (patientType === "minutes") {
+                newArrBillings = billings;
+                billings?.map((billing, index) => {
+                    arrayCPT.map(cpt => {
+                        if (isJsonString(billing?.[cpt.code])) {
+                            let arrayData = JSON.parse(billing?.[cpt.code]);
+                            if(!isArray(arrayData)) arrayData = [];
+        
+                            let tmpTime = 0;
+                            arrayData.map(item => {
+                                tmpTime += Number(item.task_time_spend);
+                            })
+        
+                            if (tmpTime >= cpt.number) {
+                                newArrBillings.splice(index, 1)
+                            }
+                        }
+                    });
+                });
+            } 
 
-    const [billingSummary, isLoading] = FetchBillingSummary(valueDate);
+            setBillingsFilter(newArrBillings);
+            setLoading(false);
+        }
+    }, [patientType]);
 
     const renderTimeDisplay = (time) => {
         let hours = Math.floor(time / 3600)
@@ -87,7 +141,7 @@ const BillingModule = () => {
             .filter((v, i) => v !== "00" || i > 0)
             .join(":")
         return timeDs;
-    }
+    };
 
     const onOpenModalSummary = (pid) => {
         setPidModal(pid);
@@ -96,6 +150,10 @@ const BillingModule = () => {
     const onCloseModalSummary = () => {
         setPidModal(null);
     };
+
+    const handleMonthChange = (date, dateString) => {
+        setValueDate(dateString);
+    }
 
     const columns = [
         {
@@ -110,7 +168,7 @@ const BillingModule = () => {
             }
         },
         {
-            title: 'MR No',
+            title: 'MR.No',
             dataIndex: "patient_datum",
             key: "med_record",
             width: 200,
@@ -144,7 +202,13 @@ const BillingModule = () => {
             render: (dataIndex, record) => {
                 const associated = billingSummary?.patchData?.filter(item => item?.pid === record?.pid);
                 return (
-                    <CheckData pid={record?.pid} sensorList={associated} />
+                    <CheckData 
+                        pid={record?.pid} 
+                        sensorList={associated} 
+                        patientType={patientType}
+                        billingSummary={billingSummary}
+                        setLoadingParent={setLoading}
+                    />
                 )
             }
         },
@@ -335,9 +399,20 @@ const BillingModule = () => {
                             >
                                 <h3 style={{ marginRight: "1rem", marginBottom: "0" }}>Patient: </h3>
                                 <Select
-                                    // defaultValue="minutes"
+                                    defaultValue=""
                                     style={{ width: "100%", minWidth: "11rem" }}
-                                    onSelect={(val) => setPatientType(val)}
+                                    onSelect={(val) => { 
+                                        if (val !== patientType) {
+                                            setLoading(true);
+                                            setPatientType(val);
+                                        }
+                                    }}
+                                    onClear={() => {
+                                        setLoading(true);
+                                        setPatientType("");
+                                        getDataBillingSummary();
+                                    }}
+                                    allowClear={true}
                                 >
                                     <Option value="minutes">Unfulfilled minutes</Option>
                                     <Option value="readings">Unfulfilled readings</Option>
@@ -353,7 +428,7 @@ const BillingModule = () => {
                             >
                                 <h3 style={{ marginRight: "1rem", marginBottom: "0" }}>Date: </h3>
                                 <DatePicker
-                                    // onChange={onChangeDate}
+                                    onChange={handleMonthChange}
                                     allowClear={false}
                                     picker="month"
                                     defaultValue={moment(valueDate, "YYYY-MM-DD")}
@@ -379,7 +454,7 @@ const BillingModule = () => {
                 justify="start"
                 style={{ padding: "0", backgroundColor: "white", margin: "4px" }}
             >
-                {isLoading ? (
+                {loading ? (
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "calc(100vh - 99px)"}}>
                         <Spin />
                     </div>
@@ -390,7 +465,7 @@ const BillingModule = () => {
                             columns={columns}
                             size="middle"
                             pagination={false}
-                            dataSource={billingSummary?.billings || []}
+                            dataSource={!!patientType ? billingsFilter || [] : billingSummary?.billings || []}
                         />
                     </div>
                 )}

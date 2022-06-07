@@ -2238,7 +2238,6 @@ function BillingModule() {
         return array.some(even);
     };
 
-
     const getDataSourceByItem99091 = (item) => {
         return [
             {
@@ -2465,7 +2464,9 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
-                                        setPatchLoading(true);
+                                        if (!associatedSensorsState) {
+                                            setPatchLoading(true);
+                                        }
                                     }}
                                     className={
                                         associatedSensorsState
