@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useHistory, useLocation } from "react-router-dom";
 import './graphVisualizer.css'
 import { DatePicker, notification, Spin, Input, Collapse } from 'antd'
@@ -18,6 +18,8 @@ import EditIcon from '../../Assets/Icons/editIcon';
 import { Button } from '../../Theme/Components/Button/button'
 
 import Colors from "../../Theme/Colors/colors";
+
+import { isJsonString } from "../../Utils/utils";
 
 import {
     LineChart,
@@ -99,14 +101,25 @@ function GraphVisualizer() {
     var EwsMaxVal = 0
     var EwsMinVal = 0
 
-    const [spo2maxval, setSpo2maxval] = useState(0)
-    const [spo2minval, setSpo2minval] = useState(0)
-    const [bpmaxval, setBpmaxval] = useState(0)
-    const [bpminval, setBpminval] = useState(0)
-    const [rrmaxval, setRrmaxval] = useState(0)
-    const [rrminval, setRrminval] = useState(0)
     const [tempmaxval, setTempmaxval] = useState(0)
     const [tempminval, setTempminval] = useState(0)
+    const [spo2maxval, setSpo2maxval] = useState(0)
+    const [spo2minval, setSpo2minval] = useState(0)
+    const [hrmaxval, setHrmaxval] = useState(0)
+    const [hrminval, setHrminval] = useState(0)
+    const [rrmaxval, setRrmaxval] = useState(0)
+    const [rrminval, setRrminval] = useState(0)
+    const [weimaxval, setWeimaxval] = useState(0)
+    const [weiminval, setWeiminval] = useState(0)
+    const [bpdmaxval, setBpdmaxval] = useState(0)
+    const [bpdminval, setBpdminval] = useState(0)
+    const [bpsmaxval, setBpsmaxval] = useState(0)
+    const [bpsminval, setBpsminval] = useState(0)
+
+    const [bpmaxval, setBpmaxval] = useState(0)
+    const [bpminval, setBpminval] = useState(0)
+
+
     const [ewsmaxval, setEwsmaxval] = useState(0)
     const [ewsminval, setEwsminval] = useState(0)
 
@@ -142,8 +155,8 @@ function GraphVisualizer() {
             data: [],
             color1: Colors.darkPink,
             color2: '#FFEEBA',
-            max: bpmaxval,
-            min: bpminval,
+            max: hrmaxval,
+            min: hrminval,
         },
         {
             _key: "ecg_rr",
@@ -155,13 +168,31 @@ function GraphVisualizer() {
             min: rrminval,
         },
         {
+            _key: "bpd",
+            name: 'BPD',
+            data: [],
+            color1: Colors.darkPurple,
+            color2: '#C4AAFD',
+            max: bpdmaxval,
+            min: bpdminval,
+        },
+        {
+            _key: "bps",
+            name: 'BPS',
+            data: [],
+            color1: Colors.darkPurple,
+            color2: '#C4AAFD',
+            max: bpsmaxval,
+            min: bpsminval,
+        },
+        {
             _key: "weight",
             name: 'WEI',
             data: [],
             color1: Colors.yellow,
             color2: '#C4AAFD',
-            max: rrmaxval,
-            min: rrminval,
+            max: weimaxval,
+            min: weiminval,
         }
     ]);
 
@@ -1734,10 +1765,50 @@ function GraphVisualizer() {
 
     }, [observationAddState])
 
+
+
+    const [patient, setPatient] = useState(null);
+
+    useEffect(() => {
+        patientApi
+            .getDetailPatientById(pid)
+            .then((res) => {
+                setPatient(res.data.response.patient);
+            })
+            .catch((err) => {
+                if (err) {
+                    const error = err.response?.data.result;
+                    notification.error({
+                        message: "Error",
+                        description: `${error}` || "",
+                    });
+                }
+            });
+    }, [pid]);
+
+    const associatedList = useMemo(() => {
+        let associatedList = [];
+        const isString = isJsonString(patient?.demographic_map?.associated_list);
+        if (isString) {
+            associatedList = JSON.parse(patient?.demographic_map?.associated_list);
+        }
+        return associatedList;
+    }, [patient]);
+
     const getDataChartsActive = () => {
         activeTrendsArray.forEach((chart, index) => {
             chart.list = [];
-            onGetDataSensorFromInfluxByKey(chart._key, chart, "change_date", index);
+
+            if (chart?._key === "bpd" || chart?._key === "bps") {
+                let keySensor = "alphamed";
+                if (associatedList?.includes("ihealth")) {
+                    keySensor = "ihealth";
+                }
+
+                onGetDataSensorFromInfluxByKey(`${keySensor}_${chart?._key}`, chart, "delete", index);
+            } else {
+                onGetDataSensorFromInfluxByKey(chart._key, chart, "delete", index);
+            }
         });
     };
 
@@ -1844,7 +1915,7 @@ function GraphVisualizer() {
         const arrayRes = [];
         const newArrayData = [...activeTrendsArray];
 
-        if (type === "change_date") {
+        if (type === "delete") {
             newArrayData.splice(index, 1);
         }
 
@@ -2262,8 +2333,8 @@ function GraphVisualizer() {
                                                     data: [],
                                                     color1: Colors.darkPink,
                                                     color2: '#FFEEBA',
-                                                    max: bpmaxval,
-                                                    min: bpminval,
+                                                    max: hrmaxval,
+                                                    min: hrminval,
                                                 }
                                                 onGetDataSensorFromInfluxByKey("ecg_hr", hr);
                                             }
@@ -2303,67 +2374,67 @@ function GraphVisualizer() {
                                             RR
                                         </div>
 
-                                        {/* <div onClick={() => {
-                                            setGraphLoading(true);
-                                            var flag = true;
-                                            activeTrendsArray.map((trend, index) => {
-                                                if (trend.name === 'RR') {
-                                                    flag = false
-                                                    var temp = activeTrendsArray
-                                                    temp.splice(index, 1)
-                                                    // console.log("SPLICED ARRAY : ", temp)
-                                                    setActiveTrendsArray(temp)
-                                                }
-                                            })
-                                            if (flag) {
-                                                var temp = activeTrendsArray
-                                                temp.push({
-                                                    name: 'RR',
-                                                    data: rr_data,
-                                                    color1: '#9e00c2',
-                                                    color2: '#C4AAFD',
-                                                    max: rrmaxval,
-                                                    min: rrminval,
-                                                })
-                                                setActiveTrendsArray(temp)
-                                            }
-                                            setGraphLoading(true)
-                                        }} className="trend-btn" style={
-                                            activeTrendsArray.some(e => e.name === 'RR') ? { border: '2px solid #9e00c2', color: '#9e00c2' } : { border: '1px solid #BABABA', color: '#BABABA' }
-                                        } >
-                                            BPD
-                                        </div>
+                                        {(associatedList?.includes("alphamed") || associatedList?.includes("ihealth")) && (
+                                            <>
+                                                <div onClick={() => {
+                                                    setGraphLoading(true);
+                                                    var flag = true;
+                                                    activeTrendsArray.map((trend, index) => {
+                                                        if (trend.name === 'BPD') {
+                                                            flag = false
+                                                            var temp = activeTrendsArray
+                                                            temp.splice(index, 1)
+                                                            setActiveTrendsArray(temp)
+                                                        }
+                                                    })
+                                                    if (flag) {
+                                                        const bpd = {
+                                                            _key: "bpd",
+                                                            name: 'BPD',
+                                                            data: [],
+                                                            color1: Colors.darkPurple,
+                                                            color2: '#C4AAFD',
+                                                            max: bpdmaxval,
+                                                            min: bpdminval,
+                                                        }
+                                                        onGetDataSensorFromInfluxByKey("bpd", bpd);
+                                                    }
+                                                }} className="trend-btn" style={
+                                                    activeTrendsArray.some(e => e.name === 'BPD') ? { border: `2px solid ${Colors.darkPurple}`, color: Colors.darkPurple } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                                } >
+                                                    BPD
+                                                </div>
 
-                                        <div onClick={() => {
-                                            setGraphLoading(true);
-                                            var flag = true;
-                                            activeTrendsArray.map((trend, index) => {
-                                                if (trend.name === 'RR') {
-                                                    flag = false
-                                                    var temp = activeTrendsArray
-                                                    temp.splice(index, 1)
-                                                    // console.log("SPLICED ARRAY : ", temp)
-                                                    setActiveTrendsArray(temp)
-                                                }
-                                            })
-                                            if (flag) {
-                                                var temp = activeTrendsArray
-                                                temp.push({
-                                                    name: 'RR',
-                                                    data: rr_data,
-                                                    color1: '#9e00c2',
-                                                    color2: '#C4AAFD',
-                                                    max: rrmaxval,
-                                                    min: rrminval,
-                                                })
-                                                setActiveTrendsArray(temp)
-                                            }
-                                            setGraphLoading(true)
-                                        }} className="trend-btn" style={
-                                            activeTrendsArray.some(e => e.name === 'RR') ? { border: '2px solid #9e00c2', color: '#9e00c2' } : { border: '1px solid #BABABA', color: '#BABABA' }
-                                        } >
-                                            BPS
-                                        </div> */}
+                                                <div onClick={() => {
+                                                    setGraphLoading(true);
+                                                    var flag = true;
+                                                    activeTrendsArray.map((trend, index) => {
+                                                        if (trend.name === 'BPS') {
+                                                            flag = false
+                                                            var temp = activeTrendsArray
+                                                            temp.splice(index, 1)
+                                                            setActiveTrendsArray(temp)
+                                                        }
+                                                    })
+                                                    if (flag) {
+                                                        const bps = {
+                                                            _key: "bps",
+                                                            name: 'BPS',
+                                                            data: [],
+                                                            color1: Colors.darkPurple,
+                                                            color2: '#C4AAFD',
+                                                            max: bpsmaxval,
+                                                            min: bpsminval,
+                                                        }
+                                                        onGetDataSensorFromInfluxByKey("bps", bps);
+                                                    }
+                                                }} className="trend-btn" style={
+                                                    activeTrendsArray.some(e => e.name === 'BPS') ? { border: `2px solid ${Colors.darkPurple}`, color: Colors.darkPurple } : { border: '1px solid #BABABA', color: '#BABABA' }
+                                                }>
+                                                    BPS
+                                                </div>
+                                            </>
+                                        )}
 
                                         <div onClick={() => {
                                             setGraphLoading(true);
@@ -2383,8 +2454,8 @@ function GraphVisualizer() {
                                                     data: [],
                                                     color1: Colors.yellow,
                                                     color2: '#C4AAFD',
-                                                    max: rrmaxval,
-                                                    min: rrminval,
+                                                    max: weimaxval,
+                                                    min: weiminval,
                                                 }
                                                 onGetDataSensorFromInfluxByKey("weight", weight);
                                             }
@@ -2462,9 +2533,10 @@ function GraphVisualizer() {
                                                                 onMouseMove={(payload) => setHoverActiveTooltipIndex(payload.activeTooltipIndex)}
 
                                                                 onClick={(gvdata) => {
-                                                                    console.log(gvdata)
+                                                                    console.log("gvdata", gvdata)
                                                                     try {
                                                                         if (gvdata.activeTooltipIndex) {
+                                                                            console.log("1 ----------------------- 1", trend.data);
                                                                             trend.data.map((ele, index) => {
                                                                                 if (ele.med === true && index === gvdata.activeTooltipIndex) {
                                                                                     setCurrentMedData(ele.medData)
@@ -2479,6 +2551,7 @@ function GraphVisualizer() {
                                                                             })
                                                                         }
                                                                         if (gvdata.activePayload[0].payload.alert) {
+                                                                            console.log("2 ---------------- 2", gvdata.activePayload);
                                                                             setCurrentAlert(gvdata.activePayload[0].payload.date)
                                                                             alertFlag = true
                                                                             bpAlertFlag = true
@@ -2562,7 +2635,7 @@ function GraphVisualizer() {
                                     {
                                         alertState
                                             ?
-                                            'Alerts'
+                                            'Alerts hehe'
                                             :
                                             null
                                     }
