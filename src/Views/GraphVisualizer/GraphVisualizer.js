@@ -2635,7 +2635,7 @@ function GraphVisualizer() {
                                     {
                                         alertState
                                             ?
-                                            'Alerts hehe'
+                                            'Alerts'
                                             :
                                             null
                                     }

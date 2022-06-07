@@ -254,7 +254,6 @@ function NotesSection(props) {
         userApi
             .getMyself()
             .then((res) => {
-                console.log("current User Data", res);
                 setCurrUser(res.data?.response?.users[0].user_uuid);
             })
             .catch((err) => {
@@ -496,7 +495,6 @@ function NotesSection(props) {
         fileList,
     };
 
-    console.log(notes, notesData, notesData1);
     // console.log(fileList, uploadTypeList);
 
     const [form] = Form.useForm();

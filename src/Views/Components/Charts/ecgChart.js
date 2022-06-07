@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Row, Col, Spin } from "antd";
 import Icons from "../../../Utils/iconMap";
 import Ecg from "../../../Apis/sockets/ecg";
@@ -6,11 +6,14 @@ import { Button } from "../../../Theme/Components/Button/button";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts from "highcharts";
 import * as htmlToImage from "html-to-image";
+import { takeDecimalNumber } from "../../../Utils/utils";
+
+import { io } from "socket.io-client";
 
 export default function ECGChart({ pid, themeMode, ThemeButton }) {
     //FIXME: handle error using hasError
     const {
-        chartData,
+        // chartData,
         vitals,
         time,
         isPaused,
@@ -19,8 +22,40 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
         isConnected,
         hasError,
     } = Ecg({ pid });
-    console.log("charData", chartData, "isLoading", isLoading);
-    
+
+    const saveDataRef = useRef(null);
+
+    // console.log("charData", chartData, "isLoading", isLoading);
+
+    const chartData = [100, 200, 125, 113, 155, 199, 822, 456, 120, 354, 123, 233];
+
+    const [dataNumberShow, setDataNumber] = useState({
+        hr: 0,
+        spo2: 0,
+        rr: 0,
+        tempinF: 0,
+        pi: 0,
+        pr: 0
+    });
+
+    useEffect(() => {
+        var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
+
+        socket.on("SENSOR_DATA_patiente9c617e0-4242-4828-ba08-66e8d4aa9009", function (data) {
+            if (!!data) {
+                console.log("---------------------- socket", data);
+                setDataNumber({
+                    ...saveDataRef.current,
+                    ...data,
+                });
+            }
+        })
+    }, [pid]);
+
+    useEffect(() => {
+        saveDataRef.current = dataNumberShow;
+    }, [dataNumberShow]);
+
     const chartOptions = {
         chart: {
             type: "spline",
@@ -136,7 +171,7 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
 
     const vitalInfoBarStyle = {
         margin: "0",
-        padding: "0em",
+        // padding: "0em",
         border: "none",
         display: "flex",
         flexDirection: "column",
@@ -152,7 +187,7 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
     };
 
     const cropNumbers = (num) => {
-        return parseFloat(num).toFixed(1);
+        return takeDecimalNumber(parseFloat(num));
     };
 
     const backProp =
@@ -220,41 +255,41 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
                     <Col span={12} style={vitalInfoBarStyle}>
                         <span style={labelStyle}>HR</span>
                         <span style={digitStyle}>
-                            {cropNumbers(vitals.hr)}
+                            {cropNumbers(dataNumberShow?.hr || 0)}
                             <span style={{ fontSize: "0.8rem", opacity: "0.8" }}> bpm</span>
                         </span>
                     </Col>
                     <Col span={12} style={vitalInfoBarStyle}>
                         <span style={labelStyle}>SPO2</span>
                         <span style={digitStyle}>
-                            {cropNumbers(vitals.spo2)}
+                            {cropNumbers(dataNumberShow?.spo2 || 0)}
                             <span style={{ fontSize: "0.8rem", opacity: "0.8" }}> %</span>
                         </span>
                     </Col>
                     <Col span={12} style={vitalInfoBarStyle}>
                         <span style={labelStyle}>RR</span>
                         <span style={digitStyle}>
-                            {cropNumbers(vitals.rr)}
+                            {cropNumbers(dataNumberShow?.rr || 0)}
                             <span style={{ fontSize: "0.8rem", opacity: "0.8" }}> bpm</span>
                         </span>
                     </Col>
                     <Col span={12} style={vitalInfoBarStyle}>
                         <span style={labelStyle}>Temp</span>
                         <span style={digitStyle}>
-                            {cropNumbers(vitals.tempinF)}
+                            {cropNumbers(dataNumberShow?.tempinF || 0)}
                             <span style={{ fontSize: "0.8rem", opacity: "0.8" }}> °F</span>
                         </span>
                     </Col>
                     <Col span={12} style={vitalInfoBarStyle}>
                         <span style={labelStyle}>PI</span>
-                        <span style={digitStyle}>{cropNumbers(vitals.pi)}</span>
+                        <span style={digitStyle}>{cropNumbers(dataNumberShow?.pi || 0)}</span>
                     </Col>
                     <Col span={12} style={vitalInfoBarStyle}>
                         <span style={labelStyle}>PR</span>
-                        <span style={digitStyle}>{cropNumbers(vitals.pr)}</span>
+                        <span style={digitStyle}>{cropNumbers(dataNumberShow?.pr || 0)}</span>
                     </Col>
-                    <Col span={12} style={vitalInfoBarStyle}>
-                        <span style={labelStyle}>Motion:</span>
+                    <Col span={12}>
+                        <span>Motion:</span> 
                         {/* {motion === "Sleeping" &&  */}
                         {/* {Icons.patientInBedIcon({ style: { fontSize: "1em" } })} */}
                         {vitals.motion === "Standing" && (

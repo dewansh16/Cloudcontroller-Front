@@ -302,7 +302,7 @@ export default function PatientDetails(props) {
         });
     };
 
-    const [tabInventory, setTabInventory] = useState([
+    const tabInventory = [
         {
             name: "liveMonitor",
             component: (
@@ -350,7 +350,7 @@ export default function PatientDetails(props) {
             name: "vitals",
             component: WardDetails,
         },
-    ]);
+    ]
 
     let history = useHistory();
 
@@ -774,7 +774,7 @@ export default function PatientDetails(props) {
                                                     >
                                                         Live Monitor
                                                     </Buttons>
-                                                    <Buttons
+                                                    {/* <Buttons
                                                         style={
                                                             activeTab === "files"
                                                                 ? activeButtonStyle
@@ -786,7 +786,7 @@ export default function PatientDetails(props) {
                                                         type="text"
                                                     >
                                                         Files
-                                                    </Buttons>
+                                                    </Buttons> */}
                                                     <Buttons
                                                         style={buttonStyle}
                                                         type="text"
@@ -951,7 +951,6 @@ export default function PatientDetails(props) {
                                         >
                                             <Col span={24}>
                                                 {tabInventory.map((item, index) => {
-                                                    console.log("item", item);
                                                     if (activeTab === item.name) {
                                                         if (item.name === "liveMonitor") {
                                                             return item.component;
