@@ -3223,7 +3223,7 @@ function BillingModule() {
                                 timeCount={timeCount}
                                 CPT_CODE={CPT_CODE.CPT_99457}
                                 addTask={addTaskState} 
-                                dataTable={task99091}
+                                dataTable={firstTwentyTasks}
                                 setAddTaskState={setAddTaskState}
                                 startCountTimer={startCountTimer}
                                 renderTimerClock={renderTimerClock}
