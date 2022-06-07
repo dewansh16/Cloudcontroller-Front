@@ -35,6 +35,8 @@ import "./Alert.Components.Alerts.Components.css";
 import alertApi from "../../../../../Apis/alertApis";
 import patientApi from "../../../../../Apis/patientApis";
 import userApi from "../../../../../Apis/userApis";
+import { InfluxDB } from "@influxdata/influxdb-client";
+import moment from "moment";
 
 const { Panel } = Collapse;
 
@@ -87,7 +89,6 @@ const Alert = (props) => {
     };
 
     const editAcknowledged = () => {
-        setCheckBtn(true);
         const data = {
             status: `${checkBtn ? "open" : "close"}`,
             text: "Raghav added a note",
@@ -97,6 +98,7 @@ const Alert = (props) => {
         alertApi
             .editAcknowledged(props.data.id, data)
             .then((res) => {
+                setCheckBtn(true);
                 console.log(res.data.response);
             })
             .catch((err) => {
@@ -117,35 +119,35 @@ const Alert = (props) => {
     };
 
     useEffect(() => {
-        // if (tagBtn === true) {
-        //     userApi
-        //         .getUserList()
-        //         .then((res) => {
-        //             console.log(res.data.response);
-        //             const doctorsData = res.data.response?.users[0].filter(
-        //                 (item) => item.role.toLowerCase() === "doctor"
-        //             );
-        //             const Doctors = [];
-        //             if (doctorsData.length > 0) {
-        //                 for (let i = 0; i < doctorsData.length; i++) {
-        //                     Doctors.push(
-        //                         <Option
-        //                             value={doctorsData[i].fname + " " + doctorsData[i].lname}
-        //                         >
-        //                             {doctorsData[i].fname + " " + doctorsData[i].lname}
-        //                         </Option>
-        //                     );
-        //                 }
-        //             }
-        //             console.log(doctorsData, Doctors);
-        //             setDoctorList(Doctors);
-        //             isTagLoading(false);
-        //         })
-        //         .catch((err) => {
-        //             console.log(err);
-        //             isTagLoading(false);
-        //         });
-        // }
+        if (tagBtn === true) {
+            userApi
+                .getUserList()
+                .then((res) => {
+                    console.log(res.data.response);
+                    const doctorsData = res.data.response?.users[0].filter(
+                        (item) => item.role.toLowerCase() === "doctor"
+                    );
+                    const Doctors = [];
+                    if (doctorsData.length > 0) {
+                        for (let i = 0; i < doctorsData.length; i++) {
+                            Doctors.push(
+                                <Option
+                                    value={doctorsData[i].fname + " " + doctorsData[i].lname}
+                                >
+                                    {doctorsData[i].fname + " " + doctorsData[i].lname}
+                                </Option>
+                            );
+                        }
+                    }
+                    console.log(doctorsData, Doctors);
+                    setDoctorList(Doctors);
+                    isTagLoading(false);
+                })
+                .catch((err) => {
+                    console.log(err);
+                    isTagLoading(false);
+                });
+        }
     }, [tagBtn]);
 
     const onFinishTagging = (values) => {
@@ -170,7 +172,7 @@ const Alert = (props) => {
     }
 
     const tagContent = (
-        <div style={{ width: "300px" }}>
+        <div style={{ width: "320px", padding: "8px" }}>
             {tagLoading && (
                 <Spin style={{ position: "relative", left: "40%", top: "30%" }} />
             )}
@@ -181,11 +183,11 @@ const Alert = (props) => {
                     name="basic"
                     onFinish={onFinishTagging}
                 >
-                    <Form.Item label="Tag Doctors" name="tags">
+                    <Form.Item label="Tag Doctors" name="tags" style={{ marginBottom: "14px" }}>
                         <Select
                             mode="multiple"
                             allowClear
-                            style={{ width: "100%" }}
+                            style={{ width: "100%", marginLeft: "4px" }}
                             placeholder="Please select"
                             defaultValue={tags}
                             onChange={handleChange}
@@ -194,7 +196,7 @@ const Alert = (props) => {
                         </Select>
                     </Form.Item>
 
-                    <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
+                    <Form.Item wrapperCol={{ offset: 6, span: 16 }} style={{ marginBottom: "0px" }}>
                         <Button
                             danger
                             small
@@ -306,55 +308,52 @@ const Alert = (props) => {
     );
     //
 
-    useEffect(() => {
-        // if (isOpen === true) {
-        //     const receiveTime = new Date(alertData.firstRcvTm);
-        //     const startTime = new Date(receiveTime.getTime() - 10000).toISOString();
-        //     const endTime = new Date(receiveTime.getTime() + 10000).toISOString();
-        //     patientApi
-        //         .getEcgValue(props.pid, startTime, endTime)
-        //         .then((res) => {
-        //             setEcgData(res.data?.response);
-        //             console.log(res.data?.response);
-        //             let reqData = null;
-        //             res.data?.response?.patient_sensor_data?.map((item) => {
-        //                 if (new Date(item.time) <= receiveTime) {
-        //                     reqData = item;
-        //                 }
-        //             });
-        //             setAlertEcgData(reqData);
-        //             setIsLoading(false);
-        //         })
-        //         .catch((err) => {
-        //             console.log(err);
-        //             setIsLoading(false);
-        //         });
-        // }
-    }, [isOpen]);
+    const processDataForSensor = () => {
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
 
-    let data = [];
-    let brushStart = 0;
-    if (!isLoading) {
-        // ecgData?.patient_sensor_data.map((item, index) => {
-        //     let array = item.ecg.split(/[ ,]+/);
-        //     var intArr = [];
-        //     if (item === alertEcgData) {
-        //         brushStart = index * 128;
-        //     }
-        //     for (let i = 0; i < array.length; i++) {
-        //         intArr.push(parseInt(array[i]));
-        //     }
-        //     data.push(...intArr);
-        //     // console.log(item.ecg, array, intArr, data);
-        // });
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+
+        const date = new Date(props?.data?.time);
+        const start = new Date(date.setMinutes(date.getMinutes() - 5));
+        const end = new Date(date.setMinutes(date.getMinutes() + 5));
+        const deviceType = props?.data?.value_of?.toLowerCase();
+
+        const query = `from(bucket: "emr_dev")
+                |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
+                |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${deviceType}")
+                |> yield(name: "mean")`;
+        
+        let index = 0;
+        const arrayRes = [];
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                index++;
+                const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                arrayRes.push({
+                    value: dataQueryInFlux?._value,
+                    time: dataQueryInFlux?._time,
+                    xData: index,
+                    yData: dataQueryInFlux?._value
+                });
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+                setEcgData(arrayRes);
+                setIsLoading(false);
+            },
+        })
     }
 
-    let chartData = data.map((value, index) => {
-        return {
-            xData: index,
-            yData: value,
-        };
-    });
+    useEffect(() => {
+        if (isOpen) {
+            processDataForSensor();
+        }
+    }, [isOpen]);
 
     const menu = (
         <Menu>
@@ -375,8 +374,6 @@ const Alert = (props) => {
         return parseFloat(num).toFixed(1);
     };
 
-    console.log("props", props);
-
     return (
         <>
             <Collapse
@@ -393,8 +390,6 @@ const Alert = (props) => {
             >
                 <Panel
                     header={panelHeader(
-                        // props.data.type,
-                        // new Date(props.data.lastRcvTm),
                         props.data
                     )}
                     key="1"
@@ -409,7 +404,7 @@ const Alert = (props) => {
                         <Spin style={{ position: "relative", left: "50%", top: "30%" }} />
                     )}
 
-                    {!isLoading && ecgData?.patient_sensor_data.length < 1 && (
+                    {/* {!isLoading && ecgData?.patient_sensor_data.length < 1 && (
                         <div style={{ width: "100%", height: "200px" }}>
                             <div
                                 className="no-alerts-div"
@@ -418,127 +413,23 @@ const Alert = (props) => {
                                 <h1>GRAPH not available for this alert</h1>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
-                    {!isLoading && ecgData?.patient_sensor_data.length > 1 && (
-                        <div style={{ width: "100%" }}>
-                            <div>
-                                <Row
-                                    span={24}
-                                    style={{
-                                        width: "90%",
-                                        marginTop: "13px",
-                                        marginLeft: "7%",
-                                    }}
-                                >
-                                    <Col span={14}>
-                                        <Row style={{ marginBottom: "6px" }}>
-                                            <Col className="alert-chart-infos" span={6}>
-                                                <p>
-                                                    <span>SpO2 : </span>
-                                                    {alertEcgData.spo2 || 0}
-                                                </p>
-                                            </Col>
-                                            <Col className="alert-chart-infos" span={6}>
-                                                <p>
-                                                    <span>PI : </span>
-                                                    {alertEcgData.pi}{" "}
-                                                </p>
-                                            </Col>
-                                            <Col className="alert-chart-infos" span={6}>
-                                                <p>
-                                                    <span>PR : </span>
-                                                    {alertEcgData.pr || 0}{" "}
-                                                </p>
-                                            </Col>
-                                            <Col className="alert-chart-infos" span={6}>
-                                                <p>
-                                                    <span>Temp :</span>{" "}
-                                                    {/* {cropNumbers(
-                                                        alertEcgData.temperature * (9 / 5) + 32
-                                                    )} */}
-                                                    0
-                                                </p>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col className="alert-chart-infos" span={6}>
-                                                <p>
-                                                    <span>HRMin :</span> {alertEcgData.hrMin || 0}
-                                                </p>
-                                            </Col>
-                                            <Col className="alert-chart-infos" span={6}>
-                                                <p>
-                                                    <span>HRMax :</span> {alertEcgData.hrMax || 0}
-                                                </p>
-                                            </Col>
-                                            <Col className="alert-chart-infos" span={6}>
-                                                <p>
-                                                    <span>AvgRR :</span> {alertEcgData.avgRR || 0}
-                                                </p>
-                                            </Col>
-                                        </Row>
-                                    </Col>
-                                    <Col span={10}>
-                                        <Row>
-                                            <Col className="alert-chart-infos" offset={2} span={4}>
-                                                <p>
-                                                    <span>Tags :</span>
-                                                </p>
-                                            </Col>
-                                            {tags.length > 0 && (
-                                                <>
-                                                    <Col offset={1} span={9}>
-                                                        <Tag
-                                                            className="alert-doctor-tags"
-                                                            color="#E6F1FF"
-                                                        >
-                                                            Dr.
-                                                            {/* Dr. {tags[0]} */}
-                                                        </Tag>
-                                                    </Col>
-                                                    {tags.length > 1 && (
-                                                        <Col
-                                                            span={8}
-                                                            style={{
-                                                                display: "flex",
-                                                                alignItems: "center",
-                                                                justifyContent: "center",
-                                                            }}
-                                                        >
-                                                            <Dropdown
-                                                                overlay={menu}
-                                                                placement="bottomCenter"
-                                                            >
-                                                                <Tag
-                                                                    className="alert-doctor-tags"
-                                                                    color="#E6F1FF"
-                                                                >
-                                                                    {/* +{`${tags.length - 1} more`} */}
-                                                                    more
-                                                                </Tag>
-                                                            </Dropdown>
-                                                        </Col>
-                                                    )}
-                                                </>
-                                            )}
-                                        </Row>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div
-                                className="body-chart"
-                                style={{
-                                    margin: "20px auto",
-                                    height: "300px",
-                                    width: "100%",
-                                }}
-                            >
+                    {!isLoading && (
+                        <div
+                            className="body-chart"
+                            style={{
+                                margin: "20px auto",
+                                height: ecgData?.length > 0 ? "300px" : "50px",
+                                width: "100%",
+                            }}
+                        >
+                            {ecgData?.length > 0 ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart
                                         width={200}
                                         height={200}
-                                        data={chartData}
+                                        data={ecgData}
                                         margin={{
                                             top: 5,
                                             right: 30,
@@ -551,24 +442,26 @@ const Alert = (props) => {
                                             hide={true}
                                             domain={["dataMin - 300", "dataMax + 200"]}
                                         />
-                                        <Brush
-                                            dataKey="name"
-                                            height={30}
-                                            stroke="#686868"
-                                            startIndex={brushStart - 4 * 128}
-                                            endIndex={brushStart + 5 * 128}
-                                        />
+                                        {/* <Brush
+                                        dataKey="name"
+                                        height={30}
+                                        stroke="#686868"
+                                        startIndex={brushStart - 4 * 128}
+                                        endIndex={brushStart + 5 * 128}
+                                    /> */}
                                         <Line
                                             type="monotone"
                                             dataKey="yData"
                                             dot={false}
                                             strokeWidth={3}
-                                            animationDuration={8000}
+                                            animationDuration={5000}
                                             stroke="#393939"
                                         />
                                     </LineChart>
                                 </ResponsiveContainer>
-                            </div>
+                            ) : (
+                                <div style={{ textAlign: "center" }}>No data</div>
+                            )}
                         </div>
                     )}
                 </Panel>

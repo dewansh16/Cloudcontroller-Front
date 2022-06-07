@@ -421,14 +421,15 @@ function AddPatient() {
             .then(res => {
                 setDeboardButtonLoading(false);
                 setDeboarded(true);
+                // goBack();
 
-                // let newTitle = "Sensor successfully Deboarded from ";
-                // setSummary({
-                //     ...summary,
-                //     isVisible: true,
-                //     status: "success",
-                //     title: newTitle + summary.name,
-                // })
+                let newTitle = "Deboard patient successfully!";
+                setSummary({
+                    ...summary,
+                    isVisible: true,
+                    status: "success",
+                    title: newTitle,
+                })
             })
             .catch(() => {
                 notification.error({
@@ -713,22 +714,24 @@ function AddPatient() {
                         </Button>
                     );
 
-                    notification.error({
-                        message:
-                            pid !== undefined
-                                ? "Couldn't add Patient!"
-                                : "Couldn't edit Patient!",
-                        description: (
-                            <div>
-                                <p style={{ marginBottom: "0px" }}>
-                                    Internal System error. Please try later
-                                </p>
-                            </div>
-                        ),
-                        btn,
-                        key,
-                        placement: "topRight",
-                    });
+                    if (!isExist) {
+                        notification.error({
+                            message:
+                                pid !== undefined
+                                    ? "Couldn't add Patient!"
+                                    : "Couldn't edit Patient!",
+                            description: (
+                                <div>
+                                    <p style={{ marginBottom: "0px" }}>
+                                        Internal System error. Please try later
+                                    </p>
+                                </div>
+                            ),
+                            btn,
+                            key,
+                            placement: "topRight",
+                        });
+                    }
                 });
         } catch (e) {
             setButtonLoading(false);
@@ -833,6 +836,7 @@ function AddPatient() {
             .associatePatchToPatient(patientId, dataBody)
             .then((res) => {
                 setButtonLoading(false);
+                setPatientData({ ...patientData, associated_list: res?.data?.response?.patch_data?.associated_list });
                 let newTitle = "Sensor successfully associated to ";
                 setSummary({
                     ...summary,
@@ -917,18 +921,20 @@ function AddPatient() {
                             >
                                 Add new patient
                             </Button>
-                            <Button
-                                onClick={() => {
-                                    setIsPatchTabDisabled(false);
-                                    setSummary({
-                                        ...summary,
-                                        isVisible: false,
-                                    });
-                                    setActivePanel("2");
-                                }}
-                            >
-                                Associate Sensor
-                            </Button>
+                            {!isDeboarded && (
+                                <Button
+                                    onClick={() => {
+                                        setIsPatchTabDisabled(false);
+                                        setSummary({
+                                            ...summary,
+                                            isVisible: false,
+                                        });
+                                        setActivePanel("2");
+                                    }}
+                                >
+                                    Associate Sensor
+                                </Button>
+                            )}
                             {!isDeboarded ? (
                                 <Button
                                     onClick={() => {

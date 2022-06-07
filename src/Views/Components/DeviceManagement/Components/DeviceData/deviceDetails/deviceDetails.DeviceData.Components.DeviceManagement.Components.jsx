@@ -126,7 +126,7 @@ function GetPatientOTP(pid, setOtp, setOtpLoading, callback = () => { }) {
     })
 }
 
-function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach, valDuration }) {
+function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach, valDuration, macAddress }) {
     const [data, isLoading] = CreateGraphData(pid, deviceType, valDuration);
 
     const config = {
@@ -493,6 +493,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach, valD
             <Row style={{ marginTop: '2em' }}>
                 <div className='device-info'>
                     <p><span>Serial</span> {serial}</p>
+                    <p><span>Mac address</span> {macAddress}</p>
                 </div>
                 <div className='device-management-chart' >
                     {displayMap[contentPosition]}
