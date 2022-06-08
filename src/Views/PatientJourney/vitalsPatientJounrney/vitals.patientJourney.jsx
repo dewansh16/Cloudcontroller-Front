@@ -451,14 +451,14 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
         const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
         const queryApi = client.getQueryApi(org);
 
-        const dateQuery = antd_selected_date_val ? new Date(antd_selected_date_val) : new Date();
-        const start = new Date(dateQuery.setHours(0, 0, 1));
-        const end = new Date(dateQuery.setHours(23, 59, 59));
+        let dateQuery = antd_selected_date_val ? new Date(antd_selected_date_val) : new Date();
+        dateQuery = moment(dateQuery).format("YYYY-MM-DD");
+        const start = `${dateQuery}T00:00:00.000Z`;
+        const end = `${dateQuery}T23:59:59.000Z`;
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
+                |> range(start: ${start}, stop: ${end})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
-                |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
