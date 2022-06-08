@@ -157,9 +157,6 @@ const PatientListItem = (props) => {
                     val_bpd = dataQueryInFlux?._value;
                 } else {
                     let value = dataQueryInFlux?._value || 0;
-                    if (key === "weight") {
-                        value = value * 2.2046
-                    }
                     arrayRes.push({ value, time: dataQueryInFlux?._time });
                 }
             },

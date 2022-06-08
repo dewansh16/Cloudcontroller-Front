@@ -23,10 +23,11 @@ const Logger = () => {
                 border: "1px solid #ff9452",
                 height: "100%",
                 borderRadius: "8px",
+                overflow: "auto"    
             }}>
                 {data.map((item, index) => {
                     return (
-                        <div key={index} style={{ padding: "0.5rem 3rem", borderBottom: "1px solid #ddd", wordBreak: "break-all", overflow: "auto" }}>
+                        <div key={index} style={{ padding: "0.5rem 3rem", borderBottom: "1px solid #ddd", wordBreak: "break-all" }}>
                             {`${index+1}: ${JSON.stringify(item)}`}
                         </div>
                     )
