@@ -25,8 +25,6 @@ export default function ChartsBlock({
         // "Blood Pressure": `${value} - ${valueBpd} mmHg`
     };
 
-    console.log("lastTime", lastTime);
-
     const renderValueByKey = (key) => {
         switch (key) {
             case "blood_pressuer":

@@ -390,7 +390,7 @@ animation: pulse 1s infinite;
     background-color: white;
     border-radius: 6px;
     opacity: 0.9;
-    width: 150%;
+    /* width: 150%; */
 }
 
 .custom-tooltip span{
