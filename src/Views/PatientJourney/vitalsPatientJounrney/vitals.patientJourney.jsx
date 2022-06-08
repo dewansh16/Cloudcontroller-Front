@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Table, Spin, DatePicker } from "antd";
 import { InfluxDB } from "@influxdata/influxdb-client";
-import { isJsonString } from "../../../Utils/utils";
+import { isJsonString, takeDecimalNumber } from "../../../Utils/utils";
 
 import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
@@ -458,6 +458,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
+                |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
@@ -552,10 +553,11 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                 const time = new Date(sensorFound.data[hoverActiveTooltipIndex].time);
 
                 return (
-                    <div className="custom-tooltip" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <span className="tooltip-label" style={{ color: sensorFound.color1 }} >
-                            {`${sensorFound?.name} : ${sensorFound.data[hoverActiveTooltipIndex].value}`}
-                        </span>
+                    <div className="custom-tooltip" style={{ textAlign: "center" }}>
+                        <div className="tooltip-label" style={{ color: sensorFound.color1 }} >
+                            {`${sensorFound?.name} : ${ takeDecimalNumber(sensorFound.data[hoverActiveTooltipIndex].value, 3)}`}
+                        </div>
+                        <div>Time: {moment(time).format("MMM-DD-YYYY hh:mm:ss a")}</div>
                     </div>
                 );
             }
