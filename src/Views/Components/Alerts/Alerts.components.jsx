@@ -23,7 +23,7 @@ function FetchAlertData(pid, isAttended) {
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        // setLoading(true);
+        setLoading(true);
         alertApi.getPatientAlerts(pid).then((res) => {
             console.log("res", res);
             let alerts = res.data?.response?.data || [];

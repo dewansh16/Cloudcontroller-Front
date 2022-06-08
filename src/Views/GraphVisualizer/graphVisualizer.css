@@ -435,3 +435,20 @@ animation: pulse 1s infinite;
     background: #c2babac4;
     opacity: 0.5;
 }
+
+.alert-container {
+    padding: 0 1.5rem;
+}
+
+.alert-container .alert-item {
+    padding: 0.5rem 1rem;
+}
+
+.alert-container .alert-item:first-child {
+    padding-top: 0rem;
+}
+
+.alert-container .alert-item:last-child {
+    padding-bottom: 0rem;
+}
+
