@@ -308,6 +308,18 @@ const Alert = (props) => {
     );
     //
 
+    const formatTypeSensor = (type) => ({
+        "value": "temp",
+        "spo2": "spo2",
+        "sys": "ihealth_bps",
+        "dia": "ihealth_bpd",
+        "weight": "weight",
+        "bps": "alphamed_bps",
+        "bpd": "alphamed_bpd",
+        "HR": "ecg_hr",
+        "RR": "ecg_rr"
+    }[type]);
+
     const processDataForSensor = () => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
@@ -322,7 +334,7 @@ const Alert = (props) => {
 
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
-                |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${deviceType}")
+                |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${formatTypeSensor(deviceType)}")
                 |> yield(name: "mean")`;
         
         let index = 0;
