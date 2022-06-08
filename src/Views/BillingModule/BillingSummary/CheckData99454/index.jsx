@@ -3,13 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { Spin } from "antd";
 import { InfluxDB } from "@influxdata/influxdb-client";
 
-const CheckData = ({ pid, sensorList, record, billingSummary }) => {
-    const [loading, setLoading] = useState(true);
+const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
+    const [loading, setLoading] = useState(false);
     const [totalDay, setTotalDay] = useState(0);
     const [effect, setRunEffect] = useState(0);
 
+    // console.log("pid", pid);
+
     const checkTotalNumberDateHaveDataFromInflux = (startDate = "", sensorType = "", patch) => {
-        const start = new Date(startDate);
+        const date = new Date(valueDate);
+        const start = new Date(date.setDate(1));
+        start.setHours(0, 0, 1);
         const end = new Date();
 
         if (start.getTime() > end.getTime()) return;
@@ -25,8 +29,9 @@ const CheckData = ({ pid, sensorList, record, billingSummary }) => {
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${sensorType}")
                 |> yield(name: "mean")
             `
-
         const arrDateQuery = [];
+        // let tepm = effect;
+
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const o = tableMeta.toObject(row);
@@ -34,6 +39,7 @@ const CheckData = ({ pid, sensorList, record, billingSummary }) => {
                 time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
                 if (!arrDateQuery.includes(time)) {
                     arrDateQuery.push(time);
+                    // tepm += 1;
                 }
             },
             error(error) {
@@ -43,15 +49,16 @@ const CheckData = ({ pid, sensorList, record, billingSummary }) => {
                 patch.total = arrDateQuery?.length;
                 patch.datesInflux = arrDateQuery;
 
-                let tepm = totalDay;
-                tepm += arrDateQuery?.length;
                 // setRunEffect(tepm);
 
-                const billFound = billingSummary?.billings?.find(bill => bill?.pid === pid);
-                if (!!billFound) {
-                    billFound.total = tepm;
-                }
-                setTotalDay(tepm);
+                // const billFound = billingSummary?.billings?.find(bill => bill?.pid === pid);
+                // if (!!billFound) {
+                //     let tepm = totalDay;
+                //     tepm += arrDateQuery?.length;
+
+                //     billFound.total = tepm;
+                //     setTotalDay(tepm);
+                // }
             },
         })
     };
@@ -89,6 +96,8 @@ const CheckData = ({ pid, sensorList, record, billingSummary }) => {
 
     useEffect(() => {
         setLoading(true);
+        setTotalDay(0);
+        
         if (sensorList?.length > 0) {
             sensorList?.forEach((patch) => {
                 const startDate = getFirstDateMonitored(patch);
@@ -100,26 +109,30 @@ const CheckData = ({ pid, sensorList, record, billingSummary }) => {
         }
 
         const timer = setTimeout(() => {
+            const billFound = billingSummary?.billings?.find(bill => bill?.pid === pid);
+            let totalArr = [];
+            sensorList.forEach(patch => {
+                if (!!patch?.total && patch?.total > 0) {
+                    totalArr = [...totalArr, ...patch?.datesInflux];
+                }
+            });
+
+            let result = [];
+            result = totalArr.filter(function (element) {
+                return result.includes(element) ? '' : result.push(element)
+            });
+
+            const total = result?.length;
+            billFound.total = total;
+            setTotalDay(total);
             setLoading(false);
-        }, 750);
+        }, 1250);
 
         return () => {
             clearTimeout(timer);
         }
-    }, [pid, billingSummary, sensorList]);
+    }, [pid, valueDate]);
 
-    // useEffect(() => {
-    //     let total = 0;
-    //     sensorList.forEach(patch => {
-    //         if (!!patch?.totalDay && patch?.totalDay > 0) {
-    //             total += patch?.totalDay;
-    //         }
-    //     });
-    //     if (!!record) {
-    //         record.total = total;
-    //     }
-    //     setTotalDay(total)
-    // }, [effect]);
 
     return (
         <div>

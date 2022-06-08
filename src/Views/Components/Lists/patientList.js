@@ -51,9 +51,9 @@ const PatientListItem = (props) => {
 
     const listStyle = {
         borderRadius: "0.3em",
-        height: "75px",
+        minHeight: "75px",
         margin: "0 0 8px 0",
-        padding: "0.2em 2em",
+        padding: "0.3em 2em",
         background: "white",
         display: "flex",
         justifyContent: "space-around",
@@ -157,9 +157,6 @@ const PatientListItem = (props) => {
                     val_bpd = dataQueryInFlux?._value;
                 } else {
                     let value = dataQueryInFlux?._value || 0;
-                    if (key === "weight") {
-                        value = value * 2.2046
-                    }
                     arrayRes.push({ value, time: dataQueryInFlux?._time });
                 }
             },
@@ -171,6 +168,7 @@ const PatientListItem = (props) => {
                 if (key !== "alphamed_bpd" && key !== "ihealth_bpd") {
                     chart.trendData = arrayRes || [];
                     chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
+                    chart.lastTime = arrayRes[arrayRes.length - 1]?.time;
                 } else {
                     chart.val_bpd = val_bpd;
                 }
@@ -371,45 +369,29 @@ const PatientListItem = (props) => {
     const ChartSection = ({ width }) => (
         <Row justify="space-around" gutter={2} style={{ width: width }}>
             {chartBlockData.map((item, i) => {
-                if (item?._key === "alphamed_bpd") return null;
-
-                if (i !== 0)
-                    return (
-                        <React.Fragment key={i}>
-                            <Divider
-                                type="vertical"
-                                style={{
-                                    background: `${dividerColor}`,
-                                    opacity: "0.2",
-                                    height: "3em",
-                                }}
-                            ></Divider>
-                            <ChartsBlock
-                                Icon={item.icon}
-                                name={item.name}
-                                value={item.val}
-                                valueBpd={item?.val_bpd || 0}
-                                chartData={item.trendData}
-                                dataKey="value"
-                                strokeColor={item.color}
-                                keyChart={item?._key}
-                            />
-                        </React.Fragment>
-                    );
-                else
-                    return (
+                return (
+                    <div className="chart_item" style={{ display: "flex", alignItems: "center", width: "15%" }} key={i}>
+                        <Divider
+                            type="vertical"
+                            style={{
+                                background: `${dividerColor}`,
+                                opacity: "0.2",
+                                height: "3em",
+                            }}
+                        ></Divider>
                         <ChartsBlock
-                            key={i}
                             Icon={item.icon}
                             name={item.name}
-                            value={item.val}
+                            value={item?.val}
                             valueBpd={item?.val_bpd || 0}
-                            chartData={item.trendData}
+                            chartData={item?.trendData}
                             dataKey="value"
                             strokeColor={item.color}
                             keyChart={item?._key}
+                            lastTime={item?.lastTime}
                         />
-                    );
+                    </div>
+                );
             })}
         </Row>
     );

@@ -14,6 +14,7 @@ import BillingModule from "../../Views/BillingModule/BillingModule";
 import AuditPage from "../../Views/AuditPage/AuditPage";
 import PatientJourney from "../../Views/PatientJourney/patientJourney";
 import BillingSummary from "../../Views/BillingModule/BillingSummary";
+import Logger from "../../Views/logger";
 
 import { FaPlusSquare } from "react-icons/fa";
 import { MdAddAlert } from "react-icons/md";
@@ -174,6 +175,19 @@ const patientRoutes = [
         showOnMenu: true,
         icon: <AiOutlineAudit style={iconStyle} />,
     },
+    {
+        id: "00036",
+        name: "Logger",
+        path: "/logger",
+        component: Logger,
+        isPrivate: true,
+        exact: true,
+        showOnMenu: true,
+        icon: <AiOutlineAudit style={iconStyle} />,
+    },
+
+
+    
 ];
 
 export default patientRoutes;

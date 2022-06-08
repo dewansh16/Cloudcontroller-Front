@@ -129,8 +129,10 @@ const BillingModule = () => {
 
             setBillingsFilter(newArrBillings);
             setLoading(false);
+        } else {
+            setBillingSummary(billingSummary);
         }
-    }, [patientType]);
+    }, [billingSummary]);
 
     const renderTimeDisplay = (time) => {
         let hours = Math.floor(time / 3600)
@@ -208,6 +210,7 @@ const BillingModule = () => {
                         patientType={patientType}
                         billingSummary={billingSummary}
                         setLoadingParent={setLoading}
+                        valueDate={valueDate}
                     />
                 )
             }
@@ -405,6 +408,7 @@ const BillingModule = () => {
                                         if (val !== patientType) {
                                             setLoading(true);
                                             setPatientType(val);
+                                            getDataBillingSummary();
                                         }
                                     }}
                                     onClear={() => {
