@@ -35,6 +35,7 @@ const BillingModule = () => {
     const [loading, setLoading] = useState(true);
     const [billingSummary, setBillingSummary] = useState(null);
     const [billingsFilter, setBillingsFilter] = useState([]);
+    const [pidEdit, setPidEdit] = useState(null);
 
     const history = useHistory();
 
@@ -104,28 +105,28 @@ const BillingModule = () => {
                         newArrBillings.push(billing);
                     };
                 });
-            } 
-            
+            }
+
             if (patientType === "minutes") {
                 newArrBillings = billings;
                 billings?.map((billing, index) => {
                     arrayCPT.map(cpt => {
                         if (isJsonString(billing?.[cpt.code])) {
                             let arrayData = JSON.parse(billing?.[cpt.code]);
-                            if(!isArray(arrayData)) arrayData = [];
-        
+                            if (!isArray(arrayData)) arrayData = [];
+
                             let tmpTime = 0;
                             arrayData.map(item => {
                                 tmpTime += Number(item.task_time_spend);
                             })
-        
+
                             if (tmpTime >= cpt.number) {
                                 newArrBillings.splice(index, 1)
                             }
                         }
                     });
                 });
-            } 
+            }
 
             setBillingsFilter(newArrBillings);
             setLoading(false);
@@ -156,6 +157,8 @@ const BillingModule = () => {
     const handleMonthChange = (date, dateString) => {
         setValueDate(dateString);
     }
+
+    console.log("pid edit", pidEdit);
 
     const columns = [
         {
@@ -204,9 +207,9 @@ const BillingModule = () => {
             render: (dataIndex, record) => {
                 const associated = billingSummary?.patchData?.filter(item => item?.pid === record?.pid);
                 return (
-                    <CheckData 
-                        pid={record?.pid} 
-                        sensorList={associated} 
+                    <CheckData
+                        pid={record?.pid}
+                        sensorList={associated}
                         patientType={patientType}
                         billingSummary={billingSummary}
                         setLoadingParent={setLoading}
@@ -220,19 +223,25 @@ const BillingModule = () => {
             dataIndex: "99457",
             key: "99457",
             align: "center",
-            render: (dataIndex) => {
+            render: (dataIndex, record) => {
+                let tmpTime = 0;
                 if (isJsonString(dataIndex)) {
                     let arrayData = JSON.parse(dataIndex);
-                    let tmpTime = 0;
+                    if (!isArray(arrayData)) arrayData = [];
 
-                    if(!isArray(arrayData)) arrayData = [];
-
-                    if(arrayData.length > 0) {
+                    if (arrayData.length > 0) {
                         arrayData.map(item => {
                             tmpTime += Number(item.task_time_spend);
                         })
                     }
+                }
 
+                if (pidEdit === record?.pid) {
+                    return <Inputs
+                        style={{ width: "63px" }}
+                        defaultValue={renderTimeDisplay(tmpTime)}
+                    />
+                } else if (tmpTime > 0) {
                     return (
                         <div>{renderTimeDisplay(tmpTime)}</div>
                     )
@@ -244,19 +253,25 @@ const BillingModule = () => {
             dataIndex: "99458",
             key: "99458",
             align: "center",
-            render: (dataIndex) => {
+            render: (dataIndex, record) => {
+                let tmpTime = 0;
                 if (isJsonString(dataIndex)) {
                     let arrayData = JSON.parse(dataIndex);
-                    let tmpTime = 0;
+                    if (!isArray(arrayData)) arrayData = [];
 
-                    if(!isArray(arrayData)) arrayData = [];
-                    
-                    if(arrayData.length > 0) {
+                    if (arrayData.length > 0) {
                         arrayData.map(item => {
                             tmpTime += Number(item.task_time_spend);
                         })
                     }
+                }
 
+                if (pidEdit === record?.pid) {
+                    return <Inputs
+                        style={{ width: "63px" }}
+                        defaultValue={renderTimeDisplay(tmpTime)}
+                    />
+                } else if (tmpTime > 0) {
                     return (
                         <div>{renderTimeDisplay(tmpTime)}</div>
                     )
@@ -268,19 +283,25 @@ const BillingModule = () => {
             dataIndex: "99091",
             key: "99091",
             align: "center",
-            render: (dataIndex) => {
+            render: (dataIndex, record) => {
+                let tmpTime = 0;
                 if (isJsonString(dataIndex)) {
                     let arrayData = JSON.parse(dataIndex);
-                    let tmpTime = 0;
+                    if (!isArray(arrayData)) arrayData = [];
 
-                    if(!isArray(arrayData)) arrayData = [];
-                    
-                    if(arrayData.length > 0) {
+                    if (arrayData.length > 0) {
                         arrayData.map(item => {
                             tmpTime += Number(item.task_time_spend);
                         })
                     }
+                }
 
+                if (pidEdit === record?.pid) {
+                    return <Inputs
+                        style={{ width: "63px" }}
+                        defaultValue={renderTimeDisplay(tmpTime)}
+                    />
+                } else if (tmpTime > 0) {
                     return (
                         <div>{renderTimeDisplay(tmpTime)}</div>
                     )
@@ -292,12 +313,24 @@ const BillingModule = () => {
             key: 'edit',
             align: "center",
             width: 130,
-            render: () => {
+            render: (dataIndex, record) => {
                 return (
                     <div>
-                        <Button type="secondary" disabled={true}>
-                            Edit
-                        </Button>
+                        {pidEdit === record?.pid ? (
+                            <Button type="secondary" disabled={false} onClick={() => {
+                                setPidEdit(null);
+                            }}>
+                                Save
+                            </Button>
+                        ) : (
+                            <Button type="secondary" disabled={false} onClick={() => {
+                                let edit = record?.pid;
+                                if (edit === pidEdit) { edit = null };
+                                setPidEdit(edit);
+                            }}>
+                                Edit
+                            </Button>
+                        )}
                     </div>
                 )
             }
@@ -311,7 +344,7 @@ const BillingModule = () => {
                 const patient = record?.patient_datum || {};
                 return (
                     <div>
-                        <Button 
+                        <Button
                             type="secondary"
                             onClick={() => {
                                 history.push({
@@ -320,10 +353,10 @@ const BillingModule = () => {
                                         pid: record.pid,
                                         name:
                                             `${patient.title === undefined
-                                            ? ""
-                                            : patient.title}` 
+                                                ? ""
+                                                : patient.title}`
                                             + " " +
-                                            patient.fname 
+                                            patient.fname
                                             + " " +
                                             patient.lname,
                                         mr: patient.med_record,
@@ -404,7 +437,7 @@ const BillingModule = () => {
                                 <Select
                                     defaultValue=""
                                     style={{ width: "100%", minWidth: "11rem" }}
-                                    onSelect={(val) => { 
+                                    onSelect={(val) => {
                                         if (val !== patientType) {
                                             setLoading(true);
                                             setPatientType(val);
@@ -459,7 +492,7 @@ const BillingModule = () => {
                 style={{ padding: "0", backgroundColor: "white", margin: "4px" }}
             >
                 {loading ? (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "calc(100vh - 99px)"}}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "calc(100vh - 99px)" }}>
                         <Spin />
                     </div>
                 ) : (

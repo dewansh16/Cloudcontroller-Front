@@ -1803,6 +1803,18 @@ function GraphVisualizer() {
         return associatedList;
     }, [patient]);
 
+    const formatTypeSensor = (type) => ({
+        "value": "temp",
+        "spo2": "spo2",
+        "sys": "bps",
+        "dia": "bpd",
+        "weight": "weight",
+        "bps": "bps",
+        "bpd": "bpd",
+        "HR": "ecg_hr",
+        "RR": "ecg_rr"
+    }[type]);
+
     const fetchDataAlert = () => {
         alertApi.getPatientAlerts(pid).then((res) => {
             let alerts = res.data?.response?.data || [];
@@ -1811,8 +1823,8 @@ function GraphVisualizer() {
             for (let index = 0; index < length; index++) {
                 const alert = alerts[index];
                 activeTrendsArray.forEach(trend => {
-                    trend.alerts = [];
-                    if (trend?._key === alert?.value_of) {
+                    if (trend?._key === formatTypeSensor(alert?.value_of)) {
+                        console.log("-------------------------------------------");
                         trend.alerts.push(alert);
                     }
                 });
@@ -1823,10 +1835,10 @@ function GraphVisualizer() {
         })
     };
 
-
     const getDataChartsActive = () => {
         activeTrendsArray.forEach((chart, index) => {
             chart.data = [];
+            chart.alerts = [];
 
             if (chart?._key === "bpd" || chart?._key === "bps") {
                 let keySensor = "alphamed";
@@ -2774,21 +2786,23 @@ function GraphVisualizer() {
                                     //                         {index + 1}: {trend?.name}
                                     //                     </div>
 
-                                    //                     {trend?.alerts?.map((alert, idx) => {
-                                    //                         return (
-                                    //                             <div
-                                    //                                 key={`${alert?.device_type}_${idx}_${alert?.time}`}
-                                    //                                 className="alert-item"
-                                    //                             >
-                                    //                                 <div className="" style={{ textTransform: "uppercase" }}>
-                                    //                                     {`${alert?.device_type} ${alert?.status}: ${alert?.value || 0}`}
+                                    //                     <div className='alert-item-container'>
+                                    //                         {trend?.alerts?.map((alert, idx) => {
+                                    //                             return (
+                                    //                                 <div
+                                    //                                     key={`${alert?.device_type}_${idx}_${alert?.time}`}
+                                    //                                     className="alert-item"
+                                    //                                 >
+                                    //                                     <div className="" style={{ textTransform: "uppercase" }}>
+                                    //                                         {`${alert?.device_type} ${alert?.status}: ${alert?.value || 0}`}
+                                    //                                     </div>
+                                    //                                     <div className="">
+                                    //                                         Local Time: {alert?.time}
+                                    //                                     </div>
                                     //                                 </div>
-                                    //                                 <div className="">
-                                    //                                     Local Time: {alert?.time}
-                                    //                                 </div>
-                                    //                             </div>
-                                    //                         )
-                                    //                     })}
+                                    //                             )
+                                    //                         })}
+                                    //                     </div>
                                     //                 </div>
 
                                     //             )

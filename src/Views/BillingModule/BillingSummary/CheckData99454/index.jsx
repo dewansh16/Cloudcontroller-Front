@@ -12,11 +12,17 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
 
     const checkTotalNumberDateHaveDataFromInflux = (startDate = "", sensorType = "", patch) => {
         const date = new Date(valueDate);
-        const start = new Date(date.setDate(1));
-        start.setHours(0, 0, 1);
+        const firstDayOfMonth = new Date(date.setDate(1));
+        firstDayOfMonth.setHours(0, 0, 1);
+
+        let start = new Date(startDate);
         const end = new Date();
 
         if (start.getTime() > end.getTime()) return;
+
+        if (start?.getTime() < firstDayOfMonth?.getTime()) {
+            start = firstDayOfMonth;
+        }
 
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';

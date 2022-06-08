@@ -25,7 +25,6 @@ function FetchAlertData(pid, isAttended) {
     useEffect(() => {
         setLoading(true);
         alertApi.getPatientAlerts(pid).then((res) => {
-            console.log("res", res);
             let alerts = res.data?.response?.data || [];
             if (isAttended === "attended") {
                 // alerts = alerts.filter((item) => {
@@ -192,8 +191,6 @@ const Alerts = (props) => {
     const [isAttended, setIsAttended] = useState('notAttended')
 
     const [data, isLoading] = FetchAlertData(pid, isAttended);
-
-    console.log("data", data);
 
     const toPatientDetails = () => {
         props.history.push(`/dashboard/patient/details/${pid}`);
