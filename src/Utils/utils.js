@@ -17,6 +17,12 @@ export const isJsonString = (str) => {
     return true;
 }
 
-export const takeDecimalNumber = (val, digits = 10) => {
-    return Math.round(val * digits) / digits;
+Number.prototype.toFixedDown = function(digits) {
+    var re = new RegExp("(\\d+\\.\\d{" + digits + "})(\\d)"),
+        m = this.toString().match(re);
+    return m ? parseFloat(m[1]) : this.valueOf();
+};
+
+export const takeDecimalNumber = (val, digits = 1) => {
+    return val.toFixedDown(digits);
 };
