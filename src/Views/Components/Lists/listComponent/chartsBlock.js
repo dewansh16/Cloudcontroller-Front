@@ -83,7 +83,7 @@ export default function ChartsBlock({
                                     textAlign: "center",
                                 }}
                             >
-                                {Math.round(value * 100) / 100}
+                                {takeDecimalNumber(value)}
                             </h3>
                             <Divider style={{ margin: "0px" }} />
                             <h3
@@ -93,11 +93,11 @@ export default function ChartsBlock({
                                     textAlign: "center",
                                 }}
                             >
-                                {Math.round(valueBpd * 100) / 100}
+                                {takeDecimalNumber(valueBpd)}
                             </h3>
                         </div>
                     ) : (
-                        <h3 style={{ color: strokeColor }}>{Math.round(value * 100) / 100}</h3>
+                        <h3 style={{ color: strokeColor }}>{takeDecimalNumber(value)}</h3>
                     )}
                 </Col>
             </Tooltip>
