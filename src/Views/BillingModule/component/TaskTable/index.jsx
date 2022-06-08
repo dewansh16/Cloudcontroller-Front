@@ -88,7 +88,7 @@ const TaskTable = (props) => {
                                     {item["task_note"]}
                                 </div>
                                 <div className="bm-item-body" style={{ width: "20%" }}>
-                                    <span style={{ paddingRight: "10px" }} id={`item-99457-time-spent-${item.task_id}`}>
+                                    <span style={{ paddingRight: "10px" }} id={`item-${CPT_CODE}-time-spent-${item.task_id}`}>
                                         {`${renderTimeDisplay(item['task_time_spend'])}`}
                                     </span>
                                     {renderTimerClock(item, CPT_CODE, disabledBtnAdd)}

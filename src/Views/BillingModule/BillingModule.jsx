@@ -402,7 +402,7 @@ function BillingModule() {
             return (
                 <CusBtn
                     onClick={() => {
-                        if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
+                        if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458 || cptCode == CPT_CODE.CPT_99091) {
                             if (document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)) {
                                 document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "none";
                             }
@@ -429,7 +429,7 @@ function BillingModule() {
                             stopCountTimer();
                             setTimerTask(false);
                             callUpdateBillingTasks(cptCode, item)
-                            if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
+                            if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458 || cptCode == CPT_CODE.CPT_99091 ) {
                                 if (document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`)) {
                                     document.getElementById(`item-${cptCode}-time-spent-${item.task_id}`).style.display = "initial";
                                 }
@@ -1507,15 +1507,32 @@ function BillingModule() {
         }
         if (cptCode == CPT_CODE.CPT_99091) {
             if (isCodeExist) {
-                let updateData = {
-                    code: cptCode,
-                    bill_date: date_string,
-                    pid: location.state.pid,
-                    billing_id: billingId,
-                    date: taskDateVal,
-                    staff_name: taskNameVal,
-                    task_note: taskNoteVal,
-                    task_time_spend: item.task_time_spend
+                let updateData = {};
+                if (item.task_id) {
+                    updateData = {
+                        code: cptCode,
+                        bill_date: date_string,
+                        pid: location.state.pid,
+                        billing_id: billingId,
+                        task_date: item.task_date,
+                        task_id: item.task_id,
+                        staff_name: item.staff_name,
+                        task_note: item.task_note,
+                        task_time_spend: item.task_time_spend
+                    }
+                } else {
+                    valiSuccess = validateFormAddTask(taskNameVal, taskNoteVal);
+
+                    updateData = {
+                        code: cptCode,
+                        bill_date: date_string,
+                        pid: location.state.pid,
+                        billing_id: billingId,
+                        task_date: taskDateVal,
+                        staff_name: taskNameVal,
+                        task_note: taskNoteVal,
+                        task_time_spend: item.task_time_spend
+                    }
                 }
                 billingApi
                     .updateBillingTask(
@@ -3318,9 +3335,9 @@ function BillingModule() {
                                 style={addTaskState ? { filter: "blur(4px)" } : null}
                                 className="bm-sensor-mid"
                             >
-                                {secondTwentyData.date ? (
+                                { secondTotalTime >= TOTAL_HOURS_FOR_EACH_99458_BILLED*2 ? (
                                     <div style={{ fontSize: "1.2rem" }}>
-                                        {`CPT code: 99458 enabled at ${secondTwentyData.date}`}
+                                        {`CPT code: 99458 enabled at ${moment(secondTwentyTasks[secondTwentyTasks.length - 1].task_date).format("YYYY-MM-DD")}`}
                                     </div>
                                 ) : (
                                     <div style={{ fontSize: "1.2rem" }}>
@@ -4149,7 +4166,7 @@ function BillingModule() {
                                                     borderLeft: "0",
                                                 }}
                                             >
-                                                {`Patient Email: ${patientData ? patientData.email : ""
+                                                {`Patient Email: ${patientData ? (patientData.email || '') : ""
                                                     }`}
                                             </div>
                                             <div
@@ -4215,7 +4232,7 @@ function BillingModule() {
                                                 padding: "0% 2%",
                                             }}
                                         >
-                                            {`Address: ${patientData ? patientData.street : ""}`}
+                                            {`Address: ${patientData ? (patientData.street || '') : ""}`}
                                         </div>
                                     </div>
                                 </div>
