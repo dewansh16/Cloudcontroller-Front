@@ -913,7 +913,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                                             null
                                                     ))
                                                 }
-                                                <Line type="monotone" dataKey="value" stroke={trend.color1} strokeWidth={3} dot={false} />
+                                                <Line type="monotone" dataKey="value" stroke={trend.color1} strokeWidth={3} dot={true} />
                                             </LineChart>
                                         </ResponsiveContainer>
                                     </div>

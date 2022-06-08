@@ -2,6 +2,7 @@ import React from "react";
 import { Col, Divider, Tooltip } from "antd";
 import { takeDecimalNumber } from "../../../../Utils/utils";
 import SmallLineChart from "../../Charts/smallCharts/lineChart";
+import moment from "moment";
 
 export default function ChartsBlock({
     Icon,
@@ -12,7 +13,8 @@ export default function ChartsBlock({
     dataKey,
     strokeColor,
     span = [1, 1, 2],
-    keyChart
+    keyChart,
+    lastTime
 }) {
     const toolTipConfig = {
         // "Temperature": `${value}° F`,
@@ -23,93 +25,116 @@ export default function ChartsBlock({
         // "Blood Pressure": `${value} - ${valueBpd} mmHg`
     };
 
-    // const renderValueByKey = (key) => {
-    //     switch (key) {
-    //         case "temp":
-    //             const celsius = 5 / 9 * (value - 32);
-    //             return (
-    //                 <div style={{ textAlign: "center", color: strokeColor }}>
-    //                     <div>{`${takeDecimalNumber(value)}°F`}</div>
-    //                     <Divider style={{ margin: "0px" }} />
-    //                     <div>{`${takeDecimalNumber(celsius)}°C`}</div>
-    //                 </div>
-    //             )    
-    //         case "blood_pressuer":
-    //             return (
-    //                 <div style={{ textAlign: "center", color: strokeColor }}>
-    //                     <div>{`${takeDecimalNumber(value)}mmHg`}</div>
-    //                     <Divider style={{ margin: "0px" }} />
-    //                     <div>{`${takeDecimalNumber(valueBpd)}mmHg`}</div>
-    //                 </div>
-    //             )               
+    console.log("lastTime", lastTime);
+
+    const renderValueByKey = (key) => {
+        switch (key) {
+            case "blood_pressuer":
+                return (
+                    <div>
+                        <h3
+                            style={{
+                                color: strokeColor,
+                                marginBottom: "0px",
+                                textAlign: "center",
+                                marginBottom: "0px"
+                            }}
+                        >
+                            {takeDecimalNumber(value)}
+                        </h3>
+                        <Divider style={{ margin: "0px" }} />
+                        <h3
+                            style={{
+                                color: strokeColor,
+                                marginBottom: "0px",
+                                textAlign: "center",
+                            }}
+                        >
+                            {takeDecimalNumber(valueBpd)}
+                        </h3>
+                    </div>
+                )
+                
+            case "weight":  
+                const lbs = value * 2.2046;
+                return (
+                    <div>
+                        <h3
+                            style={{
+                                color: strokeColor,
+                                marginBottom: "0px",
+                                textAlign: "center",
+                            }}
+                        >
+                            {`${takeDecimalNumber(value)}kg`}
+                        </h3>
+                        <Divider style={{ margin: "0px" }} />
+                        <h3
+                            style={{
+                                color: strokeColor,
+                                marginBottom: "0px",
+                                textAlign: "center",
+                            }}
+                        >
+                            {`${takeDecimalNumber(lbs)}lbs`}
+                        </h3>
+                    </div>
+                )
         
-    //         default:
-    //             break;
-    //     }
-    // };
+            default:
+                return (
+                    <h3 style={{ color: strokeColor, marginBottom: "0px" }}>{takeDecimalNumber(value)}</h3>
+                )
+        }
+    };
 
     return (
         <>
-            <Tooltip title={name}>
-                <Col
-                    span={span[0]}
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                    flex={0.5}
-                >
-                    {Icon}
-                </Col>
-            </Tooltip>
-            <Tooltip title={toolTipConfig[name]}>
-                <Col
-                    span={span[1]}
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                    flex={1}
-                >
-                    {/* {renderValueByKey(keyChart)} */}
-                    {name === "Blood Pressure" ? (
-                        <div>
-                            <h3
-                                style={{
-                                    color: strokeColor,
-                                    marginBottom: "0px",
-                                    textAlign: "center",
-                                }}
-                            >
-                                {takeDecimalNumber(value)}
-                            </h3>
-                            <Divider style={{ margin: "0px" }} />
-                            <h3
-                                style={{
-                                    color: strokeColor,
-                                    marginBottom: "0px",
-                                    textAlign: "center",
-                                }}
-                            >
-                                {takeDecimalNumber(valueBpd)}
-                            </h3>
+            <div style={{ display: "flex", alignItems: "center", flexDirection: "column", width: "100%", height: "100%" }}>
+                <div style={{ display: "flex", alignItems: "center", width: "100%", height: "80%" }}>
+                    <Tooltip title={name}>
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flex: "0",
+                                marginRight: keyChart === "blood_pressuer" ? "-3px" : "6px",
+                                marginLeft: keyChart === "blood_pressuer" ? "-4px" : "0px",
+                            }}
+                        >
+                            {Icon}
                         </div>
-                    ) : (
-                        <h3 style={{ color: strokeColor }}>{takeDecimalNumber(value)}</h3>
-                    )}
-                </Col>
-            </Tooltip>
-            <Col span={span[2]} style={{ display: "flex", alignItems: "center" }}>
-                <div style={{ width: "100%", height: "100%", marginBottom: `${keyChart === "alphamed_bps" ? "-20px" : "0px"}` }}>
-                    <SmallLineChart
-                        chartData={chartData}
-                        dataKey={dataKey}
-                        strokeColor={strokeColor}
-                    />
+                    </Tooltip>
+                    <Tooltip title={toolTipConfig[name]}>
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                maxWidth: "fit-content",
+                                marginRight: "7px"
+                            }}
+                        >
+                            {renderValueByKey(keyChart)}
+                        </div>
+                    </Tooltip>
+                    <div style={{ display: "flex", alignItems: "center", flexDirection: "column", width: "100%", height: "90%" }}>
+                        <div style={{ width: "100%", height: "100%" }}>
+                            <SmallLineChart
+                                chartData={chartData}
+                                dataKey={dataKey}
+                                strokeColor={strokeColor}
+                            />
+                        </div>
+                    </div>
                 </div>
-            </Col>
+                {!!lastTime && (
+                    <span style={{ fontSize: "12px", fontWeight: "400", color: strokeColor }}>
+                        {moment(lastTime).format("MMM/DD/YYYY hh:mm:ss a")}
+                    </span>
+                )}
+            </div>
         </>
     );
 }

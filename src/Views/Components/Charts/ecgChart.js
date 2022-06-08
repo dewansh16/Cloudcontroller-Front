@@ -9,6 +9,7 @@ import * as htmlToImage from "html-to-image";
 import { takeDecimalNumber } from "../../../Utils/utils";
 
 import { io } from "socket.io-client";
+import { InfluxDB } from "@influxdata/influxdb-client";
 
 export default function ECGChart({ pid, themeMode, ThemeButton }) {
     //FIXME: handle error using hasError
@@ -29,14 +30,64 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
 
     const chartData = [100, 200, 125, 113, 155, 199, 822, 456, 120, 354, 123, 233];
 
-    const [dataNumberShow, setDataNumber] = useState({
+    const objNumberShow = {
         hr: 0,
         spo2: 0,
         rr: 0,
         tempinF: 0,
         pi: 0,
         pr: 0
-    });
+    }
+    const [dataNumberShow, setDataNumber] = useState(objNumberShow);
+
+    const processDataForSensor = (key, newArrChart, chart) => {
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
+
+        const end = new Date();
+        const date = new Date();
+        const start = new Date(date.setDate(date.getDate() - 7));
+
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+
+        const query = `from(bucket: "emr_dev")
+                |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
+                |> filter(fn: (r) => r["_measurement"] == "${pid}_${key}")
+                |> yield(name: "mean")`;
+
+        const arrayRes = [];
+        let val_bpd = 0;
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                // console.log("dataQueryInFlux", dataQueryInFlux);
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+              
+            },
+        })
+    }
+
+    const renderKeyQuery = (key) => ({
+        "hr": "ecg_hr",
+        "rr": "ecg_rr",
+        "spo2": "spo2",
+        "tempinF": "temp",
+        "pi": "spo2_pi",
+        "pr": "spo2_pr",
+    }[key]);
+
+    useEffect(() => {
+        Object.keys(objNumberShow).forEach(key => {
+            const keyQuery = renderKeyQuery(key);
+            processDataForSensor(keyQuery);
+        })
+    }, []);
 
     useEffect(() => {
         var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
