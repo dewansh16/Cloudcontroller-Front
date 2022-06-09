@@ -485,6 +485,10 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                 //     console.log("start", end, "end.toISOString()", end.toISOString());
                 //     console.log("query", arrayRes?.length, query);
                 // }
+
+                if (keySensor === "alphamed_bpd") {
+                    console.log("arrayRes", arrayRes);
+                }
                 data.data = arrayRes;
                 newArrayData.push(data);
                 setActiveTrendsArray(newArrayData);
@@ -510,24 +514,24 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     };
 
     useEffect(() => {
-        var current_date = new Date()
-        var current_date_string = ''
+        // var current_date = new Date()
+        // var current_date_string = ''
 
-        if (current_date.getMonth() + 1 < 10 || current_date.getDate() < 10) {
-            if (current_date.getMonth() + 1 < 10 && current_date.getDate() < 10) {
-                current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-0${current_date.getDate()}`
-            }
-            else if (current_date.getMonth() + 1 < 10 && current_date.getDate() >= 10) {
-                current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-${current_date.getDate()}`
-            }
-            else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() < 10) {
-                current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-0${current_date.getDate()}`
-            }
-        }
-        else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() >= 10) {
-            current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-${current_date.getDate()}`
-        }
-        setAntd_selected_date_val(current_date_string)
+        // if (current_date.getMonth() + 1 < 10 || current_date.getDate() < 10) {
+        //     if (current_date.getMonth() + 1 < 10 && current_date.getDate() < 10) {
+        //         current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-0${current_date.getDate()}`
+        //     }
+        //     else if (current_date.getMonth() + 1 < 10 && current_date.getDate() >= 10) {
+        //         current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-${current_date.getDate()}`
+        //     }
+        //     else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() < 10) {
+        //         current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-0${current_date.getDate()}`
+        //     }
+        // }
+        // else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() >= 10) {
+        //     current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-${current_date.getDate()}`
+        // }
+        // setAntd_selected_date_val(current_date_string)
     }, []);
 
     useEffect(() => {
