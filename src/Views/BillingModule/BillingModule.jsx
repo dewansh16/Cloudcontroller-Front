@@ -2622,7 +2622,7 @@ function BillingModule() {
                                     className="bm-header-dot"
                                     style={
                                         initialStepDoneState
-                                            ? lastStateDone
+                                            ? Math.floor(totalTime99091 / 60) >= TOTAL_HOURS_FOR_EACH_99091_BILLED
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
@@ -4058,7 +4058,7 @@ function BillingModule() {
                                     </div>
                                     <div
                                         style={{
-                                            height: "46%",
+                                            // height: "46%",
                                             width: "100%",
                                             border: "2px solid #ffa000a1",
                                             borderRadius: "10px",

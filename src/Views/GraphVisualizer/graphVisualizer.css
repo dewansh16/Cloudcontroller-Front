@@ -443,12 +443,12 @@ animation: pulse 1s infinite;
 }
 
 .alert-container .alert-item-container .alert-item {
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 1rem;
 }
 
-.alert-container .alert-item-container .alert-item:first-child {
+/* .alert-container .alert-item-container .alert-item:first-child {
     padding-top: 0rem;
-}
+} */
 
 .alert-container .alert-item-container .alert-item:last-child {
     padding-bottom: 0rem;
