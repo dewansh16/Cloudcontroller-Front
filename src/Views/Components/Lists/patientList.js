@@ -11,6 +11,7 @@ import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
 import ChartsBlock from "./listComponent/chartsBlock";
 import { Button } from "../../../Theme/Components/Button/button";
+import moment from "moment";
 
 // import { arrDataChart } from "../../arrayChart";
 
@@ -132,6 +133,10 @@ const PatientListItem = (props) => {
             color: Colors.yellow,
             trendData: []
         },
+        {
+            _key: 'gateway_keep_alive_time',
+            valueGateway: 0
+        },
     ];
 
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
@@ -148,12 +153,18 @@ const PatientListItem = (props) => {
                 |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
                 |> yield(name: "mean")`;
 
+        if (key === "gateway_keep_alive_time") {
+            console.log("query", query);
+        }
+
         const arrayRes = [];
         let val_bpd = 0;
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                if (key === "alphamed_bpd" || key === "ihealth_bpd") {
+                if (key === "gateway_keep_alive_time") {
+                    chart.valueGateway = new Date(dataQueryInFlux?._value);
+                } else if (key === "alphamed_bpd" || key === "ihealth_bpd") {
                     val_bpd = dataQueryInFlux?._value;
                 } else {
                     let value = dataQueryInFlux?._value || 0;
@@ -210,13 +221,13 @@ const PatientListItem = (props) => {
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        const timeInterval = setInterval(() => {
-            getDataSensorFromInfluxDB();
-        }, 10000);
+        // const timeInterval = setInterval(() => {
+        //     getDataSensorFromInfluxDB();
+        // }, 10000);
 
-        return () => {
-            clearInterval(timeInterval);
-        }
+        // return () => {
+        //     clearInterval(timeInterval);
+        // }
     }, [props.pid, props.dataFilterOnHeader.valDuration]);
 
     // React.useEffect(() => {
@@ -370,26 +381,42 @@ const PatientListItem = (props) => {
         <Row justify="space-around" gutter={2} style={{ width: width }}>
             {chartBlockData.map((item, i) => {
                 return (
-                    <div className="chart_item" style={{ display: "flex", alignItems: "center", width: "15%" }} key={i}>
-                        <Divider
-                            type="vertical"
-                            style={{
-                                background: `${dividerColor}`,
-                                opacity: "0.2",
-                                height: "3em",
-                            }}
-                        ></Divider>
-                        <ChartsBlock
-                            Icon={item.icon}
-                            name={item.name}
-                            value={item?.val}
-                            valueBpd={item?.val_bpd || 0}
-                            chartData={item?.trendData}
-                            dataKey="value"
-                            strokeColor={item.color}
-                            keyChart={item?._key}
-                            lastTime={item?.lastTime}
-                        />
+                    <div className="chart_item" style={{ display: "flex", alignItems: "center", width: item?._key === "gateway_keep_alive_time" ? "8%" : "15%" }} key={i}>
+                        {item?._key !== "gateway_keep_alive_time" ? (
+                            <>
+                                <Divider
+                                    type="vertical"
+                                    style={{
+                                        background: `${dividerColor}`,
+                                        opacity: "0.2",
+                                        height: "3em",
+                                    }}
+                                ></Divider>
+                                <ChartsBlock
+                                    Icon={item.icon}
+                                    name={item.name}
+                                    value={item?.val}
+                                    valueBpd={item?.val_bpd || 0}
+                                    chartData={item?.trendData}
+                                    dataKey="value"
+                                    strokeColor={item.color}
+                                    keyChart={item?._key}
+                                    lastTime={item?.lastTime}
+                                />
+                            </>
+                        ) : (
+                            <>
+                                <Divider
+                                    type="vertical"
+                                    style={{
+                                        background: `${dividerColor}`,
+                                        opacity: "0.2",
+                                        height: "3em",
+                                    }}
+                                ></Divider>
+                                <div>{!!item?.valueGateway ? moment(item?.valueGateway).format("MMM/DD/YYYY hh:mm:ss a") : "NA"}</div>
+                            </>
+                        )}
                     </div>
                 );
             })}
@@ -457,7 +484,7 @@ const PatientListItem = (props) => {
                     }
                     onClick={pushToPatientDetails}
                 >
-                    <div style={{ width: "2%" }}>
+                    <div style={{ width: "1%" }}>
                         <Button
                             style={{ padding: "0em" }}
                             onClick={ShowPatientDetails}
@@ -468,7 +495,7 @@ const PatientListItem = (props) => {
                             })}
                         </Button>
                     </div>
-                    <BedDetailsSection width="15%" />
+                    <BedDetailsSection width="11%" />
 
                     {/* <CustomDivider />
                     <NameSection width="10%" /> */}
@@ -477,7 +504,7 @@ const PatientListItem = (props) => {
                     <EwsSection width="5%" /> */}
 
                     <CustomDivider />
-                    <ChartSection width="83%" />
+                    <ChartSection width="78%" />
                 </div>
             );
         } else {
