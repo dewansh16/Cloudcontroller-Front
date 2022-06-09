@@ -486,9 +486,6 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                 //     console.log("query", arrayRes?.length, query);
                 // }
 
-                if (keySensor === "alphamed_bpd") {
-                    console.log("arrayRes", arrayRes);
-                }
                 data.data = arrayRes;
                 newArrayData.push(data);
                 setActiveTrendsArray(newArrayData);
