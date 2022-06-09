@@ -1787,7 +1787,7 @@ function BillingModule() {
             });
     }
 
-    const shortTypeQueryOfSensor = (patchType) => {
+    const shortTypeQueryOfSensor = (patchType, isTimestamp) => {
         switch (patchType) {
             case "temperature":
                 return "temp"
@@ -1796,12 +1796,11 @@ function BillingModule() {
             case "spo2":
                 return "spo2"
             case "ecg":
-                return "ecg_hr"
+                return isTimestamp ? "ecg" : "ecg_hr"
             case "alphamed":
-                return "alphamed_bpd"
+                return isTimestamp ? "alphamed" : "alphamed_bpd"
             case "ihealth":
-                return "ihealth_bpd"
-
+                return isTimestamp ? "ihealth" : "ihealth_bpd"
             default:
                 break;
         }
@@ -2062,10 +2061,10 @@ function BillingModule() {
                         res.data.response.patchData?.forEach((patch) => {
                             const startDate = getFirstDateMonitored(patch) || "";
                             // const endDate = getLastDateMonitored(patch) || "";
-                            const typeQuery = shortTypeQueryOfSensor(patch["patches.patch_type"]);
                           
-                            if (!!startDate && !!typeQuery) {
-                                checkTotalNumberDateHaveDataFromInflux(startDate, typeQuery, patch);
+                            if (!!startDate && !!patch["patches.patch_type"]) {
+                                checkDateFromInflux(startDate, patch["patches.patch_type"], patch);
+                                // checkTotalNumberDateHaveDataFromInflux(startDate, patch["patches.patch_type"], patch);
                             }
                         })
 
@@ -2245,33 +2244,40 @@ function BillingModule() {
         ]
     }
 
-    const checkTotalNumberDateHaveDataFromInflux = (startDate = "", sensorType = "", patch) => {
+    const checkDateFromInflux = (startDate, sensorType, patch) => {
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
+
         const start = new Date(startDate);
         const end = new Date();
 
+        const typeQuery = shortTypeQueryOfSensor(sensorType, true);
         if (start.getTime() > end.getTime()) return;
-
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
 
         const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
         const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
-                |> filter(fn: (r) => r["_measurement"] == "${location.state.pid}_${sensorType}")
+                |> filter(fn: (r) => r["_measurement"] == "${location.state.pid}_${typeQuery}_timestamp")
                 |> yield(name: "mean")
-            `
+            `   
 
+        const timeFilter = currentDateApi ? new Date(currentDateApi) : new Date();
         const arrDateQuery = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const o = tableMeta.toObject(row);
-                let time = new Date(o._time);
-                time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
+                let time = new Date(o._value);
                 
-                if (!arrDateQuery.includes(time)) {
-                    arrDateQuery.push(time);
+                if (
+                    Number(time.getFullYear()) === Number(timeFilter.getFullYear()) 
+                    && Number(time.getMonth()) === Number(timeFilter.getMonth())
+                ) {
+                    time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
+                    if (!arrDateQuery.includes(time)) {
+                        arrDateQuery.push(time);
+                    }
                 }
             },
             error(error) {
@@ -2282,7 +2288,49 @@ function BillingModule() {
                 patch.datesInflux = arrDateQuery;
             },
         })
-    };
+    }
+
+    // const checkTotalNumberDateHaveDataFromInflux = (startDate = "", sensorType = "", patch) => {
+    //     const start = new Date(startDate);
+    //     const end = new Date();
+
+    //     const typeQuery = shortTypeQueryOfSensor(sensorType, false);
+    //     if (start.getTime() > end.getTime()) return;
+
+    //     const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+    //     const org = 'live247';
+
+    //     const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+    //     const queryApi = client.getQueryApi(org);
+
+    //     const query = `from(bucket: "emr_dev")
+    //             |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
+    //             |> filter(fn: (r) => r["_measurement"] == "${location.state.pid}_${typeQuery}")
+    //             |> yield(name: "mean")
+    //         `
+
+    //     const arrDateQuery = [];
+    //     queryApi.queryRows(query, {
+    //         next(row, tableMeta) {
+    //             const o = tableMeta.toObject(row);
+    //             let time = new Date(o._time);
+    //             time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
+                
+    //             if (!arrDateQuery.includes(time)) {
+    //                 arrDateQuery.push(time);
+    //             }
+    //         },
+    //         error(error) {
+    //             console.log('ERROR', query)
+    //         },
+    //         complete() {
+    //             patch.totalDay = arrDateQuery?.length;
+    //             patch.datesInflux = arrDateQuery;
+    //             const typeQueryTimestamp = shortTypeQueryOfSensor(sensorType, true);
+    //             checkDateFromInflux(start, end, typeQueryTimestamp, patch);
+    //         },
+    //     })
+    // };
 
     const numberOfNightsBetweenDates = (start, end) => {
         let dayCount = 0;
@@ -2292,6 +2340,12 @@ function BillingModule() {
         };
 
         return dayCount
+    }
+
+    function sortDate(a, b) {
+        const first = new Date(a).getTime();
+        const last = new Date(b).getTime();
+        return (first > last) - (first < last)
     }
 
     const filterDeviceAssociatedByDate = useMemo(() => {
@@ -2306,10 +2360,11 @@ function BillingModule() {
 
         for (let index = 0; index < patchArray.length; index++) {
             const patch = patchArray[index];
+            patch?.datesInflux?.sort(sortDate);
 
             if (patch?.datesInflux?.length > 0) {
-                const firstDateMonitored = new Date(patch.datesInflux[0]);
-                const lastDateMonitored = new Date(patch.datesInflux[patch.datesInflux?.length - 1])
+                const firstDateMonitored = new Date(patch?.datesInflux[0]);
+                const lastDateMonitored = new Date(patch?.datesInflux[patch?.datesInflux?.length - 1]);
                 if (
                     Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear()) 
                     && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
@@ -2334,6 +2389,7 @@ function BillingModule() {
         let result = 0;
         if (totalDayMonitored > TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
             result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
+            totalDayMonitored = totalDayMonitored - (TOTAL_HOURS_FOR_EACH_SENSOR_BILLED * result);
         }
 
         if (result > 0 
@@ -2348,6 +2404,61 @@ function BillingModule() {
 
         return { list: newArr, totalDayMonitored, billedUnit: result };
     }, [patchArray, currentDateApi, associatedSensorsState]);
+
+    // const filterDeviceAssociatedByDate = useMemo(() => {
+    //     if (!associatedSensorsState) return false;
+
+    //     const newArr = [];
+    //     let totalDayMonitored = 0;
+
+    //     let minDate = null;
+    //     let maxDate = null;
+    //     const timeFilter = new Date(currentDateApi);
+
+    //     for (let index = 0; index < patchArray.length; index++) {
+    //         const patch = patchArray[index];
+
+    //         if (patch?.datesInflux?.length > 0) {
+    //             const firstDateMonitored = new Date(patch.datesInflux[0]);
+    //             const lastDateMonitored = new Date(patch.datesInflux[patch.datesInflux?.length - 1])
+    //             if (
+    //                 Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear()) 
+    //                 && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
+    //             ) {
+    //                 if (minDate === null || minDate > firstDateMonitored) {
+    //                     minDate = firstDateMonitored;
+    //                 } 
+                    
+    //                 if (maxDate === null || maxDate < lastDateMonitored) {
+    //                     maxDate = lastDateMonitored;
+    //                 }
+
+    //                 newArr.push(patch);
+    //             }
+    //         }
+    //     } 
+
+    //     if (minDate !== null && maxDate !== null) {
+    //         totalDayMonitored = numberOfNightsBetweenDates(new Date(minDate), new Date(maxDate));
+    //     }
+
+    //     let result = 0;
+    //     if (totalDayMonitored > TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
+    //         result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
+    //     }
+
+    //     if (result > 0 
+    //             && Number(new Date().getFullYear()) === Number(timeFilter.getFullYear()) 
+    //             && Number(new Date().getMonth()) === Number(timeFilter.getMonth())
+    //             && !activeCode99454
+    //     ) {
+    //         setActiveCode99454(true);
+    //     }
+
+    //     setPatchLoading(false);
+
+    //     return { list: newArr, totalDayMonitored, billedUnit: result };
+    // }, [patchArray, currentDateApi, associatedSensorsState]);
 
     return rightSideLoading ? (
         <div
