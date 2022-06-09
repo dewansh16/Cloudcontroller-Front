@@ -1824,7 +1824,6 @@ function GraphVisualizer() {
                 const alert = alerts[index];
                 activeTrendsArray.forEach(trend => {
                     if (trend?._key === formatTypeSensor(alert?.value_of)) {
-                        console.log("-------------------------------------------");
                         trend.alerts.push(alert);
                     }
                 });
@@ -1858,8 +1857,8 @@ function GraphVisualizer() {
     };
 
     function handleDateChange(date, dateString) {
-        var temp = dateString.replace(/\//g, "-");
-        setAntd_selected_date_val(temp)
+        // var temp = dateString.replace(/\//g, "-");
+        setAntd_selected_date_val(date)
 
         // getReqData(temp)
         // getDataEfficiently(temp)
@@ -1949,13 +1948,12 @@ function GraphVisualizer() {
         const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
         const queryApi = client.getQueryApi(org);
 
-        let dateQuery = antd_selected_date_val ? new Date(antd_selected_date_val) : new Date();
-        dateQuery = moment(dateQuery).format("YYYY-MM-DD");
-        const start = `${dateQuery}T00:00:00.000Z`;
-        const end = `${dateQuery}T23:59:59.000Z`;
+        const dateQuery = antd_selected_date_val ? new Date(antd_selected_date_val) : new Date();
+        const start = new Date(dateQuery.setHours(0, 0, 1));
+        const end = new Date(dateQuery.setHours(23, 59, 59));
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: ${start}, stop: ${end})
+                |> range(start: ${start.toISOString()}, stop: ${end.toISOString()})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
                 |> yield(name: "mean")`;
 
