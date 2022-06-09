@@ -468,24 +468,20 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             newArrayData.splice(index, 1);
         }
 
+        let indexValue = 1;
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 const value = dataQueryInFlux?._value || 0;
-                arrayRes.push({ value, time: dataQueryInFlux?._time });
+                arrayRes.push({ value, time: dataQueryInFlux?._time, index: indexValue });
+                indexValue++;
             },
             error(error) {
                 console.error(error)
                 console.log('nFinished ERROR')
             },
             complete() {
-                // if (keySensor === "alphamed_bps") {
-                //     console.log("dateQuery", dateQuery, dateQuery.getDate(), "date", start.getDate(), end.getDate());
-                //     console.log("start", start, "start.toISOString()", start.toISOString());
-                //     console.log("start", end, "end.toISOString()", end.toISOString());
-                //     console.log("query", arrayRes?.length, query);
-                // }
-
+                console.log();
                 data.data = arrayRes;
                 newArrayData.push(data);
                 setActiveTrendsArray(newArrayData);
@@ -884,7 +880,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                                 onMouseMove={(payload) => setHoverActiveTooltipIndex(payload.activeTooltipIndex)}
                                                 width="100%" height="100%"
                                                 data={trend.data}
-                                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                                margin={{ top: 5, right: 30, left: 20, bottom: 0 }}
                                             >
                                                 <XAxis dataKey="date" hide />
                                                 <YAxis dataKey="value" domain={[trend.min, trend.max]} axisLine={false} tickLine={false} width={35} tick={{ fill: trend.color1, stroke: trend.color1, strokeWidth: 0.5 }} />
@@ -923,6 +919,11 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                                     ))
                                                 }
                                                 <Line type="monotone" dataKey="value" stroke={trend.color1} strokeWidth={3} dot={true} />
+                                                {
+                                                    trend.data.length > 100 && (
+                                                        <Brush dataKey='index' height={15} style stroke="#8884d8" startIndex={trend.data.length - 50} />
+                                                    )
+                                                }
                                             </LineChart>
                                         </ResponsiveContainer>
                                     </div>

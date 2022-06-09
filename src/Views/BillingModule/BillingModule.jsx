@@ -3085,7 +3085,7 @@ function BillingModule() {
                                 {filterDeviceAssociatedByDate?.list?.length === 0 ? (
                                     <div
                                         style={{
-                                            height: "100%",
+                                            height: "250px",
                                             width: "100%",
                                             display: "flex",
                                             justifyContent: "center",
@@ -3094,7 +3094,7 @@ function BillingModule() {
                                             color: "#00000082",
                                         }}
                                     >
-                                        No Associated Devices
+                                        No Data
                                     </div>
                                 ) : (
                                     <>
