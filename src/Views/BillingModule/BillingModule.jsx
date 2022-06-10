@@ -89,6 +89,7 @@ const columns = [
 let clockCounter = null;
 let timeCount = 0;
 let currentIdTimerClockActive = null;
+var initialData = {};
 
 
 function BillingModule() {
@@ -192,53 +193,26 @@ function BillingModule() {
     const [requiredAddTask, setRequiredAddTask] = useState([]);
 
     function handleMonthChange(date, dateString) {
-        console.log(dateString);
-
+        setInitialSetupState(false);
+        setEnrolledState(false)
+        setSecondTotalTime(0);
+        setTaskCodeActive(CPT_CODE.CPT_99453);
         setCurrentDateApi(dateString);
-        // setCurrentActiveMonth(monthNames[Number(dateString.substring(5, 7)) - 1]);
-        // // setRightSideLoading(true);
-
-        // setEnrolledState(false);
-        // setInitialSetupState(false);
-        // setAssociatedSensorsState(false);
-        // setFirstTwentyState(false);
-        // setSecondTwentyState(false);
-        // setLastBillingState(false);
-        // setBillProcessedState(false);
-
-        // setInitialStepDoneState(false);
-        // setEnrollPatchState(false);
-        // setLastStateDone(false);
-        // setLastStateData({});
-        // setLastStateLoading(false);
-        // setAddTaskState(false);
-        // // setTasksLoadingState(true);
-        // setInitialSetupLoading(false);
-        // setInitialSetupData({});
-        // setFirstTwentyData({});
-        // setSecondTwentyData({});
-        // setPatchLoading(false);
-        // setPatchEnrolled(false);
-        // setPatchData({});
-        // setPatchArray([]);
-        // setPatchInformation({});
-        // setFirstTotalTime(0);
-        // setSecondTotalTime(0);
-        // setFirstTotalTimeDisplay(0);
-        // setStageOneState(true);
-        // setStageTwoState(false);
-        // setTaskDateVal();
-        // setTaskTimeVal();
-        // setTaskNameVal();
-        // setTaskNoteVal();
-        // setTaskCodeActive("99457");
-        // setTaskCodeInternalActive("");
-        // setFirstTwentyTasks([]);
-        // setSecondTwentyTasks([]);
-
-        // var temp = runUseEffect;
-        // temp = temp + 1;
-        // setRunUseEffect(temp);
+        setFirstTwentyTasks([]);
+        setSecondTwentyTasks([]);
+        setFirstTotalTime(0);
+        setFirstTotalTimeDisplay(0);
+        setTask99091([]);
+        setTaskCodeActive(CPT_CODE.CPT_99453)
+        setTotalTime99091(0);
+        setInitialSetupData({});
+        setAssociatedSensorsState(false);
+        setFirstTwentyState(false);
+        setSecondTwentyState(false);
+        setLastBillingState(false);
+        var temp = runUseEffect;
+        temp = temp + 1;
+        setRunUseEffect(temp);
     }
 
     function findDateIndex(month) {
@@ -277,6 +251,12 @@ function BillingModule() {
         }
     }
 
+    const isDisableTask99453 = () => {
+        const currentDate = new Date();
+        const currentYearMonth = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1 < 10 ? "0" : ""}${currentDate.getMonth() + 1}`
+        if(patchArray.length == 0 || currentYearMonth != currentDateApi) return true;
+        return false;
+    }
     function disableDateRanges() {
         const date = new Date();
         const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -590,7 +570,7 @@ function BillingModule() {
                     var enrollPatch = false;
                     var lastState = false;
 
-                    var initialData = {};
+                    initialData = {};
                     var tempPatchdata = {};
                     var lastData = {};
                     var tempFirstTwentyData = {};
@@ -664,16 +644,6 @@ function BillingModule() {
                         setPatchData(tempPatchdata);
                     }
                     setPatchLoading(false);
-                    if (res.data.response.patchData) {
-                        // setPatchArray(
-                        //     res.data.response.patchData
-                        // );
-                    }
-                    var tempInfo = res.data.response.billingData[0].patch_patient_map;
-                    if (tempInfo) {
-                        delete tempInfo.patches;
-                    }
-                    setPatchInformation(tempInfo);
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
                     setSecondTwentyTasks(tempSecondTwentyTasks);
@@ -1405,6 +1375,7 @@ function BillingModule() {
                 // update
                 let updateData = {};
                 if (item.task_id) {
+                    valiSuccess = true;
                     updateData = {
                         code: cptCode,
                         bill_date: date_string,
@@ -1528,6 +1499,7 @@ function BillingModule() {
             if (isCodeExist) {
                 let updateData = {};
                 if (item.task_id) {
+                    valiSuccess = true;
                     updateData = {
                         code: cptCode,
                         bill_date: date_string,
@@ -1915,18 +1887,27 @@ function BillingModule() {
             taskData.map(item => {
                 tempTotal += Number(item.task_time_spend)
             })
+            tempTotal = Math.floor(tempTotal / 60);
+
             if (tempTotal > 1) {
                 return `${tempTotal} Mins`
             } else {
                 return `${tempTotal} Min`
             }
         }
-
     }
 
     useEffect(() => {
-        var billDate = new Date();
-        var billDateStr = getDateFromISO(billDate.toISOString());
+        let billDate = new Date();
+        if(currentDateApi){
+            if(currentDateApi.split("-").length == 2){
+                billDate = new Date(`${currentDateApi}-05`)
+            } else {
+                billDate = new Date(currentDateApi);
+            }
+          
+        } 
+        let billDateStr = getDateFromISO(billDate.toISOString());
         setBillDateString(billDateStr);
         setPresentMonth(`${billDate.getFullYear()}-${billDate.getMonth() + 1 < 10 ? "0" : ""}${billDate.getMonth() + 1}`)
         console.log(`PRESENT MONTH : ${billDate.getFullYear()}-${billDate.getMonth() + 1 >= 10 ? "" : "0"}${billDate.getMonth() + 1}`)
@@ -2091,11 +2072,7 @@ function BillingModule() {
                             res.data.response.patchData
                         );
                     }
-                    var tempInfo = res.data.response.billingData[0].patch_patient_map;
-                    if (tempInfo) {
-                        delete tempInfo.patches;
-                    }
-                    setPatchInformation(tempInfo);
+                    
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
                     setSecondTwentyTasks(tempSecondTwentyTasks);
@@ -2862,7 +2839,7 @@ function BillingModule() {
                 </div>
 
                 {!enrolledState ? (
-                    currentDateApi === presentMonth ? (
+                    !initialData.date ? (
                         <div className="bm-right-container">
                             {/* <div
                                 style={
@@ -2947,7 +2924,7 @@ function BillingModule() {
                                     }}
                                     className="primary"
                                     style={{ marginTop: "3%", padding: "1% 5%" }}
-                                    disabled={patchArray.length == 0 ? true : false}
+                                    disabled={isDisableTask99453()}
                                 >
                                     Start
                                 </CusBtn>
@@ -3096,7 +3073,7 @@ function BillingModule() {
                                 <div className="bm-month-container">
                                     {initialSetupData.month} {initialSetupData.year}
                                 </div>
-                                <div>{`First enabled on ${initialSetupData.date}`}</div>
+                                <div>{`First enabled on ${initialSetupData.date || ''}`}</div>
                             </div>
                         </div>
                         <div
