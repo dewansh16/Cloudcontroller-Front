@@ -71,7 +71,7 @@ const ModalSummary = ({ pid, onClose, currentDate }) => {
             let taskData = JSON.parse(item.params);
             let tempTotal = 0;
             taskData.map(item => {
-                tempTotal += Number(item.time_spent)
+                tempTotal += Number(item.task_time_spend)
             })
             if (tempTotal > 1) {
                 return `${tempTotal} Mins`

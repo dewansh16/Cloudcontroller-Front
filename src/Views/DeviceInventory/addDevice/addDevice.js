@@ -119,8 +119,6 @@ const PatchForm = (props) => {
         newList[[props.menuState]].patchType = values.patchType !== "bps" ? values.patchType : values.bpType;
         newList[[props.menuState]].patchserial = serialNumber;
 
-        props.setClass({ list: [...newList] });
-
         let tenantUser = JSON.parse(localStorage.getItem("user"));
 
         const dataBody = {
@@ -141,11 +139,12 @@ const PatchForm = (props) => {
             .addDevice(dataBody)
             .then((res) => {
                 message.success("New device added successfully");
+                props.setClass({ list: [...newList] });
                 props.onGetList();
             })
             .catch((err) => {
                 if (err) {
-                    const error = "" + err;
+                    const error = "" + err?.response?.data?.message;
                     notification.error({
                         message: "Error",
                         description: `${error}` || "",
