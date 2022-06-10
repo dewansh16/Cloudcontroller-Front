@@ -75,7 +75,7 @@ function CreateGraphData(pid, deviceType, valDuration) {
 
                 if (keyDevice === newDeviceType) {
                     arrBattery.push({
-                        time: `${time.getHours()}h${time.getMinutes() < 10 ? `0${time.getMinutes()}` : time.getMinutes()}p`,
+                        time: `${time.getHours() < 10 ? `0${time.getHours()}` : time.getHours()}:${time.getMinutes() < 10 ? `0${time.getMinutes()}` : time.getMinutes()} Hrs`,
                         value: dataQueryInFlux?._value
                     });
 
@@ -293,7 +293,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach, valD
                 </Row>
                 {data && (
                     <>
-                        <Line {...config} />
+                        <Line {...config}  />
                     </>
                 )}
                 <div style={{ margin: '4em 0px' }}>
@@ -301,9 +301,11 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach, valD
                         <Col className='device-info' span={12}>
                             <p><span>Current Status :</span> {data[data.length - 1]?.value === -1 ? "Inactive" : "Active"}</p>
                         </Col>
-                        {/* <Col className='device-info' span={12}>
-                            <p><span>Last Fetched :</span> {data[data.length - 1]?.value === -1 ? "NA" : data[data.length - 1].time}</p>
-                        </Col> */}
+                        {!!data[data.length - 1]?.time && (
+                            <Col className='device-info' span={12}>
+                                <p><span>Last Fetched :</span> {data[data.length - 1]?.time}</p>
+                            </Col>
+                        )}
                     </Row>
                 </div>
             </div>

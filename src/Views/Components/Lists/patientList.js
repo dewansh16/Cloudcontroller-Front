@@ -11,6 +11,7 @@ import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
 import ChartsBlock from "./listComponent/chartsBlock";
 import { Button } from "../../../Theme/Components/Button/button";
+import moment from "moment";
 
 // import { arrDataChart } from "../../arrayChart";
 
@@ -53,13 +54,25 @@ const PatientListItem = (props) => {
         borderRadius: "0.3em",
         minHeight: "75px",
         margin: "0 0 8px 0",
+        padding: "0.3em 0.5em",
+        background: "white",
+        display: "flex",
+        // justifyContent: "space-around",
+        alignItems: "center",
+        cursor: "pointer",
+        // gap: "0.5rem",
+    };
+
+    const listStyleScreenSmall = {
+        borderRadius: "0.3em",
+        minHeight: "75px",
+        margin: "0 0 8px 0",
         padding: "0.3em 2em",
         background: "white",
         display: "flex",
-        justifyContent: "space-around",
+        // justifyContent: "space-around",
         alignItems: "center",
         cursor: "pointer",
-        gap: "1rem",
     };
 
     const listItemBorder = {
@@ -132,6 +145,10 @@ const PatientListItem = (props) => {
             color: Colors.yellow,
             trendData: []
         },
+        {
+            _key: 'gateway_keep_alive_time',
+            valueGateway: 0
+        },
     ];
 
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
@@ -153,7 +170,9 @@ const PatientListItem = (props) => {
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                if (key === "alphamed_bpd" || key === "ihealth_bpd") {
+                if (key === "gateway_keep_alive_time") {
+                    chart.valueGateway = new Date(dataQueryInFlux?._value);
+                } else if (key === "alphamed_bpd" || key === "ihealth_bpd") {
                     val_bpd = dataQueryInFlux?._value;
                 } else {
                     let value = dataQueryInFlux?._value || 0;
@@ -210,14 +229,14 @@ const PatientListItem = (props) => {
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        const timeInterval = setInterval(() => {
-            getDataSensorFromInfluxDB();
-        }, 10000);
+        // const timeInterval = setInterval(() => {
+        //     getDataSensorFromInfluxDB();
+        // }, 10000);
 
-        return () => {
-            clearInterval(timeInterval);
-        }
-    }, [props.pid, props.dataFilterOnHeader.valDuration]);
+        // return () => {
+        //     clearInterval(timeInterval);
+        // }
+    }, [props?.pid, props?.dataFilterOnHeader?.valDuration, props?.patientListToShow]);
 
     // React.useEffect(() => {
     //     var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
@@ -263,7 +282,7 @@ const PatientListItem = (props) => {
         props.setShowTrend(false);
     };
 
-    const BedDetailsSection = ({ width }) => (
+    const BedDetailsSection = ({ width, marginHouseIcon = "0 0" }) => (
         <div
             style={{
                 display: "flex",
@@ -271,11 +290,24 @@ const PatientListItem = (props) => {
                 width: width,
             }}
         >
-            {Icons.houseIcon({
-                Style: { fill: `${activeTheme}`, width: "2em", opacity: "0.75" },
-            })}
+            <div style={{ width: "16px", marginRight: "0.75rem", marginLeft: "0.25rem" }}>
+                <Button
+                    style={{ padding: "0em" }}
+                    onClick={ShowPatientDetails}
+                    type="secondary"
+                >
+                    {Icons.infoCircleIcon({
+                        Style: { width: "16px" },
+                    })}
+                </Button>
+            </div>
+            <div style={{ width: "24px", margin: marginHouseIcon }}>
+                {Icons.houseIcon({
+                    Style: { fill: `${activeTheme}`, width: "24px", opacity: "0.75" },
+                })}
+            </div>
             <div style={{
-                marginLeft: "1.25rem",
+                marginLeft: "1rem",
                 textAlign: "center"
             }}>
                 <div>
@@ -366,44 +398,141 @@ const PatientListItem = (props) => {
         </div>
     );
 
-    const ChartSection = ({ width }) => (
+    const ChartSection = ({ width, hideDateGateway = false }) => (
         <Row justify="space-around" gutter={2} style={{ width: width }}>
             {chartBlockData.map((item, i) => {
-                return (
-                    <div className="chart_item" style={{ display: "flex", alignItems: "center", width: "15%" }} key={i}>
-                        <Divider
-                            type="vertical"
-                            style={{
-                                background: `${dividerColor}`,
-                                opacity: "0.2",
-                                height: "3em",
+                if (hideDateGateway && item?._key !== "gateway_keep_alive_time") {
+                    return (
+                        <div 
+                            key={i}
+                            className="chart_item" 
+                            style={{ 
+                                display: "flex", alignItems: "center", 
+                                width: "16.4%" 
                             }}
-                        ></Divider>
-                        <ChartsBlock
-                            Icon={item.icon}
-                            name={item.name}
-                            value={item?.val}
-                            valueBpd={item?.val_bpd || 0}
-                            chartData={item?.trendData}
-                            dataKey="value"
-                            strokeColor={item.color}
-                            keyChart={item?._key}
-                            lastTime={item?.lastTime}
-                        />
-                    </div>
-                );
+                        >
+                            <Divider
+                                type="vertical"
+                                style={{
+                                    background: `${dividerColor}`,
+                                    opacity: "0.2",
+                                    height: "3em",
+                                }}
+                            ></Divider>
+                            <ChartsBlock
+                                Icon={item.icon}
+                                name={item.name}
+                                value={item?.val}
+                                valueBpd={item?.val_bpd || 0}
+                                chartData={item?.trendData}
+                                dataKey="value"
+                                strokeColor={item.color}
+                                keyChart={item?._key}
+                                lastTime={item?.lastTime}
+                            />
+                        </div>
+                    )
+                } else {
+                    return (
+                        <div 
+                            key={i}
+                            className="chart_item" 
+                            style={{ display: "flex", alignItems: "center", 
+                            width: item?._key === "gateway_keep_alive_time" ? "8%" : "15%" }}
+                        >
+                            {item?._key !== "gateway_keep_alive_time" ? (
+                                <>
+                                    <Divider
+                                        type="vertical"
+                                        style={{
+                                            background: `${dividerColor}`,
+                                            opacity: "0.2",
+                                            height: "3em",
+                                        }}
+                                    ></Divider>
+                                    <ChartsBlock
+                                        Icon={item.icon}
+                                        name={item.name}
+                                        value={item?.val}
+                                        valueBpd={item?.val_bpd || 0}
+                                        chartData={item?.trendData}
+                                        dataKey="value"
+                                        strokeColor={item.color}
+                                        keyChart={item?._key}
+                                        lastTime={item?.lastTime}
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <Divider
+                                        type="vertical"
+                                        style={{
+                                            background: `${dividerColor}`,
+                                            opacity: "0.2",
+                                            height: "3em",
+                                        }}
+                                    ></Divider>
+                                    <div>{!!item?.valueGateway ? moment(item?.valueGateway).format("MMM DD hh:mm:ss a") : "NA"}</div>
+                                </>
+                            )}
+                        </div>
+                    );
+                }
             })}
         </Row>
     );
 
-    const CustomDivider = () => (
+    const CustomDivider = ({ height = "100%" }) => (
         <div
-            style={{ width: "1px", background: `${border}`, height: "100%" }}
+            style={{ width: "1px", background: `${border}`, height: height }}
         ></div>
     );
 
     // const flexType = !props.showTrend ? span = { 4} : flex = { 1}
-    if (props.patientType === "deboarded") {
+    // if (props.patientType === "deboarded") {
+    //     return (
+    //         <div
+    //             key={props.pid}
+    //             style={
+    //                 isElementClicked
+    //                     ? { ...listStyle, ...selectedListItemBorder }
+    //                     : { ...listStyle, ...listItemBorder }
+    //             }
+    //         >
+    //             <BedDetailsSection width="16%" />
+    //             {/* <CustomDivider />
+    //             <NameSection width="10%" /> */}
+
+    //             <CustomDivider />
+    //             <div
+    //                 style={{
+    //                     width: "20%",
+    //                     display: "flex",
+    //                     alignItems: "center",
+    //                     justifyContent: "center",
+    //                 }}
+    //             >
+    //                 <Button onClick={pushToEdit} type="secondary">
+    //                     Edit Patient
+    //                 </Button>
+    //             </div>
+    //             <CustomDivider />
+    //             <div
+    //                 style={{
+    //                     width: "12%",
+    //                     display: "flex",
+    //                     alignItems: "center",
+    //                     justifyContent: "center",
+    //                 }}
+    //             >
+    //                 <Button onClick={openReport} type="secondary">
+    //                     Report
+    //                 </Button>
+    //             </div>
+    //         </div>
+    //     );
+    // } else {
+    if (screens.xl) {
         return (
             <div
                 key={props.pid}
@@ -412,145 +541,71 @@ const PatientListItem = (props) => {
                         ? { ...listStyle, ...selectedListItemBorder }
                         : { ...listStyle, ...listItemBorder }
                 }
+                onClick={pushToPatientDetails}
             >
-                <BedDetailsSection width="10%" />
-                {/* <CustomDivider />
-                <NameSection width="10%" /> */}
+                <BedDetailsSection width="16%" />
 
-                <CustomDivider />
-                <div
-                    style={{
-                        width: "20%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                >
-                    <Button onClick={pushToEdit} type="secondary">
-                        Edit Patient
-                    </Button>
-                </div>
-                <CustomDivider />
-                <div
-                    style={{
-                        width: "12%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                >
-                    <Button onClick={openReport} type="secondary">
-                        Report
-                    </Button>
-                </div>
+                <ChartSection width="84%" />
             </div>
         );
     } else {
-        if (screens.xl) {
-            return (
+        return (
+            <React.Fragment key={props.pid}>
                 <div
-                    key={props.pid}
                     style={
                         isElementClicked
-                            ? { ...listStyle, ...selectedListItemBorder }
-                            : { ...listStyle, ...listItemBorder }
+                            ? { ...listStyleScreenSmall, ...selectedListItemBorder }
+                            : { ...listStyleScreenSmall, ...listItemBorder }
                     }
                     onClick={pushToPatientDetails}
                 >
-                    <div style={{ width: "2%" }}>
-                        <Button
-                            style={{ padding: "0em" }}
-                            onClick={ShowPatientDetails}
-                            type="secondary"
-                        >
-                            {Icons.infoCircleIcon({
-                                Style: { width: "2em" },
-                            })}
-                        </Button>
-                    </div>
-                    <BedDetailsSection width="15%" />
+                    <BedDetailsSection width="34%" marginHouseIcon="0 0.5rem" />
 
-                    {/* <CustomDivider />
-                    <NameSection width="10%" /> */}
-
-                    {/* <CustomDivider />
-                    <EwsSection width="5%" /> */}
-
-                    <CustomDivider />
-                    <ChartSection width="83%" />
-                </div>
-            );
-        } else {
-            return (
-                <React.Fragment key={props.pid}>
+                    <CustomDivider height="3rem" />
+                    {/* eslint-disable-next-line */}
                     <div
-                        style={
-                            isElementClicked
-                                ? { ...listStyle, ...selectedListItemBorder }
-                                : { ...listStyle, ...listItemBorder }
-                        }
-                        onClick={pushToPatientDetails}
+                        style={{ width: "23%", textAlign: "center" }}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setChartSectionVisibility(!isChartSectionVisible);
+                        }}
                     >
-                        <div>
-                            <Button
-                                style={{ padding: "0em" }}
-                                onClick={ShowPatientDetails}
-                                type="secondary"
-                            >
-                                {Icons.infoCircleIcon({
-                                    Style: { width: "2em" },
-                                })}
-                            </Button>
-                        </div>
-
-                        <BedDetailsSection />
-
-                        {/* <CustomDivider />
-                        <NameSection width="25%" />
-
-                        <CustomDivider />
-                        <EwsSection width="10%" /> */}
-
-                        <CustomDivider />
-                        {/* eslint-disable-next-line */}
-                        <div
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                setChartSectionVisibility(!isChartSectionVisible);
-                            }}
-                        >
-                            <span>View Trends</span>
-                        </div>
-
-                        <CustomDivider />
-                        <div onClick={ShowPatientDetails}>
-                            <span>View Details</span>
-                        </div>
+                        <span>View Trends</span>
                     </div>
-                    <motion.div
-                        style={
-                            isElementClicked ? {
-                                ...listStyle,
-                                ...selectedListItemBorder,
-                                position: "relative",
-                                top: "0rem",
-                            } : {
-                                ...listStyle,
-                                ...listItemBorder,
-                                position: "relative",
-                                top: "0rem",
-                            }
+
+                    <CustomDivider height="3rem" />
+                    <div onClick={ShowPatientDetails} style={{ width: "23%", textAlign: "center" }}>
+                        <span>View Details</span>
+                    </div>
+
+                    <CustomDivider height="3rem" />
+                    <div onClick={ShowPatientDetails} style={{ width: "20%", textAlign: "center" }}>
+                        <span>{!!chartBlockData?.[6]?.valueGateway ? moment(chartBlockData?.[6]?.valueGateway).format("MMM DD hh:mm:ss a") : "NA"}</span>
+                    </div>
+                </div>
+                <motion.div
+                    style={
+                        isElementClicked ? {
+                            ...listStyle,
+                            ...selectedListItemBorder,
+                            position: "relative",
+                            top: "0rem",
+                        } : {
+                            ...listStyle,
+                            ...listItemBorder,
+                            position: "relative",
+                            top: "0rem",
                         }
-                        initial={"hidden"}
-                        animate={isChartSectionVisible ? "show" : "hidden"}
-                        exit={"hidden"}
-                        variants={variants}
-                    >
-                        <ChartSection width="100%" />
-                    </motion.div>
-                </React.Fragment>
-            );
-        }
+                    }
+                    initial={"hidden"}
+                    animate={isChartSectionVisible ? "show" : "hidden"}
+                    exit={"hidden"}
+                    variants={variants}
+                >
+                    <ChartSection width="100%" hideDateGateway />
+                </motion.div>
+            </React.Fragment>
+        );
     }
 };
 

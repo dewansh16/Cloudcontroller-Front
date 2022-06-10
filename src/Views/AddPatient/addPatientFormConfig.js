@@ -223,11 +223,8 @@ const demographicsFormItems = (
                 <DatePicker
                     placeholder="yyyy-mm-dd"
                     style={{ width: "60%" }}
-                    // disabledDate={(current) => {
-                    //   return current > moment(admissionDate).add({ days: 1 });
-                    // }}
                     disabledDate={(current) => {
-                        return current > moment(dischargeDate).add({ days: 1 });
+                        return new Date(current).getTime() > new Date().getTime();
                     }}
                     format={dateFormatList}
                 />
