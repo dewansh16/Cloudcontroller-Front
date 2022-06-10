@@ -616,35 +616,35 @@ function AddPatient() {
             patientApi
                 .addPatient(payload, patientId)
                 .then((res) => {
-                    const { patient_data = {} } = res?.data?.response;
+                    const demographic_map = res?.data?.response?.demographic_map || res?.data?.response?.patient_data?.demographic_map || {};
                     
                     setButtonLoading(false);
                     setSummary({
                         isVisible: true,
                         status: "success",
-                        name: `${patient_data?.demographic_map?.title} ${patient_data?.demographic_map?.fname}`,
-                        title: `${patient_data?.demographic_map?.title} ${patient_data?.demographic_map?.fname}`,
-                        response: patient_data?.demographic_map,
+                        name: `${demographic_map?.title} ${demographic_map?.fname}`,
+                        title: `${demographic_map?.title} ${demographic_map?.fname}`,
+                        response: demographic_map,
                     });
 
                     setPatientId(
-                        patient_data?.demographic_map?.pid || patientId
+                        demographic_map?.pid || patientId
                     );
 
-                    setPatientData(patient_data.demographic_map);
+                    setPatientData(demographic_map);
 
                     let practitionersData = {
                         ...practitioners,
                         tenant_id: tenantId,
                         pid:
-                            patient_data?.demographic_map?.pid ||
+                            demographic_map?.pid ||
                             patientId,
                     };
 
                     patientApi
                         .addPatientPractitioners(
                             practitionersData,
-                            patient_data?.demographic_map?.pid || patientId
+                            demographic_map?.pid || patientId
                         )
                         .then((res) => {
                             console.log(res.data.response);
