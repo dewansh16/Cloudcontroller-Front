@@ -459,7 +459,8 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start.toISOString()}, stop: ${end.toISOString()})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
-                |> yield(name: "mean")`;
+                |> aggregateWindow(every: 4m, fn: median, createEmpty: false)
+                |> yield(name: "median")`;
 
         const arrayRes = [];
         const newArrayData = [...activeTrendsArray];
@@ -554,7 +555,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             if (payload.active && payload.payload && payload.payload.length) {
                 const sensorFound = activeTrendsArray[payload.indexSensor];
                 const time = new Date(sensorFound.data[hoverActiveTooltipIndex].time);
-                const value = takeDecimalNumber(sensorFound.data[hoverActiveTooltipIndex].value, 3);
+                const value = takeDecimalNumber(sensorFound.data[hoverActiveTooltipIndex].value, 2);
                 const lbs = value * 2.2046;
 
                 return (
@@ -562,7 +563,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                         <div className="tooltip-label" style={{ color: sensorFound.color1 }} >
                             {sensorFound?._key === "weight" ? (
                                 <>
-                                    {`${sensorFound?.name} : ${value}kg / ${takeDecimalNumber(lbs, 3)}lbs`}
+                                    {`${sensorFound?.name} : ${value}kg / ${takeDecimalNumber(lbs, 2)}lbs`}
                                 </>
                             ) : (
                                 <>
