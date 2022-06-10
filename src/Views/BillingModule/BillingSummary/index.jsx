@@ -3,13 +3,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import moment from "moment";
 
 import { isArray } from 'lodash';
-import { isJsonString } from "../../../Utils/utils";
+import { isJsonString, CPT_CODE } from "../../../Utils/utils";
 import { useHistory } from "react-router-dom";
 import { InfluxDB } from "@influxdata/influxdb-client";
 
 import {
     Input as Inputs,
-    Select, DatePicker, Table, Row, Button, Spin
+    Select, DatePicker, Table, Row, Button, Spin,
+    notification
 } from "antd";
 
 import billingApi from "../../../Apis/billingApis";
@@ -38,6 +39,16 @@ const BillingModule = () => {
     const [pidEdit, setPidEdit] = useState(null);
 
     const history = useHistory();
+    const val99457 = 0;
+    const val99458 = 0;
+    const val99091 = 0;
+
+    const updateBillingTask = (pidEdit) => {
+        const findDataByPid = billingSummary.filter(item => item.pid == pidEdit)
+        if(findDataByPid.length > 0) {
+            findDataByPid = findDataByPid[0];
+        }
+    }
 
     const getDataBillingSummary = () => {
         billingApi.getBillingSummary(moment(valueDate).format("YYYY-MM-DD"), 10 * (currentPageVal - 1), valSearch)
@@ -135,6 +146,20 @@ const BillingModule = () => {
         }
     }, [billingSummary]);
 
+    const changeValue = (cptCode, oldValue, e) => {
+        let currentVl = e.target.value;
+        let currentArrVl = currentVl.split(":");
+        currentArrVl = Number(currentArrVl[0])*60 + Number(currentArrVl[1]);
+        if(cptCode == CPT_CODE.CPT_99457){
+            val99457 = currentArrVl;
+        }
+        if(cptCode == CPT_CODE.CPT_99458){
+            val99458 = currentArrVl;
+        }
+        if(cptCode == CPT_CODE.CPT_99091){
+            val99091 = currentArrVl;
+        }
+    }
     const renderTimeDisplay = (time) => {
         let hours = Math.floor(time / 3600)
         let minutes = Math.floor(time / 60) % 60
@@ -157,8 +182,6 @@ const BillingModule = () => {
     const handleMonthChange = (date, dateString) => {
         setValueDate(dateString);
     }
-
-    console.log("pid edit", pidEdit);
 
     const columns = [
         {
@@ -238,6 +261,7 @@ const BillingModule = () => {
 
                 if (pidEdit === record?.pid) {
                     return <Inputs
+                        onChange={(e) => changeValue(CPT_CODE.CPT_99457, tmpTime, e)}
                         style={{ width: "63px" }}
                         defaultValue={renderTimeDisplay(tmpTime)}
                     />
@@ -318,6 +342,7 @@ const BillingModule = () => {
                     <div>
                         {pidEdit === record?.pid ? (
                             <Button type="secondary" disabled={false} onClick={() => {
+                                updateBillingTask(pidEdit);
                                 setPidEdit(null);
                             }}>
                                 Save
