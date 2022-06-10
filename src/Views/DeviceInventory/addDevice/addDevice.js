@@ -111,11 +111,13 @@ const PatchForm = (props) => {
 
     const addPatchDetails = (values) => {
         const newList = props.patientClass.list;
+        const serialNumber = values.serialNumber.trim();
+        const macAddress = values.macAddress.trim();
         newList[props.menuState].error = false;
         newList[[props.menuState]].delete = false;
         newList[[props.menuState]].added = true;
         newList[[props.menuState]].patchType = values.patchType !== "bps" ? values.patchType : values.bpType;
-        newList[[props.menuState]].patchserial = values.serialNumber;
+        newList[[props.menuState]].patchserial = serialNumber;
 
         props.setClass({ list: [...newList] });
 
@@ -126,9 +128,9 @@ const PatchForm = (props) => {
                 {
                     patch_type: values.patchType !== "bps" ? values.patchType : values.bpType,
                     patch_status: "Active",
-                    patch_serial: values.serialNumber,
+                    patch_serial: serialNumber,
                     tenant_id: tenantUser.tenant,
-                    patch_mac: values.macAddress,
+                    patch_mac: macAddress,
                 },
             ],
             tenantId: tenantUser.tenant,
@@ -240,7 +242,7 @@ const PatchForm = (props) => {
                         ]}
                         className="addPatientDetailsModal"
                     >
-                        <Input placeholder="Enter Serial Number" />
+                        <Input placeholder="Enter Serial Number" maxLength={30} />
                     </Form.Item>
                     <Form.Item
                         required={!props.required}
@@ -254,7 +256,7 @@ const PatchForm = (props) => {
                         ]}
                         className="addPatientDetailsModal"
                     >
-                        <Input placeholder="Enter Mac address" />
+                        <Input placeholder="Enter Mac address" maxLength={30} />
                     </Form.Item>
                     <Row>
                         <Col span={12}>

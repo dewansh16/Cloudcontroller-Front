@@ -451,14 +451,14 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
         const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
         const queryApi = client.getQueryApi(org);
 
-        const dateQuery = antd_selected_date_val ? new Date(antd_selected_date_val) : new Date();
+        const dateQuery = new Date(antd_selected_date_val);
+
         const start = new Date(dateQuery.setHours(0, 0, 1));
         const end = new Date(dateQuery.setHours(23, 59, 59));
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
+                |> range(start: ${start.toISOString()}, stop: ${end.toISOString()})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
-                |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
@@ -468,17 +468,20 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             newArrayData.splice(index, 1);
         }
 
+        let indexValue = 1;
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 const value = dataQueryInFlux?._value || 0;
-                arrayRes.push({ value, time: dataQueryInFlux?._time });
+                arrayRes.push({ value, time: dataQueryInFlux?._time, index: indexValue });
+                indexValue++;
             },
             error(error) {
                 console.error(error)
                 console.log('nFinished ERROR')
             },
             complete() {
+                console.log();
                 data.data = arrayRes;
                 newArrayData.push(data);
                 setActiveTrendsArray(newArrayData);
@@ -504,24 +507,24 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     };
 
     useEffect(() => {
-        var current_date = new Date()
-        var current_date_string = ''
+        // var current_date = new Date()
+        // var current_date_string = ''
 
-        if (current_date.getMonth() + 1 < 10 || current_date.getDate() < 10) {
-            if (current_date.getMonth() + 1 < 10 && current_date.getDate() < 10) {
-                current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-0${current_date.getDate()}`
-            }
-            else if (current_date.getMonth() + 1 < 10 && current_date.getDate() >= 10) {
-                current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-${current_date.getDate()}`
-            }
-            else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() < 10) {
-                current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-0${current_date.getDate()}`
-            }
-        }
-        else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() >= 10) {
-            current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-${current_date.getDate()}`
-        }
-        setAntd_selected_date_val(current_date_string)
+        // if (current_date.getMonth() + 1 < 10 || current_date.getDate() < 10) {
+        //     if (current_date.getMonth() + 1 < 10 && current_date.getDate() < 10) {
+        //         current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-0${current_date.getDate()}`
+        //     }
+        //     else if (current_date.getMonth() + 1 < 10 && current_date.getDate() >= 10) {
+        //         current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-${current_date.getDate()}`
+        //     }
+        //     else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() < 10) {
+        //         current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-0${current_date.getDate()}`
+        //     }
+        // }
+        // else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() >= 10) {
+        //     current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-${current_date.getDate()}`
+        // }
+        // setAntd_selected_date_val(current_date_string)
     }, []);
 
     useEffect(() => {
@@ -542,8 +545,8 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     }, [antd_selected_date_val]);
 
     function handleDateChange(date, dateString) {
-        var temp = dateString.replace(/\//g, "-");
-        setAntd_selected_date_val(temp)
+        // var temp = dateString.replace(/\//g, "-");
+        setAntd_selected_date_val(date)
     }
 
     const CustomTooltip = (payload) => {
@@ -551,11 +554,21 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             if (payload.active && payload.payload && payload.payload.length) {
                 const sensorFound = activeTrendsArray[payload.indexSensor];
                 const time = new Date(sensorFound.data[hoverActiveTooltipIndex].time);
+                const value = takeDecimalNumber(sensorFound.data[hoverActiveTooltipIndex].value, 2);
+                const lbs = value * 2.2046;
 
                 return (
                     <div className="custom-tooltip" style={{ textAlign: "center" }}>
                         <div className="tooltip-label" style={{ color: sensorFound.color1 }} >
-                            {`${sensorFound?.name} : ${ takeDecimalNumber(sensorFound.data[hoverActiveTooltipIndex].value, 3)}`}
+                            {sensorFound?._key === "weight" ? (
+                                <>
+                                    {`${sensorFound?.name} : ${value}kg / ${takeDecimalNumber(lbs, 2)}lbs`}
+                                </>
+                            ) : (
+                                <>
+                                    {`${sensorFound?.name} : ${value}`}
+                                </>
+                            )}
                         </div>
                         <div>Time: {moment(time).format("MMM-DD-YYYY hh:mm:ss a")}</div>
                     </div>
@@ -877,7 +890,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                                 onMouseMove={(payload) => setHoverActiveTooltipIndex(payload.activeTooltipIndex)}
                                                 width="100%" height="100%"
                                                 data={trend.data}
-                                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                                margin={{ top: 5, right: 30, left: 20, bottom: 0 }}
                                             >
                                                 <XAxis dataKey="date" hide />
                                                 <YAxis dataKey="value" domain={[trend.min, trend.max]} axisLine={false} tickLine={false} width={35} tick={{ fill: trend.color1, stroke: trend.color1, strokeWidth: 0.5 }} />
@@ -916,6 +929,11 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                                     ))
                                                 }
                                                 <Line type="monotone" dataKey="value" stroke={trend.color1} strokeWidth={3} dot={true} />
+                                                {
+                                                    trend.data.length > 100 && (
+                                                        <Brush dataKey='index' height={15} style stroke="#8884d8" startIndex={trend.data.length - 50} />
+                                                    )
+                                                }
                                             </LineChart>
                                         </ResponsiveContainer>
                                     </div>

@@ -1714,28 +1714,28 @@ function GraphVisualizer() {
 
     useEffect(() => {
 
-        var current_date = new Date()
-        var current_date_string = ''
+        // var current_date = new Date()
+        // var current_date_string = ''
 
-        if (current_date.getMonth() + 1 < 10 || current_date.getDate() < 10) {
-            if (current_date.getMonth() + 1 < 10 && current_date.getDate() < 10) {
-                current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-0${current_date.getDate()}`
-            }
-            else if (current_date.getMonth() + 1 < 10 && current_date.getDate() >= 10) {
-                current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-${current_date.getDate()}`
-            }
-            else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() < 10) {
-                current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-0${current_date.getDate()}`
-            }
-        }
-        else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() >= 10) {
-            current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-${current_date.getDate()}`
-        }
-        console.log("current_date_string", current_date_string)
-        setAntd_selected_date_val(current_date_string)
+        // if (current_date.getMonth() + 1 < 10 || current_date.getDate() < 10) {
+        //     if (current_date.getMonth() + 1 < 10 && current_date.getDate() < 10) {
+        //         current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-0${current_date.getDate()}`
+        //     }
+        //     else if (current_date.getMonth() + 1 < 10 && current_date.getDate() >= 10) {
+        //         current_date_string = `${current_date.getFullYear()}-0${current_date.getMonth() + 1}-${current_date.getDate()}`
+        //     }
+        //     else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() < 10) {
+        //         current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-0${current_date.getDate()}`
+        //     }
+        // }
+        // else if (current_date.getMonth() + 1 >= 10 && current_date.getDate() >= 10) {
+        //     current_date_string = `${current_date.getFullYear()}-${current_date.getMonth() + 1}-${current_date.getDate()}`
+        // }
+        // console.log("current_date_string", current_date_string)
+        // setAntd_selected_date_val(current_date_string)
 
-        // getReqData(current_date_string)
-        getDataEfficiently(current_date_string)
+        // // getReqData(current_date_string)
+        // getDataEfficiently(current_date_string)
     }, [])
 
     useEffect(() => {
@@ -1803,6 +1803,18 @@ function GraphVisualizer() {
         return associatedList;
     }, [patient]);
 
+    const formatTypeSensor = (type) => ({
+        "value": "temp",
+        "spo2": "spo2",
+        "sys": "bps",
+        "dia": "bpd",
+        "weight": "weight",
+        "bps": "bps",
+        "bpd": "bpd",
+        "HR": "ecg_hr",
+        "RR": "ecg_rr"
+    }[type]);
+
     const fetchDataAlert = () => {
         alertApi.getPatientAlerts(pid).then((res) => {
             let alerts = res.data?.response?.data || [];
@@ -1811,8 +1823,7 @@ function GraphVisualizer() {
             for (let index = 0; index < length; index++) {
                 const alert = alerts[index];
                 activeTrendsArray.forEach(trend => {
-                    trend.alerts = [];
-                    if (trend?._key === alert?.value_of) {
+                    if (trend?._key === formatTypeSensor(alert?.value_of)) {
                         trend.alerts.push(alert);
                     }
                 });
@@ -1823,10 +1834,10 @@ function GraphVisualizer() {
         })
     };
 
-
     const getDataChartsActive = () => {
         activeTrendsArray.forEach((chart, index) => {
             chart.data = [];
+            chart.alerts = [];
 
             if (chart?._key === "bpd" || chart?._key === "bps") {
                 let keySensor = "alphamed";
@@ -1846,8 +1857,8 @@ function GraphVisualizer() {
     };
 
     function handleDateChange(date, dateString) {
-        var temp = dateString.replace(/\//g, "-");
-        setAntd_selected_date_val(temp)
+        // var temp = dateString.replace(/\//g, "-");
+        setAntd_selected_date_val(date)
 
         // getReqData(temp)
         // getDataEfficiently(temp)
@@ -1863,11 +1874,21 @@ function GraphVisualizer() {
             if (payload.active && payload.payload && payload.payload.length) {
                 const sensorFound = activeTrendsArray[payload.indexSensor];
                 const time = new Date(sensorFound.data[hoverActiveTooltipIndex].time);
+                const value = takeDecimalNumber(sensorFound.data[hoverActiveTooltipIndex].value, 2);
+                const lbs = value * 2.2046;
 
                 return (
                     <div className="custom-tooltip" style={{ textAlign: "center" }}>
                         <div className="tooltip-label" style={{ color: sensorFound.color1 }} >
-                            {`${sensorFound?.name} : ${ takeDecimalNumber(sensorFound.data[hoverActiveTooltipIndex].value, 3)}`}
+                            {sensorFound?._key === "weight" ? (
+                                <>
+                                    {`${sensorFound?.name} : ${value}kg / ${takeDecimalNumber(lbs, 2)}lbs`}
+                                </>
+                            ) : (
+                                <>
+                                    {`${sensorFound?.name} : ${value}`}
+                                </>
+                            )}
                         </div>
                         <div>Time: {moment(time).format("MMM-DD-YYYY hh:mm:ss a")}</div>
                     </div>
@@ -1942,9 +1963,8 @@ function GraphVisualizer() {
         const end = new Date(dateQuery.setHours(23, 59, 59));
 
         const query = `from(bucket: "emr_dev")
-                |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
+                |> range(start: ${start.toISOString()}, stop: ${end.toISOString()})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
-                |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
@@ -2760,399 +2780,401 @@ function GraphVisualizer() {
                             }
                             {
                                 alertState
-                                    && <></>
-                                    // alertLoading ? (
-                                    //     <div style={{ width: "100%", height: "300px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                    //         <Spin />
-                                    //     </div>
-                                    // ) : (
-                                    //     <div className='alert-container'>
-                                    //         {activeTrendsArray.map((trend, index) => {
-                                    //             return (
-                                    //                 <div key={`${trend?._key}_${index}_alert`} style={{ marginBottom: "0.5rem" }}>
-                                    //                     <div style={{ textTransform: "uppercase", color: trend?.color1 }}>
-                                    //                         {index + 1}: {trend?.name}
-                                    //                     </div>
+                                && <></>
+                                // alertLoading ? (
+                                //     <div style={{ width: "100%", height: "300px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                //         <Spin />
+                                //     </div>
+                                // ) : (
+                                //     <div className='alert-container'>
+                                //         {activeTrendsArray.map((trend, index) => {
+                                //             return (
+                                //                 <div key={`${trend?._key}_${index}_alert`} style={{ marginBottom: "0.5rem" }}>
+                                //                     <div style={{ textTransform: "uppercase", color: trend?.color1 }}>
+                                //                         {index + 1}: {trend?.name}
+                                //                     </div>
 
-                                    //                     {trend?.alerts?.map((alert, idx) => {
-                                    //                         return (
-                                    //                             <div
-                                    //                                 key={`${alert?.device_type}_${idx}_${alert?.time}`}
-                                    //                                 className="alert-item"
-                                    //                             >
-                                    //                                 <div className="" style={{ textTransform: "uppercase" }}>
-                                    //                                     {`${alert?.device_type} ${alert?.status}: ${alert?.value || 0}`}
-                                    //                                 </div>
-                                    //                                 <div className="">
-                                    //                                     Local Time: {alert?.time}
-                                    //                                 </div>
-                                    //                             </div>
-                                    //                         )
-                                    //                     })}
-                                    //                 </div>
+                                //                     <div className='alert-item-container'>
+                                //                         {trend?.alerts?.map((alert, idx) => {
+                                //                             return (
+                                //                                 <div
+                                //                                     key={`${alert?.device_type}_${idx}_${alert?.time}`}
+                                //                                     className="alert-item"
+                                //                                 >
+                                //                                     <div className="" style={{ textTransform: "uppercase" }}>
+                                //                                         {`${alert?.device_type} ${alert?.status}: ${alert?.value || 0}`}
+                                //                                     </div>
+                                //                                     <div className="">
+                                //                                         Local Time: {alert?.time}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                         })}
+                                //                     </div>
+                                //                 </div>
 
-                                    //             )
-                                    //         })}
-                                    //     </div>
-                                    // )
+                                //             )
+                                //         })}
+                                //     </div>
+                                // )
 
-                                            // <div className="gv-alert-items" >iv
-                                            //     {
-                                            //         spo2_data.map((item) => (
-                                            //             item.alert
-                                            //                 ?
-                                            //                 (
-                                            //                     item.alertData.map(alert => {
-                                            //                         var comp
-                                            //                         if (alert.time === currentAlert) {
-                                            //                             var str = ''
-                                            //                             var temp = alert.info.split("_")
-                                            //                             temp.pop()
-                                            //                             temp.forEach(item => {
-                                            //                                 str += item + " "
-                                            //                             })
-                                            //                             comp = (
-                                            //                                 <div
-                                            //                                     ref={alertFlag ? spo2AlertRef : null}
-                                            //                                     className="gv-alert-item"
-                                            //                                     style={{
-                                            //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
-                                            //                                     }}
-                                            //                                 >
-                                            //                                     <div className="gv-alert-name-time" >
-                                            //                                         <div>
-                                            //                                             {alert.name}
-                                            //                                         </div>
-                                            //                                         <div>
-                                            //                                             {alert.time}
-                                            //                                         </div>
-                                            //                                     </div>
-                                            //                                     <div className="gv-alert-info" >
-                                            //                                         {str}
-                                            //                                     </div>
-                                            //                                 </div>
-                                            //                             )
-                                            //                             alertFlag = false
-                                            //                         }
-                                            //                         else {
-                                            //                             var str = ''
-                                            //                             var temp = alert.info.split("_")
-                                            //                             temp.pop()
-                                            //                             temp.forEach(item => {
-                                            //                                 str += item + " "
-                                            //                             })
-                                            //                             comp = (
-                                            //                                 <div
-                                            //                                     className="gv-alert-item"
-                                            //                                     style={{
-                                            //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
-                                            //                                     }}
-                                            //                                 >
-                                            //                                     <div className="gv-alert-name-time" >
-                                            //                                         <div>
-                                            //                                             {alert.name}
-                                            //                                         </div>
-                                            //                                         <div>
-                                            //                                             {alert.time}
-                                            //                                         </div>
-                                            //                                     </div>
-                                            //                                     <div className="gv-alert-info" >
-                                            //                                         {str}
-                                            //                                     </div>
-                                            //                                 </div>
-                                            //                             )
-                                            //                         }
-                                            //                         return comp
-                                            //                     }
-                                            //                     )
-                                            //                 )
-                                            //                 :
-                                            //                 null
-                                            //         ))
-                                            //     }
-                                            //     {
-                                            //         bp_data.map((item) => (
-                                            //             item.alert
-                                            //                 ?
-                                            //                 (
-                                            //                     item.alertData.map(alert => {
-                                            //                         var comp
-                                            //                         if (alert.time === currentAlert) {
-                                            //                             var str = ''
-                                            //                             var temp = alert.info.split("_")
-                                            //                             temp.pop()
-                                            //                             temp.forEach(item => {
-                                            //                                 str += item + " "
-                                            //                             })
-                                            //                             comp = (
-                                            //                                 <div
-                                            //                                     ref={bpAlertFlag ? bpAlertRef : null}
-                                            //                                     className="gv-alert-item"
-                                            //                                     style={{
-                                            //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
-                                            //                                     }}
-                                            //                                 >
-                                            //                                     <div className="gv-alert-name-time" >
-                                            //                                         <div>
-                                            //                                             {alert.name}
-                                            //                                         </div>
-                                            //                                         <div>
-                                            //                                             {alert.time}
-                                            //                                         </div>
-                                            //                                     </div>
-                                            //                                     <div className="gv-alert-info" >
-                                            //                                         {str}
-                                            //                                     </div>
-                                            //                                 </div>
-                                            //                             )
-                                            //                             bpAlertFlag = false
-                                            //                         }
-                                            //                         else {
-                                            //                             var str = ''
-                                            //                             var temp = alert.info.split("_")
-                                            //                             temp.pop()
-                                            //                             temp.forEach(item => {
-                                            //                                 str += item + " "
-                                            //                             })
-                                            //                             comp = (
-                                            //                                 <div
-                                            //                                     className="gv-alert-item"
-                                            //                                     style={{
-                                            //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
-                                            //                                     }}
-                                            //                                 >
-                                            //                                     <div className="gv-alert-name-time" >
-                                            //                                         <div>
-                                            //                                             {alert.name}
-                                            //                                         </div>
-                                            //                                         <div>
-                                            //                                             {alert.time}
-                                            //                                         </div>
-                                            //                                     </div>
-                                            //                                     <div className="gv-alert-info" >
-                                            //                                         {str}
-                                            //                                     </div>
-                                            //                                 </div>
-                                            //                             )
-                                            //                         }
-                                            //                         return comp
-                                            //                     }
-                                            //                     )
-                                            //                 )
-                                            //                 :
-                                            //                 null
-                                            //         ))
-                                            //     }
-                                            //     {
-                                            //         rr_data.map((item) => (
-                                            //             item.alert
-                                            //                 ?
-                                            //                 (
-                                            //                     item.alertData.map(alert => {
-                                            //                         var comp
-                                            //                         if (alert.time === currentAlert) {
-                                            //                             var str = ''
-                                            //                             var temp = alert.info.split("_")
-                                            //                             temp.pop()
-                                            //                             temp.forEach(item => {
-                                            //                                 str += item + " "
-                                            //                             })
-                                            //                             comp = (
-                                            //                                 <div
-                                            //                                     ref={rrAlertFlag ? rrAlertRef : null}
-                                            //                                     className="gv-alert-item"
-                                            //                                     style={{
-                                            //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
-                                            //                                     }}
-                                            //                                 >
-                                            //                                     <div className="gv-alert-name-time" >
-                                            //                                         <div>
-                                            //                                             {alert.name}
-                                            //                                         </div>
-                                            //                                         <div>
-                                            //                                             {alert.time}
-                                            //                                         </div>
-                                            //                                     </div>
-                                            //                                     <div className="gv-alert-info" >
-                                            //                                         {str}
-                                            //                                     </div>
-                                            //                                 </div>
-                                            //                             )
-                                            //                             rrAlertFlag = false
-                                            //                         }
-                                            //                         else {
-                                            //                             var str = ''
-                                            //                             var temp = alert.info.split("_")
-                                            //                             temp.pop()
-                                            //                             temp.forEach(item => {
-                                            //                                 str += item + " "
-                                            //                             })
-                                            //                             comp = (
-                                            //                                 <div
-                                            //                                     className="gv-alert-item"
-                                            //                                     style={{
-                                            //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
-                                            //                                     }}
-                                            //                                 >
-                                            //                                     <div className="gv-alert-name-time" >
-                                            //                                         <div>
-                                            //                                             {alert.name}
-                                            //                                         </div>
-                                            //                                         <div>
-                                            //                                             {alert.time}
-                                            //                                         </div>
-                                            //                                     </div>
-                                            //                                     <div className="gv-alert-info" >
-                                            //                                         {str}
-                                            //                                     </div>
-                                            //                                 </div>
-                                            //                             )
-                                            //                         }
-                                            //                         return comp
-                                            //                     }
-                                            //                     )
-                                            //                 )
-                                            //                 :
-                                            //                 null
-                                            //         ))
-                                            //     }
-                                            //     {
-                                            //         temp_data.map((item) => (
-                                            //             item.alert
-                                            //                 ?
-                                            //                 (
-                                            //                     item.alertData.map(alert => {
-                                            //                         var comp
-                                            //                         if (alert.time === currentAlert) {
-                                            //                             var str = ''
-                                            //                             var temp = alert.info.split("_")
-                                            //                             temp.pop()
-                                            //                             temp.forEach(item => {
-                                            //                                 str += item + " "
-                                            //                             })
-                                            //                             comp = (
-                                            //                                 <div
-                                            //                                     ref={tempAlertFlag ? tempAlertRef : null}
-                                            //                                     className="gv-alert-item"
-                                            //                                     style={{
-                                            //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
-                                            //                                     }}
-                                            //                                 >
-                                            //                                     <div className="gv-alert-name-time" >
-                                            //                                         <div>
-                                            //                                             {alert.name}
-                                            //                                         </div>
-                                            //                                         <div>
-                                            //                                             {alert.time}
-                                            //                                         </div>
-                                            //                                     </div>
-                                            //                                     <div className="gv-alert-info" >
-                                            //                                         {str}
-                                            //                                     </div>
-                                            //                                 </div>
-                                            //                             )
-                                            //                             tempAlertFlag = false
-                                            //                         }
-                                            //                         else {
-                                            //                             var str = ''
-                                            //                             var temp = alert.info.split("_")
-                                            //                             temp.pop()
-                                            //                             temp.forEach(item => {
-                                            //                                 str += item + " "
-                                            //                             })
-                                            //                             comp = (
-                                            //                                 <div
-                                            //                                     className="gv-alert-item"
-                                            //                                     style={{
-                                            //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
-                                            //                                     }}
-                                            //                                 >
-                                            //                                     <div className="gv-alert-name-time" >
-                                            //                                         <div>
-                                            //                                             {alert.name}
-                                            //                                         </div>
-                                            //                                         <div>
-                                            //                                             {alert.time}
-                                            //                                         </div>
-                                            //                                     </div>
-                                            //                                     <div className="gv-alert-info" >
-                                            //                                         {str}
-                                            //                                     </div>
-                                            //                                 </div>
-                                            //                             )
-                                            //                         }
-                                            //                         return comp
-                                            //                     }
-                                            //                     )
-                                            //                 )
-                                            //                 :
-                                            //                 null
-                                            //         ))
-                                            //     }
-                                            //     {
-                                            //         ews_data.map((item) => (
-                                            //             item.alert
-                                            //                 ?
-                                            //                 (
-                                            //                     item.alertData.map(alert => {
-                                            //                         var comp
-                                            //                         if (alert.time === currentAlert) {
+                                // <div className="gv-alert-items" >iv
+                                //     {
+                                //         spo2_data.map((item) => (
+                                //             item.alert
+                                //                 ?
+                                //                 (
+                                //                     item.alertData.map(alert => {
+                                //                         var comp
+                                //                         if (alert.time === currentAlert) {
+                                //                             var str = ''
+                                //                             var temp = alert.info.split("_")
+                                //                             temp.pop()
+                                //                             temp.forEach(item => {
+                                //                                 str += item + " "
+                                //                             })
+                                //                             comp = (
+                                //                                 <div
+                                //                                     ref={alertFlag ? spo2AlertRef : null}
+                                //                                     className="gv-alert-item"
+                                //                                     style={{
+                                //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
+                                //                                     }}
+                                //                                 >
+                                //                                     <div className="gv-alert-name-time" >
+                                //                                         <div>
+                                //                                             {alert.name}
+                                //                                         </div>
+                                //                                         <div>
+                                //                                             {alert.time}
+                                //                                         </div>
+                                //                                     </div>
+                                //                                     <div className="gv-alert-info" >
+                                //                                         {str}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                             alertFlag = false
+                                //                         }
+                                //                         else {
+                                //                             var str = ''
+                                //                             var temp = alert.info.split("_")
+                                //                             temp.pop()
+                                //                             temp.forEach(item => {
+                                //                                 str += item + " "
+                                //                             })
+                                //                             comp = (
+                                //                                 <div
+                                //                                     className="gv-alert-item"
+                                //                                     style={{
+                                //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
+                                //                                     }}
+                                //                                 >
+                                //                                     <div className="gv-alert-name-time" >
+                                //                                         <div>
+                                //                                             {alert.name}
+                                //                                         </div>
+                                //                                         <div>
+                                //                                             {alert.time}
+                                //                                         </div>
+                                //                                     </div>
+                                //                                     <div className="gv-alert-info" >
+                                //                                         {str}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                         }
+                                //                         return comp
+                                //                     }
+                                //                     )
+                                //                 )
+                                //                 :
+                                //                 null
+                                //         ))
+                                //     }
+                                //     {
+                                //         bp_data.map((item) => (
+                                //             item.alert
+                                //                 ?
+                                //                 (
+                                //                     item.alertData.map(alert => {
+                                //                         var comp
+                                //                         if (alert.time === currentAlert) {
+                                //                             var str = ''
+                                //                             var temp = alert.info.split("_")
+                                //                             temp.pop()
+                                //                             temp.forEach(item => {
+                                //                                 str += item + " "
+                                //                             })
+                                //                             comp = (
+                                //                                 <div
+                                //                                     ref={bpAlertFlag ? bpAlertRef : null}
+                                //                                     className="gv-alert-item"
+                                //                                     style={{
+                                //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
+                                //                                     }}
+                                //                                 >
+                                //                                     <div className="gv-alert-name-time" >
+                                //                                         <div>
+                                //                                             {alert.name}
+                                //                                         </div>
+                                //                                         <div>
+                                //                                             {alert.time}
+                                //                                         </div>
+                                //                                     </div>
+                                //                                     <div className="gv-alert-info" >
+                                //                                         {str}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                             bpAlertFlag = false
+                                //                         }
+                                //                         else {
+                                //                             var str = ''
+                                //                             var temp = alert.info.split("_")
+                                //                             temp.pop()
+                                //                             temp.forEach(item => {
+                                //                                 str += item + " "
+                                //                             })
+                                //                             comp = (
+                                //                                 <div
+                                //                                     className="gv-alert-item"
+                                //                                     style={{
+                                //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
+                                //                                     }}
+                                //                                 >
+                                //                                     <div className="gv-alert-name-time" >
+                                //                                         <div>
+                                //                                             {alert.name}
+                                //                                         </div>
+                                //                                         <div>
+                                //                                             {alert.time}
+                                //                                         </div>
+                                //                                     </div>
+                                //                                     <div className="gv-alert-info" >
+                                //                                         {str}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                         }
+                                //                         return comp
+                                //                     }
+                                //                     )
+                                //                 )
+                                //                 :
+                                //                 null
+                                //         ))
+                                //     }
+                                //     {
+                                //         rr_data.map((item) => (
+                                //             item.alert
+                                //                 ?
+                                //                 (
+                                //                     item.alertData.map(alert => {
+                                //                         var comp
+                                //                         if (alert.time === currentAlert) {
+                                //                             var str = ''
+                                //                             var temp = alert.info.split("_")
+                                //                             temp.pop()
+                                //                             temp.forEach(item => {
+                                //                                 str += item + " "
+                                //                             })
+                                //                             comp = (
+                                //                                 <div
+                                //                                     ref={rrAlertFlag ? rrAlertRef : null}
+                                //                                     className="gv-alert-item"
+                                //                                     style={{
+                                //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
+                                //                                     }}
+                                //                                 >
+                                //                                     <div className="gv-alert-name-time" >
+                                //                                         <div>
+                                //                                             {alert.name}
+                                //                                         </div>
+                                //                                         <div>
+                                //                                             {alert.time}
+                                //                                         </div>
+                                //                                     </div>
+                                //                                     <div className="gv-alert-info" >
+                                //                                         {str}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                             rrAlertFlag = false
+                                //                         }
+                                //                         else {
+                                //                             var str = ''
+                                //                             var temp = alert.info.split("_")
+                                //                             temp.pop()
+                                //                             temp.forEach(item => {
+                                //                                 str += item + " "
+                                //                             })
+                                //                             comp = (
+                                //                                 <div
+                                //                                     className="gv-alert-item"
+                                //                                     style={{
+                                //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
+                                //                                     }}
+                                //                                 >
+                                //                                     <div className="gv-alert-name-time" >
+                                //                                         <div>
+                                //                                             {alert.name}
+                                //                                         </div>
+                                //                                         <div>
+                                //                                             {alert.time}
+                                //                                         </div>
+                                //                                     </div>
+                                //                                     <div className="gv-alert-info" >
+                                //                                         {str}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                         }
+                                //                         return comp
+                                //                     }
+                                //                     )
+                                //                 )
+                                //                 :
+                                //                 null
+                                //         ))
+                                //     }
+                                //     {
+                                //         temp_data.map((item) => (
+                                //             item.alert
+                                //                 ?
+                                //                 (
+                                //                     item.alertData.map(alert => {
+                                //                         var comp
+                                //                         if (alert.time === currentAlert) {
+                                //                             var str = ''
+                                //                             var temp = alert.info.split("_")
+                                //                             temp.pop()
+                                //                             temp.forEach(item => {
+                                //                                 str += item + " "
+                                //                             })
+                                //                             comp = (
+                                //                                 <div
+                                //                                     ref={tempAlertFlag ? tempAlertRef : null}
+                                //                                     className="gv-alert-item"
+                                //                                     style={{
+                                //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
+                                //                                     }}
+                                //                                 >
+                                //                                     <div className="gv-alert-name-time" >
+                                //                                         <div>
+                                //                                             {alert.name}
+                                //                                         </div>
+                                //                                         <div>
+                                //                                             {alert.time}
+                                //                                         </div>
+                                //                                     </div>
+                                //                                     <div className="gv-alert-info" >
+                                //                                         {str}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                             tempAlertFlag = false
+                                //                         }
+                                //                         else {
+                                //                             var str = ''
+                                //                             var temp = alert.info.split("_")
+                                //                             temp.pop()
+                                //                             temp.forEach(item => {
+                                //                                 str += item + " "
+                                //                             })
+                                //                             comp = (
+                                //                                 <div
+                                //                                     className="gv-alert-item"
+                                //                                     style={{
+                                //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
+                                //                                     }}
+                                //                                 >
+                                //                                     <div className="gv-alert-name-time" >
+                                //                                         <div>
+                                //                                             {alert.name}
+                                //                                         </div>
+                                //                                         <div>
+                                //                                             {alert.time}
+                                //                                         </div>
+                                //                                     </div>
+                                //                                     <div className="gv-alert-info" >
+                                //                                         {str}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                         }
+                                //                         return comp
+                                //                     }
+                                //                     )
+                                //                 )
+                                //                 :
+                                //                 null
+                                //         ))
+                                //     }
+                                //     {
+                                //         ews_data.map((item) => (
+                                //             item.alert
+                                //                 ?
+                                //                 (
+                                //                     item.alertData.map(alert => {
+                                //                         var comp
+                                //                         if (alert.time === currentAlert) {
 
-                                            //                             comp = (
-                                            //                                 <div
-                                            //                                     ref={ewsAlertFlag ? ewsAlertRef : null}
-                                            //                                     className="gv-alert-item"
-                                            //                                     style={{
-                                            //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
-                                            //                                     }}
-                                            //                                 >
-                                            //                                     <div className="gv-alert-name-time" >
-                                            //                                         <div>
-                                            //                                             {alert.name}
-                                            //                                         </div>
-                                            //                                         <div>
-                                            //                                             {alert.time}
-                                            //                                         </div>
-                                            //                                     </div>
-                                            //                                     <div className="gv-alert-info" >
-                                            //                                         {alert.info}
-                                            //                                     </div>
-                                            //                                 </div>
-                                            //                             )
-                                            //                             ewsAlertFlag = false
-                                            //                         }
-                                            //                         else {
-                                            //                             comp = (
-                                            //                                 <div
-                                            //                                     className="gv-alert-item"
-                                            //                                     style={{
-                                            //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
-                                            //                                     }}
-                                            //                                 >
-                                            //                                     <div className="gv-alert-name-time" >
-                                            //                                         <div>
-                                            //                                             {alert.name}
-                                            //                                         </div>
-                                            //                                         <div>
-                                            //                                             {alert.time}
-                                            //                                         </div>
-                                            //                                     </div>
-                                            //                                     <div className="gv-alert-info" >
-                                            //                                         {alert.info}
-                                            //                                     </div>
-                                            //                                 </div>
-                                            //                             )
-                                            //                         }
-                                            //                         return comp
-                                            //                     }
-                                            //                     )
-                                            //                 )
-                                            //                 :
-                                            //                 null
-                                            //         ))
-                                            //     }
-                                            // </div>
-                                      
+                                //                             comp = (
+                                //                                 <div
+                                //                                     ref={ewsAlertFlag ? ewsAlertRef : null}
+                                //                                     className="gv-alert-item"
+                                //                                     style={{
+                                //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
+                                //                                     }}
+                                //                                 >
+                                //                                     <div className="gv-alert-name-time" >
+                                //                                         <div>
+                                //                                             {alert.name}
+                                //                                         </div>
+                                //                                         <div>
+                                //                                             {alert.time}
+                                //                                         </div>
+                                //                                     </div>
+                                //                                     <div className="gv-alert-info" >
+                                //                                         {alert.info}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                             ewsAlertFlag = false
+                                //                         }
+                                //                         else {
+                                //                             comp = (
+                                //                                 <div
+                                //                                     className="gv-alert-item"
+                                //                                     style={{
+                                //                                         border: alert.time === currentAlert ? "3px solid red" : "3px solid rgba(0, 0, 0, 0.2)"
+                                //                                     }}
+                                //                                 >
+                                //                                     <div className="gv-alert-name-time" >
+                                //                                         <div>
+                                //                                             {alert.name}
+                                //                                         </div>
+                                //                                         <div>
+                                //                                             {alert.time}
+                                //                                         </div>
+                                //                                     </div>
+                                //                                     <div className="gv-alert-info" >
+                                //                                         {alert.info}
+                                //                                     </div>
+                                //                                 </div>
+                                //                             )
+                                //                         }
+                                //                         return comp
+                                //                     }
+                                //                     )
+                                //                 )
+                                //                 :
+                                //                 null
+                                //         ))
+                                //     }
+                                // </div>
+
                             }
                             {
                                 medState

@@ -568,6 +568,7 @@ export default function PatientDashboard(props) {
                                         active={active}
                                         setActive={setActive}
                                         dataFilterOnHeader={dataFilterOnHeader}
+                                        patientListToShow={patientListToShow}
                                     />
                                 )}
                             ></List>
