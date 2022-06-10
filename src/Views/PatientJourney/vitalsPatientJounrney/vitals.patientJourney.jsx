@@ -554,11 +554,21 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             if (payload.active && payload.payload && payload.payload.length) {
                 const sensorFound = activeTrendsArray[payload.indexSensor];
                 const time = new Date(sensorFound.data[hoverActiveTooltipIndex].time);
+                const value = takeDecimalNumber(sensorFound.data[hoverActiveTooltipIndex].value, 3);
+                const lbs = value * 2.2046;
 
                 return (
                     <div className="custom-tooltip" style={{ textAlign: "center" }}>
                         <div className="tooltip-label" style={{ color: sensorFound.color1 }} >
-                            {`${sensorFound?.name} : ${ takeDecimalNumber(sensorFound.data[hoverActiveTooltipIndex].value, 3)}`}
+                            {sensorFound?._key === "weight" ? (
+                                <>
+                                    {`${sensorFound?.name} : ${value}kg / ${takeDecimalNumber(lbs, 3)}lbs`}
+                                </>
+                            ) : (
+                                <>
+                                    {`${sensorFound?.name} : ${value}`}
+                                </>
+                            )}
                         </div>
                         <div>Time: {moment(time).format("MMM-DD-YYYY hh:mm:ss a")}</div>
                     </div>
