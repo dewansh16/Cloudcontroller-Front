@@ -25,60 +25,141 @@ export default function ChartsBlock({
         // "Blood Pressure": `${value} - ${valueBpd} mmHg`
     };
 
+    const styleTitle = {
+        color: strokeColor,
+        marginBottom: "0px",
+    }
+
     const renderValueByKey = (key) => {
         switch (key) {
+            case "temp":
+                let celsius = 0;
+                if (value !== 0) { celsius = 5 / 9 * (value - 32); }
+                return (
+                    <div>
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
+                            }}
+                        >
+                            <h3 style={{
+                                ...styleTitle
+                            }}>{takeDecimalNumber(value)}</h3>
+                            <h4 style={{
+                                ...styleTitle,
+                                fontWeight: "400"
+                            }}>°F</h4>
+                        </div>
+                        <Divider style={{ margin: "0px" }} />
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
+                            }}
+                        >
+                            <h3 style={{
+                                ...styleTitle
+                            }}>{takeDecimalNumber(celsius)}</h3>
+                            <h4 style={{
+                                marginBottom: "0px",
+                                color: strokeColor,
+                                fontWeight: "400"
+                            }}>°C</h4>
+                        </div>
+                    </div>
+                )
+            case "ecg_hr":
+            case "ecg_rr":
+                return (
+                    <div>
+                        <h3 style={{
+                            ...styleTitle
+                        }}>{takeDecimalNumber(value)}</h3>
+                        <h4 style={{
+                            ...styleTitle,
+                            fontWeight: "400"
+                        }}>bpm</h4>
+                    </div>
+                )
             case "blood_pressuer":
                 return (
                     <div>
-                        <h3
+                        <div
                             style={{
-                                color: strokeColor,
-                                marginBottom: "0px",
-                                textAlign: "center",
-                                marginBottom: "0px"
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
                             }}
                         >
-                            {takeDecimalNumber(value)}
-                        </h3>
+                            <h3 style={{
+                                ...styleTitle
+                            }}>{takeDecimalNumber(value)}</h3>
+                            <h4 style={{
+                                ...styleTitle,
+                                fontWeight: "400"
+                            }}>mmHg</h4>
+                        </div>
                         <Divider style={{ margin: "0px" }} />
-                        <h3
+                        <div
                             style={{
-                                color: strokeColor,
-                                marginBottom: "0px",
-                                textAlign: "center",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
                             }}
                         >
-                            {takeDecimalNumber(valueBpd)}
-                        </h3>
+                            <h3 style={{
+                                ...styleTitle
+                            }}>{takeDecimalNumber(valueBpd)}</h3>
+                            <h4 style={{
+                                marginBottom: "0px",
+                                color: strokeColor,
+                                fontWeight: "400"
+                            }}>mmHg</h4>
+                        </div>
                     </div>
                 )
-                
-            case "weight":  
+
+            case "weight":
                 const lbs = value * 2.2046;
                 return (
                     <div>
-                        <h3
+                        <div
                             style={{
-                                color: strokeColor,
-                                marginBottom: "0px",
-                                textAlign: "center",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
                             }}
                         >
-                            {`${takeDecimalNumber(value)}kg`}
-                        </h3>
+                            <h3 style={{
+                                ...styleTitle
+                            }}>{takeDecimalNumber(value)}</h3>
+                            <h4 style={{
+                                ...styleTitle,
+                                fontWeight: "400"
+                            }}>kg</h4>
+                        </div>
                         <Divider style={{ margin: "0px" }} />
-                        <h3
+                        <div
                             style={{
-                                color: strokeColor,
-                                marginBottom: "0px",
-                                textAlign: "center",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
                             }}
                         >
-                            {`${takeDecimalNumber(lbs)}lbs`}
-                        </h3>
+                            <h3 style={{
+                                ...styleTitle,
+                            }}>{takeDecimalNumber(lbs)}</h3>
+                            <h4 style={{
+                                ...styleTitle,
+                                fontWeight: "400"
+                            }}>lbs</h4>
+                        </div>
                     </div>
                 )
-        
+
             default:
                 return (
                     <h3 style={{ color: strokeColor, marginBottom: "0px" }}>{takeDecimalNumber(value)}</h3>
@@ -129,7 +210,7 @@ export default function ChartsBlock({
                 </div>
                 {!!lastTime && (
                     <span style={{ fontSize: "12px", fontWeight: "400", color: strokeColor }}>
-                        {moment(lastTime).format("MMM/DD/YYYY hh:mm:ss a")}
+                        {moment(lastTime).format("MMM DD hh:mm:ss a")}
                     </span>
                 )}
             </div>

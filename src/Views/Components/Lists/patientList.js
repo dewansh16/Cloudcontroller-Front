@@ -54,13 +54,13 @@ const PatientListItem = (props) => {
         borderRadius: "0.3em",
         minHeight: "75px",
         margin: "0 0 8px 0",
-        padding: "0.3em 2em",
+        padding: "0.3em 1.5em",
         background: "white",
         display: "flex",
-        justifyContent: "space-around",
+        // justifyContent: "space-around",
         alignItems: "center",
         cursor: "pointer",
-        gap: "1rem",
+        gap: "0.5rem",
     };
 
     const listItemBorder = {
@@ -153,10 +153,6 @@ const PatientListItem = (props) => {
                 |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
                 |> yield(name: "mean")`;
 
-        if (key === "gateway_keep_alive_time") {
-            console.log("query", query);
-        }
-
         const arrayRes = [];
         let val_bpd = 0;
         queryApi.queryRows(query, {
@@ -221,14 +217,14 @@ const PatientListItem = (props) => {
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        // const timeInterval = setInterval(() => {
-        //     getDataSensorFromInfluxDB();
-        // }, 10000);
+        const timeInterval = setInterval(() => {
+            getDataSensorFromInfluxDB();
+        }, 10000);
 
-        // return () => {
-        //     clearInterval(timeInterval);
-        // }
-    }, [props.pid, props.dataFilterOnHeader.valDuration]);
+        return () => {
+            clearInterval(timeInterval);
+        }
+    }, [props?.pid, props?.dataFilterOnHeader?.valDuration, props?.patientListToShow]);
 
     // React.useEffect(() => {
     //     var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
@@ -282,11 +278,22 @@ const PatientListItem = (props) => {
                 width: width,
             }}
         >
+            <div style={{ width: "2rem" }}>
+                <Button
+                    style={{ padding: "0em" }}
+                    onClick={ShowPatientDetails}
+                    type="secondary"
+                >
+                    {Icons.infoCircleIcon({
+                        Style: { },
+                    })}
+                </Button>
+            </div>
             {Icons.houseIcon({
-                Style: { fill: `${activeTheme}`, width: "2em", opacity: "0.75" },
+                Style: { fill: `${activeTheme}`, width: "1.5rem", opacity: "0.75" },
             })}
             <div style={{
-                marginLeft: "1.25rem",
+                marginLeft: "1rem",
                 textAlign: "center"
             }}>
                 <div>
@@ -414,7 +421,7 @@ const PatientListItem = (props) => {
                                         height: "3em",
                                     }}
                                 ></Divider>
-                                <div>{!!item?.valueGateway ? moment(item?.valueGateway).format("MMM/DD/YYYY hh:mm:ss a") : "NA"}</div>
+                                <div>{!!item?.valueGateway ? moment(item?.valueGateway).format("MMM DD hh:mm:ss a") : "NA"}</div>
                             </>
                         )}
                     </div>
@@ -440,7 +447,7 @@ const PatientListItem = (props) => {
                         : { ...listStyle, ...listItemBorder }
                 }
             >
-                <BedDetailsSection width="10%" />
+                <BedDetailsSection width="16%" />
                 {/* <CustomDivider />
                 <NameSection width="10%" /> */}
 
@@ -484,7 +491,7 @@ const PatientListItem = (props) => {
                     }
                     onClick={pushToPatientDetails}
                 >
-                    <div style={{ width: "1%" }}>
+                    {/* <div style={{ width: "1%" }}>
                         <Button
                             style={{ padding: "0em" }}
                             onClick={ShowPatientDetails}
@@ -494,8 +501,8 @@ const PatientListItem = (props) => {
                                 Style: { width: "2em" },
                             })}
                         </Button>
-                    </div>
-                    <BedDetailsSection width="11%" />
+                    </div> */}
+                    <BedDetailsSection width="16%" />
 
                     {/* <CustomDivider />
                     <NameSection width="10%" /> */}
@@ -503,8 +510,7 @@ const PatientListItem = (props) => {
                     {/* <CustomDivider />
                     <EwsSection width="5%" /> */}
 
-                    <CustomDivider />
-                    <ChartSection width="78%" />
+                    <ChartSection width="84%" />
                 </div>
             );
         } else {
@@ -518,7 +524,7 @@ const PatientListItem = (props) => {
                         }
                         onClick={pushToPatientDetails}
                     >
-                        <div>
+                        {/* <div>
                             <Button
                                 style={{ padding: "0em" }}
                                 onClick={ShowPatientDetails}
@@ -528,7 +534,7 @@ const PatientListItem = (props) => {
                                     Style: { width: "2em" },
                                 })}
                             </Button>
-                        </div>
+                        </div> */}
 
                         <BedDetailsSection />
 
