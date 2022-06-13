@@ -73,6 +73,7 @@ const ModalSummary = ({ pid, onClose, currentDate }) => {
             taskData.map(item => {
                 tempTotal += Number(item.task_time_spend)
             })
+            tempTotal = Math.floor(tempTotal / 60);
             if (tempTotal > 1) {
                 return `${tempTotal} Mins`
             } else {
@@ -118,7 +119,7 @@ const ModalSummary = ({ pid, onClose, currentDate }) => {
             let taskData = JSON.parse(item.params);
             let tempTotal = 0;
             taskData.map(item => {
-                tempTotal += Number(item.time_spent)
+                tempTotal += Number(item.task_time_spend)
             })
             if (tempTotal >= TOTAL_HOURS_FOR_EACH_99091_BILLED) {
                 return `1 billed`;

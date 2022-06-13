@@ -459,7 +459,6 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start.toISOString()}, stop: ${end.toISOString()})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
-                |> aggregateWindow(every: 4m, fn: mean, createEmpty: false) 
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
