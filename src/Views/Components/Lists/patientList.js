@@ -229,13 +229,13 @@ const PatientListItem = (props) => {
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        // const timeInterval = setInterval(() => {
-        //     getDataSensorFromInfluxDB();
-        // }, 10000);
+        const timeInterval = setInterval(() => {
+            getDataSensorFromInfluxDB();
+        }, 10000);
 
-        // return () => {
-        //     clearInterval(timeInterval);
-        // }
+        return () => {
+            clearInterval(timeInterval);
+        }
     }, [props?.pid, props?.dataFilterOnHeader?.valDuration, props?.patientListToShow]);
 
     // React.useEffect(() => {

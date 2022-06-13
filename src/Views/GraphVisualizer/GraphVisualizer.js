@@ -1951,6 +1951,24 @@ function GraphVisualizer() {
         );
     };
 
+    function findMinAndMax(array) {
+        let max = 0;
+        let min = array[0].value;
+
+        for (var i = 0; i < array.length; i++) {
+            const number = array[i].value;
+            if (number > max) {
+                max = number;
+                min = max;
+            }
+               
+            if (number < min) {
+                min = number;
+            }
+        }
+        return { min, max };
+    }
+
     const onGetDataSensorFromInfluxByKey = (keySensor, data, type, index) => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
@@ -1978,7 +1996,7 @@ function GraphVisualizer() {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 const value = dataQueryInFlux?._value || 0;
-                arrayRes.push({ value, time: dataQueryInFlux?._time });
+                arrayRes.push({ value: takeDecimalNumber(value, 2), time: dataQueryInFlux?._time });
             },
             error(error) {
                 console.error(error)
@@ -1986,6 +2004,11 @@ function GraphVisualizer() {
             },
             complete() {
                 data.data = arrayRes;
+                if (arrayRes?.length > 0) {
+                    const { min = 0, max = 0 } = findMinAndMax(arrayRes);
+                    data.max = max + 20;
+                    data.min = min - 20;
+                }
                 newArrayData.push(data);
                 setActiveTrendsArray(newArrayData);
             },
@@ -2452,7 +2475,7 @@ function GraphVisualizer() {
                                                             max: bpdmaxval,
                                                             min: bpdminval,
                                                         }
-                                                        onGetDataSensorFromInfluxByKey("bpd", bpd);
+                                                        onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bpd" : "ihealth_bpd", bpd);
                                                     }
                                                 }} className="trend-btn" style={
                                                     activeTrendsArray.some(e => e.name === 'BPD') ? { border: `2px solid ${Colors.darkPurple}`, color: Colors.darkPurple } : { border: '1px solid #BABABA', color: '#BABABA' }
@@ -2481,7 +2504,8 @@ function GraphVisualizer() {
                                                             max: bpsmaxval,
                                                             min: bpsminval,
                                                         }
-                                                        onGetDataSensorFromInfluxByKey("bps", bps);
+                                                        onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bps" : "ihealth_bps", bps);
+
                                                     }
                                                 }} className="trend-btn" style={
                                                     activeTrendsArray.some(e => e.name === 'BPS') ? { border: `2px solid ${Colors.darkPurple}`, color: Colors.darkPurple } : { border: '1px solid #BABABA', color: '#BABABA' }
