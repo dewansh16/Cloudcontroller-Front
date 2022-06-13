@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { DatePicker } from "antd";
 import { Input } from "../../Theme/Components/Input/input";
 // import { Select, SelectOption } from "../../Theme/Components/Select/select";
@@ -81,7 +81,10 @@ const demographicsFormItems = (
     admissionDate,
     setAdmissionDate,
     dischargeDate,
-    setDischargeDate
+    setDischargeDate,
+    errorFirstName,
+    errorLastName,
+    onInputChange
 ) => [
         {
             required: props.required,
@@ -153,7 +156,7 @@ const demographicsFormItems = (
             rules: [
                 {
                     required: props.required,
-                    message: "Medical Record number is mandatory.",
+                    message: "Medical Record number is mandatory!",
                 },
             ],
             className: "addPatientDetailsModal",
@@ -163,9 +166,23 @@ const demographicsFormItems = (
             required: props.required,
             label: "First Name",
             name: "fname",
-            rules: [{ required: props.required, message: "First Name is required!" }],
+            rules: [{ 
+                required: props.required, message: "First Name is required!", 
+            }],
             className: "addPatientDetailsModal",
-            Input: <Input />,
+            Input: <div style={{ position: "relative" }}>
+                <Input onChange={(event) => onInputChange(event.target.value, "firstName")} status={errorFirstName ? "error" : ""} />
+                {errorFirstName && (
+                    <div style={{ 
+                        position: "absolute",
+                        bottom: "0",
+                        left: "0",
+                        fontSize: "14px",
+                        color: "#FF2B2B",
+                        marginBottom: "-22px"
+                    }}>First Name is not space!</div>
+                )}
+            </div>,
         },
         {
             required: !props.required,
@@ -181,7 +198,19 @@ const demographicsFormItems = (
             name: "lname",
             rules: [{ required: props.required, message: "Last Name is required!" }],
             className: "addPatientDetailsModal",
-            Input: <Input />,
+            Input: <div style={{ position: "relative" }}>
+                <Input onChange={(event) => onInputChange(event.target.value, "lastName")} status={errorLastName ? "error" : ""} />
+                {errorLastName && (
+                    <div style={{ 
+                        position: "absolute",
+                        bottom: "0",
+                        left: "0",
+                        fontSize: "14px",
+                        color: "#FF2B2B",
+                        marginBottom: "-22px"
+                    }}>Last Name is not space!</div>
+                )}
+            </div>,
         },
         // {
         //     required: props.required,
@@ -195,7 +224,7 @@ const demographicsFormItems = (
             required: props.required,
             label: "Gender",
             name: "sex",
-            rules: [{ required: props.required, message: "gender is required!" }],
+            rules: [{ required: props.required, message: "Gender is required!" }],
             className: "addPatientDetailsModal",
             Input: (
                 <Select

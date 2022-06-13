@@ -7,6 +7,7 @@ import alertApi from '../../../Apis/alertApis'
 
 import SortingHeader from './Components/SortingHeader/SortingHeader.Alerts.components'
 import AlertList from './Components/AlertList/AlertList.components.Alerts'
+import { computeTotalPages } from "../../Components/PaginationBox/pagination";
 
 import './Alerts.components.css'
 import {
@@ -18,66 +19,18 @@ import Hotkeys from "react-hot-keys";
 import { useParams } from 'react-router-dom'
 
 
-function FetchAlertData(pid, isAttended) {
+function FetchAlertData(pid, isAttended, currentPageVal, setTotalPages) {
     const [response, setResponse] = useState(null)
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         setLoading(true);
-        alertApi.getPatientAlerts(pid).then((res) => {
-            let alerts = res.data?.response?.data || [];
-            if (isAttended === "attended") {
-                // alerts = alerts.filter((item) => {
-                //     return (item.status === 'close');
-                // })
-            }
-
-            if (isAttended === "notAttended") {
-                // alerts = alerts.filter((item) => {
-                //     return (item.status === 'open');
-                // })
-            }
-
-
-            const monthNames = [
-                "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
-            ];
-
-            const toNormalDate = (date) => {
-                const date1 = new Date(date);
-                const date2 = `${date1.getDate()}  ${monthNames[date1.getMonth()]} ${date1.getFullYear()}`;
-                return (date2);
-            }
-
-            let reqData = [];
-            let oneDayAlerts = [];
-            let allDates = [];
-            let allDatesSorted;
-
-            if (alerts.length > 0) {
-                // allDates.push(toNormalDate(alerts[0]?.firstRcvTm));
-                // alerts.forEach(item => {
-                //     if (!(allDates.includes(toNormalDate(item.firstRcvTm))))
-                //         allDates.push(toNormalDate(item.firstRcvTm))
-                // })
-
-                // allDatesSorted = allDates.sort(function (a, b) {
-                //     var dateA = new Date(a), dateB = new Date(b);
-                //     return dateB - dateA;
-                // });
-
-                // allDatesSorted.forEach(date => {
-                //     alerts.forEach(item => {
-                //         if (toNormalDate(item.firstRcvTm) === date) {
-                //             oneDayAlerts.push(item);
-                //         }
-                //     })
-                //     reqData.push(oneDayAlerts)
-                //     oneDayAlerts = [];
-                // })
-            }
-
-            setResponse(alerts);
+        alertApi.getPatientAlerts(pid, currentPageVal).then((res) => {
+            let alerts = res.data?.response || {};
+            setResponse(alerts?.data || []);
+            setTotalPages(
+                computeTotalPages(alerts.count, 50)
+            );
             setLoading(false)
         }).catch((err) => {
             if (err) {
@@ -89,7 +42,7 @@ function FetchAlertData(pid, isAttended) {
                 setLoading(false);
             }
         })
-    }, [pid, isAttended])
+    }, [pid, isAttended, currentPageVal])
     return [response, loading]
 }
 
@@ -188,9 +141,12 @@ const Alerts = (props) => {
     const { pid } = useParams();
 
     const [userType, setUserType] = useState('all');
-    const [isAttended, setIsAttended] = useState('notAttended')
+    const [isAttended, setIsAttended] = useState('notAttended');
+    const [currentPageVal, setCurrentPageVal] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
-    const [data, isLoading] = FetchAlertData(pid, isAttended);
+    const [data, isLoading] = FetchAlertData(pid, isAttended, currentPageVal, setTotalPages);
+   
 
     const toPatientDetails = () => {
         props.history.push(`/dashboard/patient/details/${pid}`);
@@ -210,6 +166,9 @@ const Alerts = (props) => {
                     setUserType={setUserType} 
                     setIsAttended={setIsAttended}
                     toPatientDetails={toPatientDetails} 
+                    totalPages={totalPages}
+                    currentPageVal={currentPageVal}
+                    setCurrentPageVal={setCurrentPageVal}
                 />
             </div>
 
