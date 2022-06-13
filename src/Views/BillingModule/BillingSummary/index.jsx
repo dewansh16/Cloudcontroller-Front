@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import moment from "moment";
 
 import { isArray } from 'lodash';
-import { isJsonString, CPT_CODE } from "../../../Utils/utils";
+import { isJsonString, CPT_CODE, CPT } from "../../../Utils/utils";
 import { useHistory } from "react-router-dom";
 import { InfluxDB } from "@influxdata/influxdb-client";
 
@@ -37,17 +37,194 @@ const BillingModule = () => {
     const [billingSummary, setBillingSummary] = useState(null);
     const [billingsFilter, setBillingsFilter] = useState([]);
     const [pidEdit, setPidEdit] = useState(null);
+    const [respondBillingData, setRespondBillingData] = useState([]);
+    const [isEditRow, setIsEditRow] = useState(false);
 
     const history = useHistory();
-    const val99457 = 0;
-    const val99458 = 0;
-    const val99091 = 0;
+    let val99457 = 0;
+    let val99458 = 0;
+    let val99091 = 0;
 
-    const updateBillingTask = (pidEdit) => {
-        const findDataByPid = billingSummary.filter(item => item.pid == pidEdit)
+    const TASK_NOTE_DEFAULT =  "Update from total summary";
+    const updateBillingTaskToDb = async (updateData) => {
+        return new Promise((resolve, reject) => {billingApi
+                        .updateBillingTask(
+                            updateData
+                        )
+                        .then((res) => {
+                            resolve(true);
+                        })
+                        .catch((err) => {
+                            resolve(false);
+                        });
+                    })
+    }
+    const addBillingTaskToDb = async (updateData) => {
+        return new Promise((resolve, reject) =>{
+            billingApi
+                    .addBillingTask(
+                        updateData
+                    )
+                    .then((res) => {
+                        resolve(true);
+                    })
+                    .catch((err) => {
+                        resolve(false);
+                    });
+        })
+    }
+    const updateBillingTask = async (pidEdit) => {
+        let findDataByPid = billingSummary.billings.filter(item => item.pid == pidEdit);
+        let date = new Date(`${valueDate}-20`);
+        let date_string = date.toISOString();
+        const user = JSON.parse(localStorage.getItem("user"));
+        let isReloadData = false;
         if(findDataByPid.length > 0) {
             findDataByPid = findDataByPid[0];
+            let task99457 = findDataByPid[CPT_CODE.CPT_99457];
+            let task99458 = findDataByPid[CPT_CODE.CPT_99458];
+            let task99091 = findDataByPid[CPT_CODE.CPT_99091];
+            let currentTotalTime99458 = 0;
+            let currentTotalTime99457 = 0;
+            let currentTotalTime99091 = 0;
+            if(task99457){
+                task99457 = JSON.parse(task99457);
+                task99457.map(item => {
+                    currentTotalTime99457 += Number(item.task_time_spend);
+                })
+                let billingDataDetailForCode = respondBillingData.filter(item => item.pid == pidEdit && item.code == CPT_CODE.CPT_99457);
+                if(billingDataDetailForCode.length > 0){
+                    billingDataDetailForCode = billingDataDetailForCode[0];
+                }
+                if(val99457 > currentTotalTime99457 && billingDataDetailForCode.id){   
+                    let updateData = {
+                        code: CPT_CODE.CPT_99457,
+                        bill_date: date_string,
+                        pid: pidEdit,
+                        billing_id: billingDataDetailForCode.id,
+                        task_date: date_string,
+                        staff_name: user.userName,
+                        add_task_note: TASK_NOTE_DEFAULT,
+                        task_time_spend: val99457 - currentTotalTime99457
+                    }
+                    let rs = await updateBillingTaskToDb(updateData);
+                    if(rs) isReloadData = true;
+                }
+            } else {
+                if(val99457 > 0){   
+                    let updateData = {
+                        code_type: CPT,
+                        code: CPT_CODE.CPT_99457,
+                        bill_date: date_string,
+                        pid: pidEdit,
+                        revenue_code: 123,
+                        notecodes: "pending",
+                        bill_process: 0,
+                        fee: 40,
+                        add_task_id: date.getTime(),
+                        add_task_date: date_string,
+                        add_task_staff_name: user.userName,
+                        add_task_note: TASK_NOTE_DEFAULT,
+                        task_time_spend: val99457 - 0
+                    }
+                    let rs = await addBillingTaskToDb(updateData);
+                    if(rs) isReloadData = true;
+                }
+            }
+            if(task99458){
+                task99458 = JSON.parse(task99458);
+                task99458.map(item => {
+                    currentTotalTime99458 += Number(item.task_time_spend);
+                })
+
+                let billingDataDetailForCode99458 = respondBillingData.filter(item => item.pid == pidEdit && item.code == CPT_CODE.CPT_99458);
+                if(billingDataDetailForCode99458.length > 0){
+                    billingDataDetailForCode99458 = billingDataDetailForCode99458[0];
+                }
+                if(val99458 > currentTotalTime99458 && billingDataDetailForCode99458.id){   
+                    let updateData = {
+                        code: CPT_CODE.CPT_99458,
+                        bill_date: date_string,
+                        pid: pidEdit,
+                        billing_id: billingDataDetailForCode99458.id,
+                        task_date: date_string,
+                        staff_name: user.userName,
+                        add_task_note: TASK_NOTE_DEFAULT,
+                        task_time_spend: val99458 - currentTotalTime99458
+                    }
+                    let rs = await updateBillingTaskToDb(updateData);
+                    if(rs) isReloadData = true;
+                }
+            } else {
+                if(val99458 > 0){   
+                    let updateData = {
+                        code_type: CPT,
+                        code: CPT_CODE.CPT_99458,
+                        bill_date: date_string,
+                        pid: pidEdit,
+                        revenue_code: 123,
+                        notecodes: "pending",
+                        bill_process: 0,
+                        fee: 40,
+                        add_task_id: date.getTime(),
+                        add_task_date: date_string,
+                        add_task_staff_name: user.userName,
+                        add_task_note: TASK_NOTE_DEFAULT,
+                        task_time_spend: val99458 - 0
+                    }
+                    let rs = await addBillingTaskToDb(updateData);
+                    if(rs) isReloadData = true;
+                }
+            }
+            if(task99091){
+                task99091 = JSON.parse(task99091);
+                task99091.map(item => {
+                    currentTotalTime99091 += Number(item.task_time_spend);
+                })
+                let billingDataDetailForCode99091 = respondBillingData.filter(item => item.pid == pidEdit && item.code == CPT_CODE.CPT_99091);
+                if(billingDataDetailForCode99091.length > 0){
+                    billingDataDetailForCode99091 = billingDataDetailForCode99091[0];
+                }
+                if(val99091 > currentTotalTime99091 && billingDataDetailForCode99091.id){   
+                    let updateData = {
+                        code: CPT_CODE.CPT_99091,
+                        bill_date: date_string,
+                        pid: pidEdit,
+                        billing_id: billingDataDetailForCode99091.id,
+                        task_date: date_string,
+                        staff_name: user.userName,
+                        task_note: TASK_NOTE_DEFAULT,
+                        task_time_spend: val99091 - currentTotalTime99091
+                    }
+                    let rs = await updateBillingTaskToDb(updateData);
+                    if(rs) isReloadData = true;
+                }
+            } else {
+                if(val99091 > 0){   
+                    let updateData = {
+                        code_type: CPT,
+                        code: CPT_CODE.CPT_99091,
+                        bill_date: date_string,
+                        pid: pidEdit,
+                        revenue_code: 123,
+                        notecodes: "pending",
+                        bill_process: 0,
+                        fee: 40,
+                        task_id: date.getTime(),
+                        date: date_string,
+                        staff_name: user.userName,
+                        task_note: TASK_NOTE_DEFAULT,
+                        task_time_spend: val99091 - 0
+                    }
+                    let rs = await addBillingTaskToDb(updateData);
+                    if(rs) isReloadData = true;
+                }
+            }
         }
+        val99457 = 0;
+        val99458 = 0;
+        val99091 = 0;
+        if(isReloadData) getDataBillingSummary();
     }
 
     const getDataBillingSummary = () => {
@@ -59,7 +236,7 @@ const BillingModule = () => {
                     patchData: []
                 };
                 const billingData = res?.data?.response?.billingData || [];
-
+                setRespondBillingData(billingData); 
                 if (billingData?.length > 0) {
                     for (let index = 0; index < billingData.length; index++) {
                         const billing = billingData[index];
@@ -181,6 +358,9 @@ const BillingModule = () => {
 
     const handleMonthChange = (date, dateString) => {
         setValueDate(dateString);
+        const currentDate = new Date();
+        const currentYearMonth = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1 < 10 ? "0" : ""}${currentDate.getMonth() + 1}`;
+        setIsEditRow(currentYearMonth != dateString);
     }
 
     const columns = [
@@ -292,6 +472,7 @@ const BillingModule = () => {
 
                 if (pidEdit === record?.pid) {
                     return <Inputs
+                    onChange={(e) => changeValue(CPT_CODE.CPT_99458, tmpTime, e)}
                         style={{ width: "63px" }}
                         defaultValue={renderTimeDisplay(tmpTime)}
                     />
@@ -322,6 +503,7 @@ const BillingModule = () => {
 
                 if (pidEdit === record?.pid) {
                     return <Inputs
+                    onChange={(e) => changeValue(CPT_CODE.CPT_99091, tmpTime, e)}
                         style={{ width: "63px" }}
                         defaultValue={renderTimeDisplay(tmpTime)}
                     />
@@ -339,6 +521,7 @@ const BillingModule = () => {
             width: 130,
             render: (dataIndex, record) => {
                 return (
+                    isEditRow && (
                     <div>
                         {pidEdit === record?.pid ? (
                             <Button type="secondary" disabled={false} onClick={() => {
@@ -357,6 +540,7 @@ const BillingModule = () => {
                             </Button>
                         )}
                     </div>
+                    )
                 )
             }
         },
