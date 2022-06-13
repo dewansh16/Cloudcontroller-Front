@@ -67,7 +67,7 @@ function DetailBox({ detailsBox, setDetailBox, patient }) {
                         </span>
                         {handleGender(patient.demographic_map.sex.slice(0, 7)) || " Male"}
                     </Col>
-                    <Col className="patient-detailbox-cols" span={12}>
+                    {/* <Col className="patient-detailbox-cols" span={12}>
                         <span className="patient-detailbox-col-icon">
                             {Icons.upDownArrowIcon({})}
                         </span>
@@ -78,7 +78,7 @@ function DetailBox({ detailsBox, setDetailBox, patient }) {
                             {Icons.weighingMachineIcon({})}
                         </span>
                         {patient.demographic_map.weight || "70"}kg
-                    </Col>
+                    </Col> */}
                     <Col className="patient-detailbox-cols" span={24}>
                         <span className="patient-detailbox-col-icon">
                             {Icons.calenderIcon({})}
@@ -113,7 +113,7 @@ function DetailBox({ detailsBox, setDetailBox, patient }) {
                         <span className="patient-detailbox-col-icon">
                             {Icons.homeIcon({})}
                         </span>{" "}
-                        4/17 Kamp Road, GHY, MP-302001
+                        {`${patient.demographic_map.street} ${patient.demographic_map.city} ${patient.demographic_map.state}`}
                     </Col>
                 </Row>
             </div>

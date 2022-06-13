@@ -29,7 +29,7 @@ function FetchAlertData(pid, isAttended, currentPageVal, setTotalPages) {
             let alerts = res.data?.response || {};
             setResponse(alerts?.data || []);
             setTotalPages(
-                computeTotalPages(alerts.count, 50)
+                computeTotalPages(alerts.count, 25)
             );
             setLoading(false)
         }).catch((err) => {

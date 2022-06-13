@@ -921,7 +921,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                                     trend.data.map((ele) => (
                                                         ele.med
                                                             ?
-                                                            (
+                                                            (   
                                                                 <ReferenceLine x={ele.date} stroke="blue" strokeDasharray="7 7" strokeWidth={3} />
                                                             )
                                                             :

@@ -1816,7 +1816,7 @@ function GraphVisualizer() {
     }[type]);
 
     const fetchDataAlert = () => {
-        alertApi.getPatientAlerts(pid).then((res) => {
+        alertApi.getPatientAlerts(pid, 1, 1000).then((res) => {
             let alerts = res.data?.response?.data || [];
 
             const length = alerts?.length;
@@ -2803,44 +2803,43 @@ function GraphVisualizer() {
                                     null
                             }
                             {
-                                alertState
-                                && <></>
-                                // alertLoading ? (
-                                //     <div style={{ width: "100%", height: "300px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                //         <Spin />
-                                //     </div>
-                                // ) : (
-                                //     <div className='alert-container'>
-                                //         {activeTrendsArray.map((trend, index) => {
-                                //             return (
-                                //                 <div key={`${trend?._key}_${index}_alert`} style={{ marginBottom: "0.5rem" }}>
-                                //                     <div style={{ textTransform: "uppercase", color: trend?.color1 }}>
-                                //                         {index + 1}: {trend?.name}
-                                //                     </div>
+                                alertState &&
+                                alertLoading ? (
+                                    <div style={{ width: "100%", height: "300px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <Spin />
+                                    </div>
+                                ) : (
+                                    <div className='alert-container'>
+                                        {activeTrendsArray.map((trend, index) => {
+                                            return (
+                                                <div key={`${trend?._key}_${index}_alert`} style={{ marginBottom: "0.5rem" }}>
+                                                    <div style={{ textTransform: "uppercase", color: trend?.color1 }}>
+                                                        {index + 1}: {trend?.name}
+                                                    </div>
 
-                                //                     <div className='alert-item-container'>
-                                //                         {trend?.alerts?.map((alert, idx) => {
-                                //                             return (
-                                //                                 <div
-                                //                                     key={`${alert?.device_type}_${idx}_${alert?.time}`}
-                                //                                     className="alert-item"
-                                //                                 >
-                                //                                     <div className="" style={{ textTransform: "uppercase" }}>
-                                //                                         {`${alert?.device_type} ${alert?.status}: ${alert?.value || 0}`}
-                                //                                     </div>
-                                //                                     <div className="">
-                                //                                         Local Time: {alert?.time}
-                                //                                     </div>
-                                //                                 </div>
-                                //                             )
-                                //                         })}
-                                //                     </div>
-                                //                 </div>
+                                                    <div className='alert-item-container'>
+                                                        {trend?.alerts?.map((alert, idx) => {
+                                                            return (
+                                                                <div
+                                                                    key={`${alert?.device_type}_${idx}_${alert?.time}`}
+                                                                    className="alert-item"
+                                                                >
+                                                                    <div className="" style={{ textTransform: "uppercase" }}>
+                                                                        {`${alert?.device_type} ${alert?.status}: ${alert?.value || 0}`}
+                                                                    </div>
+                                                                    <div className="">
+                                                                        Local Time: {alert?.time}
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                </div>
 
-                                //             )
-                                //         })}
-                                //     </div>
-                                // )
+                                            )
+                                        })}
+                                    </div>
+                                )
 
                                 // <div className="gv-alert-items" >iv
                                 //     {
