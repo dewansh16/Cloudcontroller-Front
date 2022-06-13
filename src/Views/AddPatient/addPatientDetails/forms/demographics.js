@@ -43,6 +43,34 @@ const PatientDemographics = (props) => {
     // console.log(admissionDate, dischargeDate);
     React.useEffect(() => { }, [props.patientData]);
 
+    const [errorFirstName, setErrorFirstName] = useState(false);
+    const [errorLastName, setErrorLastName] = useState(false);
+
+    const onInputChange = (val, type) => {
+        const newClass = {...props.patientClass};
+        const list = newClass.list;
+        if (val.indexOf(' ') >= 0) {
+            if (type === "firstName") {
+                setErrorFirstName(true);
+                list[0].errorFirstName = true;
+            } else {
+                setErrorLastName(true);
+                list[0].errorLastName = true;
+            }
+         
+        } else {
+            if (type === "firstName") {
+                list[0].errorFirstName = false;
+                setErrorFirstName(false);
+            } else {
+                setErrorLastName(false);
+                list[0].errorLastName = false;
+
+            }
+        }
+        props.setClass(newClass);
+    }
+
     return (
         <Form
             {...props.layout}
@@ -54,16 +82,16 @@ const PatientDemographics = (props) => {
             onFinishFailed={raiseError}
             form={props.form}
         >
-            {
-                // console.log("demographics", props.patientData)
-            }
             <Row span={24} gutter={[8, 8]}>
                 {demographicsFormItems(
                     props,
                     admissionDate,
                     setAdmissionDate,
                     dischargeDate,
-                    setDischargeDate
+                    setDischargeDate,
+                    errorFirstName,
+                    errorLastName,
+                    onInputChange
                 ).map((item) => {
                     if (item.name === "admission_date") {
                         // console.log("admisiion wala kaam krra");

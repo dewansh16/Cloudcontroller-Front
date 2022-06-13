@@ -14,10 +14,11 @@ import {
 } from "antd";
 import ecgImg from "../../../Assets/Images/ecg.png";
 import tempImg from "../../../Assets/Images/temp1.png";
-import watchImg from "../../../Assets/Images/watch.jpg";
-import spo2Img from "../../../Assets/Images/spo2.jpg";
+import gatewayImg from "../../../Assets/Images/gateway.png";
+// import spo2Img from "../../../Assets/Images/spo2.jpg";
 import bpImg from "../../../Assets/Images/BP-sensor.png";
 import digitalScale from "../../../Assets/Images/DigitalScale.png";
+import spo2Img from "../../../Assets/Images/spo2img.png";
 
 import deviceApi from "../../../Apis/deviceApis";
 import { Button } from "../../../Theme/Components/Button/button";
@@ -63,17 +64,17 @@ const PatchForm = (props) => {
             case "gateway":
                 setIsBpSensor(false);
                 return setDeviceimg({
-                    patchImage: watchImg,
-                    patchHead: "Watch Sensor",
-                    width: "47%",
-                    style: { marginLeft: "1em" },
+                    patchImage: gatewayImg,
+                    patchHead: "Gateway Sensor",
+                    width: "100%",
+                    style: { marginLeft: "-2.5em", marginTop: "-2.5rem" },
                 });
             case "digital":
                 setIsBpSensor(false);
                 return setDeviceimg({
                     patchImage: digitalScale,
                     patchHead: "Digital Scale",
-                    width: "47%",
+                    width: "55%",
                     style: { marginLeft: "1em" },
                 });
             case "bps":
@@ -118,8 +119,7 @@ const PatchForm = (props) => {
         newList[[props.menuState]].added = true;
         newList[[props.menuState]].patchType = values.patchType !== "bps" ? values.patchType : values.bpType;
         newList[[props.menuState]].patchserial = serialNumber;
-
-        props.setClass({ list: [...newList] });
+        newList[[props.menuState]].macAddress = macAddress;
 
         let tenantUser = JSON.parse(localStorage.getItem("user"));
 
@@ -141,11 +141,12 @@ const PatchForm = (props) => {
             .addDevice(dataBody)
             .then((res) => {
                 message.success("New device added successfully");
+                props.setClass({ list: [...newList] });
                 props.onGetList();
             })
             .catch((err) => {
                 if (err) {
-                    const error = "" + err;
+                    const error = "" + err?.response?.data?.message;
                     notification.error({
                         message: "Error",
                         description: `${error}` || "",
@@ -195,7 +196,7 @@ const PatchForm = (props) => {
                         >
                             <Option value="temperature">Temperature Sensor</Option>
                             <Option value="gateway">Gateway Sensor (EV-04)</Option>
-                            <Option value="spo2">SpO2 (Aeon)</Option>
+                            <Option value="spo2">SpO2 (CheckMe)</Option>
                             <Option value="ecg">ECG Sensor</Option>
                             <Option value="digital">Digital Scale</Option>
                             <Option value="bps">BP Sensor</Option>
@@ -318,11 +319,21 @@ const PatchDisplay = (props) => {
             <Descriptions.Item
                 label="Device Type"
                 labelStyle={{ backgroundColor: "#FBFBFB" }}
+                style={{ paddingRight: "12px", paddingLeft: "12px" }}
             >
                 {toProperName(props.patientClass.list[props.menuState].patchType)}
             </Descriptions.Item>
-            <Descriptions.Item label="Device Serial Number">
+            <Descriptions.Item 
+                label="Device Serial Number" 
+                style={{ paddingRight: "12px", paddingLeft: "12px" }}
+            >
                 {props.patientClass.list[props.menuState].patchserial}
+            </Descriptions.Item>
+            <Descriptions.Item 
+                label="Device MAC Address" 
+                style={{ paddingRight: "12px", paddingLeft: "12px" }}
+            >
+                {props.patientClass.list[props.menuState].macAddress}
             </Descriptions.Item>
         </Descriptions>
     );
@@ -459,7 +470,7 @@ export default function PatchInventoryModal(props) {
                         </Col>
 
                         <Col
-                            style={{ padding: "2em", maxWidth: "65em" }}
+                            style={{ padding: "2em", maxWidth: "65em", paddingRight: "0" }}
                             sm={24}
                             lg={16}
                             className="patchFormScrollContainer"

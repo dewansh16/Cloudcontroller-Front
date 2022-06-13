@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Menu, Col, Row, notification } from "antd";
+
+import { Menu, Col, Row, notification, Upload, Button } from "antd";
 import DeviceDetails from "./Components/DeviceData/deviceDetails/deviceDetails.DeviceData.Components.DeviceManagement.Components";
+import { InboxOutlined } from '@ant-design/icons';
 
 import patientApi from "../../../Apis/patientApis";
 import { UserStore } from "../../../Stores/userStore";
 
 import "./DeviceManagement.css";
+
+const { Dragger } = Upload;
 
 // function FetchPatchInfo(pid) {
 //     const [response, setResponse] = useState(null)
@@ -35,8 +39,11 @@ function DeviceManagement({ pid, associated_list, valDuration }) {
         isLoading: true,
         list: [],
     });
-    
+
+    const [isUpload, setIsUpload] = useState(false);
+    const [fileList, setFileList] = useState([]);
     const [menuState, setMenuState] = useState();
+    const [uploadTypeList, setUploadTypeList] = useState({})
 
     const handleMenuState = ({ item, key }) => {
         setMenuState(key);
@@ -139,82 +146,116 @@ function DeviceManagement({ pid, associated_list, valDuration }) {
             })
     };
 
+    const propsUpload = {
+        onRemove: (file) => {
+            const index = fileList.indexOf(file);
+            const newFileList = fileList.slice();
+            newFileList.splice(index, 1);
+            setFileList(newFileList);
+        },
+        beforeUpload: (file) => {
+            setFileList([...fileList, file]);
+        },
+    };
+
     return (
         <div>
             <Row span={24}>
-                <Col span={24}>
+                <Col span={20}>
                     <div className="heading">
                         <h1>Device Management</h1>
                     </div>
                 </Col>
-            </Row>
-            {deviceClass.list.length > 0 && (
-                <Row>
-                    <Col span={6}>
-                        <div className="menu-box">
-                            <Menu
-                                onClick={handleMenuState}
-                                // defaultSelectedKeys={menuState}
-                                selectedKeys={[menuState]}
-                                mode="inline"
-                            >
-                                {deviceClass.list.map((listItem, index) => {
-                                    return (
-                                        <Menu.Item
-                                            key={`${listItem?.["patches.patch_type"]}-${index}`}
-                                            className="menu-item"
-                                        >
-                                            {menuItemName(listItem?.["patches.patch_type"])}
-                                        </Menu.Item>
-                                    )
-                                })}
-                            </Menu>
-                        </div>
-                    </Col>
-                    <Col span={18}>
-                        <div className="data-container">
-                            {deviceClass.list.map(
-                                (Item, index) =>
-                                    menuState === `${Item["patches.patch_type"]}-${index}` && (
-                                        <DeviceDetails
-                                            serial={Item["patches.patch_serial"]}
-                                            key={`${Item["patches.patch_type"]}-${index}`}
-                                            uuid={Item["patches.patch_uuid"]}
-                                            duration={Item["duration"]}
-                                            pid={pid}
-                                            deviceType={Item["patches.patch_type"]}
-                                            onDetach={onDetachAssociate}
-                                            valDuration={valDuration}
-                                            macAddress={Item["patches.patch_mac"]}
-                                        />
-                                    )
-                            )}
-                        </div>
-                    </Col>
-                </Row>
-            )}
-
-            {deviceClass.list.length === 0 && (
-                <div
-                    style={{
-                        position: "relative",
-                        height: "400px",
-                        boxShadow: "rgb(0 0 0 / 5%) 0px 0px 20px",
-                    }}
-                >
-                    <h1
-                        style={{
-                            position: "absolute",
-                            top: "50%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                            fontSize: "3em",
-                            opacity: "0.5",
-                        }}
+                <Col span={4}>
+                    <Button 
+                        onClick={() => { setIsUpload(!isUpload) }} 
+                        className="primary" 
+                        style={{ fontSize: "1rem", padding: "0.35rem 2rem", height: "auto" }} 
                     >
-                        No Device Attached
-                    </h1>
-                </div>
+                        {isUpload ? "Cancel" : "Upload"} 
+                    </Button> 
+                </Col>
+            </Row>
+            {isUpload ? (
+                <div style={{ height: "80%", margin: "1% 5% 5% 5%"}}>
+                <Dragger {...propsUpload} showUploadList={true} multiple={true}>
+                    <p className="ant-upload-drag-icon">
+                        <InboxOutlined />
+                    </p>
+                    <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                </Dragger>
+            </div>
+            ) : (
+                <>
+                    {deviceClass.list.length > 0 && (
+                        <Row>
+                            <Col span={6}>
+                                <div className="menu-box">
+                                    <Menu
+                                        onClick={handleMenuState}
+                                        // defaultSelectedKeys={menuState}
+                                        selectedKeys={[menuState]}
+                                        mode="inline"
+                                    >
+                                        {deviceClass.list.map((listItem, index) => {
+                                            return (
+                                                <Menu.Item
+                                                    key={`${listItem?.["patches.patch_type"]}-${index}`}
+                                                    className="menu-item"
+                                                >
+                                                    {menuItemName(listItem?.["patches.patch_type"])}
+                                                </Menu.Item>
+                                            )
+                                        })}
+                                    </Menu>
+                                </div>
+                            </Col>
+                            <Col span={18}>
+                                <div className="data-container">
+                                    {deviceClass.list.map(
+                                        (Item, index) =>
+                                            menuState === `${Item["patches.patch_type"]}-${index}` && (
+                                                <DeviceDetails
+                                                    serial={Item["patches.patch_serial"]}
+                                                    key={`${Item["patches.patch_type"]}-${index}`}
+                                                    uuid={Item["patches.patch_uuid"]}
+                                                    duration={Item["duration"]}
+                                                    pid={pid}
+                                                    deviceType={Item["patches.patch_type"]}
+                                                    onDetach={onDetachAssociate}
+                                                    valDuration={valDuration}
+                                                    macAddress={Item["patches.patch_mac"]}
+                                                />
+                                            )
+                                    )}
+                                </div>
+                            </Col>
+                        </Row>
+                    )}
+        
+                    {deviceClass.list.length === 0 && (
+                        <div
+                            style={{
+                                position: "relative",
+                                height: "400px",
+                                boxShadow: "rgb(0 0 0 / 5%) 0px 0px 20px",
+                            }}
+                        >
+                            <h1
+                                style={{
+                                    position: "absolute",
+                                    top: "50%",
+                                    left: "50%",
+                                    transform: "translate(-50%, -50%)",
+                                    fontSize: "3em",
+                                    opacity: "0.5",
+                                }}
+                            >
+                                No Device Attached
+                            </h1>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );

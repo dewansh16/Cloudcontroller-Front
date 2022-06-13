@@ -22,11 +22,13 @@ import AddGatewayModal from "./addGateway";
 import device1 from "../../Assets/Images/ecg.png";
 import device2 from "../../Assets/Images/temp1.png";
 import device3 from "../../Assets/Images/watch.jpg";
-import device4 from "../../Assets/Images/spo2.jpg";
+// import device4 from "../../Assets/Images/spo2.jpg";
 import device5 from "../../Assets/Images/BUNDLE_png.png";
-import imgAlphamed from "../../Assets/Images/alphamed.png";
+import spo2Img from "../../Assets/Images/spo2img.png";
 import imgIHealth from "../../Assets/Images/ihealth.png";
 import digitalScale from "../../Assets/Images/DigitalScale.png";
+import gatewayImg from "../../Assets/Images/gateway.png";
+import bpImg from "../../Assets/Images/BP-sensor.png";
 
 import deviceApi from "../../Apis/deviceApis";
 // import PaginationBox from '../Components/paginationBox';
@@ -265,15 +267,15 @@ function PatchInventory() {
             case "ecg":
                 return device1;
             case "spo2":
-                return device4;
+                return spo2Img;
             case "gateway":
-                return device3;
+                return gatewayImg;
             case "digital":
                 return digitalScale;
             case "alphamed":
-                return imgAlphamed;
+                return bpImg;
             case "ihealth":
-                return imgIHealth;
+                return bpImg;
             default:
                 return null;
         }
@@ -443,7 +445,7 @@ function PatchInventory() {
     const renderLabelPatchType = (type) => ({
         "temperature": "Temperature Sensor",
         "gateway": "Gateway Sensor (EV-04)",
-        "spo2": "SpO2 (Aeon)",
+        "spo2": "SpO2 (CheckMe)",
         "ecg": "ECG Sensor",
         "bps": "BP Sensor",
         "digital": "Digital Scale",
@@ -496,7 +498,15 @@ function PatchInventory() {
                         />
                     )}
                     <div>
-                        <img alt="someimage" src={handleImg(record)} width="80px"></img>
+                        <img 
+                            alt="someimage" 
+                            src={handleImg(record)} 
+                            width="80px" 
+                            style={{ 
+                                transform: (record?.patch_type === "gateway" || record?.patch_type === "temperature") ? "scale(1.25)" :
+                                (record?.patch_type === "alphamed" || record?.patch_type === "ihealth") ? "scale(0.7)" : "scale(1)"
+                            }}
+                        ></img>
                     </div>
                 </div>
             )

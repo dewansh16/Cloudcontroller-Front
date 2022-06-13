@@ -444,6 +444,24 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     //     ]);
     // }, [activeStep, stepArray]);
 
+    function findMinAndMax(array) {
+        let max = 0;
+        let min = array[0].value;
+
+        for (var i = 0; i < array.length; i++) {
+            const number = array[i].value;
+            if (number > max) {
+                max = number;
+                min = max;
+            }
+               
+            if (number < min) {
+                min = number;
+            }
+        }
+        return { min, max };
+    }
+
     const onGetDataSensorFromInfluxByKey = (keySensor, data, type, index) => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
@@ -473,7 +491,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 const value = dataQueryInFlux?._value || 0;
-                arrayRes.push({ value, time: dataQueryInFlux?._time, index: indexValue });
+                arrayRes.push({ value: takeDecimalNumber(value, 2), time: dataQueryInFlux?._time, index: indexValue });
                 indexValue++;
             },
             error(error) {
@@ -481,8 +499,12 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                 console.log('nFinished ERROR')
             },
             complete() {
-                console.log();
                 data.data = arrayRes;
+                if (arrayRes?.length > 0) {
+                    const { min = 0, max = 0 } = findMinAndMax(arrayRes);
+                    data.max = max + 20;
+                    data.min = min - 20;
+                }
                 newArrayData.push(data);
                 setActiveTrendsArray(newArrayData);
             },
@@ -785,7 +807,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                             max: bpdmaxval,
                                             min: bpdminval,
                                         }
-                                        onGetDataSensorFromInfluxByKey("bpd", bpd);
+                                        onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bpd" : "ihealth_bpd", bpd);
                                     }
                                 }} className="trend-btn" style={
                                     activeTrendsArray.some(e => e.name === 'BPD') ? { border: `2px solid ${Colors.darkPurple}`, color: Colors.darkPurple } : { border: '1px solid #BABABA', color: '#BABABA' }
@@ -814,7 +836,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                             max: bpsmaxval,
                                             min: bpsminval,
                                         }
-                                        onGetDataSensorFromInfluxByKey("bps", bps);
+                                        onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bps" : "ihealth_bps", bps);
                                     }
                                 }} className="trend-btn" style={
                                     activeTrendsArray.some(e => e.name === 'BPS') ? { border: `2px solid ${Colors.darkPurple}`, color: Colors.darkPurple } : { border: '1px solid #BABABA', color: '#BABABA' }
@@ -899,7 +921,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                                     trend.data.map((ele) => (
                                                         ele.med
                                                             ?
-                                                            (
+                                                            (   
                                                                 <ReferenceLine x={ele.date} stroke="blue" strokeDasharray="7 7" strokeWidth={3} />
                                                             )
                                                             :

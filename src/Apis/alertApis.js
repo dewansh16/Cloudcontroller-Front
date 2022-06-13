@@ -1,10 +1,10 @@
 import axiosInstance from './index';
 
 const alertApi = {
-    getPatientAlerts: (pid) =>
+    getPatientAlerts: (pid, offset, limit = 25) =>
         axiosInstance.request({
             method: "GET",
-            url: `/alerts?limit=50&offset=0&pid=${pid}`,
+            url: `/alerts?limit=${limit}&offset=${offset}&pid=${pid}`,
             // withCredentials: true,
         }),
     editAcknowledged: (id, data) =>

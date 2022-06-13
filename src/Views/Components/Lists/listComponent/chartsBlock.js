@@ -47,10 +47,10 @@ export default function ChartsBlock({
                             <h3 style={{
                                 ...styleTitle
                             }}>{takeDecimalNumber(value)}</h3>
-                            <h4 style={{
+                            <h5 style={{
                                 ...styleTitle,
                                 fontWeight: "400"
-                            }}>°F</h4>
+                            }}>°F</h5>
                         </div>
                         <Divider style={{ margin: "0px" }} />
                         <div
@@ -63,11 +63,11 @@ export default function ChartsBlock({
                             <h3 style={{
                                 ...styleTitle
                             }}>{takeDecimalNumber(celsius)}</h3>
-                            <h4 style={{
+                            <h5 style={{
                                 marginBottom: "0px",
                                 color: strokeColor,
                                 fontWeight: "400"
-                            }}>°C</h4>
+                            }}>°C</h5>
                         </div>
                     </div>
                 )
@@ -78,10 +78,10 @@ export default function ChartsBlock({
                         <h3 style={{
                             ...styleTitle
                         }}>{takeDecimalNumber(value)}</h3>
-                        <h4 style={{
+                        <h5 style={{
                             ...styleTitle,
                             fontWeight: "400"
-                        }}>bpm</h4>
+                        }}>bpm</h5>
                     </div>
                 )
             case "blood_pressuer":
@@ -97,10 +97,10 @@ export default function ChartsBlock({
                             <h3 style={{
                                 ...styleTitle
                             }}>{takeDecimalNumber(value)}</h3>
-                            <h4 style={{
+                            <h5 style={{
                                 ...styleTitle,
                                 fontWeight: "400"
-                            }}>mmHg</h4>
+                            }}>mmHg</h5>
                         </div>
                         <Divider style={{ margin: "0px" }} />
                         <div
@@ -113,11 +113,11 @@ export default function ChartsBlock({
                             <h3 style={{
                                 ...styleTitle
                             }}>{takeDecimalNumber(valueBpd)}</h3>
-                            <h4 style={{
+                            <h5 style={{
                                 marginBottom: "0px",
                                 color: strokeColor,
                                 fontWeight: "400"
-                            }}>mmHg</h4>
+                            }}>mmHg</h5>
                         </div>
                     </div>
                 )
@@ -136,10 +136,10 @@ export default function ChartsBlock({
                             <h3 style={{
                                 ...styleTitle
                             }}>{takeDecimalNumber(value)}</h3>
-                            <h4 style={{
+                            <h5 style={{
                                 ...styleTitle,
                                 fontWeight: "400"
-                            }}>kg</h4>
+                            }}>kg</h5>
                         </div>
                         <Divider style={{ margin: "0px" }} />
                         <div
@@ -152,10 +152,10 @@ export default function ChartsBlock({
                             <h3 style={{
                                 ...styleTitle,
                             }}>{takeDecimalNumber(lbs)}</h3>
-                            <h4 style={{
+                            <h5 style={{
                                 ...styleTitle,
                                 fontWeight: "400"
-                            }}>lbs</h4>
+                            }}>lbs</h5>
                         </div>
                     </div>
                 )

@@ -7,6 +7,7 @@ import './SortingHeader.Alerts.Components.css'
 import patientApi from '../../../../../Apis/patientApis';
 
 import { Button as Buttons } from '../../../../../Theme/Components/Button/button';
+import { PaginationBox, computeTotalPages } from "../../../../Components/PaginationBox/pagination";
 
 import Icons from '../../../../../Utils/iconMap';
 // const { Option } = Select;
@@ -36,7 +37,7 @@ function FetchDetails(pid) {
 
 const SortingHeader = (props) => {
     const [topBellBtn, setTopBellBtn] = useState(false);
-    const [data, isLoading] = FetchDetails(props.pid)
+    const [data, isLoading] = FetchDetails(props.pid);
 
     const topBellBtnStyle = {
         border: '1px solid #FB2D77',
@@ -64,7 +65,7 @@ const SortingHeader = (props) => {
             <Affix className='first-affix-box' >
                 <div className="alert-dashboard-grid"
                     style={{
-                        gridTemplateColumns: "4fr 6fr 0.5fr"
+                        gridTemplateColumns: "3fr 6fr 0.5fr"
                     }}>
                     <div className="alert-select-location ">
                         <Buttons 
@@ -160,6 +161,12 @@ const SortingHeader = (props) => {
                             </Radio.Group>
                         </div>
                     </div>
+
+                    <PaginationBox
+                        totalPages={props?.totalPages}
+                        currentPageVal={props?.currentPageVal}
+                        setCurrentPageVal={props?.setCurrentPageVal}
+                    />
                 </div>
             </Affix>
         </div >

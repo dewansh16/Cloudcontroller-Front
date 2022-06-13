@@ -102,6 +102,8 @@ function AddPatient() {
                 class: "Demographics",
                 error: false,
                 added: false,
+                errorFirstName: false,
+                errorLastName: false,
                 Component: PatientDemographics,
             },
             {
@@ -495,8 +497,13 @@ function AddPatient() {
 
     // add patient to the backend
     const addPatient = () => {
+        const { errorFirstName = false, errorLastName = false } = patientClass.list[0];
+        if (errorFirstName || errorLastName) return null;
+
         setButtonLoading(true);
+
         try {
+            console.log("patient", patientClass);
             addPatientForm.submit();
 
             let list = patientClass.list;
