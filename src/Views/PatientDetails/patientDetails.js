@@ -486,7 +486,7 @@ export default function PatientDetails(props) {
                                                 />
                                             }
                                             overlayInnerStyle={{
-                                                height: "40vh",
+                                                // height: "40vh",
                                                 width: "25vw",
                                                 maxHeight: "400px",
                                                 minHeight: "200px",
