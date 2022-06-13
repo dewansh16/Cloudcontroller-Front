@@ -218,7 +218,7 @@ const PatchForm = (props) => {
     const renderTitleSensor = (type) => ({
         "temperature": "Temperature Sensor",
         "gateway": "Gateway (EV-04)",
-        "spo2": "SpO2 (Aeon)",
+        "spo2": "SpO2 (CheckMe)",
         "ecg": "ECG Sensor",
         "bps": "BP Sensor",
         "digital": "Digital Scale",
