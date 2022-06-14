@@ -2286,48 +2286,6 @@ function BillingModule() {
         })
     }
 
-    // const checkTotalNumberDateHaveDataFromInflux = (startDate = "", sensorType = "", patch) => {
-    //     const start = new Date(startDate);
-    //     const end = new Date();
-
-    //     const typeQuery = shortTypeQueryOfSensor(sensorType, false);
-    //     if (start.getTime() > end.getTime()) return;
-
-    //     const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-    //     const org = 'live247';
-
-    //     const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-    //     const queryApi = client.getQueryApi(org);
-
-    //     const query = `from(bucket: "emr_dev")
-    //             |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
-    //             |> filter(fn: (r) => r["_measurement"] == "${location.state.pid}_${typeQuery}")
-    //             |> yield(name: "mean")
-    //         `
-
-    //     const arrDateQuery = [];
-    //     queryApi.queryRows(query, {
-    //         next(row, tableMeta) {
-    //             const o = tableMeta.toObject(row);
-    //             let time = new Date(o._time);
-    //             time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
-
-    //             if (!arrDateQuery.includes(time)) {
-    //                 arrDateQuery.push(time);
-    //             }
-    //         },
-    //         error(error) {
-    //             console.log('ERROR', query)
-    //         },
-    //         complete() {
-    //             patch.totalDay = arrDateQuery?.length;
-    //             patch.datesInflux = arrDateQuery;
-    //             const typeQueryTimestamp = shortTypeQueryOfSensor(sensorType, true);
-    //             checkDateFromInflux(start, end, typeQueryTimestamp, patch);
-    //         },
-    //     })
-    // };
-
     const numberOfNightsBetweenDates = (start, end) => {
         let dayCount = 0;
         while (end >= start) {
@@ -2396,65 +2354,33 @@ function BillingModule() {
             setActiveCode99454(true);
         }
 
-        setPatchLoading(false);
+        // setPatchLoading(false);
 
         return { list: newArr, totalDayMonitored, billedUnit: result };
-    }, [patchArray, currentDateApi, associatedSensorsState]);
+    }, [patchArray, currentDateApi]);
 
-    // const filterDeviceAssociatedByDate = useMemo(() => {
-    //     if (!associatedSensorsState) return false;
+    const timerPatchLoading = useRef(null); 
+    useEffect(() => {
+        if (patchLoading) {
+            timerPatchLoading.current = setTimeout(() => {
+                setPatchLoading(false)
+            }, 1000);
+        }
+        return () => { clearTimeout(timerPatchLoading.current) }
+    }, [patchLoading]);
 
-    //     const newArr = [];
-    //     let totalDayMonitored = 0;
+    const getDataForSensor99454 = () => {
+        const newArr = [...patchArray];
+        newArr?.forEach((patch) => {
+            const startDate = getFirstDateMonitored(patch) || "";
 
-    //     let minDate = null;
-    //     let maxDate = null;
-    //     const timeFilter = new Date(currentDateApi);
+            if (!!startDate && !!patch["patches.patch_type"]) {
+                checkDateFromInflux(startDate, patch["patches.patch_type"], patch);
+            }
+        })
 
-    //     for (let index = 0; index < patchArray.length; index++) {
-    //         const patch = patchArray[index];
-
-    //         if (patch?.datesInflux?.length > 0) {
-    //             const firstDateMonitored = new Date(patch.datesInflux[0]);
-    //             const lastDateMonitored = new Date(patch.datesInflux[patch.datesInflux?.length - 1])
-    //             if (
-    //                 Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear()) 
-    //                 && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
-    //             ) {
-    //                 if (minDate === null || minDate > firstDateMonitored) {
-    //                     minDate = firstDateMonitored;
-    //                 } 
-
-    //                 if (maxDate === null || maxDate < lastDateMonitored) {
-    //                     maxDate = lastDateMonitored;
-    //                 }
-
-    //                 newArr.push(patch);
-    //             }
-    //         }
-    //     } 
-
-    //     if (minDate !== null && maxDate !== null) {
-    //         totalDayMonitored = numberOfNightsBetweenDates(new Date(minDate), new Date(maxDate));
-    //     }
-
-    //     let result = 0;
-    //     if (totalDayMonitored > TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
-    //         result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
-    //     }
-
-    //     if (result > 0 
-    //             && Number(new Date().getFullYear()) === Number(timeFilter.getFullYear()) 
-    //             && Number(new Date().getMonth()) === Number(timeFilter.getMonth())
-    //             && !activeCode99454
-    //     ) {
-    //         setActiveCode99454(true);
-    //     }
-
-    //     setPatchLoading(false);
-
-    //     return { list: newArr, totalDayMonitored, billedUnit: result };
-    // }, [patchArray, currentDateApi, associatedSensorsState]);
+        setPatchArray(newArr);
+    }
 
     return rightSideLoading ? (
         <div
@@ -2540,6 +2466,7 @@ function BillingModule() {
                             {enrolledState ? (
                                 <div
                                     onClick={() => {
+                                        getDataForSensor99454();
                                         setAssociatedSensorsState(true);
                                         setInitialSetupState(false);
                                         setFirstTwentyState(false);
@@ -2550,9 +2477,7 @@ function BillingModule() {
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
                                         setTaskCodeActive(CPT_CODE.CPT_99454)
-                                        if (!associatedSensorsState) {
-                                            setPatchLoading(true);
-                                        }
+                                        setPatchLoading(true);
                                     }}
                                     className={
                                         associatedSensorsState
@@ -2670,7 +2595,7 @@ function BillingModule() {
                                     className="bm-header-dot"
                                     style={
                                         initialStepDoneState ?
-                                            Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
+                                            Math.floor(secondTotalTime / 60 / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
