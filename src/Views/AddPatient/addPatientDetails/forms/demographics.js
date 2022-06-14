@@ -119,9 +119,20 @@ const PatientDemographics = (props) => {
                                 name={item.name}
                                 validateFirst={item.validateFirst}
                                 rules={item.rules}
+                                className={item.className}
                             >
                                 {item.Input}
                             </Form.Item>
+                            {((errorFirstName && item.name === "fname") || (errorLastName && item.name === "lname")) && (
+                                <div style={{ 
+                                    position: "absolute",
+                                    bottom: "0",
+                                    left: "0",
+                                    fontSize: "14px",
+                                    color: "#FF2B2B",
+                                    // marginBottom: "-22px"
+                                }}>{`${errorFirstName ? "First" : "Last"} Name is not space!`}</div>
+                            )}
                         </Col>
                     );
                 })}

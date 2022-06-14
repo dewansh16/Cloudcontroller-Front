@@ -169,20 +169,8 @@ const demographicsFormItems = (
             rules: [{ 
                 required: props.required, message: "First Name is required!", 
             }],
-            className: "addPatientDetailsModal",
-            Input: <div style={{ position: "relative" }}>
-                <Input onChange={(event) => onInputChange(event.target.value, "firstName")} status={errorFirstName ? "error" : ""} />
-                {errorFirstName && (
-                    <div style={{ 
-                        position: "absolute",
-                        bottom: "0",
-                        left: "0",
-                        fontSize: "14px",
-                        color: "#FF2B2B",
-                        marginBottom: "-22px"
-                    }}>First Name is not space!</div>
-                )}
-            </div>,
+            className: "addPatientDetailsModal relative-error",
+            Input: <Input onChange={(event) => onInputChange(event.target.value, "firstName")} status={errorFirstName ? "error" : ""} />
         },
         {
             required: !props.required,
@@ -198,19 +186,20 @@ const demographicsFormItems = (
             name: "lname",
             rules: [{ required: props.required, message: "Last Name is required!" }],
             className: "addPatientDetailsModal",
-            Input: <div style={{ position: "relative" }}>
-                <Input onChange={(event) => onInputChange(event.target.value, "lastName")} status={errorLastName ? "error" : ""} />
-                {errorLastName && (
-                    <div style={{ 
-                        position: "absolute",
-                        bottom: "0",
-                        left: "0",
-                        fontSize: "14px",
-                        color: "#FF2B2B",
-                        marginBottom: "-22px"
-                    }}>Last Name is not space!</div>
-                )}
-            </div>,
+            Input: <Input onChange={(event) => onInputChange(event.target.value, "lastName")} status={errorLastName ? "error" : ""} />,
+            // Input: <div style={{ position: "relative" }}>
+            //     <Input onChange={(event) => onInputChange(event.target.value, "lastName")} status={errorLastName ? "error" : ""} />
+            //     {errorLastName && (
+            //         <div style={{ 
+            //             position: "absolute",
+            //             bottom: "0",
+            //             left: "0",
+            //             fontSize: "14px",
+            //             color: "#FF2B2B",
+            //             marginBottom: "-22px"
+            //         }}>Last Name is not space!</div>
+            //     )}
+            // </div>,
         },
         // {
         //     required: props.required,

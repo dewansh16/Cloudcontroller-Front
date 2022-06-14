@@ -1,6 +1,16 @@
 import axiosInstance from "./index";
 
 const patientApi = {
+    downloadLogger: (url) => 
+        axiosInstance.request({
+            method: "GET",
+            url: `/logger/download?url=${url}`,
+        }),
+    getListUploadLogger: (tenantId) => 
+        axiosInstance.request({
+            method: "GET",
+            url: `/logger?tenantId=${tenantId}`,
+        }),
     detachSensorOfPatient: (data) => 
         axiosInstance.request({
             method: "DELETE",
