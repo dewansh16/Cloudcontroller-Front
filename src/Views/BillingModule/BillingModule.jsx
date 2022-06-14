@@ -2595,7 +2595,7 @@ function BillingModule() {
                                     className="bm-header-dot"
                                     style={
                                         initialStepDoneState ?
-                                            Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
+                                            Math.floor(secondTotalTime / 60 / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
