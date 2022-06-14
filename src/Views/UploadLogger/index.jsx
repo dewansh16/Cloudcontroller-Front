@@ -38,10 +38,10 @@ const UploadLogger = () => {
     }, []);
 
     const handleDownloadFile = (url) => {
-        // patientApi.downloadLogger(url)
-        //     .then(res => {
-        //         console.log("res", res);
-        //     })
+        patientApi.downloadLogger(url)
+            .then(res => {
+                console.log("res", res);
+            })
         // const url = window.URL.createObjectURL(blob);
         // const a = document.createElement('a');
         // a.style.display = 'none';
