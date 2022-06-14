@@ -991,7 +991,12 @@ function BillingModule() {
 
     const getDateEnable99457 = (dataTask) => {
         if (isArray(dataTask) && dataTask.length > 0) {
-            return moment(dataTask[dataTask.length - 1]).format('YYYY-MM-DD');
+            if(taskCodeActive == CPT_CODE.CPT_99457 || taskCodeActive == CPT_CODE.CPT_99458){
+                return moment(dataTask[dataTask.length - 1].task_date).format('YYYY-MM-DD');
+            }
+            if(taskCodeActive == CPT_CODE.CPT_99091){
+                return moment(dataTask[dataTask.length - 1].date).format('YYYY-MM-DD');
+            }
         }
         return '';
     }
