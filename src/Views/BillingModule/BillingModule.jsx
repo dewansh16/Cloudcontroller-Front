@@ -2344,6 +2344,10 @@ function BillingModule() {
         if (totalDayMonitored > TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
             result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
             totalDayMonitored = totalDayMonitored - (TOTAL_HOURS_FOR_EACH_SENSOR_BILLED * result);
+
+            if (totalDayMonitored >= 0) {
+                totalDayMonitored = 16;
+            }
         }
 
         if (result > 0

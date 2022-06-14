@@ -161,12 +161,12 @@ function DeviceManagement({ pid, associated_list, valDuration }) {
     return (
         <div>
             <Row span={24}>
-                <Col span={20}>
+                <Col span={24}>
                     <div className="heading">
                         <h1>Device Management</h1>
                     </div>
                 </Col>
-                <Col span={4}>
+                {/* <Col span={4}>
                     <Button 
                         onClick={() => { setIsUpload(!isUpload) }} 
                         className="primary" 
@@ -174,7 +174,7 @@ function DeviceManagement({ pid, associated_list, valDuration }) {
                     >
                         {isUpload ? "Cancel" : "Upload"} 
                     </Button> 
-                </Col>
+                </Col> */}
             </Row>
             {isUpload ? (
                 <div style={{ height: "80%", margin: "1% 5% 5% 5%"}}>
