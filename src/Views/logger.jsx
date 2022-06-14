@@ -7,17 +7,22 @@ const { Option } = Select;
 
 const Logger = () => {
     const [data, setData] = useState([]);
-    const [typeLog, setTypeLog] = useState("SENSOR_LOG_DATA");
+    let typeLog = localStorage.getItem("typeLog");
 
     useEffect(() => {
         var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
 
+        if (typeLog === null || typeLog === undefined) {
+            typeLog = "SENSOR_LOG_DATA";
+            localStorage.setItem("typeLog", typeLog);
+        }
+        console.log("typeLog", typeLog);
         socket.on(`${typeLog}`, function ({ body }) {
             console.log("---------------------- socket", body);
             data.push(body);
             setData([...data]);
         })
-    }, [typeLog]);
+    }, []);
 
     return (
         <div style={{ padding: "1rem 2rem", height: "100vh" }}>
@@ -30,12 +35,16 @@ const Logger = () => {
                 >
                     <h3 style={{ margin: "0" }}>Log Type: </h3>
                     <Select
-                        defaultValue="SENSOR_LOG_DATA"
+                        defaultValue={typeLog}
                         style={{ width: "9rem", marginLeft: "1rem" }}
-                        onSelect={(val) => setTypeLog(val)}
+                        onSelect={(val) => { 
+                            localStorage.setItem("typeLog", val);
+                            setData([]);
+                            window.location.reload();
+                        }}
                     >
-                        <Option value="SENSOR_LOG_KEEP_ALIVE">Keep alive</Option>
                         <Option value="SENSOR_LOG_DATA">Sensor data</Option>
+                        <Option value="SENSOR_LOG_KEEP_ALIVE">Keep alive</Option>
                     </Select>
                 </div>
             </div>
