@@ -187,14 +187,8 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
             ) : (
                 <>
                     {
-                        totalDay >= 16 ? (
-                            <div>1 billed</div>
-                        ) : (
-                            <>
-                                {totalDay > 0 && (
-                                    <div>{`${totalDay} ${totalDay > 1 ? "days" : "day"}`}</div>
-                                )}
-                            </>
+                        totalDay > 0 && (
+                            <div>{`${totalDay} ${totalDay > 1 ? "days" : "day"}`}</div>
                         )
                     }
                 </>
