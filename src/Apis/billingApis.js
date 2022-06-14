@@ -45,7 +45,7 @@ const billingApi = {
     getBillingSummary: (bill_date, ofset, search) => 
         axiosInstance.request({
             method: "GET",
-            url: `/billing/total-summary?bill_date=${bill_date}&limit=1000&offset=${ofset}${!!search ? `&filter=${search}` : ""} `,
+            url: `/billing/total-summary?bill_date=${bill_date}&limit=15&offset=${ofset}${!!search ? `&filter=${search}` : ""} `,
         }),
 };
 

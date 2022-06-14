@@ -66,6 +66,8 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
             complete() {
                 patch.total = arrDateQuery?.length;
                 patch.datesInflux = arrDateQuery;
+                const temp = setRunEffect + 1;
+                setRunEffect(temp);
             },
         })
     };
@@ -161,12 +163,12 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
             billFound.total = totalDayMonitored;
             setTotalDay(totalDayMonitored);
             setLoading(false);
-        }, 1250);
+        }, 2000);
 
         return () => {
             clearTimeout(timer);
         }
-    }, [pid, valueDate]);
+    }, [pid, valueDate, effect]);
 
     const numberOfNightsBetweenDates = (start, end) => {
         let dayCount = 0;
@@ -185,7 +187,7 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
             ) : (
                 <>
                     {
-                        totalDay > 16 ? (
+                        totalDay >= 16 ? (
                             <div>1 billed</div>
                         ) : (
                             <>
