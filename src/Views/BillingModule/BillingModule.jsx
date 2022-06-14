@@ -90,7 +90,7 @@ let clockCounter = null;
 let timeCount = 0;
 let currentIdTimerClockActive = null;
 var initialData = {};
-
+const DEFAULT_TASK_NOTE = 'System add task';
 
 function BillingModule() {
     const pid = useParams().pid;
@@ -1332,42 +1332,75 @@ function BillingModule() {
         let billingId = null;
         let currentTotalTime99457 = 0;
         let addNewLine99458 = null;
+        let oldTime = null;
+        let currentUser = JSON.parse(localStorage.getItem("user"));
 
         let valiSuccess = false;
 
-        billingInformation.map(item => {
-            if (item.code == cptCode) {
+        billingInformation.map(obj1 => {
+            if (obj1.code == cptCode) {
                 isCodeExist = true;
-                billingId = item.id
+                billingId = obj1.id
             }
-            if (item.code == CPT_CODE.CPT_99457) {
-                let taskData = JSON.parse(item.params);
-                taskData.map(item => {
-                    currentTotalTime99457 += item.task_time_spend;
+            if (obj1.code == CPT_CODE.CPT_99457) {
+                let taskData = JSON.parse(obj1.params);
+                taskData.map(obj2 => {
+                    currentTotalTime99457 += obj2.task_time_spend;
+                    if(item.task_id && item.task_id == obj2.task_id){
+                        oldTime = obj2.task_time_spend;
+                    }
                 })
             }
         })
 
+        // Add new line 99458
         if (cptCode == CPT_CODE.CPT_99457) {
-            if ((currentTotalTime99457 + item.task_time_spend) >= TOTAL_HOURS_FOR_CODE_99457_BILLED * 60) {
-                let timeReduce = currentTotalTime99457 + item.task_time_spend - TOTAL_HOURS_FOR_CODE_99457_BILLED * 60;
-                item.task_time_spend = item.task_time_spend - timeReduce;
-                addNewLine99458 = {
-                    code_type: CPT,
-                    code: CPT_CODE.CPT_99458,
-                    bill_date: date_string,
-                    pid: location.state.pid,
-                    revenue_code: 123,
-                    notecodes: "pending",
-                    bill_process: 0,
-                    fee: 40,
-                    add_task_id: date.getTime(),
-                    add_task_date: taskDateVal,
-                    add_task_staff_name: taskNameVal,
-                    add_task_note: taskNoteVal,
-                    task_time_spend: timeReduce
+            if(item.task_id){
+                if(oldTime){
+                    const timeAdd = item.task_time_spend - oldTime;
+                    if ((currentTotalTime99457 + timeAdd) >= TOTAL_HOURS_FOR_CODE_99457_BILLED * 60) {
+                        let timeReduce = currentTotalTime99457 + timeAdd - TOTAL_HOURS_FOR_CODE_99457_BILLED * 60;
+                        item.task_time_spend = item.task_time_spend - timeReduce;
+                        addNewLine99458 = {
+                            code_type: CPT,
+                            code: CPT_CODE.CPT_99458,
+                            bill_date: date_string,
+                            pid: location.state.pid,
+                            revenue_code: 123,
+                            notecodes: "pending",
+                            bill_process: 0,
+                            fee: 40,
+                            add_task_id: date.getTime(),
+                            add_task_date: taskDateVal,
+                            add_task_staff_name: taskNameVal ? taskNameVal : currentUser.userName,
+                            add_task_note: taskNoteVal ? taskNoteVal : DEFAULT_TASK_NOTE,
+                            task_time_spend: timeReduce
+                        }
+                    }
+                } 
+                
+            } else {
+                if ((currentTotalTime99457 + item.task_time_spend) >= TOTAL_HOURS_FOR_CODE_99457_BILLED * 60) {
+                    let timeReduce = currentTotalTime99457 + item.task_time_spend - TOTAL_HOURS_FOR_CODE_99457_BILLED * 60;
+                    item.task_time_spend = item.task_time_spend - timeReduce;
+                    addNewLine99458 = {
+                        code_type: CPT,
+                        code: CPT_CODE.CPT_99458,
+                        bill_date: date_string,
+                        pid: location.state.pid,
+                        revenue_code: 123,
+                        notecodes: "pending",
+                        bill_process: 0,
+                        fee: 40,
+                        add_task_id: date.getTime(),
+                        add_task_date: taskDateVal,
+                        add_task_staff_name: taskNameVal ? taskNameVal : currentUser.userName,
+                        add_task_note: taskNoteVal ? taskNoteVal : DEFAULT_TASK_NOTE,
+                        task_time_spend: timeReduce
+                    }
                 }
             }
+           
         }
 
         if (cptCode == CPT_CODE.CPT_99457 || cptCode == CPT_CODE.CPT_99458) {
