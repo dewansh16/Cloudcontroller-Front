@@ -2279,9 +2279,16 @@ function BillingModule() {
 
         const start = new Date(startDate);
         const end = new Date();
+        const timeFilter = currentDateApi ? new Date(currentDateApi) : new Date();
+        
+        const firstDayOfMonth = new Date(timeFilter.setDate(1));
+        firstDayOfMonth.setHours(0, 0, 1);
 
         const typeQuery = shortTypeQueryOfSensor(sensorType, true);
         if (start.getTime() > end.getTime()) return;
+        if (start?.getTime() < firstDayOfMonth?.getTime()) {
+            start = firstDayOfMonth;
+        }
 
         const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
         const queryApi = client.getQueryApi(org);
@@ -2292,7 +2299,6 @@ function BillingModule() {
                 |> yield(name: "mean")
             `
 
-        const timeFilter = currentDateApi ? new Date(currentDateApi) : new Date();
         const arrDateQuery = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {
@@ -2313,6 +2319,8 @@ function BillingModule() {
                 console.log('ERROR', patch)
             },
             complete() {
+                console.log("arrDateQuery", arrDateQuery);
+
                 patch.totalDay = arrDateQuery?.length;
                 patch.datesInflux = arrDateQuery;
             },
@@ -2375,7 +2383,8 @@ function BillingModule() {
 
         let result = 0;
         if (totalDayMonitored > TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
-            result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
+            // result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
+            result = 1;
             totalDayMonitored = totalDayMonitored - (TOTAL_HOURS_FOR_EACH_SENSOR_BILLED * result);
 
             if (totalDayMonitored >= 0) {

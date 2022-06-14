@@ -32,7 +32,7 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
 
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
-                |> filter(fn: (r) => r["_measurement"] == "${pid}_${sensorType}")
+                |> filter(fn: (r) => r["_measurement"] == "${pid}_${sensorType}_timestamp")
                 |> yield(name: "mean")
             `
         const arrDateQuery = [];
@@ -41,11 +41,23 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const o = tableMeta.toObject(row);
-                let time = new Date(o._time);
-                time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
-                if (!arrDateQuery.includes(time)) {
-                    arrDateQuery.push(time);
-                    // tepm += 1;
+                // let time = new Date(o._time);
+                // time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
+                // if (!arrDateQuery.includes(time)) {
+                //     arrDateQuery.push(time);
+                //     // tepm += 1;
+                // }
+
+                let time = new Date(o._value);
+
+                if (
+                    Number(time.getFullYear()) === Number(date.getFullYear())
+                    && Number(time.getMonth()) === Number(date.getMonth())
+                ) {
+                    time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
+                    if (!arrDateQuery.includes(time)) {
+                        arrDateQuery.push(time);
+                    }
                 }
             },
             error(error) {
@@ -54,17 +66,6 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
             complete() {
                 patch.total = arrDateQuery?.length;
                 patch.datesInflux = arrDateQuery;
-
-                // setRunEffect(tepm);
-
-                // const billFound = billingSummary?.billings?.find(bill => bill?.pid === pid);
-                // if (!!billFound) {
-                //     let tepm = totalDay;
-                //     tepm += arrDateQuery?.length;
-
-                //     billFound.total = tepm;
-                //     setTotalDay(tepm);
-                // }
             },
         })
     };
@@ -78,16 +79,22 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
             case "spo2":
                 return "spo2"
             case "ecg":
-                return "ecg_hr"
+                return "ecg"
             case "alphamed":
-                return "alphamed_bpd"
+                return "alphamed"
             case "ihealth":
-                return "ihealth_bpd"
+                return "ihealth"
 
             default:
                 break;
         }
     };
+
+    function sortDate(a, b) {
+        const first = new Date(a).getTime();
+        const last = new Date(b).getTime();
+        return (first > last) - (first < last)
+    }
 
     const getFirstDateMonitored = (item) => {
         let result = '';
@@ -123,14 +130,36 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
                 }
             });
 
-            let result = [];
-            result = totalArr.filter(function (element) {
-                return result.includes(element) ? '' : result.push(element)
-            });
+            totalArr?.sort(sortDate);
 
-            const total = result?.length;
-            billFound.total = total;
-            setTotalDay(total);
+            let minDate = null;
+            let maxDate = null;
+            let totalDayMonitored = 0;
+
+            const timeFilter = new Date(valueDate);
+            if (totalArr?.length > 0) {
+                const firstDateMonitored = new Date(totalArr[0]);
+                const lastDateMonitored = new Date(totalArr[totalArr?.length - 1]);
+                if (
+                    Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear())
+                    && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
+                ) {
+                    if (minDate === null || minDate > firstDateMonitored) {
+                        minDate = firstDateMonitored;
+                    }
+
+                    if (maxDate === null || maxDate < lastDateMonitored) {
+                        maxDate = lastDateMonitored;
+                    }
+                }
+            }
+
+            if (minDate !== null && maxDate !== null) {
+                totalDayMonitored = numberOfNightsBetweenDates(new Date(minDate), new Date(maxDate));
+            }
+
+            billFound.total = totalDayMonitored;
+            setTotalDay(totalDayMonitored);
             setLoading(false);
         }, 1250);
 
@@ -139,6 +168,15 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
         }
     }, [pid, valueDate]);
 
+    const numberOfNightsBetweenDates = (start, end) => {
+        let dayCount = 0;
+        while (end >= start) {
+            dayCount++;
+            start.setDate(start.getDate() + 1);
+        };
+
+        return dayCount
+    }
 
     return (
         <div>
@@ -146,9 +184,17 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
                 <Spin style={{ transform: "scale(0.8)", marginBottom: "-4px" }} />
             ) : (
                 <>
-                    {totalDay > 0 ? (
-                        <div>{`${totalDay} ${totalDay > 1 ? "days" : "day"}`}</div>
-                    ) : null}
+                    {
+                        totalDay > 16 ? (
+                            <div>1 billed</div>
+                        ) : (
+                            <>
+                                {totalDay > 0 && (
+                                    <div>{`${totalDay} ${totalDay > 1 ? "days" : "day"}`}</div>
+                                )}
+                            </>
+                        )
+                    }
                 </>
             )}
         </div>
