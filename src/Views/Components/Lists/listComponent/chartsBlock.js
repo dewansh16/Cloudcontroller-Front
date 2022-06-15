@@ -210,7 +210,7 @@ export default function ChartsBlock({
                 </div>
                 {!!lastTime && (
                     <span style={{ fontSize: "12px", fontWeight: "400", color: strokeColor }}>
-                        {moment(lastTime).format("MMM DD hh:mm:ss a")}
+                        {moment(lastTime).format("MMM DD YYYY hh:mm:ss a")}
                     </span>
                 )}
             </div>

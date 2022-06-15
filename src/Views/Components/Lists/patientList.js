@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import { motion } from "framer-motion";
 import { io } from "socket.io-client";
@@ -25,6 +25,8 @@ const PatientListItem = (props) => {
     const listThemeColor = "#444444";
     const border = "#C7C7C7";
     const activeThemeColor = Colors.blue;
+
+    const [totalDay, setTotalDay] = useState(0);
 
     //animation config
     const variants = {
@@ -153,6 +155,12 @@ const PatientListItem = (props) => {
 
     const [chartBlockData, setChartBlockData] = React.useState(arrDataChart);
 
+    let associatedList = [];
+    const isString = isJsonString(props?.data?.demographic_map?.associated_list);
+    if (isString) {
+        associatedList = JSON.parse(props?.data?.demographic_map?.associated_list);
+    }
+
     const processDataForSensor = (key, newArrChart, chart) => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
         const org = 'live247';
@@ -166,6 +174,7 @@ const PatientListItem = (props) => {
                 |> yield(name: "mean")`;
 
         const arrayRes = [];
+        const arrayTime = [];
         let val_bpd = 0;
         queryApi.queryRows(query, {
             next(row, tableMeta) {
@@ -177,6 +186,12 @@ const PatientListItem = (props) => {
                 } else {
                     let value = dataQueryInFlux?._value || 0;
                     arrayRes.push({ value, time: dataQueryInFlux?._time });
+                }
+
+                let time = new Date(dataQueryInFlux._time);
+                time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
+                if (!arrayTime.includes(time)) {
+                    arrayTime.push(time);
                 }
             },
             error(error) {
@@ -191,33 +206,33 @@ const PatientListItem = (props) => {
                 } else {
                     chart.val_bpd = val_bpd;
                 }
+                chart.arrayTime = arrayTime || [];
                 setChartBlockData([...newArrChart]);
             },
         })
     }
 
     const getDataSensorFromInfluxDB = () => {
-        let associatedList = [];
-
-        const isString = isJsonString(props?.data?.demographic_map?.associated_list);
-        if (isString) {
-            associatedList = JSON.parse(props?.data?.demographic_map?.associated_list);
-        }
-
         const newArrChart = [...arrDataChart];
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];
-
             const key = chart?._key;
+
             if (key !== "blood_pressuer") {
                 processDataForSensor(key, newArrChart, chart)
             } else {
                 let arrKeyChild = [];
+                // let isPbPushDataForEcg = false;
+
                 if (associatedList?.includes("alphamed")) {
                     arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
                 } else {
                     arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
                 }
+
+                // if (!associatedList?.includes("ecg")) {
+                //     isPbPushDataForEcg = true;
+                // }
 
                 for (let j = 0; j < arrKeyChild.length; j++) {
                     processDataForSensor(arrKeyChild[j], newArrChart, chart);
@@ -282,7 +297,46 @@ const PatientListItem = (props) => {
         props.setShowTrend(false);
     };
 
+    function sortDate(a, b) {
+        const first = new Date(a).getTime();
+        const last = new Date(b).getTime();
+        return (first > last) - (first < last)
+    }
+
+    const numberOfNightsBetweenDates = (start, end) => {
+        let dayCount = 0;
+        while (end >= start) {
+            dayCount++;
+            start.setDate(start.getDate() + 1);
+        };
+
+        return dayCount
+    }
+
+    const getTotalDayReadingOfSensor = (visible) => {
+        if (visible) {
+            const totalArrTime = [];
+            chartBlockData.map(chart => {
+                const arrayTime = chart.arrayTime || [];
+                arrayTime.map(time => {
+                    if (!totalArrTime?.includes(time)) {
+                        totalArrTime.push(time)
+                    }
+                })
+            });
+
+            totalArrTime?.sort(sortDate);
+            const minDate = new Date(totalArrTime[0]);
+            const maxDate = new Date(totalArrTime[totalArrTime?.length - 1]);
+            const total = numberOfNightsBetweenDates(minDate, maxDate)
+            setTotalDay(total);
+        } else {
+            setTotalDay(0);
+        }
+    };
+
     const BedDetailsSection = ({ width, marginHouseIcon = "0 0" }) => (
+
         <div
             style={{
                 display: "flex",
@@ -301,19 +355,28 @@ const PatientListItem = (props) => {
                     })}
                 </Button>
             </div>
+
             <div style={{ width: "24px", margin: marginHouseIcon }}>
                 {Icons.houseIcon({
                     Style: { fill: `${activeTheme}`, width: "24px", opacity: "0.75" },
                 })}
             </div>
+
             <div style={{
                 marginLeft: "1rem",
                 textAlign: "center"
             }}>
                 <div>
-                    <div style={{ color: `${activeTheme}`, fontWeight: "bold" }}>
-                        {props.Name}
-                    </div>
+                    <Tooltip
+                        // visible={!!(totalDay > 0)}
+                        // title={`${totalDay} ${totalDay > 1 ? "days" : "day"}`}
+                        // onVisibleChange={(visible) => { getTotalDayReadingOfSensor(visible) }}
+                    >
+                        <div style={{ color: `${activeTheme}`, fontWeight: "bold" }}>
+                            {props.Name}
+                        </div>
+                    </Tooltip>
+
                     <div style={{ lineHeight: "16px" }}>
                         <span style={{ color: `${activeTheme}` }}>{props.age} Y</span>
                         <span
@@ -403,12 +466,12 @@ const PatientListItem = (props) => {
             {chartBlockData.map((item, i) => {
                 if (hideDateGateway && item?._key !== "gateway_keep_alive_time") {
                     return (
-                        <div 
+                        <div
                             key={i}
-                            className="chart_item" 
-                            style={{ 
-                                display: "flex", alignItems: "center", 
-                                width: "16.4%" 
+                            className="chart_item"
+                            style={{
+                                display: "flex", alignItems: "center",
+                                width: "16.4%"
                             }}
                         >
                             <Divider
@@ -434,11 +497,13 @@ const PatientListItem = (props) => {
                     )
                 } else {
                     return (
-                        <div 
+                        <div
                             key={i}
-                            className="chart_item" 
-                            style={{ display: "flex", alignItems: "center", 
-                            width: item?._key === "gateway_keep_alive_time" ? "8%" : "15%" }}
+                            className="chart_item"
+                            style={{
+                                display: "flex", alignItems: "center",
+                                width: item?._key === "gateway_keep_alive_time" ? "8%" : "15%"
+                            }}
                         >
                             {item?._key !== "gateway_keep_alive_time" ? (
                                 <>
@@ -472,7 +537,7 @@ const PatientListItem = (props) => {
                                             height: "3em",
                                         }}
                                     ></Divider>
-                                    <div>{!!item?.valueGateway ? moment(item?.valueGateway).format("MMM DD hh:mm:ss a") : "NA"}</div>
+                                    <div>{!!item?.valueGateway ? moment(item?.valueGateway).format("MMM DD YYYY hh:mm:ss a") : "NA"}</div>
                                 </>
                             )}
                         </div>
@@ -543,7 +608,9 @@ const PatientListItem = (props) => {
                 }
                 onClick={pushToPatientDetails}
             >
-                <BedDetailsSection width="16%" />
+                <Tooltip title="abc">
+                    <BedDetailsSection width="16%" />
+                </Tooltip>
 
                 <ChartSection width="84%" />
             </div>

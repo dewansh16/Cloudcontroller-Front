@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 
 import {
-    Table, Row, Button, Spin, Input, notification
+    Table, Row, Button, Spin, Input, notification, Modal
 } from "antd";
 import Navbar from "../../Theme/Components/Navbar/navbar";
 import { PaginationBox, computeTotalPages } from "../Components/PaginationBox/pagination";
@@ -12,7 +12,7 @@ import patientApi from "../../Apis/patientApis";
 import IconDownload from "../../Assets/Images/iconDownload.png";
 import Icons from "../../Utils/iconMap";
 
-const { Search } = Input;
+const { Search, TextArea } = Input;
 
 const UploadLogger = () => {
     const [dataLog, setDataLog] = useState([]);
@@ -20,6 +20,7 @@ const UploadLogger = () => {
 
     const [currentPageVal, setCurrentPageVal] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [dataModal, setDataModal] = useState(null);
 
     useEffect(() => {
         const { tenant = "" } = UserStore.getUser();
@@ -37,8 +38,8 @@ const UploadLogger = () => {
             })
     }, []);
 
-    const handleDownloadFile = (url) => {
-        patientApi.downloadLogger(url)
+    const handleDownloadFile = (fileId) => {
+        patientApi.downloadLogger(fileId)
             .then(res => {
                 const urlFile = window.URL.createObjectURL(res.data);
                 const a = document.createElement('a');
@@ -63,6 +64,12 @@ const UploadLogger = () => {
             });
     };
 
+    const onOpenModalView = (record) => {
+        const newData = Buffer.from(record.data).toString('base64');
+        const dataShow = Buffer.from(newData, 'base64').toString('ascii');
+        setDataModal(dataShow);
+    }
+
     const columns = [
         {
             title: 'TIME',
@@ -78,6 +85,11 @@ const UploadLogger = () => {
             title: 'URL',
             dataIndex: 'url',
             key: 'url',
+            render: (dataIndex, record) => {
+                return (
+                    <div style={{ cursor: "pointer"}} onClick={() => onOpenModalView(record)}>{dataIndex}</div>
+                )
+            }
         },
         {
             title: 'Download',
@@ -88,7 +100,7 @@ const UploadLogger = () => {
                         src={IconDownload} 
                         width={17} height={17} 
                         style={{ cursor: "pointer" }}
-                        onClick={() => { handleDownloadFile(record?.url) }}
+                        onClick={() => { handleDownloadFile(record?.id) }}
                     />
                 )
             }
@@ -97,6 +109,18 @@ const UploadLogger = () => {
 
     return (
         <div>
+            <Modal
+                width="50%"
+                visible={!!dataModal}
+                onCancel={() => setDataModal(null)}
+                centered
+                footer={null}
+            >
+                <div style={{ margin: "1.5rem 0 1rem 0"}}>
+                    <TextArea value={dataModal} style={{ height: "calc(100vh - 150px)", minHeight: "200px" }} />
+                </div>
+            </Modal>
+
             <div>
                 <Navbar
                     startChildren={
@@ -128,13 +152,14 @@ const UploadLogger = () => {
                         <Spin />
                     </div>
                 ) : (
-                    <div style={{ margin: "30px 2%", width: "100%" }}>
+                    <div style={{ margin: "0 2% 15px 2%", width: "100%" }}>
                         <Table
                             style={{ backgroundColor: "#ffffff" }}
                             columns={columns}
                             size="middle"
                             pagination={false}
                             dataSource={dataLog}
+                            scroll={{ y: "calc(100vh - 190px)" }}
                         />
                     </div>
                 )}

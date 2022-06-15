@@ -7,6 +7,7 @@ import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
 import VitalGraphs from "./vitalGraphs.patientJourney";
 import moment from 'moment';
+import { minBy, maxBy } from "lodash";
 
 import {
     LineChart,
@@ -121,7 +122,10 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
         associatedList = JSON.parse(patient?.demographic_map?.associated_list);
     }
 
-    const dateFormat = 'YYYY/MM/DD';
+    console.log("activeTrendsArray", activeTrendsArray);
+
+    
+    const dateFormat = 'MMM DD YYYY';
     const timerTimeout = useRef();
 
     useEffect(() => {
@@ -445,21 +449,9 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     // }, [activeStep, stepArray]);
 
     function findMinAndMax(array) {
-        let max = 0;
-        let min = array[0].value;
-
-        for (var i = 0; i < array.length; i++) {
-            const number = array[i].value;
-            if (number > max) {
-                max = number;
-                min = max;
-            }
-               
-            if (number < min) {
-                min = number;
-            }
-        }
-        return { min, max };
+        let max = maxBy(array, "value");
+        let min = minBy(array, "value");
+        return { min: min.value, max: max.value };
     }
 
     const onGetDataSensorFromInfluxByKey = (keySensor, data, type, index) => {
@@ -502,6 +494,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                 data.data = arrayRes;
                 if (arrayRes?.length > 0) {
                     const { min = 0, max = 0 } = findMinAndMax(arrayRes);
+                    console.log("min", min, "max", max);
                     data.max = max + 20;
                     data.min = min - 20;
                 }

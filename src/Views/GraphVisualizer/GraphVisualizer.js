@@ -47,6 +47,7 @@ import {
 
 import { nullableTypeAnnotation } from '@babel/types';
 import { InfluxDB } from "@influxdata/influxdb-client";
+import { minBy, maxBy } from "lodash";
 
 import './graphVisualizer.css'
 
@@ -135,7 +136,7 @@ function GraphVisualizer() {
 
     const { pid } = useParams();
     // console.log("PID : ", pid);
-    const dateFormat = 'YYYY/MM/DD';
+    const dateFormat = 'MMM DD YYYY';
     const [antd_selected_date_val, setAntd_selected_date_val] = useState(new Date())
 
     const [activeTrendsArray, setActiveTrendsArray] = useState([
@@ -1816,7 +1817,8 @@ function GraphVisualizer() {
     }[type]);
 
     const fetchDataAlert = () => {
-        alertApi.getPatientAlerts(pid, 1, 1000).then((res) => {
+        const dateFormat = moment(antd_selected_date_val).format("YYYY-MM-DD");
+        alertApi.getPatientAlerts(pid, 1, 1000, dateFormat).then((res) => {
             let alerts = res.data?.response?.data || [];
 
             const length = alerts?.length;
@@ -1952,21 +1954,9 @@ function GraphVisualizer() {
     };
 
     function findMinAndMax(array) {
-        let max = 0;
-        let min = array[0].value;
-
-        for (var i = 0; i < array.length; i++) {
-            const number = array[i].value;
-            if (number > max) {
-                max = number;
-                min = max;
-            }
-               
-            if (number < min) {
-                min = number;
-            }
-        }
-        return { min, max };
+        let max = maxBy(array, "value");
+        let min = minBy(array, "value");
+        return { min: min.value, max: max.value };
     }
 
     const onGetDataSensorFromInfluxByKey = (keySensor, data, type, index) => {

@@ -364,6 +364,21 @@ const BillingModule = () => {
         setIsEditRow(currentYearMonth != dateString);
     }
 
+    const getTotalTimeTaskSpend = (dataIndex) => {
+        let tmpTime = 0;
+        if (isJsonString(dataIndex)) {
+            let arrayData = JSON.parse(dataIndex);
+            if (!isArray(arrayData)) arrayData = [];
+
+            if (arrayData.length > 0) {
+                arrayData.map(item => {
+                    tmpTime += Number(item.task_time_spend);
+                })
+            }
+        }
+        return tmpTime;
+    };
+
     const columns = [
         {
             title: 'P.No',
@@ -375,10 +390,10 @@ const BillingModule = () => {
                     <div>{`${dataIndex.fname} ${dataIndex.lname}`}</div>
                 )
             },
-            // sortDirections: ['descend'],
-            // sorter: (a, b) => {
-            //     if(a.patient_datum.fname < b.patient_datum.fname) { return 1; }
-            // },
+            sorter: (a, b) => {
+                if(a.patient_datum.fname < b.patient_datum.fname) { return 1; }
+                if(a.patient_datum.fname > b.patient_datum.fname) { return -1; }
+            },
         },
         {
             title: 'MR.No',
@@ -390,11 +405,10 @@ const BillingModule = () => {
                     <div>{dataIndex.med_record}</div>
                 )
             },
-            // sortDirections: ['descend'],
-            // sorter: (a, b) => {
-            //     console.log();
-            //     if(a.patient_datum.med_record < b.patient_datum.med_record) { return 1; }
-            // },
+            sorter: (a, b) => {
+                if(a.patient_datum.med_record < b.patient_datum.med_record) { return 1; }
+                if(a.patient_datum.med_record > b.patient_datum.med_record) { return -1; }
+            },
         },
         {
             title: '99453',
@@ -430,10 +444,10 @@ const BillingModule = () => {
                     />
                 )
             },
-            // sortDirections: ['descend'],
-            // sorter: (a, b) => {
-            //     if(a.total < b.total) { return 1; }
-            // },
+            sorter: (a, b) => {
+                if(a.total < b.total) { return 1; }
+                if(a.total > b.total) { return -1; }
+            },
         },
         {
             title: '99457',
@@ -441,17 +455,7 @@ const BillingModule = () => {
             key: "99457",
             align: "center",
             render: (dataIndex, record) => {
-                let tmpTime = 0;
-                if (isJsonString(dataIndex)) {
-                    let arrayData = JSON.parse(dataIndex);
-                    if (!isArray(arrayData)) arrayData = [];
-
-                    if (arrayData.length > 0) {
-                        arrayData.map(item => {
-                            tmpTime += Number(item.task_time_spend);
-                        })
-                    }
-                }
+                const tmpTime = getTotalTimeTaskSpend(dataIndex);
 
                 if (pidEdit === record?.pid) {
                     return <Inputs
@@ -464,7 +468,14 @@ const BillingModule = () => {
                         <div>{renderTimeDisplay(tmpTime)}</div>
                     )
                 }
-            }
+            },
+            sorter: (a, b) => {
+                const aTime = getTotalTimeTaskSpend(a?.["99457"]);
+                const bTime = getTotalTimeTaskSpend(b?.["99457"]);
+
+                if(aTime < bTime) { return 1; }
+                if(aTime > bTime) { return -1; }
+            },
         },
         {
             title: '99458',
@@ -472,21 +483,23 @@ const BillingModule = () => {
             key: "99458",
             align: "center",
             render: (dataIndex, record) => {
-                let tmpTime = 0;
-                if (isJsonString(dataIndex)) {
-                    let arrayData = JSON.parse(dataIndex);
-                    if (!isArray(arrayData)) arrayData = [];
+                const tmpTime = getTotalTimeTaskSpend(dataIndex);
 
-                    if (arrayData.length > 0) {
-                        arrayData.map(item => {
-                            tmpTime += Number(item.task_time_spend);
-                        })
-                    }
-                }
+                // let tmpTime = 0;
+                // if (isJsonString(dataIndex)) {
+                //     let arrayData = JSON.parse(dataIndex);
+                //     if (!isArray(arrayData)) arrayData = [];
+
+                //     if (arrayData.length > 0) {
+                //         arrayData.map(item => {
+                //             tmpTime += Number(item.task_time_spend);
+                //         })
+                //     }
+                // }
 
                 if (pidEdit === record?.pid) {
                     return <Inputs
-                    onChange={(e) => changeValue(CPT_CODE.CPT_99458, tmpTime, e)}
+                        onChange={(e) => changeValue(CPT_CODE.CPT_99458, tmpTime, e)}
                         style={{ width: "63px" }}
                         defaultValue={renderTimeDisplay(tmpTime)}
                     />
@@ -495,7 +508,14 @@ const BillingModule = () => {
                         <div>{renderTimeDisplay(tmpTime)}</div>
                     )
                 }
-            }
+            },
+            sorter: (a, b) => {
+                const aTime = getTotalTimeTaskSpend(a?.["99458"]);
+                const bTime = getTotalTimeTaskSpend(b?.["99458"]);
+
+                if(aTime < bTime) { return 1; }
+                if(aTime > bTime) { return -1; }
+            },
         },
         {
             title: '99091',
@@ -503,21 +523,22 @@ const BillingModule = () => {
             key: "99091",
             align: "center",
             render: (dataIndex, record) => {
-                let tmpTime = 0;
-                if (isJsonString(dataIndex)) {
-                    let arrayData = JSON.parse(dataIndex);
-                    if (!isArray(arrayData)) arrayData = [];
+                const tmpTime = getTotalTimeTaskSpend(dataIndex);
+                // let tmpTime = 0;
+                // if (isJsonString(dataIndex)) {
+                //     let arrayData = JSON.parse(dataIndex);
+                //     if (!isArray(arrayData)) arrayData = [];
 
-                    if (arrayData.length > 0) {
-                        arrayData.map(item => {
-                            tmpTime += Number(item.task_time_spend);
-                        })
-                    }
-                }
+                //     if (arrayData.length > 0) {
+                //         arrayData.map(item => {
+                //             tmpTime += Number(item.task_time_spend);
+                //         })
+                //     }
+                // }
 
                 if (pidEdit === record?.pid) {
                     return <Inputs
-                    onChange={(e) => changeValue(CPT_CODE.CPT_99091, tmpTime, e)}
+                        onChange={(e) => changeValue(CPT_CODE.CPT_99091, tmpTime, e)}
                         style={{ width: "63px" }}
                         defaultValue={renderTimeDisplay(tmpTime)}
                     />
@@ -526,7 +547,14 @@ const BillingModule = () => {
                         <div>{renderTimeDisplay(tmpTime)}</div>
                     )
                 }
-            }
+            },
+            sorter: (a, b) => {
+                const aTime = getTotalTimeTaskSpend(a?.["99091"]);
+                const bTime = getTotalTimeTaskSpend(b?.["99091"]);
+
+                if(aTime < bTime) { return 1; }
+                if(aTime > bTime) { return -1; }
+            },
         },
         {
             title: 'Edit',
