@@ -1,10 +1,10 @@
 import axiosInstance from "./index";
 
 const patientApi = {
-    downloadLogger: (url) => 
+    downloadLogger: (fileId) => 
         axiosInstance.request({
             method: "GET",
-            url: `/logger/download?url=${url}`,
+            url: `/logger/download?id=${fileId}`,
             responseType: 'blob',
         }),
     getListUploadLogger: (tenantId) => 
