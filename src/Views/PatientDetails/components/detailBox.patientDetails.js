@@ -109,12 +109,16 @@ function DetailBox({ detailsBox, setDetailBox, patient }) {
                         </span>
                         {patient.demographic_map.phone_contact}
                     </Col>
-                    <Col className="patient-detailbox-cols" span={24}>
-                        <span className="patient-detailbox-col-icon">
-                            {Icons.homeIcon({})}
-                        </span>{" "}
-                        {`${patient.demographic_map.street} ${patient.demographic_map.city} ${patient.demographic_map.state}`}
-                    </Col>
+                    {(!!patient.demographic_map.street || !!patient.demographic_map.city || !!patient.demographic_map.state) && (
+                        <Col className="patient-detailbox-cols" span={24}>
+                            <span className="patient-detailbox-col-icon">
+                                {Icons.homeIcon({})}
+                            </span>{" "}
+                            {`${patient.demographic_map.street || ""}
+                                ${patient.demographic_map.city || ""} 
+                                ${patient.demographic_map.state || ""}`}
+                        </Col>
+                    )}
                 </Row>
             </div>
         </div>
