@@ -5,6 +5,7 @@ const patientApi = {
         axiosInstance.request({
             method: "GET",
             url: `/logger/download?url=${url}`,
+            responseType: 'blob',
         }),
     getListUploadLogger: (tenantId) => 
         axiosInstance.request({

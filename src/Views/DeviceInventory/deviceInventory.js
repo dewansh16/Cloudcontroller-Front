@@ -1171,7 +1171,7 @@ function PatchInventory() {
                         size="middle"
                         onChange={onChange}
                         pagination={{ position: ["bottomRight"] }}
-                        scroll={extraDiv === true ? { y: "hidden" } : { y: "100vh" }}
+                        scroll={extraDiv === true ? { y: "hidden" } : { y: "calc(100vh - 258px)" }}
                         rowClassName={setRowClassName}
                         // expandable={{
                         //     expandedRowRender: (record) => bundleModel(record),
