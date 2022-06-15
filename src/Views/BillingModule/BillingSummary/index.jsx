@@ -13,6 +13,7 @@ import {
     notification
 } from "antd";
 
+import Icons from "../../../Utils/iconMap";
 import billingApi from "../../../Apis/billingApis";
 
 import Navbar from "../../../Theme/Components/Navbar/navbar";
@@ -373,7 +374,11 @@ const BillingModule = () => {
                 return (
                     <div>{`${dataIndex.fname} ${dataIndex.lname}`}</div>
                 )
-            }
+            },
+            // sortDirections: ['descend'],
+            // sorter: (a, b) => {
+            //     if(a.patient_datum.fname < b.patient_datum.fname) { return 1; }
+            // },
         },
         {
             title: 'MR.No',
@@ -384,7 +389,12 @@ const BillingModule = () => {
                 return (
                     <div>{dataIndex.med_record}</div>
                 )
-            }
+            },
+            // sortDirections: ['descend'],
+            // sorter: (a, b) => {
+            //     console.log();
+            //     if(a.patient_datum.med_record < b.patient_datum.med_record) { return 1; }
+            // },
         },
         {
             title: '99453',
@@ -419,7 +429,11 @@ const BillingModule = () => {
                         valueDate={valueDate}
                     />
                 )
-            }
+            },
+            // sortDirections: ['descend'],
+            // sorter: (a, b) => {
+            //     if(a.total < b.total) { return 1; }
+            // },
         },
         {
             title: '99457',
@@ -518,7 +532,7 @@ const BillingModule = () => {
             title: 'Edit',
             key: 'edit',
             align: "center",
-            width: 130,
+            width: 120,
             render: (dataIndex, record) => {
                 return (
                     isEditRow && (
@@ -548,7 +562,7 @@ const BillingModule = () => {
             title: 'Details',
             key: 'detail',
             align: "center",
-            width: 130,
+            width: 120,
             render: (dataIndex, record) => {
                 const patient = record?.patient_datum || {};
                 return (
@@ -585,7 +599,7 @@ const BillingModule = () => {
             title: 'Create',
             key: 'create',
             align: "center",
-            width: 130,
+            width: 120,
             render: (dataIndex, record) => {
                 return (
                     <div>
@@ -600,7 +614,7 @@ const BillingModule = () => {
             title: 'Submit',
             key: 'submit',
             align: "center",
-            width: 130,
+            width: 120,
             render: () => {
                 return (
                     <div>
@@ -705,13 +719,14 @@ const BillingModule = () => {
                         <Spin />
                     </div>
                 ) : (
-                    <div style={{ margin: "30px 2%", width: "100%" }}>
+                    <div style={{ margin: "0 2% 15px 2%", width: "100%" }}>
                         <Table
-                            style={{ backgroundColor: "blue" }}
+                            style={{ backgroundColor: "#ffffff" }}
                             columns={columns}
                             size="middle"
                             pagination={false}
                             dataSource={!!patientType ? billingsFilter || [] : billingSummary?.billings || []}
+                            scroll={{ y: "calc(100vh - 190px)" }}
                         />
                     </div>
                 )}

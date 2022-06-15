@@ -2828,7 +2828,7 @@ function GraphVisualizer() {
                                                                         {`${alert?.device_type} ${alert?.status}: ${alert?.value || 0}`}
                                                                     </div>
                                                                     <div className="">
-                                                                        Local Time: {alert?.time}
+                                                                        Local Time: {moment(alert?.time).format("MMM-DD-YYYY hh:mm:ss a")}
                                                                     </div>
                                                                 </div>
                                                             )

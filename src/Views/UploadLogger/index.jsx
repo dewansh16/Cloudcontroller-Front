@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 
 import {
-    Table, Row, Button, Spin, Input
+    Table, Row, Button, Spin, Input, notification
 } from "antd";
 import Navbar from "../../Theme/Components/Navbar/navbar";
 import { PaginationBox, computeTotalPages } from "../Components/PaginationBox/pagination";
@@ -40,16 +40,27 @@ const UploadLogger = () => {
     const handleDownloadFile = (url) => {
         patientApi.downloadLogger(url)
             .then(res => {
-                console.log("res", res);
+                const urlFile = window.URL.createObjectURL(res.data);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = urlFile;
+                a.download = urlFile;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(urlFile);
+                notification.success({
+                    description:
+                        'Download successfully!',
+                    placement: 'topRight'
+                });
             })
-        // const url = window.URL.createObjectURL(blob);
-        // const a = document.createElement('a');
-        // a.style.display = 'none';
-        // a.href = url;
-        // a.download = 'todo-1.json';
-        // document.body.appendChild(a);
-        // a.click();
-        // window.URL.revokeObjectURL(url);
+            .catch(() => {
+                notification.error({
+                    description:
+                        'Download failed!',
+                    placement: 'topRight'
+                });
+            });
     };
 
     const columns = [
@@ -95,15 +106,15 @@ const UploadLogger = () => {
                             </div>
                         </>
                     }
-                    endChildren={
-                        <>
-                            <PaginationBox
-                                totalPages={totalPages}
-                                currentPageVal={currentPageVal}
-                                setCurrentPageVal={setCurrentPageVal}
-                            />
-                        </>
-                    }
+                    // endChildren={
+                    //     <>
+                    //         <PaginationBox
+                    //             totalPages={totalPages}
+                    //             currentPageVal={currentPageVal}
+                    //             setCurrentPageVal={setCurrentPageVal}
+                    //         />
+                    //     </>
+                    // }
                 />
             </div>
 

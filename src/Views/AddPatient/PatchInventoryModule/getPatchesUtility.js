@@ -3,11 +3,14 @@ import { notification, Image, Row, Col } from "antd";
 
 import patchApi from "../../../Apis/patchApis";
 import patchImage from "../../../Assets/Images/patchImage.png";
-import sp02Image from "../../../Assets/Images/spo2.jpg";
+// import sp02Image from "../../../Assets/Images/spo2.jpg";
 import temp1 from "../../../Assets/Images/temp1.png";
 import watch from "../../../Assets/Images/watch.jpg";
 import bpSensor from "../../../Assets/Images/BP-sensor.png";
 import digitalScale from "../../../Assets/Images/DigitalScale.png";
+import gatewayImg from "../../../Assets/Images/gateway.png";
+import sp02Image from "../../../Assets/Images/spo2img.png";
+
 
 const getImageSrc = (type, width) => {
     switch (type) {
@@ -16,7 +19,7 @@ const getImageSrc = (type, width) => {
         case "temperature":
             return <Image width={width} src={temp1} preview={false} />;
         case "gateway":
-            return <Image width={150} src={watch} preview={false} />;
+            return <Image width={250} src={gatewayImg} preview={false} />;
         case "ecg":
             return <Image width={width} src={patchImage} preview={false} />;
         case "alphamed":
