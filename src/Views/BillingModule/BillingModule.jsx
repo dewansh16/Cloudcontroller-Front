@@ -116,7 +116,7 @@ function BillingModule() {
     const [tenantData, setTenantData] = useState({});
 
     // const [rightSideLoading, setRightSideLoading] = useState(true);
-    const [rightSideLoading, setRightSideLoading] = useState(false);
+    const [rightSideLoading, setRightSideLoading] = useState(true);
 
     const [currentActiveMonth, setCurrentActiveMonth] = useState("");
     const [currentDateApi, setCurrentDateApi] = useState("");
@@ -191,6 +191,7 @@ function BillingModule() {
     const [keyNoteActive, setKeyNoteActive] = useState(0);
 
     const [requiredAddTask, setRequiredAddTask] = useState([]);
+    const [effect, setEffect] = useState(0);
 
     function handleMonthChange(date, dateString) {
         setInitialSetupState(false);
@@ -1953,8 +1954,6 @@ function BillingModule() {
         if (!location.state) {
             history.push(`/dashboard/patient/details/${pid}`);
         } else {
-            setRightSideLoading(false);
-
             var year = billDate.getFullYear();
             var monthNumber = billDate.getMonth() + 1;
             var dateMonthString = "";
@@ -2106,11 +2105,12 @@ function BillingModule() {
                             }
                         })
 
-                        setPatchArray(
-                            res.data.response.patchData
-                        );
+                        setTimeout(() => {
+                            setPatchArray(
+                                res.data.response.patchData
+                            );
+                        }, 1000);
                     }
-                    
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
                     setSecondTwentyTasks(tempSecondTwentyTasks);
@@ -2124,14 +2124,23 @@ function BillingModule() {
                         setTaskCodeActive(CPT_CODE.CPT_99457);
                     }
 
-                    setTaskDeleteArray([])
-
+                    setTaskDeleteArray([]);
                 })
                 .catch((err) => {
                     console.log(err);
                 });
         }
     }, [runUseEffect]);
+
+    useEffect(() => {
+        let timer = null;
+        if (rightSideLoading) {
+            timer = setTimeout(() => {
+                setRightSideLoading(false);
+            }, 1500);
+        }
+        return () => { clearTimeout(timer) }
+    }, [rightSideLoading]);
 
     function placeDatePicker(width) {
         let defaultDate = moment();
@@ -2324,10 +2333,11 @@ function BillingModule() {
                 console.log('ERROR', patch)
             },
             complete() {
-                console.log("arrDateQuery", arrDateQuery);
-
                 patch.totalDay = arrDateQuery?.length;
                 patch.datesInflux = arrDateQuery;
+                let temp = effect;
+                temp += 1;
+                setEffect(temp);
             },
         })
     }
@@ -2349,10 +2359,9 @@ function BillingModule() {
     }
 
     const filterDeviceAssociatedByDate = useMemo(() => {
-        if (!associatedSensorsState) return false;
-
         const newArr = [];
         let totalDayMonitored = 0;
+        let result = 0;
 
         let minDate = null;
         let maxDate = null;
@@ -2386,15 +2395,11 @@ function BillingModule() {
             totalDayMonitored = numberOfNightsBetweenDates(new Date(minDate), new Date(maxDate));
         }
 
-        let result = 0;
-        if (totalDayMonitored > TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
+        if (totalDayMonitored >= TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
             // result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
+            // totalDayMonitored = totalDayMonitored - (TOTAL_HOURS_FOR_EACH_SENSOR_BILLED * result);
             result = 1;
-            totalDayMonitored = totalDayMonitored - (TOTAL_HOURS_FOR_EACH_SENSOR_BILLED * result);
-
-            if (totalDayMonitored >= 0) {
-                totalDayMonitored = 16;
-            }
+            totalDayMonitored = 16;
         }
 
         if (result > 0
@@ -2404,8 +2409,6 @@ function BillingModule() {
         ) {
             setActiveCode99454(true);
         }
-
-        // setPatchLoading(false);
 
         return { list: newArr, totalDayMonitored, billedUnit: result };
     }, [patchArray, currentDateApi]);
