@@ -208,7 +208,7 @@ function PatchInventory() {
                     }, 250);
                 }
 
-                if (key !== "gateway_battery") {
+                if (key !== "gateway_battery" && !!newArr) {
                     setFilteredList(newArr);
                 }
             },

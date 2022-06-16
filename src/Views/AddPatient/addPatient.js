@@ -231,6 +231,8 @@ function AddPatient() {
                             demographic_map.deceased_date !== undefined
                             ? moment(demographic_map.deceased_date)
                             : null;
+
+                    // demographic_map.patient_type = "remote";
                     setPatientData(demographic_map);
 
                     if (demographic_map.status === "Deboarded") {

@@ -226,6 +226,8 @@ const PatchForm = (props) => {
         "ihealth": "iHealth",
     }[type]);
 
+    console.log("patchList", patchList);
+
     return summary.isVisible ? (
         <Summary status={summary.status} title={summary.title}>
             <p>P.S: Don't forget to save changes after adding all the patches.</p>
@@ -317,18 +319,26 @@ const PatchForm = (props) => {
                                     //         setPatchFetched(true);
                                     //     }
                                     // }}
-                                    onSearch={(value) => {
-                                        fetchPatchesData(props.type === "bps" ? valueBpType : props.type, value);
-                                    }}
+                                    // onSearch={(value) => {
+                                    //     fetchPatchesData(props.type === "bps" ? valueBpType : props.type, value);
+                                    // }}
                                     filterOption={true}
                                 >
-                                    {patchList?.map((item) => {
-                                        return (
-                                            <Option key={item.id} value={item.patch_serial}>
-                                                {item.patch_serial}
-                                            </Option>
-                                        );
-                                    })}
+                                    {patchList?.length > 0 ? (
+                                        <>
+                                            {patchList?.map((item) => {
+                                                return (
+                                                    <Option key={item.id} value={item.patch_serial}>
+                                                        {item.patch_serial}
+                                                    </Option>
+                                                );
+                                            })}
+                                        </>
+                                    ) : (
+                                        <Option key='new_device' value="new_device">
+                                            Add New Device
+                                        </Option>
+                                    )}
                                 </Select>
                             </Form.Item>
                         </Col>

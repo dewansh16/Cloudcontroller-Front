@@ -26,10 +26,6 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
 
     const saveDataRef = useRef(null);
 
-    // console.log("charData", chartData, "isLoading", isLoading);
-
-    const chartData = [100, 200, 125, 113, 155, 199, 822, 456, 120, 354, 123, 233];
-
     const objNumberShow = {
         hr: 0,
         spo2: 0,
@@ -39,6 +35,7 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
         pr: 0
     }
     const [dataNumberShow, setDataNumber] = useState(objNumberShow);
+    const [arrChartEcg, setArrChartEcg] = useState([]);
 
     const processDataForSensor = (key, newArrChart, chart) => {
         const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
@@ -92,13 +89,16 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
     useEffect(() => {
         var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
 
-        socket.on("SENSOR_DATA_patiente9c617e0-4242-4828-ba08-66e8d4aa9009", function (data) {
+        socket.on(`SENSOR_DATA_${pid}`, function (data) {
             if (!!data) {
                 console.log("---------------------- socket", data);
                 setDataNumber({
                     ...saveDataRef.current,
                     ...data,
                 });
+                if (!!data.chart) {
+                    setArrChartEcg(data.chart);
+                }
             }
         })
     }, [pid]);
@@ -166,7 +166,7 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
             minorTicks: true,
             minorTickWidth: 1,
             min: -1600,
-            max: 1600,
+            max: 16000,
             zoomEnabled: true,
             labels: {
                 enabled: false,
@@ -209,7 +209,7 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
                 marker: {
                     enabled: false,
                 },
-                data: chartData,
+                data: arrChartEcg,
             },
         ],
     };

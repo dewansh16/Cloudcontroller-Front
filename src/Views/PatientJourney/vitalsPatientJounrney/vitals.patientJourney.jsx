@@ -508,7 +508,6 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     const getDataChartsActive = () => {
         activeTrendsArray.forEach((chart, index) => {
             chart.data = [];
-            console.log("disabledBloodPressure", disabledBloodPressure);
 
             if ((chart?._key === "bpd" || chart?._key === "bps") && !disabledBloodPressure) {
                 if (!associatedList?.includes("ecg")) {

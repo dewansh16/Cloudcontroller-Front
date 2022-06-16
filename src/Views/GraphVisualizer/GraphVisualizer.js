@@ -1849,7 +1849,6 @@ function GraphVisualizer() {
             chart.data = [];
             chart.alerts = [];
 
-            // console.log("disabledBloodPressure", disabledBloodPressure);
             if ((chart?._key === "bpd" || chart?._key === "bps") && !disabledBloodPressure) {
                
                 if (!associatedList?.includes("ecg")) {
