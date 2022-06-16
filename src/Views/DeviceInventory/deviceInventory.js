@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Table,
     Button,
@@ -11,7 +11,8 @@ import {
     Menu,
     message,
     Popconfirm,
-    Checkbox
+    Checkbox,
+    Spin
 } from "antd";
 import { withRouter } from "react-router-dom";
 import "./device.css";
@@ -45,6 +46,7 @@ import { UserStore } from "../../Stores/userStore";
 
 import iconDelete from "../../Assets/Images/iconDelete.png";
 import notification from 'antd/lib/notification'
+import { InfluxDB } from "@influxdata/influxdb-client";
 
 import {
     SearchOutlined,
@@ -53,12 +55,13 @@ import {
     CheckOutlined,
     CloseCircleOutlined,
 } from "@ant-design/icons";
+import moment from "moment";
 
 function PatchInventory() {
     // const { url } = useRouteMatch();
 
     const [value, setValue] = useState(null);
-
+    const [loading, setLoading] = useState(false);
     const [currentPageVal, setCurrentPageVal] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [valSearch, setValSearch] = useState("");
@@ -75,6 +78,8 @@ function PatchInventory() {
     const [filteredlist, setFilteredList] = useState([]);
 
     const [arrayChecked, setArrayChecked] = useState([]);
+
+    const timerFetchData = useRef();
 
     const modifyData = (fetchedData) => {
         const modifiedData = fetchedData.map((device, index) => {
@@ -105,11 +110,25 @@ function PatchInventory() {
         })
         .filter((device) => device !== null);
 
-        setFilteredList(modifiedData);
-        return modifiedData;
+        modifiedData.map(device => {
+            if (device.patch_type === "gateway") {
+                const patient_data = device?.patch_patient_map?.patient_data?.[0] || {};
+                processDataForSensor(patient_data?.pid, "gateway_keep_alive_time", device, modifiedData)
+            }
+        })
     };
 
+    useEffect(() => {
+        if (loading) {
+            timerFetchData.current = setTimeout(() => {
+                setLoading(false);
+            }, 2000);
+        }
+    }, [loading])
+
     function fetchPatchList() {
+        clearTimeout(timerFetchData.current);
+        setLoading(true);
         const { tenant } = UserStore.getUser();
 
         const dataBody = {
@@ -123,17 +142,84 @@ function PatchInventory() {
             .getPatchList(dataBody)
             .then((res) => {
                 const data = res.data?.response?.patches;
-                // setPatchlist(data);
+                data.map(device => {
+                    if (device.patch_type === "gateway") {
+                        const patient_data = device?.patch_patient_map?.patient_data?.[0] || {};
+                        processDataForSensor(patient_data?.pid, "gateway_keep_alive_time", device)
+                    }
+                })
+
                 modifyData(data);
                 setTotalPages(Math.ceil(res.data?.response?.patchTotalCount / 10));
             })
             .catch((err) => {
                 console.log(err);
+                setLoading(false);
             });
     }
 
+    const processDataForSensor = (pid, key, device, newArr, time) => {
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
+
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+
+        let start = "-336h";
+        if (key !== "gateway_keep_alive_time") {
+            start = new Date(time).toISOString();
+        }
+
+        const query = `from(bucket: "emr_dev")
+                |> range(start: ${start})
+                |> filter(fn: (r) => r["_measurement"] == "${pid}_${key}")
+                |> yield(name: "mean")`;
+
+        // let lastTime = null;
+        let value = null;
+
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                if (key === "gateway_keep_alive_time") {
+                    value = dataQueryInFlux?._time;
+                    // lastTime = dataQueryInFlux?._time;
+                }
+               
+                if (key === "gateway_battery") {
+                    value = dataQueryInFlux?._value;
+                }
+
+                if (key === "gateway_version") {
+                    value = dataQueryInFlux?._value;
+                }
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+                device[key] = value;
+
+                if (key === "gateway_keep_alive_time") {
+                    processDataForSensor(pid, "gateway_version", device, newArr, device.gateway_keep_alive_time);
+                    setTimeout(() => {
+                        processDataForSensor(pid, "gateway_battery", device, newArr, device.gateway_keep_alive_time);
+                    }, 250);
+                }
+
+                if (key !== "gateway_battery") {
+                    setFilteredList(newArr);
+                }
+            },
+        })
+    }
+
     useEffect(() => {
-        return fetchPatchList();
+        fetchPatchList();
+        return () => {
+            clearTimeout(timerFetchData.current);
+        };
     }, [updateList, currentPageVal, valSearch]);
 
     const success = () => {
@@ -147,7 +233,6 @@ function PatchInventory() {
 
     const updateActive = (data) => {
         setIsUploading(true);
-        console.log(data, value);
         const sendData = [
             {
                 patch_type: data.patch_type,
@@ -161,8 +246,6 @@ function PatchInventory() {
         deviceApi
             .editPatch(sendData, data.patch_uuid)
             .then((res) => {
-                console.log(res.data?.response);
-
                 if (data.AssociatedPatch.length > 1) {
                     data.AssociatedPatch.map((item, index) => {
                         const sendData = [
@@ -174,11 +257,9 @@ function PatchInventory() {
                                 tenant_id: item.tenant_id,
                             },
                         ];
-                        console.log(sendData);
                         deviceApi
                             .editPatch(sendData, item.patch_uuid)
                             .then((res) => {
-                                console.log(res.data?.response);
                                 if (index === data.AssociatedPatch.length - 1) {
                                     setIsUploading(false);
                                     openPopover("closePopOver");
@@ -233,17 +314,18 @@ function PatchInventory() {
     }
 
     const editBtnStyle = {
-        height: "40px",
+        height: "36px",
         border: "2px solid #D5F0FF ",
         borderRadius: "6px ",
-        fontSize: "16px",
+        fontSize: "14px",
         fontWeight: "500",
         width: "fit-content ",
         padding: "0px 16px ",
         color: "#1479FF",
-        position: "absolute",
-        top: "0",
-        right: "-6px",
+        marginTop: "8px"
+        // position: "absolute",
+        // top: "0",
+        // right: "-6px",
     };
 
     const onEditBtnStyle = {
@@ -478,9 +560,9 @@ function PatchInventory() {
             dataIndex: "patch_type",
             key: "sensorsImage",
             // ellipsis: true,
-            width: 70,
+            width: 60,
             render: (dataIndex, record) => (
-                <div style={{ display: "flex", justifyContent: "space-around", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center" }}>
                     {record.AssociatedPatch?.length < 2 && (
                         <Checkbox 
                             onChange={() => {
@@ -495,6 +577,7 @@ function PatchInventory() {
                             disabled={record.patch_patient_map !== null}
                             className="checkbox-delete-device"
                             checked={arrayChecked?.includes(record.patch_uuid)}
+                            style={{ marginLeft: "6px" }}
                         />
                     )}
                     <div>
@@ -515,20 +598,12 @@ function PatchInventory() {
         {
             title: "Device Serial",
             dataIndex: "patch_serial",
-            key: "lastSeen",
+            key: "patch_serial",
             ellipsis: true,
-            width: 100,
+            width: 80,
             render: (dataIndex) => {
                 return (
-                    <div style={{ fontSize: "16px", fontWeight: "500" }}>
-                        <div>
-                            <div>
-                                {dataIndex.length > 25
-                                    ? dataIndex.slice(0, 23) + "..."
-                                    : dataIndex}
-                            </div>
-                        </div>
-                    </div>
+                    <span style={{ fontSize: "16px", fontWeight: "500" }}>{dataIndex}</span>
                 )
             }
         },
@@ -536,42 +611,124 @@ function PatchInventory() {
         {
             title: "Mac Address",
             dataIndex: "patch_mac",
-            key: "lastSeen",
+            key: "patch_mac",
             ellipsis: true,
-            width: 100,
+            width: 80,
             render: (dataIndex) => {
                 return (
-                    <div style={{ fontSize: "16px", fontWeight: "500" }}>
-                        <div>
-                            <div>
-                                {dataIndex.length > 25
-                                    ? dataIndex.slice(0, 23) + "..."
-                                    : dataIndex}
-                            </div>
-                        </div>
-                    </div>
+                    <span style={{ fontSize: "16px", fontWeight: "500" }}>{dataIndex}</span>
                 )
+            }
+        },
+        {
+            title: "Patient",
+            dataIndex: "patch_patient_map",
+            key: "patch_patient_map",
+            ellipsis: true,
+            width: 80,
+            render: (dataIndex) => {
+                const patient_data = dataIndex?.patient_data?.[0] || {};
+                const patientName = `${patient_data?.fname || ""} ${patient_data?.lname || ""}`;
+                return (
+                    <span>
+                        <span style={{ fontSize: "16px", fontWeight: "500" }}>{!!patient_data?.fname ? patientName : "No Patient"}</span>
+                        {!!patient_data?.med_record && (
+                            <span style={{
+                                width: "100%",
+                                textAlign: "center",
+                                display: "grid"
+                            }}>
+                                <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                                    MR:
+                                </span>
+                                <span style={{ fontWeight: "500", marginLeft: "2px" }}>
+                                    {patient_data?.med_record || ""}
+                                </span>
+                            </span> 
+                        )}
+                    </span>
+                )
+            }
+        },
+
+        {
+            title: "Gateway Status",
+            dataIndex: "gateway_status",
+            key: "gateway_status",
+            ellipsis: true,
+            width: 85,
+            render: (dataIndex, record) => {
+                if (record?.patch_type === "gateway") {
+                    return (
+                        <div>
+                            {!!record?.gateway_battery && (
+                                <div style={{
+                                    width: "100%",
+                                    textAlign: "center",
+                                    fontSize: "16px",
+                                }}>
+                                    <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                                        Battery: 
+                                    </span>
+                                    <span style={{ fontWeight: "500", marginLeft: "2px" }}>
+                                        {record?.gateway_battery}%
+                                    </span>
+                                </div>
+                            )}
+
+                            {!!record?.gateway_version && (
+                                <div style={{
+                                    width: "100%",
+                                    textAlign: "center",
+                                }}>
+                                    <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                                        Version: 
+                                    </span>
+                                    <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
+                                        {record?.gateway_version}
+                                    </span>
+                                </div>
+                            )}
+    
+                            {!!record?.gateway_keep_alive_time && (
+                                <div style={{
+                                    width: "100%",
+                                    textAlign: "center",
+                                    fontSize: "16px",
+                                    display: "grid"
+                                }}>
+                                    <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                                        Last received: 
+                                    </span>
+                                    <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
+                                        {moment(record?.gateway_keep_alive_time).format("MMM DD hh:mm:ss a")} 
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    )
+                }
             }
         },
 
         {
             title: "Device Status",
             dataIndex: "patch_status",
-            key: "patchStatus",
+            key: "patch_status",
             ellipsis: true,
             align: "center",
-            width: 110,
+            width: 75,
             render: (dataIndex, record) => {
                 // console.log('dataIndex, record', dataIndex, record);
                 return (
-                    <Row style={{ alignItems: "center", justifyContent: "center" }}>
-                        <Col
-                            span={24}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div
                             style={{
                                 position: "relative",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
+                                flexDirection: "column",
                                 minHeight: "40px"
                             }}
                         >
@@ -579,18 +736,19 @@ function PatchInventory() {
                                 <Tag
                                     icon={<CheckOutlined />}
                                     style={{
-                                        marginRight: "10px",
+                                        // marginRight: "10px",
                                         width: "fit-content",
                                         color: "#06A400",
-                                        backgroundColor: "whilte",
-                                        fontSize: "16px",
-                                        border: "2px solid #06A00020",
+                                        background: "transparent",
+                                        fontSize: "15px",
+                                        // border: "2px solid #06A00020",
+                                        border: "none",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
                                         fontWeight: "500",
                                         height: "40px",
-                                        padding: "0px 16px",
+                                        padding: "0px 0px",
                                     }}
                                     color="#06A000"
                                 >
@@ -601,18 +759,20 @@ function PatchInventory() {
                                 <Tag
                                     icon={<CloseCircleOutlined />}
                                     style={{
-                                        marginRight: "10px",
+                                        // marginRight: "10px", 
                                         width: "fit-content",
                                         color: "#DD4A34",
-                                        backgroundColor: "whilte",
+                                        background: "transparent",
                                         fontSize: "16px",
-                                        border: "2px solid #FFBEB4",
+                                        // border: "2px solid #FFBEB4",
+                                        border: "none",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        fontWeight: "500",
-                                        height: "40px",
-                                        padding: "0px 16px",
+                                        // fontWeight: "500",
+                                        // height: "40px",
+                                        padding: "0px 0px",
+                                        margin: "0px"
                                     }}
                                     color="#FFBEB4"
                                 >
@@ -622,19 +782,22 @@ function PatchInventory() {
                             {dataIndex === "Under Sterilization" && (
                                 <Tag
                                     style={{
-                                        marginRight: "10px",
+                                        // marginRight: "10px",
                                         width: "fit-content",
                                         color: "#1479FF",
-                                        backgroundColor: "whilte",
+                                        background: "transparent",
                                         fontSize: "16px",
-                                        border: "2px solid #1479FF",
+                                        // border: "2px solid #1479FF",
+                                        border: "none",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
                                         fontWeight: "500",
-                                        height: "40px",
-                                        padding: "0px 16px",
-                                        marginLeft: "-24px",
+                                        // height: "40px",
+                                        // padding: "0px 16px",
+                                        // marginLeft: "-24px",
+                                        padding: "0px 0px",
+                                        margin: "0px"
                                     }}
                                     color="#FFBEB4"
                                 >
@@ -670,81 +833,72 @@ function PatchInventory() {
                             ) : (
                                 ""
                             )}
-                        </Col>
-                    </Row>
+                        </div>
+                    </div>
                 )
             },
-            filters: [
-                {
-                    text: "Active",
-                    value: "Active",
-                },
-                {
-                    text: "Under Sterilization",
-                    value: "Under Sterilization",
-                },
-                {
-                    text: "Inactive",
-                    value: "Inactive",
-                },
-            ],
+            // filters: [
+            //     {
+            //         text: "Active",
+            //         value: "Active",
+            //     },
+            //     {
+            //         text: "Under Sterilization",
+            //         value: "Under Sterilization",
+            //     },
+            //     {
+            //         text: "Inactive",
+            //         value: "Inactive",
+            //     },
+            // ],
 
-            onFilter: (value, record) => record.patch_status === value,
+            // onFilter: (value, record) => record.patch_status === value,
 
-            oncell: (record, rowindex) => {
-                console.log(record, rowindex);
-            },
+            // oncell: (record, rowindex) => {
+            //     console.log(record, rowindex);
+            // },
         },
 
         {
             title: "Sensors",
             dataIndex: "patch_type",
-            key: "sensors",
+            key: "patch_type",
             ellipsis: true,
-            width: 90,
+            width: 75,
             render: (dataIndex, record) => (
-                <div
+                <span
                     style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        height: "100px",
-                        alignItems: "center",
+                        fontSize: "16px",
+                        fontWeight: "500",
+                        textTransform: "capitalize",
                     }}
                 >
-                    <span
-                        style={{
-                            fontSize: "16px",
-                            fontWeight: "500",
-                            textTransform: "capitalize",
-                        }}
-                    >
-                        {record.AssociatedPatch?.length > 1 ? "Bundle" : renderLabelPatchType(dataIndex)}
-                    </span>
-                </div>
+                    {record.AssociatedPatch?.length > 1 ? "Bundle" : renderLabelPatchType(dataIndex)}
+                </span>
             ),
-            filters: [
-                {
-                    text: "Bundle",
-                    value: "bundle",
-                },
-                {
-                    text: "Gateway",
-                    value: "gateway",
-                },
-                {
-                    text: "ecg",
-                    value: "ecg",
-                },
-                {
-                    text: "spo2",
-                    value: "spo2",
-                },
-                {
-                    text: "Temperature",
-                    value: "temperature",
-                },
-            ],
-            onFilter: (value, record) => record.patch_type === value
+            // filters: [
+            //     {
+            //         text: "Bundle",
+            //         value: "bundle",
+            //     },
+            //     {
+            //         text: "Gateway",
+            //         value: "gateway",
+            //     },
+            //     {
+            //         text: "ecg",
+            //         value: "ecg",
+            //     },
+            //     {
+            //         text: "spo2",
+            //         value: "spo2",
+            //     },
+            //     {
+            //         text: "Temperature",
+            //         value: "temperature",
+            //     },
+            // ],
+            // onFilter: (value, record) => record.patch_type === value
         },
         {
             title: "Device In Use",
@@ -752,75 +906,79 @@ function PatchInventory() {
             key: "patchMap",
             ellipsis: true,
             align: "center",
-            width: 90,
+            width: 75,
             render: (dataIndex, record) => (
-                <Row style={{ alignItems: "center", justifyContent: "center" }}>
-                    <Col span={16}>
-                        {dataIndex === null ? (
-                            <Tag
-                                icon={<CloseCircleOutlined />}
-                                style={{
-                                    marginRight: "16px",
-                                    width: "fit-content",
-                                    color: "#DD4A34",
-                                    backgroundColor: "whilte",
-                                    fontSize: "16px",
-                                    border: "2px solid #FFBEB4",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontWeight: "500",
-                                    height: "40px",
-                                    padding: "0px 16px",
-                                }}
-                                color="#FD505C"
-                            >
-                                Unregistered
-                            </Tag>
-                        ) : (
-                            <Tag
-                                icon={<CheckOutlined />}
-                                style={{
-                                    marginRight: "5px",
-                                    marginLeft: "5px",
-                                    width: "fit-content",
-                                    color: "#06A400",
-                                    backgroundColor: "whilte",
-                                    fontSize: "16px",
-                                    border: "2px solid #06A00020",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontWeight: "500",
-                                    height: "40px",
-                                    padding: "0px 16px",
-                                }}
-                                color="#06A400"
-                            >
-                                Registered
-                            </Tag>
-                        )}
-                    </Col>
-                </Row>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {dataIndex === null ? (
+                        <Tag
+                            icon={<CloseCircleOutlined />}
+                            style={{
+                                // marginRight: "16px",
+                                width: "fit-content",
+                                color: "#DD4A34",
+                                background: "#ffffff",
+                                fontSize: "16px",
+                                // border: "2px solid #FFBEB4",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                // fontWeight: "500",
+                                height: "40px",
+                                //     padding: "0px 16px",
+                                padding: "0px 0px",
+                                border: "none",
+                                margin: "0px"
+                            }}
+                            color="#FD505C"
+                        >
+                            Unregistered
+                        </Tag>
+                    ) : (
+                        <Tag
+                            icon={<CheckOutlined />}
+                            style={{
+                                // marginRight: "5px",
+                                // marginLeft: "5px",
+                                width: "fit-content",
+                                color: "#06A400",
+                                background: "#ffffff    ",
+                                fontSize: "16px",
+                                // border: "2px solid #06A00020",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                // fontWeight: "500",
+                                height: "40px",
+                                // padding: "0px 16px",
+                                padding: "0px 0px",
+                                border: "none",
+                                margin: "0px"
+                            }}
+                            color="#06A400"
+                        >
+                            Registered
+                        </Tag>
+                    )}
+                </div>
             ),
-            filters: [
-                {
-                    text: "Registered",
-                    value: 1,
-                },
-                {
-                    text: "Unregistered",
-                    value: null,
-                },
-            ],
-            onFilter: (value, record) => {
-                if (value === null) {
-                    return record.patch_patient_map === null;
-                }
-                if (value === 1) {
-                    return record.patch_patient_map !== null;
-                }
-            },
+            // filters: [
+            //     {
+            //         text: "Registered",
+            //         value: 1,
+            //     },
+            //     {
+            //         text: "Unregistered",
+            //         value: null,
+            //     },
+            // ],
+            // onFilter: (value, record) => {
+            //     if (value === null) {
+            //         return record.patch_patient_map === null;
+            //     }
+            //     if (value === 1) {
+            //         return record.patch_patient_map !== null;
+            //     }
+            // },
         },
 
         {
@@ -828,7 +986,7 @@ function PatchInventory() {
             dataIndex: "",
             key: "deleteIcon",
             ellipsis: true,
-            width: 35,
+            width: 25,
             render: (dataIndex, record) => {
                 if (record.AssociatedPatch?.length < 2) {
                     if (record.patch_patient_map !== null) {
@@ -1158,30 +1316,36 @@ function PatchInventory() {
                 }
             />
 
-            <Row
-                className="table-body devie-inventory-table"
-                justify="start"
-                style={{ padding: "0", backgroundColor: "white", margin: "4px" }}
-            >
-                <div style={{ margin: "30px 2%", width: "100%" }}>
-                    {extraDiv === true ? <div className="blur-div"></div> : null}
-                    <Table
-                        style={{ backgroundColor: "blue" }}
-                        columns={columns}
-                        size="middle"
-                        onChange={onChange}
-                        pagination={{ position: ["bottomRight"] }}
-                        scroll={extraDiv === true ? { y: "hidden" } : { y: "calc(100vh - 258px)" }}
-                        rowClassName={setRowClassName}
-                        // expandable={{
-                        //     expandedRowRender: (record) => bundleModel(record),
-                        //     expandIcon: (props) => customExpandIcon(props)
-                        // }}
-                        dataSource={filteredlist}
-                        onRow={onClickRow}
-                    />
+            {loading ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "80vh" }}>
+                    <Spin />
                 </div>
-            </Row>
+            ) : (
+                <Row
+                    className="table-body devie-inventory-table"
+                    justify="start"
+                    style={{ padding: "0", backgroundColor: "white", margin: "4px" }}
+                >
+                    <div style={{ margin: "30px 2%", width: "100%" }}>
+                        {extraDiv === true ? <div className="blur-div"></div> : null}
+                        <Table
+                            style={{ backgroundColor: "white" }}
+                            columns={columns}
+                            size="middle"
+                            onChange={onChange}
+                            pagination={{ position: ["bottomRight"] }}
+                            scroll={extraDiv === true ? { y: "hidden" } : { y: "calc(100vh - 237px)" }}
+                            rowClassName={setRowClassName}
+                            // expandable={{
+                            //     expandedRowRender: (record) => bundleModel(record),
+                            //     expandIcon: (props) => customExpandIcon(props)
+                            // }}
+                            dataSource={filteredlist}
+                            onRow={onClickRow}
+                        />
+                    </div>
+                </Row>
+            )}
 
             <Modal
                 visible={visible}

@@ -1795,6 +1795,12 @@ function GraphVisualizer() {
             });
     }, [pid]);
 
+    // let associatedList = [];
+    // const isString = isJsonString(patient?.demographic_map?.associated_list);
+    // if (isString) {
+    //     associatedList = JSON.parse(patient?.demographic_map?.associated_list);
+    // }
+
     const associatedList = useMemo(() => {
         let associatedList = [];
         const isString = isJsonString(patient?.demographic_map?.associated_list);
@@ -1836,18 +1842,27 @@ function GraphVisualizer() {
         })
     };
 
+    const disabledBloodPressure = !associatedList?.includes("alphamed") && !associatedList?.includes("ihealth");
+
     const getDataChartsActive = () => {
         activeTrendsArray.forEach((chart, index) => {
             chart.data = [];
             chart.alerts = [];
 
-            if (chart?._key === "bpd" || chart?._key === "bps") {
+            // console.log("disabledBloodPressure", disabledBloodPressure);
+            if ((chart?._key === "bpd" || chart?._key === "bps") && !disabledBloodPressure) {
+               
+                if (!associatedList?.includes("ecg")) {
+                    const indexEcgHr = activeTrendsArray.findIndex(chart => chart?._key === "ecg_hr");
+                    onGetDataSensorFromInfluxByKey("ihealth_hr", activeTrendsArray[indexEcgHr], "delete", indexEcgHr);
+                } 
+
                 let keySensor = "alphamed";
                 if (associatedList?.includes("ihealth")) {
                     keySensor = "ihealth";
                 }
-
                 onGetDataSensorFromInfluxByKey(`${keySensor}_${chart?._key}`, chart, "delete", index);
+
             } else {
                 onGetDataSensorFromInfluxByKey(chart._key, chart, "delete", index);
             }
@@ -1869,7 +1884,7 @@ function GraphVisualizer() {
     useEffect(() => {
         setGraphLoading(true);
         getDataChartsActive();
-    }, [antd_selected_date_val]);
+    }, [antd_selected_date_val, disabledBloodPressure]);
 
     const CustomTooltip = (payload) => {
         try {
@@ -2404,7 +2419,11 @@ function GraphVisualizer() {
                                                     max: hrmaxval,
                                                     min: hrminval,
                                                 }
-                                                onGetDataSensorFromInfluxByKey("ecg_hr", hr);
+                                                if (!associatedList?.includes("ecg")) {
+                                                    onGetDataSensorFromInfluxByKey("ihealth_hr", hr);
+                                                } else {
+                                                    onGetDataSensorFromInfluxByKey("ecg_hr", hr);
+                                                }
                                             }
                                         }}
                                             className="trend-btn" style={
@@ -2442,8 +2461,8 @@ function GraphVisualizer() {
                                             RR
                                         </div>
 
-                                        {(associatedList?.includes("alphamed") || associatedList?.includes("ihealth")) && (
-                                            <>
+                                        {/* {(associatedList?.includes("alphamed") || associatedList?.includes("ihealth")) && (
+                                            <> */}
                                                 <div onClick={() => {
                                                     setGraphLoading(true);
                                                     var flag = true;
@@ -2465,7 +2484,14 @@ function GraphVisualizer() {
                                                             max: bpdmaxval,
                                                             min: bpdminval,
                                                         }
-                                                        onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bpd" : "ihealth_bpd", bpd);
+                                                        
+                                                        if (associatedList?.includes("alphamed") || associatedList?.includes("ihealth")) {
+                                                            onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bpd" : "ihealth_bpd", bpd);
+                                                        } else {
+                                                            const newArr = [...activeTrendsArray];
+                                                            newArr.push(bpd);
+                                                            setActiveTrendsArray(newArr)
+                                                        }
                                                     }
                                                 }} className="trend-btn" style={
                                                     activeTrendsArray.some(e => e.name === 'BPD') ? { border: `2px solid ${Colors.darkPurple}`, color: Colors.darkPurple } : { border: '1px solid #BABABA', color: '#BABABA' }
@@ -2494,16 +2520,21 @@ function GraphVisualizer() {
                                                             max: bpsmaxval,
                                                             min: bpsminval,
                                                         }
-                                                        onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bps" : "ihealth_bps", bps);
-
+                                                        if (associatedList?.includes("alphamed") || associatedList?.includes("ihealth")) {
+                                                            onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bps" : "ihealth_bps", bps);
+                                                        } else {
+                                                            const newArr = [...activeTrendsArray];
+                                                            newArr.push(bps);
+                                                            setActiveTrendsArray(newArr)
+                                                        }
                                                     }
                                                 }} className="trend-btn" style={
                                                     activeTrendsArray.some(e => e.name === 'BPS') ? { border: `2px solid ${Colors.darkPurple}`, color: Colors.darkPurple } : { border: '1px solid #BABABA', color: '#BABABA' }
                                                 }>
                                                     BPS
                                                 </div>
-                                            </>
-                                        )}
+                                            {/* </>
+                                        )} */}
 
                                         <div onClick={() => {
                                             setGraphLoading(true);
@@ -2589,106 +2620,115 @@ function GraphVisualizer() {
                                             ? (
                                                 <div><Spin /></div>
                                             ) : (
-                                                activeTrendsArray.map((trend, idx) => (
-                                                    <div key={`${idx}-${trend.name}`} style={{ height: `${100 / activeTrendsArray.length}%`, width: "100%", position: "relative" }} >
-                                                        <div className="gv-bg-container" style={{ left: "0", top: "0" }} >
-                                                            <div className="gv-graph-lable" style={{ color: trend.color1 }} >
-                                                                {trend.name}
-                                                            </div>
-                                                            <div className="gv-graph-bg" style={{ backgroundColor: trend.color2 }} ></div>
-                                                        </div>
-                                                        <ResponsiveContainer width="97%" height="100%" >
-                                                            <LineChart
-                                                                onMouseMove={(payload) => setHoverActiveTooltipIndex(payload.activeTooltipIndex)}
-
-                                                                onClick={(gvdata) => {
-                                                                    try {
-                                                                        if (gvdata.activeTooltipIndex) {
-                                                                            trend.data.map((ele, index) => {
-                                                                                if (ele.med === true && index === gvdata.activeTooltipIndex) {
-                                                                                    setCurrentMedData(ele.medData)
-                                                                                    setAlertState(false)
-                                                                                    setMedState(true)
+                                                activeTrendsArray.map((trend, idx) => {
+                                                    // if ((trend?._key === "bpd" || trend?._key === "bps") && disabledBloodPressure) {
+                                                    //     return null
+                                                    // } else {
+                                                        return (
+                                                            <div 
+                                                                key={`${idx}-${trend.name}`} 
+                                                                style={{ height: `${100 / activeTrendsArray.length}%`, 
+                                                                width: "100%", position: "relative" }} 
+                                                            >
+                                                                <div className="gv-bg-container" style={{ left: "0", top: "0" }} >
+                                                                    <div className="gv-graph-lable" style={{ color: trend.color1 }} >
+                                                                        {trend.name}
+                                                                    </div>
+                                                                    <div className="gv-graph-bg" style={{ backgroundColor: trend.color2 }} ></div>
+                                                                </div>
+                                                                <ResponsiveContainer width="97%" height="100%" >
+                                                                    <LineChart
+                                                                        onMouseMove={(payload) => setHoverActiveTooltipIndex(payload.activeTooltipIndex)}
+        
+                                                                        onClick={(gvdata) => {
+                                                                            try {
+                                                                                if (gvdata.activeTooltipIndex) {
+                                                                                    trend.data.map((ele, index) => {
+                                                                                        if (ele.med === true && index === gvdata.activeTooltipIndex) {
+                                                                                            setCurrentMedData(ele.medData)
+                                                                                            setAlertState(false)
+                                                                                            setMedState(true)
+                                                                                            setPieState(false)
+                                                                                            setLabState(false)
+                                                                                            setProcedureState(false)
+                                                                                            setIntakeState(false)
+                                                                                            setOutputState(false)
+                                                                                        }
+                                                                                    })
+                                                                                }
+                                                                                if (gvdata.activePayload[0].payload.alert) {
+                                                                                    setCurrentAlert(gvdata.activePayload[0].payload.date)
+                                                                                    alertFlag = true
+                                                                                    bpAlertFlag = true
+                                                                                    rrAlertFlag = true
+                                                                                    tempAlertFlag = true
+                                                                                    ewsAlertFlag = true
+                                                                                    setAlertName(trend.name)
+                                                                                    setAlertState(true)
+                                                                                    setMedState(false)
                                                                                     setPieState(false)
                                                                                     setLabState(false)
                                                                                     setProcedureState(false)
                                                                                     setIntakeState(false)
                                                                                     setOutputState(false)
                                                                                 }
-                                                                            })
+                                                                            }
+                                                                            catch (err) {
+                                                                                console.log(err)
+                                                                                // notification.error({
+                                                                                //     message: 'Error',
+                                                                                //     description: `${err}`
+                                                                                // });
+                                                                            }
+        
+                                                                        }}
+                                                                        width="100%" height="100%"
+                                                                        data={trend.data}
+                                                                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                                                    >
+                                                                        <XAxis dataKey="date" hide />
+                                                                        <YAxis dataKey="value" domain={[trend.min, trend.max]} axisLine={false} tickLine={false} width={35} tick={{ fill: trend.color1, stroke: trend.color1, strokeWidth: 0.5 }} />
+                                                                        <Tooltip content={<CustomTooltip indexSensor={idx} />} />
+                                                                        {
+                                                                            trend.data.map((ele) => (
+                                                                                ele.med
+                                                                                    ?
+                                                                                    (
+                                                                                        <ReferenceLine x={ele.date} stroke="blue" strokeDasharray="7 7" strokeWidth={3} />
+                                                                                    )
+                                                                                    :
+                                                                                    null
+                                                                            ))
                                                                         }
-                                                                        if (gvdata.activePayload[0].payload.alert) {
-                                                                            setCurrentAlert(gvdata.activePayload[0].payload.date)
-                                                                            alertFlag = true
-                                                                            bpAlertFlag = true
-                                                                            rrAlertFlag = true
-                                                                            tempAlertFlag = true
-                                                                            ewsAlertFlag = true
-                                                                            setAlertName(trend.name)
-                                                                            setAlertState(true)
-                                                                            setMedState(false)
-                                                                            setPieState(false)
-                                                                            setLabState(false)
-                                                                            setProcedureState(false)
-                                                                            setIntakeState(false)
-                                                                            setOutputState(false)
+                                                                        {
+                                                                            trend.data.map((ele) => (
+                                                                                ele.med
+                                                                                    ?
+                                                                                    (
+                                                                                        <ReferenceDot x={ele.date} y={ele.value} shape={CustomMedReferenceDot} />
+                                                                                    )
+                                                                                    :
+                                                                                    null
+                                                                            ))
                                                                         }
-                                                                    }
-                                                                    catch (err) {
-                                                                        console.log(err)
-                                                                        // notification.error({
-                                                                        //     message: 'Error',
-                                                                        //     description: `${err}`
-                                                                        // });
-                                                                    }
-
-                                                                }}
-                                                                width="100%" height="100%"
-                                                                data={trend.data}
-                                                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                                                            >
-                                                                <XAxis dataKey="date" hide />
-                                                                <YAxis dataKey="value" domain={[trend.min, trend.max]} axisLine={false} tickLine={false} width={35} tick={{ fill: trend.color1, stroke: trend.color1, strokeWidth: 0.5 }} />
-                                                                <Tooltip content={<CustomTooltip indexSensor={idx} />} />
-                                                                {
-                                                                    trend.data.map((ele) => (
-                                                                        ele.med
-                                                                            ?
-                                                                            (
-                                                                                <ReferenceLine x={ele.date} stroke="blue" strokeDasharray="7 7" strokeWidth={3} />
-                                                                            )
-                                                                            :
-                                                                            null
-                                                                    ))
-                                                                }
-                                                                {
-                                                                    trend.data.map((ele) => (
-                                                                        ele.med
-                                                                            ?
-                                                                            (
-                                                                                <ReferenceDot x={ele.date} y={ele.value} shape={CustomMedReferenceDot} />
-                                                                            )
-                                                                            :
-                                                                            null
-                                                                    ))
-                                                                }
-                                                                {
-                                                                    trend.data.map((ele) => (
-                                                                        ele.alert
-                                                                            ?
-                                                                            (
-                                                                                <ReferenceDot x={ele.date} y={ele.value} shape={CustomReferenceDot} />
-                                                                            )
-                                                                            :
-                                                                            null
-                                                                    ))
-                                                                }
-                                                                <Line type="monotone" dataKey="value" stroke={trend.color1} strokeWidth={3} dot={true} />
-                                                            </LineChart>
-                                                        </ResponsiveContainer>
-                                                    </div>
-
-                                                ))
+                                                                        {
+                                                                            trend.data.map((ele) => (
+                                                                                ele.alert
+                                                                                    ?
+                                                                                    (
+                                                                                        <ReferenceDot x={ele.date} y={ele.value} shape={CustomReferenceDot} />
+                                                                                    )
+                                                                                    :
+                                                                                    null
+                                                                            ))
+                                                                        }
+                                                                        <Line type="monotone" dataKey="value" stroke={trend.color1} strokeWidth={3} dot={true} />
+                                                                    </LineChart>
+                                                                </ResponsiveContainer>
+                                                            </div>
+                                                        )
+                                                    // }
+                                                })
                                             )
                                     }
                                 </div>
