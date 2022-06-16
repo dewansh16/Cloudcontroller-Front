@@ -38,14 +38,14 @@ const UploadLogger = () => {
             })
     }, []);
 
-    const handleDownloadFile = (fileId) => {
+    const handleDownloadFile = (fileId, url) => {
         patientApi.downloadLogger(fileId)
             .then(res => {
                 const urlFile = window.URL.createObjectURL(res.data);
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = urlFile;
-                a.download = urlFile;
+                a.download = url;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(urlFile);
@@ -100,7 +100,7 @@ const UploadLogger = () => {
                         src={IconDownload} 
                         width={17} height={17} 
                         style={{ cursor: "pointer" }}
-                        onClick={() => { handleDownloadFile(record?.id) }}
+                        onClick={() => { handleDownloadFile(record?.id, record?.url) }}
                     />
                 )
             }

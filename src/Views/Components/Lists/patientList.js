@@ -212,6 +212,8 @@ const PatientListItem = (props) => {
         })
     }
 
+    const disabledBloodPressure = !associatedList?.includes("alphamed") && !associatedList?.includes("ihealth");
+
     const getDataSensorFromInfluxDB = () => {
         const newArrChart = [...arrDataChart];
         for (let index = 0; index < newArrChart.length; index++) {
@@ -220,9 +222,8 @@ const PatientListItem = (props) => {
 
             if (key !== "blood_pressuer") {
                 processDataForSensor(key, newArrChart, chart)
-            } else {
+            } else if (!disabledBloodPressure) {
                 let arrKeyChild = [];
-                // let isPbPushDataForEcg = false;
 
                 if (associatedList?.includes("alphamed")) {
                     arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
@@ -230,9 +231,9 @@ const PatientListItem = (props) => {
                     arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
                 }
 
-                // if (!associatedList?.includes("ecg")) {
-                //     isPbPushDataForEcg = true;
-                // }
+                if (!associatedList?.includes("ecg")) {
+                    processDataForSensor("ihealth_hr", newArrChart, newArrChart[2]);
+                }
 
                 for (let j = 0; j < arrKeyChild.length; j++) {
                     processDataForSensor(arrKeyChild[j], newArrChart, chart);

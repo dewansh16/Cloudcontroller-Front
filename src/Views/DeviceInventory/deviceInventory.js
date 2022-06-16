@@ -53,6 +53,7 @@ import {
     CheckOutlined,
     CloseCircleOutlined,
 } from "@ant-design/icons";
+import moment from "moment";
 
 function PatchInventory() {
     // const { url } = useRouteMatch();
@@ -233,17 +234,18 @@ function PatchInventory() {
     }
 
     const editBtnStyle = {
-        height: "40px",
+        height: "36px",
         border: "2px solid #D5F0FF ",
         borderRadius: "6px ",
-        fontSize: "16px",
+        fontSize: "14px",
         fontWeight: "500",
         width: "fit-content ",
         padding: "0px 16px ",
         color: "#1479FF",
-        position: "absolute",
-        top: "0",
-        right: "-6px",
+        marginTop: "8px"
+        // position: "absolute",
+        // top: "0",
+        // right: "-6px",
     };
 
     const onEditBtnStyle = {
@@ -478,9 +480,9 @@ function PatchInventory() {
             dataIndex: "patch_type",
             key: "sensorsImage",
             // ellipsis: true,
-            width: 70,
+            width: 60,
             render: (dataIndex, record) => (
-                <div style={{ display: "flex", justifyContent: "space-around", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center" }}>
                     {record.AssociatedPatch?.length < 2 && (
                         <Checkbox 
                             onChange={() => {
@@ -495,6 +497,7 @@ function PatchInventory() {
                             disabled={record.patch_patient_map !== null}
                             className="checkbox-delete-device"
                             checked={arrayChecked?.includes(record.patch_uuid)}
+                            style={{ marginLeft: "6px" }}
                         />
                     )}
                     <div>
@@ -515,20 +518,12 @@ function PatchInventory() {
         {
             title: "Device Serial",
             dataIndex: "patch_serial",
-            key: "lastSeen",
+            key: "patch_serial",
             ellipsis: true,
-            width: 100,
+            width: 80,
             render: (dataIndex) => {
                 return (
-                    <div style={{ fontSize: "16px", fontWeight: "500" }}>
-                        <div>
-                            <div>
-                                {dataIndex.length > 25
-                                    ? dataIndex.slice(0, 23) + "..."
-                                    : dataIndex}
-                            </div>
-                        </div>
-                    </div>
+                    <span style={{ fontSize: "16px", fontWeight: "500" }}>{dataIndex}</span>
                 )
             }
         },
@@ -536,19 +531,91 @@ function PatchInventory() {
         {
             title: "Mac Address",
             dataIndex: "patch_mac",
-            key: "lastSeen",
+            key: "patch_mac",
             ellipsis: true,
-            width: 100,
+            width: 80,
             render: (dataIndex) => {
                 return (
-                    <div style={{ fontSize: "16px", fontWeight: "500" }}>
-                        <div>
-                            <div>
-                                {dataIndex.length > 25
-                                    ? dataIndex.slice(0, 23) + "..."
-                                    : dataIndex}
-                            </div>
+                    <span style={{ fontSize: "16px", fontWeight: "500" }}>{dataIndex}</span>
+                )
+            }
+        },
+        {
+            title: "Patient",
+            dataIndex: "patch_patient_map",
+            key: "patch_patient_map",
+            ellipsis: true,
+            width: 80,
+            render: (dataIndex) => {
+                const patient_data = dataIndex?.patient_data?.[0] || {};
+                const patientName = `${patient_data?.fname || ""} ${patient_data?.lname || ""}`;
+                return (
+                    <span>
+                        <span style={{ fontSize: "16px", fontWeight: "500" }}>{!!patient_data?.fname ? patientName : "No Patient"}</span>
+                        <span style={{
+                            width: "100%",
+                            textAlign: "center",
+                            display: "grid"
+                        }}>
+                            <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                                MR:
+                            </span>
+                            <span style={{ fontWeight: "500", marginLeft: "2px" }}>
+                                Med record
+                            </span>
+                        </span> 
+                    </span>
+                )
+            }
+        },
+
+        {
+            title: "Gateway Status",
+            dataIndex: "patch_mac",
+            key: "lastSeen",
+            ellipsis: true,
+            width: 85,
+            render: (dataIndex) => {
+                return (
+                    <div>
+                        <div style={{
+                            width: "100%",
+                            textAlign: "center",
+                            fontSize: "16px",
+                        }}>
+                            <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                                Battery: 
+                            </span>
+                            <span style={{ color: "#06A400", fontWeight: "500", marginLeft: "2px" }}>
+                                Active
+                            </span>
                         </div>
+
+                        <div style={{
+                            width: "100%",
+                            textAlign: "center",
+                            fontSize: "16px",
+                        }}>
+                            <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                            Last received: 
+                            </span>
+                            <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
+                                {moment(new Date()).format("MMM DD YYYY")}  
+                            </span>
+                        </div>
+
+                        <div style={{
+                            width: "100%",
+                            textAlign: "center",
+                        }}>
+                            <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                            Version: 
+                            </span>
+                            <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
+                                1.1.1.1
+                            </span>
+                        </div>
+
                     </div>
                 )
             }
@@ -560,18 +627,18 @@ function PatchInventory() {
             key: "patchStatus",
             ellipsis: true,
             align: "center",
-            width: 110,
+            width: 75,
             render: (dataIndex, record) => {
                 // console.log('dataIndex, record', dataIndex, record);
                 return (
-                    <Row style={{ alignItems: "center", justifyContent: "center" }}>
-                        <Col
-                            span={24}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div
                             style={{
                                 position: "relative",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
+                                flexDirection: "column",
                                 minHeight: "40px"
                             }}
                         >
@@ -579,18 +646,19 @@ function PatchInventory() {
                                 <Tag
                                     icon={<CheckOutlined />}
                                     style={{
-                                        marginRight: "10px",
+                                        // marginRight: "10px",
                                         width: "fit-content",
                                         color: "#06A400",
-                                        backgroundColor: "whilte",
-                                        fontSize: "16px",
-                                        border: "2px solid #06A00020",
+                                        background: "transparent",
+                                        fontSize: "15px",
+                                        // border: "2px solid #06A00020",
+                                        border: "none",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
                                         fontWeight: "500",
                                         height: "40px",
-                                        padding: "0px 16px",
+                                        padding: "0px 0px",
                                     }}
                                     color="#06A000"
                                 >
@@ -601,18 +669,20 @@ function PatchInventory() {
                                 <Tag
                                     icon={<CloseCircleOutlined />}
                                     style={{
-                                        marginRight: "10px",
+                                        // marginRight: "10px", 
                                         width: "fit-content",
                                         color: "#DD4A34",
-                                        backgroundColor: "whilte",
+                                        background: "transparent",
                                         fontSize: "16px",
-                                        border: "2px solid #FFBEB4",
+                                        // border: "2px solid #FFBEB4",
+                                        border: "none",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        fontWeight: "500",
-                                        height: "40px",
-                                        padding: "0px 16px",
+                                        // fontWeight: "500",
+                                        // height: "40px",
+                                        padding: "0px 0px",
+                                        margin: "0px"
                                     }}
                                     color="#FFBEB4"
                                 >
@@ -622,19 +692,22 @@ function PatchInventory() {
                             {dataIndex === "Under Sterilization" && (
                                 <Tag
                                     style={{
-                                        marginRight: "10px",
+                                        // marginRight: "10px",
                                         width: "fit-content",
                                         color: "#1479FF",
-                                        backgroundColor: "whilte",
+                                        background: "transparent",
                                         fontSize: "16px",
-                                        border: "2px solid #1479FF",
+                                        // border: "2px solid #1479FF",
+                                        border: "none",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
                                         fontWeight: "500",
-                                        height: "40px",
-                                        padding: "0px 16px",
-                                        marginLeft: "-24px",
+                                        // height: "40px",
+                                        // padding: "0px 16px",
+                                        // marginLeft: "-24px",
+                                        padding: "0px 0px",
+                                        margin: "0px"
                                     }}
                                     color="#FFBEB4"
                                 >
@@ -670,30 +743,30 @@ function PatchInventory() {
                             ) : (
                                 ""
                             )}
-                        </Col>
-                    </Row>
+                        </div>
+                    </div>
                 )
             },
-            filters: [
-                {
-                    text: "Active",
-                    value: "Active",
-                },
-                {
-                    text: "Under Sterilization",
-                    value: "Under Sterilization",
-                },
-                {
-                    text: "Inactive",
-                    value: "Inactive",
-                },
-            ],
+            // filters: [
+            //     {
+            //         text: "Active",
+            //         value: "Active",
+            //     },
+            //     {
+            //         text: "Under Sterilization",
+            //         value: "Under Sterilization",
+            //     },
+            //     {
+            //         text: "Inactive",
+            //         value: "Inactive",
+            //     },
+            // ],
 
-            onFilter: (value, record) => record.patch_status === value,
+            // onFilter: (value, record) => record.patch_status === value,
 
-            oncell: (record, rowindex) => {
-                console.log(record, rowindex);
-            },
+            // oncell: (record, rowindex) => {
+            //     console.log(record, rowindex);
+            // },
         },
 
         {
@@ -701,50 +774,41 @@ function PatchInventory() {
             dataIndex: "patch_type",
             key: "sensors",
             ellipsis: true,
-            width: 90,
+            width: 75,
             render: (dataIndex, record) => (
-                <div
+                <span
                     style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        height: "100px",
-                        alignItems: "center",
+                        fontSize: "16px",
+                        fontWeight: "500",
+                        textTransform: "capitalize",
                     }}
                 >
-                    <span
-                        style={{
-                            fontSize: "16px",
-                            fontWeight: "500",
-                            textTransform: "capitalize",
-                        }}
-                    >
-                        {record.AssociatedPatch?.length > 1 ? "Bundle" : renderLabelPatchType(dataIndex)}
-                    </span>
-                </div>
+                    {record.AssociatedPatch?.length > 1 ? "Bundle" : renderLabelPatchType(dataIndex)}
+                </span>
             ),
-            filters: [
-                {
-                    text: "Bundle",
-                    value: "bundle",
-                },
-                {
-                    text: "Gateway",
-                    value: "gateway",
-                },
-                {
-                    text: "ecg",
-                    value: "ecg",
-                },
-                {
-                    text: "spo2",
-                    value: "spo2",
-                },
-                {
-                    text: "Temperature",
-                    value: "temperature",
-                },
-            ],
-            onFilter: (value, record) => record.patch_type === value
+            // filters: [
+            //     {
+            //         text: "Bundle",
+            //         value: "bundle",
+            //     },
+            //     {
+            //         text: "Gateway",
+            //         value: "gateway",
+            //     },
+            //     {
+            //         text: "ecg",
+            //         value: "ecg",
+            //     },
+            //     {
+            //         text: "spo2",
+            //         value: "spo2",
+            //     },
+            //     {
+            //         text: "Temperature",
+            //         value: "temperature",
+            //     },
+            // ],
+            // onFilter: (value, record) => record.patch_type === value
         },
         {
             title: "Device In Use",
@@ -752,75 +816,79 @@ function PatchInventory() {
             key: "patchMap",
             ellipsis: true,
             align: "center",
-            width: 90,
+            width: 75,
             render: (dataIndex, record) => (
-                <Row style={{ alignItems: "center", justifyContent: "center" }}>
-                    <Col span={16}>
-                        {dataIndex === null ? (
-                            <Tag
-                                icon={<CloseCircleOutlined />}
-                                style={{
-                                    marginRight: "16px",
-                                    width: "fit-content",
-                                    color: "#DD4A34",
-                                    backgroundColor: "whilte",
-                                    fontSize: "16px",
-                                    border: "2px solid #FFBEB4",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontWeight: "500",
-                                    height: "40px",
-                                    padding: "0px 16px",
-                                }}
-                                color="#FD505C"
-                            >
-                                Unregistered
-                            </Tag>
-                        ) : (
-                            <Tag
-                                icon={<CheckOutlined />}
-                                style={{
-                                    marginRight: "5px",
-                                    marginLeft: "5px",
-                                    width: "fit-content",
-                                    color: "#06A400",
-                                    backgroundColor: "whilte",
-                                    fontSize: "16px",
-                                    border: "2px solid #06A00020",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontWeight: "500",
-                                    height: "40px",
-                                    padding: "0px 16px",
-                                }}
-                                color="#06A400"
-                            >
-                                Registered
-                            </Tag>
-                        )}
-                    </Col>
-                </Row>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {dataIndex === null ? (
+                        <Tag
+                            icon={<CloseCircleOutlined />}
+                            style={{
+                                // marginRight: "16px",
+                                width: "fit-content",
+                                color: "#DD4A34",
+                                background: "#ffffff",
+                                fontSize: "16px",
+                                // border: "2px solid #FFBEB4",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                // fontWeight: "500",
+                                height: "40px",
+                                //     padding: "0px 16px",
+                                padding: "0px 0px",
+                                border: "none",
+                                margin: "0px"
+                            }}
+                            color="#FD505C"
+                        >
+                            Unregistered
+                        </Tag>
+                    ) : (
+                        <Tag
+                            icon={<CheckOutlined />}
+                            style={{
+                                // marginRight: "5px",
+                                // marginLeft: "5px",
+                                width: "fit-content",
+                                color: "#06A400",
+                                background: "#ffffff    ",
+                                fontSize: "16px",
+                                // border: "2px solid #06A00020",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                // fontWeight: "500",
+                                height: "40px",
+                                // padding: "0px 16px",
+                                padding: "0px 0px",
+                                border: "none",
+                                margin: "0px"
+                            }}
+                            color="#06A400"
+                        >
+                            Registered
+                        </Tag>
+                    )}
+                </div>
             ),
-            filters: [
-                {
-                    text: "Registered",
-                    value: 1,
-                },
-                {
-                    text: "Unregistered",
-                    value: null,
-                },
-            ],
-            onFilter: (value, record) => {
-                if (value === null) {
-                    return record.patch_patient_map === null;
-                }
-                if (value === 1) {
-                    return record.patch_patient_map !== null;
-                }
-            },
+            // filters: [
+            //     {
+            //         text: "Registered",
+            //         value: 1,
+            //     },
+            //     {
+            //         text: "Unregistered",
+            //         value: null,
+            //     },
+            // ],
+            // onFilter: (value, record) => {
+            //     if (value === null) {
+            //         return record.patch_patient_map === null;
+            //     }
+            //     if (value === 1) {
+            //         return record.patch_patient_map !== null;
+            //     }
+            // },
         },
 
         {
@@ -828,7 +896,7 @@ function PatchInventory() {
             dataIndex: "",
             key: "deleteIcon",
             ellipsis: true,
-            width: 35,
+            width: 25,
             render: (dataIndex, record) => {
                 if (record.AssociatedPatch?.length < 2) {
                     if (record.patch_patient_map !== null) {
@@ -1166,12 +1234,12 @@ function PatchInventory() {
                 <div style={{ margin: "30px 2%", width: "100%" }}>
                     {extraDiv === true ? <div className="blur-div"></div> : null}
                     <Table
-                        style={{ backgroundColor: "blue" }}
+                        style={{ backgroundColor: "white" }}
                         columns={columns}
                         size="middle"
                         onChange={onChange}
                         pagination={{ position: ["bottomRight"] }}
-                        scroll={extraDiv === true ? { y: "hidden" } : { y: "calc(100vh - 258px)" }}
+                        scroll={extraDiv === true ? { y: "hidden" } : { y: "calc(100vh - 237px)" }}
                         rowClassName={setRowClassName}
                         // expandable={{
                         //     expandedRowRender: (record) => bundleModel(record),

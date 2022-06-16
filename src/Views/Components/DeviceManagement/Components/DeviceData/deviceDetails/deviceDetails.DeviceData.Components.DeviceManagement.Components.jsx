@@ -299,7 +299,7 @@ function DeviceDetails({ serial, pid, uuid, duration, deviceType, onDetach, valD
                 <div style={{ margin: '4em 0px' }}>
                     <Row className='device-info-box'>
                         <Col className='device-info' span={12}>
-                            <p><span>Current Status :</span> {data[data.length - 1]?.value === -1 ? "Inactive" : "Active"}</p>
+                            <p><span>Current Status :</span> Active</p>
                         </Col>
                         {!!data[data.length - 1]?.time && (
                             <Col className='device-info' span={12}>
