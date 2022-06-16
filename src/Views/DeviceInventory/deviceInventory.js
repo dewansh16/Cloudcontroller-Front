@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Table,
     Button,
@@ -11,7 +11,8 @@ import {
     Menu,
     message,
     Popconfirm,
-    Checkbox
+    Checkbox,
+    Spin
 } from "antd";
 import { withRouter } from "react-router-dom";
 import "./device.css";
@@ -45,6 +46,7 @@ import { UserStore } from "../../Stores/userStore";
 
 import iconDelete from "../../Assets/Images/iconDelete.png";
 import notification from 'antd/lib/notification'
+import { InfluxDB } from "@influxdata/influxdb-client";
 
 import {
     SearchOutlined,
@@ -59,7 +61,7 @@ function PatchInventory() {
     // const { url } = useRouteMatch();
 
     const [value, setValue] = useState(null);
-
+    const [loading, setLoading] = useState(false);
     const [currentPageVal, setCurrentPageVal] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [valSearch, setValSearch] = useState("");
@@ -76,6 +78,8 @@ function PatchInventory() {
     const [filteredlist, setFilteredList] = useState([]);
 
     const [arrayChecked, setArrayChecked] = useState([]);
+
+    const timerFetchData = useRef();
 
     const modifyData = (fetchedData) => {
         const modifiedData = fetchedData.map((device, index) => {
@@ -106,11 +110,25 @@ function PatchInventory() {
         })
         .filter((device) => device !== null);
 
-        setFilteredList(modifiedData);
-        return modifiedData;
+        modifiedData.map(device => {
+            if (device.patch_type === "gateway") {
+                const patient_data = device?.patch_patient_map?.patient_data?.[0] || {};
+                processDataForSensor(patient_data?.pid, "gateway_keep_alive_time", device, modifiedData)
+            }
+        })
     };
 
+    useEffect(() => {
+        if (loading) {
+            timerFetchData.current = setTimeout(() => {
+                setLoading(false);
+            }, 2000);
+        }
+    }, [loading])
+
     function fetchPatchList() {
+        clearTimeout(timerFetchData.current);
+        setLoading(true);
         const { tenant } = UserStore.getUser();
 
         const dataBody = {
@@ -124,17 +142,84 @@ function PatchInventory() {
             .getPatchList(dataBody)
             .then((res) => {
                 const data = res.data?.response?.patches;
-                // setPatchlist(data);
+                data.map(device => {
+                    if (device.patch_type === "gateway") {
+                        const patient_data = device?.patch_patient_map?.patient_data?.[0] || {};
+                        processDataForSensor(patient_data?.pid, "gateway_keep_alive_time", device)
+                    }
+                })
+
                 modifyData(data);
                 setTotalPages(Math.ceil(res.data?.response?.patchTotalCount / 10));
             })
             .catch((err) => {
                 console.log(err);
+                setLoading(false);
             });
     }
 
+    const processDataForSensor = (pid, key, device, newArr, time) => {
+        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
+        const org = 'live247';
+
+        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
+        const queryApi = client.getQueryApi(org);
+
+        let start = "-336h";
+        if (key !== "gateway_keep_alive_time") {
+            start = new Date(time).toISOString();
+        }
+
+        const query = `from(bucket: "emr_dev")
+                |> range(start: ${start})
+                |> filter(fn: (r) => r["_measurement"] == "${pid}_${key}")
+                |> yield(name: "mean")`;
+
+        // let lastTime = null;
+        let value = null;
+
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                if (key === "gateway_keep_alive_time") {
+                    value = dataQueryInFlux?._time;
+                    // lastTime = dataQueryInFlux?._time;
+                }
+               
+                if (key === "gateway_battery") {
+                    value = dataQueryInFlux?._value;
+                }
+
+                if (key === "gateway_version") {
+                    value = dataQueryInFlux?._value;
+                }
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+                device[key] = value;
+
+                if (key === "gateway_keep_alive_time") {
+                    processDataForSensor(pid, "gateway_version", device, newArr, device.gateway_keep_alive_time);
+                    setTimeout(() => {
+                        processDataForSensor(pid, "gateway_battery", device, newArr, device.gateway_keep_alive_time);
+                    }, 250);
+                }
+
+                if (key !== "gateway_battery") {
+                    setFilteredList(newArr);
+                }
+            },
+        })
+    }
+
     useEffect(() => {
-        return fetchPatchList();
+        fetchPatchList();
+        return () => {
+            clearTimeout(timerFetchData.current);
+        };
     }, [updateList, currentPageVal, valSearch]);
 
     const success = () => {
@@ -148,7 +233,6 @@ function PatchInventory() {
 
     const updateActive = (data) => {
         setIsUploading(true);
-        console.log(data, value);
         const sendData = [
             {
                 patch_type: data.patch_type,
@@ -162,8 +246,6 @@ function PatchInventory() {
         deviceApi
             .editPatch(sendData, data.patch_uuid)
             .then((res) => {
-                console.log(res.data?.response);
-
                 if (data.AssociatedPatch.length > 1) {
                     data.AssociatedPatch.map((item, index) => {
                         const sendData = [
@@ -175,11 +257,9 @@ function PatchInventory() {
                                 tenant_id: item.tenant_id,
                             },
                         ];
-                        console.log(sendData);
                         deviceApi
                             .editPatch(sendData, item.patch_uuid)
                             .then((res) => {
-                                console.log(res.data?.response);
                                 if (index === data.AssociatedPatch.length - 1) {
                                     setIsUploading(false);
                                     openPopover("closePopOver");
@@ -552,18 +632,20 @@ function PatchInventory() {
                 return (
                     <span>
                         <span style={{ fontSize: "16px", fontWeight: "500" }}>{!!patient_data?.fname ? patientName : "No Patient"}</span>
-                        <span style={{
-                            width: "100%",
-                            textAlign: "center",
-                            display: "grid"
-                        }}>
-                            <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
-                                MR:
-                            </span>
-                            <span style={{ fontWeight: "500", marginLeft: "2px" }}>
-                                Med record
-                            </span>
-                        </span> 
+                        {!!patient_data?.med_record && (
+                            <span style={{
+                                width: "100%",
+                                textAlign: "center",
+                                display: "grid"
+                            }}>
+                                <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                                    MR:
+                                </span>
+                                <span style={{ fontWeight: "500", marginLeft: "2px" }}>
+                                    {patient_data?.med_record || ""}
+                                </span>
+                            </span> 
+                        )}
                     </span>
                 )
             }
@@ -571,60 +653,68 @@ function PatchInventory() {
 
         {
             title: "Gateway Status",
-            dataIndex: "patch_mac",
-            key: "lastSeen",
+            dataIndex: "gateway_status",
+            key: "gateway_status",
             ellipsis: true,
             width: 85,
-            render: (dataIndex) => {
-                return (
-                    <div>
-                        <div style={{
-                            width: "100%",
-                            textAlign: "center",
-                            fontSize: "16px",
-                        }}>
-                            <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
-                                Battery: 
-                            </span>
-                            <span style={{ color: "#06A400", fontWeight: "500", marginLeft: "2px" }}>
-                                Active
-                            </span>
-                        </div>
+            render: (dataIndex, record) => {
+                if (record?.patch_type === "gateway") {
+                    return (
+                        <div>
+                            {!!record?.gateway_battery && (
+                                <div style={{
+                                    width: "100%",
+                                    textAlign: "center",
+                                    fontSize: "16px",
+                                }}>
+                                    <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                                        Battery: 
+                                    </span>
+                                    <span style={{ fontWeight: "500", marginLeft: "2px" }}>
+                                        {record?.gateway_battery}%
+                                    </span>
+                                </div>
+                            )}
 
-                        <div style={{
-                            width: "100%",
-                            textAlign: "center",
-                            fontSize: "16px",
-                        }}>
-                            <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
-                            Last received: 
-                            </span>
-                            <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
-                                {moment(new Date()).format("MMM DD YYYY")}  
-                            </span>
+                            {!!record?.gateway_version && (
+                                <div style={{
+                                    width: "100%",
+                                    textAlign: "center",
+                                }}>
+                                    <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                                        Version: 
+                                    </span>
+                                    <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
+                                        {record?.gateway_version}
+                                    </span>
+                                </div>
+                            )}
+    
+                            {!!record?.gateway_keep_alive_time && (
+                                <div style={{
+                                    width: "100%",
+                                    textAlign: "center",
+                                    fontSize: "16px",
+                                    display: "grid"
+                                }}>
+                                    <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                                        Last received: 
+                                    </span>
+                                    <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
+                                        {moment(record?.gateway_keep_alive_time).format("MMM DD hh:mm:ss a")} 
+                                    </span>
+                                </div>
+                            )}
                         </div>
-
-                        <div style={{
-                            width: "100%",
-                            textAlign: "center",
-                        }}>
-                            <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
-                            Version: 
-                            </span>
-                            <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
-                                1.1.1.1
-                            </span>
-                        </div>
-
-                    </div>
-                )
+                    )
+                }
             }
         },
 
         {
             title: "Device Status",
             dataIndex: "patch_status",
-            key: "patchStatus",
+            key: "patch_status",
             ellipsis: true,
             align: "center",
             width: 75,
@@ -772,7 +862,7 @@ function PatchInventory() {
         {
             title: "Sensors",
             dataIndex: "patch_type",
-            key: "sensors",
+            key: "patch_type",
             ellipsis: true,
             width: 75,
             render: (dataIndex, record) => (
@@ -1226,30 +1316,36 @@ function PatchInventory() {
                 }
             />
 
-            <Row
-                className="table-body devie-inventory-table"
-                justify="start"
-                style={{ padding: "0", backgroundColor: "white", margin: "4px" }}
-            >
-                <div style={{ margin: "30px 2%", width: "100%" }}>
-                    {extraDiv === true ? <div className="blur-div"></div> : null}
-                    <Table
-                        style={{ backgroundColor: "white" }}
-                        columns={columns}
-                        size="middle"
-                        onChange={onChange}
-                        pagination={{ position: ["bottomRight"] }}
-                        scroll={extraDiv === true ? { y: "hidden" } : { y: "calc(100vh - 237px)" }}
-                        rowClassName={setRowClassName}
-                        // expandable={{
-                        //     expandedRowRender: (record) => bundleModel(record),
-                        //     expandIcon: (props) => customExpandIcon(props)
-                        // }}
-                        dataSource={filteredlist}
-                        onRow={onClickRow}
-                    />
+            {loading ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "80vh" }}>
+                    <Spin />
                 </div>
-            </Row>
+            ) : (
+                <Row
+                    className="table-body devie-inventory-table"
+                    justify="start"
+                    style={{ padding: "0", backgroundColor: "white", margin: "4px" }}
+                >
+                    <div style={{ margin: "30px 2%", width: "100%" }}>
+                        {extraDiv === true ? <div className="blur-div"></div> : null}
+                        <Table
+                            style={{ backgroundColor: "white" }}
+                            columns={columns}
+                            size="middle"
+                            onChange={onChange}
+                            pagination={{ position: ["bottomRight"] }}
+                            scroll={extraDiv === true ? { y: "hidden" } : { y: "calc(100vh - 237px)" }}
+                            rowClassName={setRowClassName}
+                            // expandable={{
+                            //     expandedRowRender: (record) => bundleModel(record),
+                            //     expandIcon: (props) => customExpandIcon(props)
+                            // }}
+                            dataSource={filteredlist}
+                            onRow={onClickRow}
+                        />
+                    </div>
+                </Row>
+            )}
 
             <Modal
                 visible={visible}
