@@ -11,6 +11,9 @@ const PatientDemographics = (props) => {
     const [dischargeDate, setDischargeDate] = useState(
         props.patientData.discharge_date ? props.patientData.discharge_date : null
     );
+    const [patientType, setPatientType] = useState(
+        props.patientData.patient_type ? props.patientData.patient_type : "remote"
+    )
     const StoreDemographics = (fieldValues) => {
         //FIXME:remove hardfix deceased date
         // console.log(props.patientData);
@@ -91,12 +94,14 @@ const PatientDemographics = (props) => {
                     setDischargeDate,
                     errorFirstName,
                     errorLastName,
-                    onInputChange
+                    onInputChange,
+                    setPatientType,
+                    patientType
                 ).map((item) => {
-                    if (item.name === "admission_date") {
+                    if (item.name === "patient_type") {
                         // console.log("admisiion wala kaam krra");
                         return (
-                            <Col key={item.name} span={12}>
+                            <Col key={item.name} span={24}>
                                 <Form.Item
                                     required={item.required}
                                     hasFeedback={item.hasFeedback}

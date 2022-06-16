@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { DatePicker } from "antd";
+import React from "react";
+import { DatePicker, Radio  } from "antd";
 import { Input } from "../../Theme/Components/Input/input";
 // import { Select, SelectOption } from "../../Theme/Components/Select/select";
 import moment from "moment";
@@ -84,13 +84,30 @@ const demographicsFormItems = (
     setDischargeDate,
     errorFirstName,
     errorLastName,
-    onInputChange
+    onInputChange,
+    setPatientType,
+    patientType
 ) => [
         {
             required: props.required,
-            label: "Admission Date",
+            label: "Patient Type",
+            name: "patient_type",
+            rules: [{ required: props.required, message: "Patient type is required!" }],
+            className: "addPatientDetailsModal",
+            Input: (
+                <Radio.Group onChange={(val) => setPatientType(val)} defaultValue={patientType}>
+                    <Radio value="remote">Remote</Radio>
+                    <Radio value="hospital" style={{ marginLeft: "2rem" }}>Hospital</Radio>
+                </Radio.Group>
+            ),
+        },
+        {
+            required: props.required,
+            label: `${patientType === "remote" ? "Start" : "Admission"} Date`,
             name: "admission_date",
-            rules: [{ required: !props.required, message: "email is required!" }],
+            rules: [
+                { required: props.required, message: `${patientType === "remote" ? "Start" : "Admission"} Date is required!` },
+            ],
             className: "addPatientDetailsModal",
             Input: (
                 <DatePicker
@@ -106,10 +123,10 @@ const demographicsFormItems = (
         },
         {
             required: !props.required,
-            label: "Discharge Date",
+            label: `${patientType === "remote" ? "End" : "Discharge"} Date`,
             name: "discharge_date",
             rules: [
-                { required: !props.required, message: "discharge Date is required!" },
+                { required: !props.required, message: `${patientType === "remote" ? "End" : "Discharge"} Date is required!` },
             ],
             className: "addPatientDetailsModal",
             Input: (
