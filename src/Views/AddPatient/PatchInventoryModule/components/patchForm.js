@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Col,
     Row,
@@ -7,6 +7,7 @@ import {
     Select,
     DatePicker,
     Popconfirm,
+    Input
 } from "antd";
 import { Button } from "../../../../Theme/Components/Button/button";
 import Summary from "../../summary/summary";
@@ -22,9 +23,12 @@ const { RangePicker } = DatePicker;
 
 const PatchForm = (props) => {
     const [patchList, setPatchList] = useState([]);
-    const [patchFetched, setPatchFetched] = useState(false);
+    const [deviceSelected, setDeviceSelected] = useState(null);
     const [isSelectDisabled, setSelectDisabled] = useState(false);
-    const [valueBpType, setValueBpType] = useState('alphamed')
+    const [valueBpType, setValueBpType] = useState('alphamed');
+    const [isNewDevice, setIsNewDevice] = useState(false);
+    const [valSearch, setValSearch] = useState("");
+    const refValSearch = useRef();
 
     const [summary, setSummary] = React.useState({
         isVisible: false,
@@ -44,10 +48,14 @@ const PatchForm = (props) => {
         let type = props.type;
         if (props.type === 'bps') {
             type = valueBpType;
-        } 
+        }
 
         props.form.setFieldsValue({ [`${type}_patch_serial`]: null });
         props.form.setFieldsValue({ [`${type}_duration`]: null });
+        refValSearch.current = "";
+        setDeviceSelected(null);
+        setValSearch("");
+        setIsNewDevice(false);
     }
 
     const disAllocatePatch = (patchData) => {
@@ -62,7 +70,7 @@ const PatchForm = (props) => {
             patchData[`${props.type}_duration`] = null;
             patchData.tenant_id = tenantId;
             patchData.pid = "0";
-            
+
             let payload = [];
             payload.push(patchData);
 
@@ -112,6 +120,17 @@ const PatchForm = (props) => {
                 .catch((err) => {
                     console.log(err);
                 });
+        };
+
+
+        if (isNewDevice) {
+            refValSearch.current = "";
+            const newArr = [...patchList];
+            newArr.splice(0, 1);
+            setPatchList(newArr);
+            setDeviceSelected(null);
+            setValSearch("");
+            setIsNewDevice(false);
         }
     };
 
@@ -130,7 +149,7 @@ const PatchForm = (props) => {
         let type = props.type;
         if (props.type === 'bps') {
             type = valueBpType;
-        } 
+        }
 
         switch (values[0].name[0]) {
             //FIXME: use delimiter as ampersand
@@ -186,6 +205,29 @@ const PatchForm = (props) => {
                 }
                 break;
             }
+
+            case `${type}_mac_address`: {
+                let payload = props.patchData;
+
+                if (values[0].value != null) {
+                    payload[type] = {
+                        ...payload[type],
+                        mac_address: values[0].value,
+                        isNewDevice: true
+                    };
+
+                    props.savePatchDetails(payload);
+                } else {
+                    payload[type] = {
+                        ...payload[type],
+                        mac_address: null,
+                        isNewDevice: true
+                    };
+
+                    props.savePatchDetails(payload);
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -226,7 +268,42 @@ const PatchForm = (props) => {
         "ihealth": "iHealth",
     }[type]);
 
-    console.log("patchList", patchList);
+    const handleAddNewSeriaNumber = () => {
+        if (!refValSearch.current) return;
+
+        let type = props.type;
+        if (props.type === 'bps') {
+            type = valueBpType;
+        }
+
+        const data = {
+            patch_serial: refValSearch.current,
+            patch_type: type
+        }
+        const newList = [data, ...patchList];
+
+        setPatchList([...newList]);
+
+        let payload = props.patchData;
+        payload[type] = {
+            [`${type}_patch_serial`]: data.patch_serial,
+            type_device: type,
+            isNewDevice: true
+        };
+
+        props.savePatchDetails(payload);
+        props.form.setFieldsValue({
+            [`${props.type}_patch_serial`]: data.patch_serial,
+        });
+        setIsNewDevice(true);
+        setDeviceSelected(data.patch_serial);
+    };
+
+    useEffect(() => {
+        if (!!valSearch) {
+            refValSearch.current = valSearch;
+        }
+    }, [valSearch]);
 
     return summary.isVisible ? (
         <Summary status={summary.status} title={summary.title}>
@@ -269,20 +346,9 @@ const PatchForm = (props) => {
                                     initialValue={valueBpType}
                                 >
                                     <Select
-                                        disabled={isSelectDisabled}
                                         showSearch
                                         placeholder="Search to Select"
                                         optionFilterProp="children"
-                                        // onFocus={() => {
-                                        //     if (!patchFetched) {
-                                        //         fetchPatchesData(props.type);
-                                        //         setPatchFetched(true);
-                                        //     }
-                                        // }}
-                                        // onSearch={(value) => {
-                                        //     fetchPatchesData(props.type, value);
-                                        // }}
-                                        // filterOption={true}
                                     >
                                         <Option value="alphamed">
                                             Alphamed
@@ -295,53 +361,71 @@ const PatchForm = (props) => {
                             </Col>
                         )}
 
-                        <Col span={18}>
-                            <Form.Item
-                                required={props.required}
-                                label="Serial Number"
-                                name={`${props.type === 'bps' ? valueBpType : props.type}_patch_serial`}
-                                rules={[
-                                    {
-                                        required: props.required,
-                                        message: "serial number is required",
-                                    },
-                                ]}
-                                className="addPatientDetailsModal"
-                            >
-                                <Select
-                                    disabled={isSelectDisabled}
-                                    showSearch
-                                    placeholder="Search to Select"
-                                    optionFilterProp="children"
-                                    // onFocus={() => {
-                                    //     if (!patchFetched) {
-                                    //         fetchPatchesData(props.type);
-                                    //         setPatchFetched(true);
-                                    //     }
-                                    // }}
-                                    // onSearch={(value) => {
-                                    //     fetchPatchesData(props.type === "bps" ? valueBpType : props.type, value);
-                                    // }}
-                                    filterOption={true}
+                        <Col span={18} style={{ position: "relative" }}>
+                                <Form.Item
+                                    required={props.required}
+                                    label="Serial Number"
+                                    name={`${props.type === 'bps' ? valueBpType : props.type}_patch_serial`}
+                                    rules={[
+                                        {
+                                            required: props.required,
+                                            message: "serial number is required",
+                                        },
+                                    ]}
+                                    className="addPatientDetailsModal"
                                 >
-                                    {patchList?.length > 0 ? (
-                                        <>
-                                            {patchList?.map((item) => {
-                                                return (
-                                                    <Option key={item.id} value={item.patch_serial}>
-                                                        {item.patch_serial}
-                                                    </Option>
-                                                );
-                                            })}
-                                        </>
-                                    ) : (
-                                        <Option key='new_device' value="new_device">
-                                            Add New Device
-                                        </Option>
-                                    )}
-                                </Select>
-                            </Form.Item>
+                                    <Select
+                                        disabled={isNewDevice}
+                                        showSearch
+                                        placeholder="Search to Select"
+                                        optionFilterProp="children"
+                                        filterOption={true}
+                                        className="select-sensor-associate"
+                                        onChange={(val) => setDeviceSelected(val)}
+                                        onSearch={(val) => setValSearch(val)}
+                                    >
+                                        {patchList?.map((item) => {
+                                            return (
+                                                <Option key={item.patch_serial} value={item.patch_serial}>
+                                                    {item.patch_serial}
+                                                </Option>
+                                            );
+                                        })}
+                                    </Select>
+                                </Form.Item>
+                                {(deviceSelected === null) && (
+                                    <div
+                                        style={{
+                                            position: "absolute", top: "50%", right: "8px", transform: "translateY(-50%)", color: "#ff7529", cursor: "pointer",
+                                            fontSize: "12px", padding: "1px 4px", borderRadius: "4px", border: "1px solid #ff7529", background: "#fff", marginTop: "3px"
+                                        }}
+                                        onClick={() => {
+                                            handleAddNewSeriaNumber();
+                                        }}
+                                    >
+                                        Add
+                                    </div>
+                                )}
                         </Col>
+                        {isNewDevice && (
+                            <Col span={18}>
+                                <Form.Item
+                                    required={props.required}
+                                    label="MAC address"
+                                    name={`${props.type === 'bps' ? valueBpType : props.type}_mac_address`}
+                                    rules={[
+                                        {
+                                            required: props.required,
+                                            message: "mac address is required",
+                                        },
+                                    ]}
+                                    className="addPatientDetailsModal"
+                                >
+                                    <Input />
+                                </Form.Item>
+                            </Col>
+                        )}
+
                         <Col
                             span={6}
                             style={{

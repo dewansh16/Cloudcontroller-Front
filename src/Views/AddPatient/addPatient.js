@@ -175,6 +175,8 @@ function AddPatient() {
         ],
     });
 
+    const { tenant } = UserStore.getUser();
+
     const savePatientDetails = (values) => {
         setPatientData({ ...patientData, ...values });
     };
@@ -414,7 +416,6 @@ function AddPatient() {
 
     const deboardPatches = () => {
         setDeboardButtonLoading(true);
-        const { tenant } = UserStore.getUser();
 
         const data = {
             list: [ { pid } ],
@@ -755,10 +756,10 @@ function AddPatient() {
     const addPatch = () => {
         setButtonLoading(true);
 
-        let userData = UserStore.getUser();
-        let tenantId = userData.tenant;
-      
+        let tenantId = tenant;
         let payload = [];
+        let dataNewDevice = null;
+        
         if (
             bundleData.ecg !== null ||
             bundleData.spo2 !== null ||
@@ -799,39 +800,13 @@ function AddPatient() {
         } else {
             Object.keys(patchData).forEach(patch => {
                 if (patchData?.[patch] !== null) {
+                    if (patchData[patch].isNewDevice) {
+                        dataNewDevice = patchData[patch];
+                    }
                     patchData[patch].config = {};
                     payload.push(patchData[patch]);
                 }
             })
-
-            // if (patchData.ecg !== null) {
-            //     patchData.ecg.config = {};
-            //     payload.push(patchData.ecg);
-            // }
-            // if (patchData.spo2 !== null) {
-            //     patchData.spo2.config = {};
-            //     payload.push(patchData.spo2);
-            // }
-            // if (patchData.temperature !== null) {
-            //     patchData.temperature.config = {};
-            //     payload.push(patchData.temperature);
-            // }
-            // if (patchData.gateway !== null) {
-            //     patchData.gateway.config = {};
-            //     payload.push(patchData.gateway);
-            // }
-            // if (patchData.alphamed !== null) {
-            //     patchData.alphamed.config = {};
-            //     payload.push(patchData.alphamed);
-            // }
-            // if (patchData.ihealth !== null) {
-            //     patchData.ihealth.config = {};
-            //     payload.push(patchData.ihealth);
-            // }
-            // if (patchData.digital !== null) {
-            //     patchData.digital.config = {};
-            //     payload.push(patchData.digital);
-            // }
         }
 
         const dataBody = {
@@ -841,6 +816,42 @@ function AddPatient() {
             list: payload
         }
 
+        if (!!dataNewDevice) {
+            const dataNew = {
+                data: [
+                    {
+                        patch_type: dataNewDevice.type_device,
+                        patch_status: "Active",
+                        patch_serial: dataNewDevice[`${dataNewDevice.type_device}_patch_serial`],
+                        tenant_id: tenantId,
+                        patch_mac: dataNewDevice.mac_address,
+                    },
+                ],
+                tenantId: tenantId,
+                actionType: "device"
+            }
+
+            deviceApi
+                .addDevice(dataNew)
+                .then((res) => {
+                    const patch_uuid = res?.data?.response?.data?.patch_uuid || "";
+                    dataBody.list[0].patch_uuid = patch_uuid;
+                    handleAssociateDevice(dataBody);
+                })
+                .catch((err) => {
+                    setButtonLoading(false);
+                    setSummary({
+                        isVisible: true,
+                        status: "error",
+                        title: `Couldn't associate Sensor`,
+                    });
+                });
+        } else {
+            handleAssociateDevice(dataBody);
+        }
+    };
+
+    const handleAssociateDevice = (dataBody) => {
         patientApi
             .associatePatchToPatient(patientId, dataBody)
             .then((res) => {
@@ -864,8 +875,6 @@ function AddPatient() {
                     title: `Couldn't associate Sensor`,
                 });
             });
-
-        // patientApi.associatePatchToPatient()
     };
 
     React.useEffect(() => { }, [isPatchTabDisabled]);
@@ -906,8 +915,14 @@ function AddPatient() {
     const disabledBtnSaveSensor = useMemo(() => {
         let disabled = true;
         Object.keys(patchData).forEach(patch => {
-            if (!!patchData?.[patch]?.patch_uuid && !!patchData?.[patch]?.duration) {
-                disabled = false;
+            if (!!patchData?.[patch]?.[`${patch}_patch_serial`] && !!patchData?.[patch]?.duration) {
+                if (patchData?.[patch]?.isNewDevice) {
+                    if (!!patchData?.[patch]?.mac_address) {
+                        disabled = false;
+                    } 
+                } else {
+                    disabled = false;
+                }
             }
         })
         return disabled;

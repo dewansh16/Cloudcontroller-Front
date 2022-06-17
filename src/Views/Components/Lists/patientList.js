@@ -215,7 +215,9 @@ const PatientListItem = (props) => {
     const disabledBloodPressure = !associatedList?.includes("alphamed") && !associatedList?.includes("ihealth");
 
     const getDataSensorFromInfluxDB = () => {
-        const newArrChart = [...arrDataChart];
+        let newArrChart = [...arrDataChart];
+        newArrChart = newArrChart.filter(chart => !props.sensorHide.includes(chart?._key));
+        
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];
             const key = chart?._key;
@@ -465,6 +467,8 @@ const PatientListItem = (props) => {
     const ChartSection = ({ width, hideDateGateway = false }) => (
         <Row justify="space-around" gutter={2} style={{ width: width }}>
             {chartBlockData.map((item, i) => {
+                if (props.sensorHide.includes(item?._key)) return null;
+
                 if (hideDateGateway && item?._key !== "gateway_keep_alive_time") {
                     return (
                         <div
