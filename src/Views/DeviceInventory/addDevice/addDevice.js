@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Icons from "../../../Utils/iconMap";
 import {
     Input,
@@ -22,18 +22,30 @@ import spo2Img from "../../../Assets/Images/spo2img.png";
 
 import deviceApi from "../../../Apis/deviceApis";
 import { Button } from "../../../Theme/Components/Button/button";
+import { UserStore } from "../../../Stores/userStore";
 
 const { Option } = Select;
 
 const PatchForm = (props) => {
     const [deviceImg, setDeviceimg] = useState({
-        patchImage: tempImg,
-        patchHead: "Temp Sensor",
+        patchImage: gatewayImg,
+        patchHead: "Gateway Sensor",
         width: "100%",
-        style: { marginLeft: "1em" },
+        style: { marginLeft: "-2.5em", marginTop: "-2.5rem" },
     });
 
     const [isBpSensor, setIsBpSensor] = useState(false);
+    const [gatewayList, setGatewayList] = useState([]);
+
+    useEffect(() => {
+        const user = UserStore.getUser();
+        deviceApi
+            .getPatchesData("gateway", -1, "", user.tenant)
+            .then((res) => {
+                setGatewayList(res.data?.response?.patches);
+            })
+            .catch((err) => {});
+    }, []);
 
     const handleimg = (value) => {
         switch (value) {
@@ -174,7 +186,7 @@ const PatchForm = (props) => {
             <Row span={24} justify="space-around">
                 <Col span={12} style={{ paddingRight: "2em" }}>
                     <Form.Item
-                        required={!props.required}
+                        required={props.required}
                         label="Device type"
                         name="patchType"
                         rules={[
@@ -184,24 +196,51 @@ const PatchForm = (props) => {
                             },
                         ]}
                         className="addPatchFormItem"
-                        initialValue="temperature"
+                        initialValue="gateway"
                     >
                         <Select
                             showSearch
                             placeholder="Search to Select"
                             optionFilterProp="children"
                             filterOption={true}
-                            // defaultValue="temperature"
                             onChange={handleimg}
                         >
-                            <Option value="temperature">Temperature Sensor</Option>
                             <Option value="gateway">Gateway Sensor (EV-04)</Option>
+                            <Option value="temperature">Temperature Sensor</Option>
                             <Option value="spo2">SpO2 (CheckMe)</Option>
                             <Option value="ecg">ECG Sensor</Option>
                             <Option value="digital">Digital Scale</Option>
                             <Option value="bps">BP Sensor</Option>
                         </Select>
                     </Form.Item>
+
+                    {deviceImg.patchHead !== "Gateway Sensor" && (
+                        <Form.Item
+                            required={props.required}
+                            label="Gateway"
+                            name="gateway"
+                            rules={[
+                                {
+                                    required: props.required,
+                                    message: "Gateway is required",
+                                },
+                            ]}
+                            className="addPatchFormItem"
+                        >
+                            <Select
+                                showSearch
+                                placeholder="Search to Select"
+                                optionFilterProp="children"
+                                filterOption={true}
+                            >
+                                {gatewayList.map(item => {
+                                    return (
+                                        <Option key={item.patch_serial} value={item.patch_serial}>{item.patch_serial}</Option>
+                                    )
+                                })}
+                            </Select>
+                        </Form.Item>
+                    )}
 
                     {isBpSensor && (
                         <Form.Item
@@ -232,7 +271,7 @@ const PatchForm = (props) => {
                     )}
                     
                     <Form.Item
-                        required={!props.required}
+                        required={props.required}
                         label="Serial Number"
                         name="serialNumber"
                         rules={[
@@ -246,7 +285,7 @@ const PatchForm = (props) => {
                         <Input placeholder="Enter Serial Number" maxLength={30} />
                     </Form.Item>
                     <Form.Item
-                        required={!props.required}
+                        required={props.required}
                         label="MAC address"
                         name="macAddress"
                         rules={[

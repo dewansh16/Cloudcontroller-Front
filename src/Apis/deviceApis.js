@@ -4,9 +4,8 @@ const deviceApi = {
     getPatchesData: (deviceType, inuse, patchSerial, tenantId) =>
         axiosInstance.request({
             method: "GET",
-            url: `/patch/patchinventory?devicetype=${deviceType}&limit=10&offset=0&inuse=${inuse}&patch_serial=${
-                patchSerial || ""
-            }&tenantId=${tenantId}`,
+            url: `/patch/patchinventory?devicetype=${deviceType}&limit=10&offset=0&inuse=${inuse}
+            &patch_serial=${patchSerial || ""}&tenantId=${tenantId}`,
             // withCredentials: true,
         }),
     addPatchBundle: (data) =>
