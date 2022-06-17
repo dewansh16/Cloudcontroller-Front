@@ -10,6 +10,8 @@ import patientApi from '../../../Apis/patientApis'
 import { EmrView } from '../EMR'
 import { useHistory } from 'react-router-dom'
 import moment from 'moment'
+import { UserStore } from "../../../Stores/userStore";
+
 
 function FetchMedicalHistory(pid, limit) {
     const [response, setResponse] = useState(null)
@@ -18,12 +20,10 @@ function FetchMedicalHistory(pid, limit) {
 
     useEffect(() => {
         patientApi.getPatientMedicalHistory(pid, limit).then((res) => {
-            console.log(res.data.response)
-            res.data.response['medical_history_list'].map((medicalhistory, idx) => {
+            res.data.response['data'].map((medicalhistory, idx) => {
                 dataSource.push({
                     key: idx,
-                    ...medicalhistory,
-                    data: { ...medicalhistory }
+                    ...medicalhistory
                 })
             })
             setDataSource([...dataSource])
@@ -44,6 +44,20 @@ function FetchMedicalHistory(pid, limit) {
 }
 
 function AddMedicalHistory(pid, data, successCallBack) {
+    // "date_of_treatment": "2022-06-21T09:01:15.000Z",
+    // "doctor_name": "Doctor Name",
+    // "documents": "Your Note",
+    // "hospital_name": "Hospital Name",
+    // "note": "Your Note",
+    // "treatment": "Treatment",
+    // "pid": "patiente9c617e0-4242-4828-ba08-66e8d4aa9009",
+    // "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385
+    let userData = UserStore.getUser();
+    let tenantId = userData.tenant;
+    console.log(data)
+    data.date_of_treatment = data.date_of_treatment.toISOString();
+    data.pid = pid;
+    data.tenant_id = tenantId;
     patientApi.createPatientMedicalHistory(pid, data).then((res) => {
         notification.success({
             message: "Success",
@@ -85,7 +99,7 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
     const onFinish = (values) => {
         let formData = {
             // "medical_history_uuid": "medicalhistory-XXXX",
-            // "date_of_treatement": "2021-09-06T00:00:00.000Z",
+            // "date_of_treatment": "2021-09-06T00:00:00.000Z",
             // "treatment": "1",
             // "hospital_name": "MB Hospital",
             // "doctor_name": "Dr. Ansh",
@@ -134,7 +148,7 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
                     <Form.Item
                         required={false}
                         label="Date of treatement"
-                        name="date_of_treatement"
+                        name="date_of_treatment"
                         rules={[{
                             required: reqd,
                             message: "required"
@@ -251,8 +265,8 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
         },
         {
             title: "Documents",
-            dataIndex: "other_document",
-            key: "other_document"
+            dataIndex: "documents",
+            key: "documents"
         },
         {
             title: "",
