@@ -215,8 +215,7 @@ const PatientListItem = (props) => {
     const disabledBloodPressure = !associatedList?.includes("alphamed") && !associatedList?.includes("ihealth");
 
     const getDataSensorFromInfluxDB = () => {
-        let newArrChart = [...arrDataChart];
-        newArrChart = newArrChart.filter(chart => !props.sensorHide.includes(chart?._key));
+        const newArrChart = [...arrDataChart];
         
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];

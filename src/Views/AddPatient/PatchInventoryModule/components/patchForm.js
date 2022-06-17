@@ -88,19 +88,25 @@ const PatchForm = (props) => {
     const removePatch = () => {
         let userData = UserStore.getUser();
         let tenantId = userData.tenant;
+
+        let type = props.type;
+        if (props.type === 'bps') {
+            type = valueBpType;
+        }
+
         props.form.setFieldsValue({
-            [`${props.type}_duration`]: null,
-            [`${props.type}_patch_serial`]: null,
+            [`${type}_duration`]: null,
+            [`${type}_patch_serial`]: null,
         });
         props.resetDataSelect('patch');
-        const patchData = props.patchData[props.type];
+        const patchData = props.patchData[type];
         if (
             patchData !== null &&
-            patchData[`${props.type}_patch_serial`] !== undefined &&
-            patchData[`${props.type}_patch_serial`] !== null
+            patchData[`${type}_patch_serial`] !== undefined &&
+            patchData[`${type}_patch_serial`] !== null
         ) {
             patchData.duration = null;
-            patchData[`${props.type}_duration`] = null;
+            patchData[`${type}_duration`] = null;
             patchData.tenant_id = tenantId;
             patchData.pid = "0";
             patchData.config = {};
@@ -110,11 +116,11 @@ const PatchForm = (props) => {
                 .EditOneAssociatedPatchToPatient(props.pid, payload)
                 .then((res) => {
                     let updateNull = props.patchData;
-                    updateNull[props.type] = null;
+                    updateNull[type] = null;
                     props.savePatchDetails(payload);
                     props.form.setFieldsValue({
-                        [`${props.type}_duration`]: null,
-                        [`${props.type}_patch_serial`]: null,
+                        [`${type}_duration`]: null,
+                        [`${type}_patch_serial`]: null,
                     });
                 })
                 .catch((err) => {
@@ -293,11 +299,13 @@ const PatchForm = (props) => {
 
         props.savePatchDetails(payload);
         props.form.setFieldsValue({
-            [`${props.type}_patch_serial`]: data.patch_serial,
+            [`${type}_patch_serial`]: data.patch_serial,
         });
         setIsNewDevice(true);
         setDeviceSelected(data.patch_serial);
     };
+
+    console.log("props.patchData", props.patchData);
 
     useEffect(() => {
         if (!!valSearch) {
@@ -349,6 +357,14 @@ const PatchForm = (props) => {
                                         showSearch
                                         placeholder="Search to Select"
                                         optionFilterProp="children"
+                                        disabled={isNewDevice}
+                                        className="select-sensor-associate"
+                                        onChange={() => {
+                                            refValSearch.current = "";
+                                            setDeviceSelected(null);
+                                            setValSearch("");
+                                            setIsNewDevice(false);
+                                        }}
                                     >
                                         <Option value="alphamed">
                                             Alphamed

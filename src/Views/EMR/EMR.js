@@ -18,7 +18,7 @@ import Reports from './Reports/Reports'
 
 export function createName(title, firstName, middleName, lastName) {
     const name = `${title} ${firstName ? firstName + " " : ""}${middleName ? middleName + " " : ""}${lastName ? lastName : ""}`
-    return name.slice(0, 9)
+    return name;
 }
 
 function ContactAdmin() {
