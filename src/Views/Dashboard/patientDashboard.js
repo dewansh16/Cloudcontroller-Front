@@ -605,7 +605,6 @@ export default function PatientDashboard(props) {
                                 <Select
                                     style={{ minWidth: "13rem", height: '32px' }}
                                     placeholder="Show full sensor"
-                                    allowClear={true}
                                     maxTagCount={2}
                                     onSelect={(val) =>{
                                         setLoading(true);
@@ -617,10 +616,7 @@ export default function PatientDashboard(props) {
                                         const newArr = sensorHide.filter(item => item !== val);
                                         setSensorHide([...newArr]);
                                     }}
-                                    onClear={() => {
-                                        setLoading(true);
-                                        setSensorHide([]);
-                                    }}
+                                   
                                     defaultValue={sensorHide}
                                     optionLabelProp="label"
                                     mode="multiple"
