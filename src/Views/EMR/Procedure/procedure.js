@@ -9,6 +9,7 @@ import { modes } from './mode'
 import patientApi from '../../../Apis/patientApis'
 import { useHistory } from 'react-router-dom'
 import moment from 'moment'
+import { UserStore } from "../../../Stores/userStore";
 
 function FetchProcedure(pid, limit) {
     const [response, setResponse] = useState(null)
@@ -16,33 +17,45 @@ function FetchProcedure(pid, limit) {
     const [dataSource, setDataSource] = useState([])
 
     useEffect(() => {
-        // patientApi.getPatientProcedure(pid, limit).then((res) => {
-        //     console.log(res.data.response)
-        //     res.data.response['procedure_list'].map((procedure, idx) => {
-        //         dataSource.push({
-        //             key: idx,
-        //             ...procedure,
-        //             data: { ...procedure }
-        //         })
-        //     })
-        //     setDataSource([...dataSource])
-        //     setResponse(res.data.response)
-        //     setLoading(false);
-        // }).catch((err) => {
-        //     console.log(err)
-        //     if (err) {
-        //         notification.error({
-        //             message: 'Error',
-        //             description: `${err.response?.data.result}` || ""
-        //         })
-        //         setLoading(false);
-        //     }
-        // })
+        patientApi.getPatientProcedure(pid, limit).then((res) => {
+            res.data.response['procedure_list'].map((procedure, idx) => {
+                dataSource.push({
+                    key: idx,
+                    ...procedure
+                })
+            })
+            setDataSource([...dataSource])
+            setResponse(res.data.response)
+            setLoading(false);
+        }).catch((err) => {
+            console.log(err)
+            if (err) {
+                notification.error({
+                    message: 'Error',
+                    description: `${err.response?.data.result}` || ""
+                })
+                setLoading(false);
+            }
+        })
     }, [pid])
     return [response, loading, dataSource]
 }
 
 function AddProcedure(pid, data, successCallBack) {
+    // "pid": "patientc10c064c-fd5a-4ddc-85ca-1744d6104229",
+    // "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+    // "code_type": "code_type02",
+    // "description": "description",
+    // "diagnosis_date": "2022-06-17T07:54:05.014Z",
+    // "result": "result",
+    // "consulting_person": "consulting_person",
+    // "reaction": "Reaction123",
+    // "status": "completed02",
+    // "label": "normal"
+    let userData = UserStore.getUser();
+    let tenantId = userData.tenant;
+    data.pid = pid;
+    data.tenant_id = tenantId;
     patientApi.createPatientProcedure(pid, data).then((res) => {
         notification.success({
             message: "Success",
@@ -263,15 +276,14 @@ export default function Procedure({ pid, setComponentSupportContent, setPadding,
             key: "description"
         },
         {
-            title: "Label",
-            dataIndex: "label",
-            key: "label"
+            title: "Status",
+            dataIndex: "status",
+            key: "status"
         },
         {
-            title: "Other documents",
-            dataIndex: "other_document",
-            key: "other_document",
-            render: data => <p>Docs</p>
+            title: "Labels",
+            dataIndex: "label",
+            key: "label"
         },
         {
             title: "",

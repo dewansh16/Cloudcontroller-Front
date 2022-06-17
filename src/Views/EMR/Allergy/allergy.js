@@ -8,22 +8,25 @@ import Icons from '../../../Utils/iconMap'
 import { modes } from './mode'
 import patientApi from '../../../Apis/patientApis'
 import { EmrView } from '../EMR'
-import { useHistory } from 'react-router-dom'
+import { useHistory, useLocation } from 'react-router-dom'
 import moment from 'moment'
+import { UserStore } from "../../../Stores/userStore";
 
+let status = 'active';
+let allergyEdit = null;
 function FetchAllergy(pid, limit) {
     const [response, setResponse] = useState(null)
     const [loading, setLoading] = useState(true)
     const [dataSource, setDataSource] = useState([])
+    
 
     useEffect(() => {
         patientApi.getPatientAllergy(pid, limit).then((res) => {
             console.log(res.data.response)
-            res.data.response['allergy_list'].map((allergy, idx) => {
+            res.data.response['data'].map((allergy, idx) => {
                 dataSource.push({
                     key: idx,
-                    ...allergy,
-                    data: { ...allergy }
+                    ...allergy
                 })
             })
             setDataSource([...dataSource])
@@ -44,6 +47,22 @@ function FetchAllergy(pid, limit) {
 }
 
 function AddMedicalHistory(pid, data, successCallBack) {
+    // "pid": "patiente9c617e0-4242-4828-ba08-66e8d4aa9009",
+    // "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
+    // "allergy_name": "Allergy Name",
+    // "allergy_type": "Allergy Type",
+    // "date_from": "2022-06-15T07:49:06.582Z",
+    // "date_to": "2022-06-14T07:49:05.299Z",
+    // "note": "Your Note",
+    // "reaction": "Reaction",
+    // "status": "active"
+    let userData = UserStore.getUser();
+    let tenantId = userData.tenant;
+    data.pid = pid;
+    data.tenant_id = tenantId;
+    data.date_from = data.date_from?.toISOString();
+    data.date_to = data.date_to?.toISOString();
+    data.status = status;
     patientApi.createPatientAllergy(pid, data).then((res) => {
         notification.success({
             message: "Success",
@@ -62,14 +81,20 @@ function AddMedicalHistory(pid, data, successCallBack) {
 }
 
 function UpdateAllergy(pid, data, successCallBack) {
+    console.log(data);
+    data.allergy_uuid = allergyEdit;
+    data.date_from = data.date_from.toISOString();
+    data.date_to = data.date_to.toISOString();
     patientApi.updatePatientAllergy(pid, data).then((res) => {
         notification.success({
             message: "Success",
             description: res.message
         })
+        allergyEdit = null;
         successCallBack()
     }).catch((err) => {
         console.log(err)
+        allergyEdit = null;
         if (err) {
             notification.error({
                 message: 'Error',
@@ -144,7 +169,7 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
                         <DatePicker />
                     </Form.Item>
                 </Col>
-                <Col style={{}} span={reqd ? 8 : 12}>
+                <Col style={{}} span={8}>
                     <Form.Item
                         required={false}
                         label="To"
@@ -157,7 +182,7 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
                         <DatePicker />
                     </Form.Item>
                 </Col>
-                {mode === modes.ADD_NEW && <Col style={{}} span={reqd ? 8 : 12}>
+                 <Col style={{}} span={8}>
                     <Form.Item
                         required={false}
                         label="Status"
@@ -171,12 +196,15 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
                             // onChange={(e) => { setNameType(e) }}
                             defaultValue={"active"}
                             bordered={false}
+                            onChange={(value) => {
+                                status = value;
+                              }} 
                             suffixIcon={Icons.downArrowFilled({ style: { color: "#121215" } })}>
                             <Option value="active"><span style={{ color: "#08D000" }}>Active</span></Option>
                             <Option value="inactive"><span style={{ color: "#EB1348" }}>Inactive</span></Option>
                         </Select>
                     </Form.Item>
-                </Col>}
+                </Col>
                 <Col style={{}} span={24}>
                     <Form.Item
                         required={false}
@@ -236,6 +264,7 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
 
 export default function MedicalHistory({ pid, setComponentSupportContent, setPadding, setEmrView }) {
     let history = useHistory();
+    let location = useLocation();
     const [allergy, isLoading, dataSource] = FetchAllergy(pid, 20)
     const [allergyForm] = Form.useForm()
     const [visible, setVisible] = useState(false);
@@ -266,26 +295,8 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
         },
         {
             title: "Status",
-            key: "status",
-            render: data => {
-                console.log(data)
-                return < Select
-                    // onChange={(e) => { setNameType(e) }}
-                    defaultValue={data.status}
-                    bordered={false}
-                    suffixIcon={Icons.downArrowFilled({ style: { color: "#121215" } })}
-                    onSelect={(string, option) => {
-                        console.log(data.allergy_uuid, string, option)
-                        UpdateAllergy(pid, {
-                            allergy_uuid: data.allergy_uuid,
-                            status: string,
-                        }, () => { })
-                    }}
-                >
-                    <Option value="active"><span style={{ color: "#08D000" }}>Active</span></Option>
-                    <Option value="inactive"><span style={{ color: "#EB1348" }}>Inactive</span></Option>
-                </ Select>
-            }
+            dataIndex: "status",
+            key: "status"
         },
         {
             title: "Report",
@@ -299,7 +310,7 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
                 onClick: () => {
                     showDrawer();
                     setFormMode(modes.EDIT);
-                    // console.log(data);
+                    allergyEdit = data.allergy_uuid;
                     data['date_from'] = moment(data['date_from'])
                     data['date_to'] = moment(data['date_to'])
                     allergyForm.setFieldsValue({ ...data });
