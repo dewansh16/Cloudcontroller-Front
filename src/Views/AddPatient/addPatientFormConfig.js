@@ -95,7 +95,7 @@ const demographicsFormItems = (
             rules: [{ required: props.required, message: "Patient type is required!" }],
             className: "addPatientDetailsModal",
             Input: (
-                <Radio.Group onChange={(val) => setPatientType(val)} defaultValue={patientType}>
+                <Radio.Group onChange={(event) => setPatientType(event?.target?.value)} defaultValue={patientType}>
                     <Radio value="remote">Remote</Radio>
                     <Radio value="hospital" style={{ marginLeft: "2rem" }}>Hospital</Radio>
                 </Radio.Group>

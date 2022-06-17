@@ -3,25 +3,30 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import { SearchOutlined } from "@ant-design/icons";
 import Hotkeys from "react-hot-keys";
-
-import Icons from "../../Utils/iconMap";
-import PatientParticular from "../PatientDetailsCom/patient";
-import { PatientListItem } from "../Components/Lists/patientList";
-import { PaginationBox, computeTotalPages } from "../Components/PaginationBox/pagination";
 import {
-  Row, Col, List, notification,
-  Dropdown, Modal, Form, Grid,
-  Input as Inputs, Select,
-} from "antd";
-import { Button } from "../../Theme/Components/Button/button";
+    Row, Col, List, notification,
+    Dropdown, Modal, Form, Grid,
+    Input as Inputs, Select,
+  } from "antd";
+
 import WardSelector from "./components/wardSelector";
-import { Input } from "../../Theme/Components/Input/input";
 import FilterMenu from "./components/filterMenu";
+
+import { Button } from "../../Theme/Components/Button/button";
+import { Input } from "../../Theme/Components/Input/input";
 import Navbar from "../../Theme/Components/Navbar/navbar";
-// import { primaryButtonStyle, primaryButtonWithNoOutlineStyle, primaryButtonShadowedStyle } from '../../Theme/styles';
+
 import NotesSection from "../PatientDetails/components/notesSection";
 import TrendTimeSelector from "../PatientIcu/components/trendTimeSelector";
+import PatientParticular from "../PatientDetailsCom/patient";
+import { PatientListItem } from "../Components/Lists/patientList";
+
+import { PaginationBox, computeTotalPages } from "../Components/PaginationBox/pagination";
+// import { primaryButtonStyle, primaryButtonWithNoOutlineStyle, primaryButtonShadowedStyle } from '../../Theme/styles';
+
 import getAge from "../../Utils/getAge";
+import Colors from "../../Theme/Colors/colors";
+import Icons from "../../Utils/iconMap";
 
 import patientApi from "../../Apis/patientApis";
 import { UserStore } from "../../Stores/userStore";
@@ -151,6 +156,7 @@ export default function PatientDashboard(props) {
         isLoading: true,
         list: [],
     });
+    const [loading, setLoading] = useState(false);
 
     const dataFilterHeader = props?.location?.state?.dataFilterHeader || null;
 
@@ -167,6 +173,7 @@ export default function PatientDashboard(props) {
     const [wardDetails, setWardDetails] = useState({ text: null, value: null });
     const [patientType, setSelectedPatient] = useState("remote");
     // const [showModal, setShowModal] = useState(false);
+    const [sensorHide, setSensorHide] = useState(dataFilterHeader?.sensorHide || []);
 
     //animation config
     const patientDetailsAnimationConfig = {
@@ -299,7 +306,7 @@ export default function PatientDashboard(props) {
     // }
 
     function fetchPatientList() {
-        setPatient({ isLoading: true });
+        setLoading(true);
 
         const data = {
             tenantId,
@@ -316,8 +323,7 @@ export default function PatientDashboard(props) {
                 );
 
                 let data = res.data.response.patients;
-                setPatient({ isLoading: false, list: data });
-                // filterBasedonPatientType(data);
+                setPatient({ list: data });
                 setPatientList(data);
 
                 if (props.location.state?.dataFilterHeader) {
@@ -325,7 +331,7 @@ export default function PatientDashboard(props) {
                 }
             })
             .catch((err) => {
-                setPatient({ isLoading: false });
+                setLoading(false);
                 notification.error({
                     message: "Failure in fetching patients",
                 });
@@ -375,17 +381,67 @@ export default function PatientDashboard(props) {
             valuePageLength,
             valSearch,
             valDuration,
+            sensorHide
         };
-    }, [currentPageVal, valuePageLength, valSearch, valDuration]);
+    }, [currentPageVal, valuePageLength, valSearch, valDuration, sensorHide]);
 
     const onSelectValDuration = (val) => {
         setValDuration(val);
-        setPatient({ isLoading: true });
-
-        setTimeout(() => {
-            setPatient({ isLoading: false });
-        }, 3000);
+        setLoading(true);
     };
+
+    useEffect(() => {
+        let timerLoading = null;
+        if (loading) {
+            timerLoading = setTimeout(() => {
+                setLoading(false);
+            }, 2500);
+        }
+        return () => {
+            clearTimeout(timerLoading);
+        }
+    }, [loading]);
+
+    const arrayFilterColumnSensor = [
+        {
+            _key: 'temp',
+            name: "Temperature",
+            icon: Icons.thermometerIcon({ Style: { width: "40px", transform: "scale(0.8)", color: Colors.purple } }),
+            color: Colors.purple,
+        },
+        {
+            _key: 'spo2',
+            name: "SPO2",
+            icon: Icons.o2({ Style: { width: "40px", transform: "scale(0.9)", color: Colors.green } }),
+            color: Colors.green,
+        },
+        {
+            _key: 'ecg_hr',
+            name: "Heart Rate",
+            icon: Icons.ecgIcon({ Style: { width: "40px", transform: "scale(0.85)", color: Colors.darkPink } }),
+            color: Colors.darkPink,
+        },
+        {
+            _key: 'ecg_rr',
+            name: "Respiration Rate",
+            icon: Icons.lungsIcon({ Style: { width: "40px", transform: "scale(0.8)", color: Colors.orange } }),
+            color: Colors.orange,
+        },
+        {
+            _key: "blood_pressuer",
+            name: "Blood Pressure",
+            icon: Icons.bloodPressure({ Style: { width: "40px", transform: "scale(0.65)", color: Colors.darkPurple } }),
+            color: Colors.darkPurple,
+        },
+        {
+            _key: 'weight',
+            name: "Weight",
+            icon: Icons.bpIcon({
+                Style: { width: "40px", color: Colors.yellow, fontSize: "22px" },
+            }),
+            color: Colors.yellow,
+        },
+    ]
 
     return (
         <>
@@ -516,33 +572,77 @@ export default function PatientDashboard(props) {
             <Row style={{ display: "flex", flexDirection: "column" }}>
                 {!showNotes && (
                     <>
-                        <Col
-                            style={{
-                                width: "20em",
-                                margin: "10px 20px",
-                                display: "inline-flex",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <div style={{ display: "inline-flex", alignItems: "center" }}>
-                                <h3 style={{ width: "8rem", margin: "0" }}>Patient Type: </h3>
-                            </div>
-                            <Select
-                                defaultValue="remote"
-                                style={{ width: "100%" }}
-                                onSelect={showSelectedPatient}
+                        <Row>
+                            <Col
+                                style={{
+                                    margin: "10px 20px",
+                                    display: "inline-flex",
+                                }}
+                                span={5}
                             >
-                                {/* <Option value="incare">In Care</Option>
-                                <Option value="discharged">Discharged</Option>
-                                <Option value="deboarded">Deboarded</Option>
-                                <Option value="all">All Patients</Option> */}
-                                <Option value="remote">Remote</Option>
-                            </Select>
-                        </Col>
+                                <div style={{ display: "inline-flex", alignItems: "center" }}>
+                                    <h3 style={{ width: "8rem", margin: "0" }}>Patient Type: </h3>
+                                </div>
+                                <Select
+                                    defaultValue="remote"
+                                    style={{ width: "9rem", height: '32px' }}
+                                    onSelect={showSelectedPatient}
+                                >
+                                    <Option value="remote">Remote</Option>
+                                </Select>
+                            </Col>
+
+                            <Col
+                                style={{
+                                    margin: "10px 20px",
+                                    display: "inline-flex",
+                                }}
+                                span={9}
+                            >
+                                <div style={{ display: "inline-flex", alignItems: "center" }}>
+                                    <h3 style={{ width: "7.5rem", margin: "0" }}>Hide Sensor: </h3>
+                                </div>
+                                <Select
+                                    style={{ minWidth: "13rem", height: '32px' }}
+                                    placeholder="Show full sensor"
+                                    allowClear={true}
+                                    maxTagCount={2}
+                                    onSelect={(val) =>{
+                                        setLoading(true);
+                                        sensorHide.push(val);
+                                        setSensorHide([...sensorHide]);
+                                    }}
+                                    onDeselect={(val) => {
+                                        setLoading(true);
+                                        const newArr = sensorHide.filter(item => item !== val);
+                                        setSensorHide([...newArr]);
+                                    }}
+                                    onClear={() => {
+                                        setLoading(true);
+                                        setSensorHide([]);
+                                    }}
+                                    defaultValue={sensorHide}
+                                    optionLabelProp="label"
+                                    mode="multiple"
+                                    showArrow={true}
+                                >
+                                    {arrayFilterColumnSensor.map(item => {
+                                        return (
+                                            <Option key={item?._key} value={item?._key} label={item.name} style={{ height: "40px", display: "flex", alignItems: "center" }}>
+                                                <div style={{ display: "flex", alignItems: "center" }}>
+                                                    {item?.icon} 
+                                                    <span style={{ marginLeft: "4px" }}>{item.name}</span>
+                                                </div>
+                                            </Option>
+                                        )
+                                    })}
+                                </Select>
+                            </Col>
+                        </Row>
                         
-                        <Col flex="auto" style={{ margin: "10px 20px" }}>
+                        <Col flex="auto" style={{ margin: "10px 20px", overflow: "auto", height: "calc(100vh - 165px)" }}>
                             <List
-                                loading={patient.isLoading}
+                                loading={loading}
                                 dataSource={patientListToShow}
                                 renderItem={(item) => (
                                     //TODO:optimize the props -- unnecessary props
@@ -569,6 +669,7 @@ export default function PatientDashboard(props) {
                                         setActive={setActive}
                                         dataFilterOnHeader={dataFilterOnHeader}
                                         patientListToShow={patientListToShow}
+                                        sensorHide={sensorHide}
                                     />
                                 )}
                             ></List>
