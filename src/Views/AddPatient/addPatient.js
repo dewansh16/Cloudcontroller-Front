@@ -137,6 +137,12 @@ function AddPatient() {
         isloading: false,
         list: [
             {
+                class: "gateway",
+                error: false,
+                added: false,
+                Component: PatchForm,
+            },
+            {
                 class: "ecg",
                 error: false,
                 added: false,
@@ -144,12 +150,6 @@ function AddPatient() {
             },
             {
                 class: "spo2",
-                error: false,
-                added: false,
-                Component: PatchForm,
-            },
-            {
-                class: "gateway",
                 error: false,
                 added: false,
                 Component: PatchForm,
@@ -1098,6 +1098,7 @@ function AddPatient() {
                                     form={addPatchForm}
                                     pid={patientId}
                                     resetDataSelect={resetDataSelected}
+                                    patientData={patientData}
                                 />
                                 <div
                                     style={{

@@ -24,10 +24,10 @@ const { RangePicker } = DatePicker;
 const PatchForm = (props) => {
     const [patchList, setPatchList] = useState([]);
     const [deviceSelected, setDeviceSelected] = useState(null);
-    const [isSelectDisabled, setSelectDisabled] = useState(false);
-    const [valueBpType, setValueBpType] = useState('alphamed');
+    const [valueBpType, setValueBpType] = useState(props.associatedList?.includes('ihealth') ? "ihealth" : "alphamed");
     const [isNewDevice, setIsNewDevice] = useState(false);
     const [valSearch, setValSearch] = useState("");
+
     const refValSearch = useRef();
 
     const [summary, setSummary] = React.useState({
@@ -35,6 +35,17 @@ const PatchForm = (props) => {
         status: "success",
         title: `${props.type} is Added`,
     });
+
+    // useEffect(() => {
+    //     const { tenant = '' } = UserStore.getUser();
+
+    //     patientApi
+    //         .getPatientPatches(props?.pid, tenant)
+    //         .then((res) => {
+    //             setListDevice(res.data?.response?.patch_patient_map || []);
+    //         })
+    //         .catch((err) => {});
+    // }, [props?.pid]);
 
     useEffect(() => {
         if (props.type !== 'bps') {
@@ -305,13 +316,28 @@ const PatchForm = (props) => {
         setDeviceSelected(data.patch_serial);
     };
 
-    console.log("props.patchData", props.patchData);
-
     useEffect(() => {
         if (!!valSearch) {
             refValSearch.current = valSearch;
         }
     }, [valSearch]);
+
+    useEffect(() => {
+        let type = props.type;
+        if (props.type === 'bps') { type = valueBpType; }
+
+        const deviceFound = props.listDeviceAssociated.find(device => device?.["patches.patch_type"] === type);
+        if (!!deviceFound) {
+            const arrDuration = deviceFound.duration.split(',');
+            const firstDay = moment(arrDuration[0], 'YYYY-MM-DD');
+            const lastDate = moment(arrDuration[1], 'YYYY-MM-DD');
+
+            props.form.setFieldsValue({
+                [`${type}_patch_serial`]: deviceFound?.["patches.patch_serial"],
+                [`${type}_duration`]: [firstDay, lastDate]
+            });
+        }
+    }, [props.listDeviceAssociated, valueBpType]);
 
     return summary.isVisible ? (
         <Summary status={summary.status} title={summary.title}>
@@ -357,8 +383,8 @@ const PatchForm = (props) => {
                                         showSearch
                                         placeholder="Search to Select"
                                         optionFilterProp="children"
-                                        disabled={isNewDevice}
-                                        className="select-sensor-associate"
+                                        disabled={props.disabled || isNewDevice}
+                                        className={isNewDevice ? "select-sensor-associate" : ""}
                                         onChange={() => {
                                             refValSearch.current = "";
                                             setDeviceSelected(null);
@@ -378,50 +404,51 @@ const PatchForm = (props) => {
                         )}
 
                         <Col span={18} style={{ position: "relative" }}>
-                                <Form.Item
-                                    required={props.required}
-                                    label="Serial Number"
-                                    name={`${props.type === 'bps' ? valueBpType : props.type}_patch_serial`}
-                                    rules={[
-                                        {
-                                            required: props.required,
-                                            message: "serial number is required",
-                                        },
-                                    ]}
-                                    className="addPatientDetailsModal"
+                            <Form.Item
+                                required={props.required}
+                                label="Serial Number"
+                                name={`${props.type === 'bps' ? valueBpType : props.type}_patch_serial`}
+                                rules={[
+                                    {
+                                        required: props.required,
+                                        message: "serial number is required",
+                                    },
+                                ]}
+                                className="addPatientDetailsModal"
+                            >
+                                <Select
+                                    disabled={props.disabled || isNewDevice}
+                                    showSearch
+                                    placeholder="Search to Select"
+                                    optionFilterProp="children"
+                                    filterOption={true}
+                                    className={isNewDevice ? "select-sensor-associate" : ""}
+                                    onChange={(val) => setDeviceSelected(val)}
+                                    onSearch={(val) => setValSearch(val)}
                                 >
-                                    <Select
-                                        disabled={isNewDevice}
-                                        showSearch
-                                        placeholder="Search to Select"
-                                        optionFilterProp="children"
-                                        filterOption={true}
-                                        className="select-sensor-associate"
-                                        onChange={(val) => setDeviceSelected(val)}
-                                        onSearch={(val) => setValSearch(val)}
-                                    >
-                                        {patchList?.map((item) => {
-                                            return (
-                                                <Option key={item.patch_serial} value={item.patch_serial}>
-                                                    {item.patch_serial}
-                                                </Option>
-                                            );
-                                        })}
-                                    </Select>
-                                </Form.Item>
-                                {(deviceSelected === null) && (
-                                    <div
-                                        style={{
-                                            position: "absolute", top: "50%", right: "8px", transform: "translateY(-50%)", color: "#ff7529", cursor: "pointer",
-                                            fontSize: "12px", padding: "1px 4px", borderRadius: "4px", border: "1px solid #ff7529", background: "#fff", marginTop: "3px"
-                                        }}
-                                        onClick={() => {
-                                            handleAddNewSeriaNumber();
-                                        }}
-                                    >
-                                        Add
-                                    </div>
-                                )}
+                                    {patchList?.map((item) => {
+                                        return (
+                                            <Option key={item.patch_serial} value={item.patch_serial}>
+                                                {item.patch_serial}
+                                            </Option>
+                                        );
+                                    })}
+                                </Select>
+                            </Form.Item>
+
+                            {(deviceSelected === null && !props.disabled) && (
+                                <div
+                                    style={{
+                                        position: "absolute", top: "50%", right: "8px", transform: "translateY(-50%)", color: "#ff7529", cursor: "pointer",
+                                        fontSize: "12px", padding: "1px 4px", borderRadius: "4px", border: "1px solid #ff7529", background: "#fff", marginTop: "3px"
+                                    }}
+                                    onClick={() => {
+                                        handleAddNewSeriaNumber();
+                                    }}
+                                >
+                                    Add
+                                </div>
+                            )}
                         </Col>
                         {isNewDevice && (
                             <Col span={18}>
@@ -484,7 +511,8 @@ const PatchForm = (props) => {
                         className="addPatientDetailsModal"
                     >
                         <RangePicker
-                            disabled={isSelectDisabled}
+                            className="range-picker-device"
+                            disabled={props.disabled}
                             disabledDate={(current) => {
                                 return current < moment().subtract({ days: 1 });
                             }}

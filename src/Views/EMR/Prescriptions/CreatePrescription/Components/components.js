@@ -9,7 +9,6 @@ import productApi from '../../../../../Apis/productApis'
 import './components.css'
 import { message } from 'antd'
 
-
 function MedicineListItem({ medicine, medicineStore, setAddNew, setMedicineStore, nameType, newMed = false, idx, showAddMedicineToDatabaseModal, ...rest }) {
     const [form] = Form.useForm()
     const [addNewMedView, setAddNewMedView] = useState(newMed)
@@ -17,12 +16,13 @@ function MedicineListItem({ medicine, medicineStore, setAddNew, setMedicineStore
 
 
     function RenderForm_({ medicine }) {
-        const [medicineSearchList, setMedicineSearchList] = useState([])
+        const [medicineSearchList, setMedicineSearchList] = useState([]);
+
         useEffect(() => {
             form.setFieldsValue(medicine)
             return () => {
             }
-        }, [medicine, nameType, medicineSearchList])
+        }, [medicine, nameType, medicineSearchList]);
 
         const onFinish = (values) => {
             let formData = {
@@ -67,10 +67,7 @@ function MedicineListItem({ medicine, medicineStore, setAddNew, setMedicineStore
             // Message.error("Incomplete")
         }
 
-        const onValuesChange = (changedFields, allFields) => {
-        }
-
-
+        const onValuesChange = (changedFields, allFields) => {}
 
         const [source, setSource] = useState(new axios.CancelToken.source())
         const [searching, setSearching] = useState(false)
@@ -84,18 +81,18 @@ function MedicineListItem({ medicine, medicineStore, setAddNew, setMedicineStore
             //     setSource(new axios.CancelToken.source())
             // }
             // setSearching(true)
-            productApi.getMedicineList(genericName, productName, 100, 0, 0, source.token).then((res) => {
-                setMedicineSearchList(res.data?.response.products)
-                setSearching(false)
-            }).catch(function (thrown) {
-                if (axios.isCancel(thrown)) {
-                    console.log('Request canceled');
-                    setSearching(false)
-                } else {
-                    console.log(thrown.message)
-                    setSearching(false)
-                }
-            });
+            productApi.getMedicineList(genericName, productName, 100, 0, 0, source.token)
+                .then((res) => {
+                    setMedicineSearchList(res.data?.response.products);
+                    setSearching(false);
+                })
+                .catch(function (thrown) {
+                    if (axios.isCancel(thrown)) {
+                        setSearching(false)
+                    } else {
+                        setSearching(false);
+                    }
+                });
         }
 
         return (
@@ -149,7 +146,14 @@ function MedicineListItem({ medicine, medicineStore, setAddNew, setMedicineStore
                                         }}
                                         showArrow={false}
                                         notFoundContent={
-                                            <div>Search for medicine or <span style={{ cursor: "pointer" }} onClick={showAddMedicineToDatabaseModal} style={{ color: "red" }}>Add new medicine to database</span></div>
+                                            <div>Search for medicine or 
+                                                <span 
+                                                    style={{ cursor: "pointer", color: "red" }} 
+                                                    onClick={showAddMedicineToDatabaseModal}
+                                                >
+                                                    Add new medicine to database
+                                                </span>
+                                            </div>
                                         }
                                         placeholder="Drug Name"
                                     >

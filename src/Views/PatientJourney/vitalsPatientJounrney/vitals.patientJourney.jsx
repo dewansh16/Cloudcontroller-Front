@@ -59,6 +59,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             color2: '#A8CBDE',
             max: tempmaxval,
             min: tempminval,
+            orderKey: 0
         },
         {
             _key: "spo2",
@@ -68,6 +69,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             color2: '#FFD0B6',
             max: spo2maxval,
             min: spo2minval,
+            orderKey: 1
         },
         {
             _key: "ecg_hr",
@@ -77,6 +79,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             color2: '#FFEEBA',
             max: hrmaxval,
             min: hrminval,
+            orderKey: 2
         },
         {
             _key: "ecg_rr",
@@ -86,6 +89,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             color2: '#C4AAFD',
             max: rrmaxval,
             min: rrminval,
+            orderKey: 3
         },
         {
             _key: "bpd",
@@ -95,6 +99,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             color2: '#C4AAFD',
             max: bpdmaxval,
             min: bpdminval,
+            orderKey: 4
         },
         {
             _key: "bps",
@@ -104,6 +109,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             color2: '#C4AAFD',
             max: bpsmaxval,
             min: bpsminval,
+            orderKey: 5
         },
         {
             _key: "weight",
@@ -113,6 +119,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             color2: '#C4AAFD',
             max: weimaxval,
             min: weiminval,
+            orderKey: 6
         }
     ]);
 
@@ -448,7 +455,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     function findMinAndMax(array) {
         let max = maxBy(array, "value");
         let min = minBy(array, "value");
-        return { min: min.value, max: max.value };
+        return { min: min?.value || 0, max: max?.value || 0 };
     }
 
     const onGetDataSensorFromInfluxByKey = (keySensor, data, type, index) => {
@@ -491,11 +498,9 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
             complete() {
                 if (!!data) {
                     data.data = arrayRes;
-                    if (arrayRes?.length > 0) {
-                        const { min = 0, max = 0 } = findMinAndMax(arrayRes);
-                        data.max = max + 20;
-                        data.min = min - 20;
-                    }
+                    const { min = 0, max = 0 } = findMinAndMax(arrayRes);
+                    data.max = max > 0 ? max + 20 : 0;
+                    data.min = min > 0 ? min - 20 : 0;
                     newArrayData.push(data);
                     setActiveTrendsArray(newArrayData);
                 }
@@ -591,7 +596,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                 </>
                             )}
                         </div>
-                        <div>Time: {moment(time).format("MMM-DD-YYYY hh:mm:ss a")}</div>
+                        <div>Time: {moment(time).format("MMM DD YYYY hh:mm:ss a")}</div>
                     </div>
                 );
             }
@@ -628,6 +633,10 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                 cy={props.cy}
             />
         );
+    };
+
+    const formatArrayActives = (a, b) => {
+        return (a.orderKey > b.orderKey) - (a.orderKey < b.orderKey)
     };
 
     return (
@@ -675,6 +684,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                         color2: '#A8CBDE',
                                         max: tempmaxval,
                                         min: tempminval,
+                                        orderKey: 0
                                     }
                                     onGetDataSensorFromInfluxByKey("temp", temp);
                                 }
@@ -709,6 +719,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                     color2: '#FFD0B6',
                                     max: spo2maxval,
                                     min: spo2minval,
+                                    orderKey: 1
                                 }
                                 onGetDataSensorFromInfluxByKey("spo2", spo2);
                             }
@@ -744,6 +755,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                     color2: '#FFEEBA',
                                     max: hrmaxval,
                                     min: hrminval,
+                                    orderKey: 2
                                 }
                                 if (!associatedList?.includes("ecg")) {
                                     onGetDataSensorFromInfluxByKey("ihealth_hr", hr);
@@ -778,6 +790,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                     color2: '#C4AAFD',
                                     max: rrmaxval,
                                     min: rrminval,
+                                    orderKey: 3
                                 }
                                 onGetDataSensorFromInfluxByKey("ecg_rr", rr);
                             }
@@ -808,6 +821,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                     color2: '#C4AAFD',
                                     max: bpdmaxval,
                                     min: bpdminval,
+                                    orderKey: 4
                                 }
                                 if (associatedList?.includes("alphamed") || associatedList?.includes("ihealth")) {
                                     onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bpd" : "ihealth_bpd", bpd);
@@ -843,6 +857,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                     color2: '#C4AAFD',
                                     max: bpsmaxval,
                                     min: bpsminval,
+                                    orderKey: 5
                                 }
                                 if (associatedList?.includes("alphamed") || associatedList?.includes("ihealth")) {
                                     onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bps" : "ihealth_bps", bps);
@@ -878,6 +893,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                                     color2: '#C4AAFD',
                                     max: weimaxval,
                                     min: weiminval,
+                                    orderKey: 6
                                 }
                                 onGetDataSensorFromInfluxByKey("weight", weight);
                             }
@@ -911,7 +927,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                             ? (
                                 <div><Spin /></div>
                             ) : (
-                                activeTrendsArray.map((trend, idx) => {
+                                activeTrendsArray?.sort(formatArrayActives)?.map((trend, idx) => {
                                     // if ((trend?._key === "bpd" || trend?._key === "bps") && disabledBloodPressure) {
                                     //     return null
                                     // } else {

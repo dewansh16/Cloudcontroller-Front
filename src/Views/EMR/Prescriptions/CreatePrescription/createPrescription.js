@@ -322,7 +322,7 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                     </Row>
                 </Col>
                 <Col lg={6} md={12} style={{ padding: "12px", fontSize: "35px", color: "#000000", fontWeight: "400" }}>
-                    Create Prescription
+                    Create Prescription 2
                 </Col>
                 <Col lg={8} md={18} style={{
                     display: "flex",

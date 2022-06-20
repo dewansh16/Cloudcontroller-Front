@@ -466,7 +466,7 @@ const PatientListItem = (props) => {
     const ChartSection = ({ width, hideDateGateway = false }) => (
         <Row justify="space-around" gutter={2} style={{ width: width }}>
             {chartBlockData.map((item, i) => {
-                if (props.sensorHide.includes(item?._key)) return null;
+                if (!props.sensorShow.includes(item?._key) && item?._key !== "gateway_keep_alive_time") return null;
 
                 if (hideDateGateway && item?._key !== "gateway_keep_alive_time") {
                     return (

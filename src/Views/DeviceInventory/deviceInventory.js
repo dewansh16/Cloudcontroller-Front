@@ -18,7 +18,6 @@ import { withRouter } from "react-router-dom";
 import "./device.css";
 import PatchInventoryModal from "./addDevice/addDevice";
 import AddBundleModal from "./addBundle/addBundle";
-import AddGatewayModal from "./addGateway";
 
 import device1 from "../../Assets/Images/ecg.png";
 import device2 from "../../Assets/Images/temp1.png";
@@ -142,14 +141,11 @@ function PatchInventory() {
             .getPatchList(dataBody)
             .then((res) => {
                 const data = res.data?.response?.patches;
-                data.map(device => {
-                    if (device.patch_type === "gateway") {
-                        const patient_data = device?.patch_patient_map?.patient_data?.[0] || {};
-                        processDataForSensor(patient_data?.pid, "gateway_keep_alive_time", device)
-                    }
-                })
-
-                modifyData(data);
+                if (data?.length > 0) {
+                    modifyData(data);
+                } else {
+                    setFilteredList([])
+                }
                 setTotalPages(Math.ceil(res.data?.response?.patchTotalCount / 10));
             })
             .catch((err) => {
@@ -220,12 +216,12 @@ function PatchInventory() {
         return () => {
             clearTimeout(timerFetchData.current);
         };
-    }, [updateList, currentPageVal, valSearch]);
+    }, [currentPageVal, valSearch]);
 
     const success = () => {
         const key = "warning";
         message.success({
-            content: "status updated successfully",
+            content: "Status updated successfully",
             key,
             duration: 1,
         });
@@ -263,6 +259,7 @@ function PatchInventory() {
                                 if (index === data.AssociatedPatch.length - 1) {
                                     setIsUploading(false);
                                     openPopover("closePopOver");
+                                    fetchPatchList();
                                 }
                                 success();
                             })
@@ -275,6 +272,7 @@ function PatchInventory() {
                     setIsUploading(false);
                     openPopover("closePopOver");
                     success();
+                    fetchPatchList();
                 }
             })
             .catch((err) => {
@@ -653,8 +651,8 @@ function PatchInventory() {
 
         {
             title: "Gateway Status",
-            dataIndex: "gateway_status",
-            key: "gateway_status",
+            dataIndex: "gateway",
+            key: "gateway",
             ellipsis: true,
             width: 85,
             render: (dataIndex, record) => {
@@ -706,6 +704,12 @@ function PatchInventory() {
                                 </div>
                             )}
                         </div>
+                    )
+                } else if (!!dataIndex) {
+                    return (
+                        <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
+                            {dataIndex?.patch_serial}
+                        </span>
                     )
                 }
             }
@@ -1371,19 +1375,6 @@ function PatchInventory() {
                 destroyOnClose={true}
             >
                 <AddBundleModal onGetList={fetchPatchList} />
-            </Modal>
-
-            <Modal
-                visible={gateway}
-                title=""
-                onCancel={onCloseGateway}
-                maskClosable={false}
-                footer={null}
-                closable={true}
-                width="60%"
-                destroyOnClose={true}
-            >
-                <AddGatewayModal onGetList={fetchPatchList} />
             </Modal>
         </>
     );
