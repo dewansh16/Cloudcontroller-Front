@@ -359,9 +359,15 @@ const PatientListItem = (props) => {
             </div>
 
             <div style={{ width: "24px", margin: marginHouseIcon }}>
-                {Icons.houseIcon({
-                    Style: { fill: `${activeTheme}`, width: "24px", opacity: "0.75" },
-                })}
+                {props?.patientTypeIcon === "remote" ? (
+                    Icons.houseIcon({
+                        Style: { fill: `${activeTheme}`, width: "24px", opacity: "0.75" },
+                    })
+                ) : (
+                    Icons.patientInBedIcon({
+                        Style: { fill: `${activeTheme}`, width: "24px", opacity: "0.75" },
+                    })
+                )}
             </div>
 
             <div style={{
@@ -466,7 +472,7 @@ const PatientListItem = (props) => {
     const ChartSection = ({ width, hideDateGateway = false }) => (
         <Row justify="space-around" gutter={2} style={{ width: width }}>
             {chartBlockData.map((item, i) => {
-                if (props.sensorHide.includes(item?._key)) return null;
+                if (!props.sensorShow.includes(item?._key) && item?._key !== "gateway_keep_alive_time") return null;
 
                 if (hideDateGateway && item?._key !== "gateway_keep_alive_time") {
                     return (

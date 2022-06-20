@@ -214,7 +214,7 @@ const PatchForm = (props) => {
                         </Select>
                     </Form.Item>
 
-                    {deviceImg.patchHead !== "Gateway Sensor" && (
+                    {/* {deviceImg.patchHead !== "Gateway Sensor" && (
                         <Form.Item
                             required={props.required}
                             label="Gateway"
@@ -240,7 +240,7 @@ const PatchForm = (props) => {
                                 })}
                             </Select>
                         </Form.Item>
-                    )}
+                    )} */}
 
                     {isBpSensor && (
                         <Form.Item

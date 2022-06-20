@@ -173,7 +173,7 @@ export default function PatientDashboard(props) {
     const [wardDetails, setWardDetails] = useState({ text: null, value: null });
     const [patientType, setSelectedPatient] = useState("remote");
     // const [showModal, setShowModal] = useState(false);
-    const [sensorHide, setSensorHide] = useState(dataFilterHeader?.sensorHide || []);
+    const [sensorShow, setSensorShow] = useState(dataFilterHeader?.sensorShow || ["temp", "spo2", "ecg_hr", "ecg_rr", "blood_pressuer", "weight"]);
 
     //animation config
     const patientDetailsAnimationConfig = {
@@ -381,9 +381,9 @@ export default function PatientDashboard(props) {
             valuePageLength,
             valSearch,
             valDuration,
-            sensorHide
+            sensorShow
         };
-    }, [currentPageVal, valuePageLength, valSearch, valDuration, sensorHide]);
+    }, [currentPageVal, valuePageLength, valSearch, valDuration, sensorShow]);
 
     const onSelectValDuration = (val) => {
         setValDuration(val);
@@ -435,7 +435,7 @@ export default function PatientDashboard(props) {
         },
         {
             _key: 'weight',
-            name: "Weight",
+            name: "Digital",
             icon: Icons.bpIcon({
                 Style: { width: "40px", color: Colors.yellow, fontSize: "22px" },
             }),
@@ -572,16 +572,16 @@ export default function PatientDashboard(props) {
             <Row style={{ display: "flex", flexDirection: "column" }}>
                 {!showNotes && (
                     <>
-                        <Row>
+                        <Row style={{ height: "55px" }}>
                             <Col
                                 style={{
                                     margin: "10px 20px",
                                     display: "inline-flex",
                                 }}
-                                span={5}
+                                span={4}
                             >
                                 <div style={{ display: "inline-flex", alignItems: "center" }}>
-                                    <h3 style={{ width: "8rem", margin: "0" }}>Patient Type: </h3>
+                                    <h3 style={{ width: "7.5rem", margin: "0" }}>Patient Type: </h3>
                                 </div>
                                 <Select
                                     defaultValue="remote"
@@ -597,27 +597,33 @@ export default function PatientDashboard(props) {
                                     margin: "10px 20px",
                                     display: "inline-flex",
                                 }}
-                                span={9}
+                                span={18}
                             >
                                 <div style={{ display: "inline-flex", alignItems: "center" }}>
-                                    <h3 style={{ width: "7.5rem", margin: "0" }}>Hide Sensor: </h3>
+                                    <h3 style={{ width: "4.5rem", margin: "0" }}>Sensor: </h3>
                                 </div>
                                 <Select
                                     style={{ minWidth: "13rem", height: '32px' }}
                                     placeholder="Show full sensor"
-                                    maxTagCount={2}
+                                    // maxTagCount={6}
                                     onSelect={(val) =>{
                                         setLoading(true);
-                                        sensorHide.push(val);
-                                        setSensorHide([...sensorHide]);
+
+                                        let newArr = [...sensorShow];
+                                        if (newArr?.includes(val)) {
+                                            newArr = newArr?.filter(item => item !== val);
+                                        } else {
+                                            newArr.push(val);
+                                        }
+                                        setSensorShow([...newArr]);
                                     }}
                                     onDeselect={(val) => {
                                         setLoading(true);
-                                        const newArr = sensorHide.filter(item => item !== val);
-                                        setSensorHide([...newArr]);
+                                        const newArr = sensorShow.filter(item => item !== val);
+                                        setSensorShow([...newArr]);
                                     }}
                                    
-                                    defaultValue={sensorHide}
+                                    defaultValue={sensorShow}
                                     optionLabelProp="label"
                                     mode="multiple"
                                     showArrow={true}
@@ -665,7 +671,8 @@ export default function PatientDashboard(props) {
                                         setActive={setActive}
                                         dataFilterOnHeader={dataFilterOnHeader}
                                         patientListToShow={patientListToShow}
-                                        sensorHide={sensorHide}
+                                        sensorShow={sensorShow}
+                                        patientTypeIcon="remote"
                                     />
                                 )}
                             ></List>

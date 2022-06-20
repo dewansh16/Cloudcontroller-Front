@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { notification, Menu, Switch } from 'antd';
 
 import Icons from '../../../Utils/iconMap';
+import { isJsonString } from "../../../Utils/utils";
 import KitForm from './components/kitForm';
+import { UserStore } from "../../../Stores/userStore";
+import patientApi from "../../../Apis/patientApis";
 
 import './patchInventory.css';
 
 export default function PatchInventoryModal(props) {
-
     const layout = {
         labelCol: { sm: 24, md: 30 },
         wrapperCol: { sm: 24, md: 24 },
@@ -15,6 +17,7 @@ export default function PatchInventoryModal(props) {
     const required = true;
 
     const [menuState, setMenuState] = useState(props.patchClass.list[0].class);
+    const [listDeviceAssociated, setListDevice] = useState([]);
 
     const handleMenuState = ({ item, key }) => {
         setMenuState(key);
@@ -59,9 +62,49 @@ export default function PatchInventoryModal(props) {
         }
     }
 
-    React.useEffect(() => { }, [menuState, isIndividualPatchChecked])
-    React.useEffect(() => { }, [props.patchClass.list])
+    React.useEffect(() => { }, [menuState, isIndividualPatchChecked]);
+    React.useEffect(() => { }, [props.patchClass.list]);
 
+    const associatedList = useMemo(() => {
+        let list = [];
+        const isString = isJsonString(props.patientData?.associated_list);
+        if (isString) {
+            list = JSON.parse(props.patientData?.associated_list);
+        }
+        return list;
+
+    }, [props.patientData]);
+
+    useEffect(() => {
+        const { tenant = '' } = UserStore.getUser();
+
+        patientApi
+            .getPatientPatches(props?.patientData?.pid, tenant)
+            .then((res) => {
+                setListDevice(res.data?.response?.patch_patient_map || []);
+            })
+            .catch((err) => {});
+    }, [props?.patientData]);
+
+    const formatKeyCompare = (keySensor) => ({
+        "gateway": "gateway",
+        "ecg": "ecg",
+        "spo2": "spo2",
+        "temperature": "temperature",
+        "digital": "weight",
+    }[keySensor]);
+
+    const checkDisableLayout = (key) => {
+        const formatKey = formatKeyCompare(key);
+        if (key !== "bps") {
+            if (associatedList?.includes(formatKey)) return true;
+            return false;
+        } else {
+            if (associatedList?.includes("ihealth") || associatedList?.includes("alphamed")) return true;
+            return false;
+        }
+    };
+ 
     return (
         <div className="formWrapper">
             <div className="menu-container">
@@ -71,7 +114,11 @@ export default function PatchInventoryModal(props) {
                     mode="inline"
                 >
                     {isIndividualPatchChecked && props.patchClass.list.map(listItem =>
-                        <Menu.Item key={listItem.class} className='add-patient-menu-item'>
+                        <Menu.Item
+                            key={listItem.class} 
+                            className='add-patient-menu-item'
+                            // disabled={checkDisableLayout(listItem.class)}
+                        >
                             {properNameConfig(listItem.class)}
                         </Menu.Item>
                     )}
@@ -103,6 +150,12 @@ export default function PatchInventoryModal(props) {
                             form={props.form}
                             type={Item.class}
                             resetDataSelect={props.resetDataSelect}
+                            disabled={Item.class !== "gateway" 
+                                    ? (checkDisableLayout(Item.class) || !associatedList?.includes("gateway"))
+                                    : checkDisableLayout(Item.class)
+                                }
+                            listDeviceAssociated={listDeviceAssociated}
+                            associatedList={associatedList}
                         />
                     )}
                 </div> : <div className="scroll-container">

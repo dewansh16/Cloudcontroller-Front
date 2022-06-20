@@ -148,6 +148,7 @@ function GraphVisualizer() {
             color2: '#A8CBDE',
             max: tempmaxval,
             min: tempminval,
+            orderKey: 0
         },
         {
             _key: "spo2",
@@ -157,6 +158,7 @@ function GraphVisualizer() {
             color2: '#FFD0B6',
             max: spo2maxval,
             min: spo2minval,
+            orderKey: 1
         },
         {
             _key: "ecg_hr",
@@ -166,6 +168,7 @@ function GraphVisualizer() {
             color2: '#FFEEBA',
             max: hrmaxval,
             min: hrminval,
+            orderKey: 2
         },
         {
             _key: "ecg_rr",
@@ -175,6 +178,7 @@ function GraphVisualizer() {
             color2: '#C4AAFD',
             max: rrmaxval,
             min: rrminval,
+            orderKey: 3
         },
         {
             _key: "bpd",
@@ -184,6 +188,7 @@ function GraphVisualizer() {
             color2: '#C4AAFD',
             max: bpdmaxval,
             min: bpdminval,
+            orderKey: 4
         },
         {
             _key: "bps",
@@ -193,6 +198,7 @@ function GraphVisualizer() {
             color2: '#C4AAFD',
             max: bpsmaxval,
             min: bpsminval,
+            orderKey: 5
         },
         {
             _key: "weight",
@@ -202,6 +208,7 @@ function GraphVisualizer() {
             color2: '#C4AAFD',
             max: weimaxval,
             min: weiminval,
+            orderKey: 6
         }
     ]);
 
@@ -1906,7 +1913,7 @@ function GraphVisualizer() {
                                 </>
                             )}
                         </div>
-                        <div>Time: {moment(time).format("MMM-DD-YYYY hh:mm:ss a")}</div>
+                        <div>Time: {moment(time).format("MMM DD YYYY hh:mm:ss a")}</div>
                     </div>
 
                     // <div className="custom-tooltip">
@@ -1970,7 +1977,7 @@ function GraphVisualizer() {
     function findMinAndMax(array) {
         let max = maxBy(array, "value");
         let min = minBy(array, "value");
-        return { min: min.value, max: max.value };
+        return { min: min?.value || 0, max: max?.value || 0 };
     }
 
     const onGetDataSensorFromInfluxByKey = (keySensor, data, type, index) => {
@@ -2008,15 +2015,17 @@ function GraphVisualizer() {
             },
             complete() {
                 data.data = arrayRes;
-                if (arrayRes?.length > 0) {
-                    const { min = 0, max = 0 } = findMinAndMax(arrayRes);
-                    data.max = max + 20;
-                    data.min = min - 20;
-                }
+                const { min = 0, max = 0 } = findMinAndMax(arrayRes);
+                data.max = max > 0 ? max + 20 : 0;
+                data.min = min > 0 ? min - 20 : 0;
                 newArrayData.push(data);
                 setActiveTrendsArray(newArrayData);
             },
         })
+    };
+
+    const formatArrayActives = (a, b) => {
+        return (a.orderKey > b.orderKey) - (a.orderKey < b.orderKey)
     };
 
     return (
@@ -2348,6 +2357,7 @@ function GraphVisualizer() {
                                                         color2: '#A8CBDE',
                                                         max: tempmaxval,
                                                         min: tempminval,
+                                                        orderKey: 0
                                                     }
                                                     onGetDataSensorFromInfluxByKey("temp", temp);
                                                 }
@@ -2382,6 +2392,7 @@ function GraphVisualizer() {
                                                     color2: '#FFD0B6',
                                                     max: spo2maxval,
                                                     min: spo2minval,
+                                                    orderKey: 1
                                                 }
                                                 onGetDataSensorFromInfluxByKey("spo2", spo2);
                                             }
@@ -2417,6 +2428,7 @@ function GraphVisualizer() {
                                                     color2: '#FFEEBA',
                                                     max: hrmaxval,
                                                     min: hrminval,
+                                                    orderKey: 2
                                                 }
                                                 if (!associatedList?.includes("ecg")) {
                                                     onGetDataSensorFromInfluxByKey("ihealth_hr", hr);
@@ -2451,6 +2463,7 @@ function GraphVisualizer() {
                                                     color2: '#C4AAFD',
                                                     max: rrmaxval,
                                                     min: rrminval,
+                                                    orderKey: 3
                                                 }
                                                 onGetDataSensorFromInfluxByKey("ecg_rr", rr);
                                             }
@@ -2482,6 +2495,7 @@ function GraphVisualizer() {
                                                             color2: '#C4AAFD',
                                                             max: bpdmaxval,
                                                             min: bpdminval,
+                                                            orderKey: 4
                                                         }
                                                         
                                                         if (associatedList?.includes("alphamed") || associatedList?.includes("ihealth")) {
@@ -2518,6 +2532,7 @@ function GraphVisualizer() {
                                                             color2: '#C4AAFD',
                                                             max: bpsmaxval,
                                                             min: bpsminval,
+                                                            orderKey: 5
                                                         }
                                                         if (associatedList?.includes("alphamed") || associatedList?.includes("ihealth")) {
                                                             onGetDataSensorFromInfluxByKey(associatedList?.includes("alphamed") ? "alphamed_bps" : "ihealth_bps", bps);
@@ -2555,6 +2570,7 @@ function GraphVisualizer() {
                                                     color2: '#C4AAFD',
                                                     max: weimaxval,
                                                     min: weiminval,
+                                                    orderKey: 6
                                                 }
                                                 onGetDataSensorFromInfluxByKey("weight", weight);
                                             }
@@ -2563,38 +2579,6 @@ function GraphVisualizer() {
                                         } >
                                             WEI
                                         </div>
-
-
-
-                                        {/* <div onClick={() => {
-                                            var flag = true
-                                            activeTrendsArray.map((trend, index) => {
-                                                if (trend.name === 'EWS') {
-                                                    flag = false
-                                                    var temp = activeTrendsArray
-                                                    temp.splice(index, 1)
-                                                    // console.log("SPLICED ARRAY : ", temp)
-                                                    setActiveTrendsArray(temp)
-                                                }
-                                            })
-                                            if (flag) {
-                                                var temp = activeTrendsArray
-                                                temp.push({
-                                                    name: 'EWS',
-                                                    data: ews_data,
-                                                    color1: '#9e00c2',
-                                                    color2: '#C4AAFD',
-                                                    max: ewsmaxval,
-                                                    min: ewsminval,
-                                                })
-                                                setActiveTrendsArray(temp)
-                                            }
-                                            setGraphLoading(true)
-                                        }} className="trend-btn" style={
-                                            activeTrendsArray.some(e => e.name === 'EWS') ? { border: '2px solid #9e00c2', color: '#9e00c2' } : { border: '1px solid #BABABA', color: '#BABABA' }
-                                        } >
-                                            EWS
-                                        </div> */}
                                     </div>
                                     <div className="gv-date" >
                                         <DatePicker
@@ -2619,7 +2603,7 @@ function GraphVisualizer() {
                                             ? (
                                                 <div><Spin /></div>
                                             ) : (
-                                                activeTrendsArray.map((trend, idx) => {
+                                                activeTrendsArray?.sort(formatArrayActives)?.map((trend, idx) => {
                                                     // if ((trend?._key === "bpd" || trend?._key === "bps") && disabledBloodPressure) {
                                                     //     return null
                                                     // } else {
@@ -2839,7 +2823,7 @@ function GraphVisualizer() {
                                     </div>
                                 ) : (
                                     <div className='alert-container'>
-                                        {activeTrendsArray.map((trend, index) => {
+                                        {activeTrendsArray?.sort(formatArrayActives)?.map((trend, index) => {
                                             return (
                                                 <div key={`${trend?._key}_${index}_alert`} style={{ marginBottom: "0.5rem" }}>
                                                     <div style={{ textTransform: "uppercase", color: trend?.color1 }}>
