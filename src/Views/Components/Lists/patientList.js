@@ -359,9 +359,15 @@ const PatientListItem = (props) => {
             </div>
 
             <div style={{ width: "24px", margin: marginHouseIcon }}>
-                {Icons.houseIcon({
-                    Style: { fill: `${activeTheme}`, width: "24px", opacity: "0.75" },
-                })}
+                {props?.patientTypeIcon === "remote" ? (
+                    Icons.houseIcon({
+                        Style: { fill: `${activeTheme}`, width: "24px", opacity: "0.75" },
+                    })
+                ) : (
+                    Icons.patientInBedIcon({
+                        Style: { fill: `${activeTheme}`, width: "24px", opacity: "0.75" },
+                    })
+                )}
             </div>
 
             <div style={{

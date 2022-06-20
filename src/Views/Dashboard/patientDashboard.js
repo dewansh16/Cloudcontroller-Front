@@ -672,6 +672,7 @@ export default function PatientDashboard(props) {
                                         dataFilterOnHeader={dataFilterOnHeader}
                                         patientListToShow={patientListToShow}
                                         sensorShow={sensorShow}
+                                        patientTypeIcon="remote"
                                     />
                                 )}
                             ></List>
