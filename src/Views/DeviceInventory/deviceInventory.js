@@ -64,6 +64,7 @@ function PatchInventory() {
     const [currentPageVal, setCurrentPageVal] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [valSearch, setValSearch] = useState("");
+    const [valuePageLength, setValuePageLength] = useState(50);
 
     const [extraDiv, setExtraDiv] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -77,7 +78,7 @@ function PatchInventory() {
     const [filteredlist, setFilteredList] = useState([]);
 
     const [arrayChecked, setArrayChecked] = useState([]);
-
+    
     const timerFetchData = useRef();
 
     const modifyData = (fetchedData) => {
@@ -108,20 +109,16 @@ function PatchInventory() {
             } else return null;
         })
         .filter((device) => device !== null);
-
-        modifiedData.map(device => {
-            if (device.patch_type === "gateway") {
-                const patient_data = device?.patch_patient_map?.patient_data?.[0] || {};
-                processDataForSensor(patient_data?.pid, "gateway_keep_alive_time", device, modifiedData)
-            }
-        })
     };
 
     useEffect(() => {
         if (loading) {
             timerFetchData.current = setTimeout(() => {
                 setLoading(false);
-            }, 2000);
+            }, 3000);
+        }
+        return () => {
+            clearTimeout(timerFetchData.current);
         }
     }, [loading])
 
@@ -131,7 +128,7 @@ function PatchInventory() {
         const { tenant } = UserStore.getUser();
 
         const dataBody = {
-            limit: 10,
+            limit: valuePageLength,
             offset: currentPageVal,
             tenantId: tenant,
             search: valSearch
@@ -142,11 +139,18 @@ function PatchInventory() {
             .then((res) => {
                 const data = res.data?.response?.patches;
                 if (data?.length > 0) {
-                    modifyData(data);
+                    // modifyData(data);
+                    data.map(device => {
+                        if (device.patch_type === "gateway") {
+                            const patient_data = device?.patch_patient_map?.patient_data?.[0] || {};
+                            processDataForSensor(patient_data?.pid, "gateway_keep_alive_time", device, data)
+                        }
+                    })
                 } else {
                     setFilteredList([])
+                    setLoading(false);
                 }
-                setTotalPages(Math.ceil(res.data?.response?.patchTotalCount / 10));
+                setTotalPages(Math.ceil(res.data?.response?.patchTotalCount / valuePageLength));
             })
             .catch((err) => {
                 console.log(err);
@@ -178,8 +182,7 @@ function PatchInventory() {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 if (key === "gateway_keep_alive_time") {
-                    value = dataQueryInFlux?._time;
-                    // lastTime = dataQueryInFlux?._time;
+                    value = dataQueryInFlux?._value;
                 }
                
                 if (key === "gateway_battery") {
@@ -204,7 +207,7 @@ function PatchInventory() {
                     }, 250);
                 }
 
-                if (key !== "gateway_battery" && !!newArr) {
+                if (key === "gateway_battery" && !!newArr) {
                     setFilteredList(newArr);
                 }
             },
@@ -216,7 +219,7 @@ function PatchInventory() {
         return () => {
             clearTimeout(timerFetchData.current);
         };
-    }, [currentPageVal, valSearch]);
+    }, [currentPageVal]);
 
     const success = () => {
         const key = "warning";
@@ -561,7 +564,7 @@ function PatchInventory() {
             width: 60,
             render: (dataIndex, record) => (
                 <div style={{ display: "flex", alignItems: "center" }}>
-                    {record.AssociatedPatch?.length < 2 && (
+                    {/* {record.AssociatedPatch?.length < 2 && ( */}
                         <Checkbox 
                             onChange={() => {
                                 let newArr = [...arrayChecked]
@@ -577,7 +580,7 @@ function PatchInventory() {
                             checked={arrayChecked?.includes(record.patch_uuid)}
                             style={{ marginLeft: "6px" }}
                         />
-                    )}
+                    {/* )} */}
                     <div>
                         <img 
                             alt="someimage" 
@@ -706,9 +709,10 @@ function PatchInventory() {
                         </div>
                     )
                 } else if (!!dataIndex) {
+                    const gatewayFound = dataIndex?.length > 0 ? dataIndex?.find(item => item.patch_type === "gateway") : {};
                     return (
                         <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
-                            {dataIndex?.patch_serial}
+                            {gatewayFound?.patch_serial}
                         </span>
                     )
                 }
@@ -992,35 +996,62 @@ function PatchInventory() {
             ellipsis: true,
             width: 25,
             render: (dataIndex, record) => {
-                if (record.AssociatedPatch?.length < 2) {
-                    if (record.patch_patient_map !== null) {
-                        return (
-                            <div 
-                                style={{ marginTop: "-4px", opacity: "0.5" }} 
-                                onClick={() => showMessageCanNotDelete(
-                                    record.AssociatedPatch?.length > 1 ? "Bundle" : "Device"
-                                )}
-                            >
-                                <img src={iconDelete} width="22px"></img>
-                            </div>
-                        )
-                    } else {
-                        return <Popconfirm
-                            placement="left"
-                            title="Are you sure to delete this device?"
-                            onConfirm={() => onDeleteDeviceItem(
-                                record?.patch_uuid, 
-                                record.AssociatedPatch?.length > 1 ? "bundle" : "device"
+                if (record.patch_patient_map !== null) {
+                    return (
+                        <div 
+                            style={{ marginTop: "-4px", opacity: "0.5" }} 
+                            onClick={() => showMessageCanNotDelete(
+                                record.AssociatedPatch?.length > 1 ? "Bundle" : "Device"
                             )}
-                            okText="Yes"
-                            cancelText="No"
                         >
-                            <div style={{ marginTop: "-4px", cursor: "pointer" }}>
-                                <img src={iconDelete} width="22px"></img>
-                            </div>
-                        </Popconfirm>
-                    }
-                }
+                            <img src={iconDelete} width="22px"></img>
+                        </div>
+                    )
+                } 
+                
+                return <Popconfirm
+                    placement="left"
+                    title="Are you sure to delete this device?"
+                    onConfirm={() => onDeleteDeviceItem(
+                        record?.patch_uuid, 
+                        record.AssociatedPatch?.length > 1 ? "bundle" : "device"
+                    )}
+                    okText="Yes"
+                    cancelText="No"
+                >
+                    <div style={{ marginTop: "-4px", cursor: "pointer" }}>
+                        <img src={iconDelete} width="22px"></img>
+                    </div>
+                </Popconfirm>
+                // if (record.AssociatedPatch?.length < 2) {
+                //     if (record.patch_patient_map !== null) {
+                //         return (
+                //             <div 
+                //                 style={{ marginTop: "-4px", opacity: "0.5" }} 
+                //                 onClick={() => showMessageCanNotDelete(
+                //                     record.AssociatedPatch?.length > 1 ? "Bundle" : "Device"
+                //                 )}
+                //             >
+                //                 <img src={iconDelete} width="22px"></img>
+                //             </div>
+                //         )
+                //     } else {
+                //         return <Popconfirm
+                //             placement="left"
+                //             title="Are you sure to delete this device?"
+                //             onConfirm={() => onDeleteDeviceItem(
+                //                 record?.patch_uuid, 
+                //                 record.AssociatedPatch?.length > 1 ? "bundle" : "device"
+                //             )}
+                //             okText="Yes"
+                //             cancelText="No"
+                //         >
+                //             <div style={{ marginTop: "-4px", cursor: "pointer" }}>
+                //                 <img src={iconDelete} width="22px"></img>
+                //             </div>
+                //         </Popconfirm>
+                //     }
+                // }
             } 
         },
 
@@ -1272,20 +1303,29 @@ function PatchInventory() {
         return record === editActiveRow ? "clickRowStyl" : "";
     };
 
+    // const onChangeValueSearch = (val) => {
+    //     setValSearch(val);
+    // };
+
     return (
         <>
             <Navbar
                 startChildren={
-                    <div className="user-header-heading">
-                        <p>Device Inventory</p>
-                    </div>
-                }
-                centerChildren={
                     <>
+                        <div className="user-header-heading">
+                            <p>Device Inventory</p>
+                        </div>
                         <div style={{ width: "100%" }}>
                             <GlobalSearch
                                 enterButton
-                                onSearch={(val) => setValSearch(val)}
+                                onSearch={() => {
+                                    if (currentPageVal > 1) {
+                                        setCurrentPageVal(1);
+                                    } else {
+                                        fetchPatchList();
+                                    }
+                                }}
+                                onChange={(event) => setValSearch(event?.target?.value || "")}
                                 style={{
                                     width: "100%",
                                 }}
@@ -1294,14 +1334,14 @@ function PatchInventory() {
                         </div>
                     </>
                 }
-                endChildren={
+                centerChildren={
                     <>
                         <Dropdown
                             overlay={menu}
                             trigger={["click"]}
                             placement="bottom"
                         >
-                            <Buttons style={{ marginRight: "24px" }} className="utility">
+                            <Buttons className="utility">
                                 {" "}
                                 <span style={{ marginRight: "10px" }}>
                                     {Icons.PlusOutlined({})}
@@ -1309,11 +1349,17 @@ function PatchInventory() {
                                 Add Device
                             </Buttons>
                         </Dropdown>
+                    </>
+                }
+                endChildren={
+                    <>
                         <div>
                             <PaginationBox
                                 totalPages={totalPages}
                                 currentPageVal={currentPageVal}
                                 setCurrentPageVal={setCurrentPageVal}
+                                valuePageLength={valuePageLength}
+                                setValuePageLength={setValuePageLength}
                             />
                         </div>
                     </>
@@ -1337,7 +1383,7 @@ function PatchInventory() {
                             columns={columns}
                             size="middle"
                             onChange={onChange}
-                            pagination={{ position: ["bottomRight"] }}
+                            pagination={false}
                             scroll={extraDiv === true ? { y: "hidden" } : { y: "calc(100vh - 237px)" }}
                             rowClassName={setRowClassName}
                             // expandable={{

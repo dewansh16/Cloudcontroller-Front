@@ -162,7 +162,7 @@ export default function PatientDashboard(props) {
 
     // const pageSize = 5;
     const [currentPageVal, setCurrentPageVal] = useState(dataFilterHeader?.currentPageVal || 1);
-    const [valuePageLength, setValuePageLength] = useState(dataFilterHeader?.valuePageLength || 10);
+    const [valuePageLength, setValuePageLength] = useState(dataFilterHeader?.valuePageLength || 50);
     const [valSearch, setValSearch] = useState(dataFilterHeader?.valSearch || "");
     const [valDuration, setValDuration] = useState(dataFilterHeader?.valDuration || "7d");
 
@@ -395,7 +395,7 @@ export default function PatientDashboard(props) {
         if (loading) {
             timerLoading = setTimeout(() => {
                 setLoading(false);
-            }, 2500);
+            }, 3500);
         }
         return () => {
             clearTimeout(timerLoading);

@@ -86,18 +86,18 @@ export default function PatchInventoryModal(props) {
             .catch((err) => {});
     }, [props?.patientData]);
 
-    const formatKeyCompare = (keySensor) => ({
-        "gateway": "gateway",
-        "ecg": "ecg",
-        "spo2": "spo2",
-        "temperature": "temperature",
-        "digital": "weight",
-    }[keySensor]);
+    // const formatKeyCompare = (keySensor) => ({
+    //     "gateway": "gateway",
+    //     "ecg": "ecg",
+    //     "spo2": "spo2",
+    //     "temperature": "temperature",
+    //     "digital": "digital",
+    // }[keySensor]);
 
     const checkDisableLayout = (key) => {
-        const formatKey = formatKeyCompare(key);
+        // const formatKey = formatKeyCompare(key);
         if (key !== "bps") {
-            if (associatedList?.includes(formatKey)) return true;
+            if (associatedList?.includes(key)) return true;
             return false;
         } else {
             if (associatedList?.includes("ihealth") || associatedList?.includes("alphamed")) return true;
