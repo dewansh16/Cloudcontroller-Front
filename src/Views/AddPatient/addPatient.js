@@ -799,20 +799,27 @@ function AddPatient() {
             // }
         } else {
             Object.keys(patchData).forEach(patch => {
-                if (patchData?.[patch] !== null) {
-                    if (patchData[patch].isNewDevice) {
-                        dataNewDevice = patchData[patch];
+                const data = patchData?.[patch];
+                if (data !== null) {
+                    if (data.isNewDevice) {
+                        dataNewDevice = data;
                     }
-                    patchData[patch].config = {};
-                    payload.push(patchData[patch]);
+                    data.config = {};
+                    payload.push(data);
                 }
             })
+        }
+
+        let associated_list = [];
+        const isString = isJsonString(patientData?.associated_list);
+        if (isString) {
+            associated_list = JSON.parse(patientData?.associated_list);
         }
 
         const dataBody = {
             tenantId,
             pid: patientId,
-            associated_list: isJsonString(patientData?.associated_list) ? JSON.parse(patientData?.associated_list) : [],
+            associated_list: associated_list,
             list: payload
         }
 

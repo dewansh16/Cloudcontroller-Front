@@ -74,7 +74,7 @@ const guardianSchema = Joy.object({
     guardianpostalcode: Joy.string(),
 });
 
-const dateFormatList = ["YYYY-MM-DD"];
+const dateFormatList = ["MMM DD YYYY"];
 
 const demographicsFormItems = (
     props,
@@ -112,7 +112,7 @@ const demographicsFormItems = (
             Input: (
                 <DatePicker
                     // defaultValue={moment()}
-                    placeholder="yyyy-mm-dd"
+                    placeholder="MMM DD YYYY"
                     style={{ width: "60%" }}
                     onChange={(time) => {
                         setAdmissionDate(time);
@@ -131,7 +131,7 @@ const demographicsFormItems = (
             className: "addPatientDetailsModal",
             Input: (
                 <DatePicker
-                    placeholder="yyyy-mm-dd"
+                    placeholder="MMM DD YYYY"
                     style={{ width: "60%" }}
                     disabledDate={(current) => {
                         return current < admissionDate;
@@ -256,7 +256,7 @@ const demographicsFormItems = (
             className: "addPatientDetailsModal",
             Input: (
                 <DatePicker
-                    placeholder="yyyy-mm-dd"
+                    placeholder="MMM DD YYYY"
                     style={{ width: "60%" }}
                     disabledDate={(current) => {
                         return new Date(current).getTime() > new Date().getTime();
@@ -398,7 +398,7 @@ const demographicsFormItems = (
             className: "addPatientDetailsModal",
             Input: (
                 <DatePicker
-                    placeholder="yyyy-mm-dd"
+                    placeholder="MMM DD YYYY"
                     style={{ width: "60%" }}
                     format={dateFormatList}
                 />

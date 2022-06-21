@@ -22,9 +22,11 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const PatchForm = (props) => {
+    const { associatedList = [], listDeviceAssociated = [] } = props;
+
     const [patchList, setPatchList] = useState([]);
     const [deviceSelected, setDeviceSelected] = useState(null);
-    const [valueBpType, setValueBpType] = useState(props.associatedList?.includes('ihealth') ? "ihealth" : "alphamed");
+    const [valueBpType, setValueBpType] = useState(associatedList?.includes('ihealth') ? "ihealth" : "alphamed");
     const [isNewDevice, setIsNewDevice] = useState(false);
     const [valSearch, setValSearch] = useState("");
 
@@ -171,12 +173,6 @@ const PatchForm = (props) => {
         switch (values[0].name[0]) {
             //FIXME: use delimiter as ampersand
             case `${type}_patch_serial`: {
-                // console.log(
-                //     " pid from patchForm xxxxxxxx",
-                //     props.pid,
-                //     props.patchData[type]
-                // );
-
                 if (props.patchData[type]?.[`${type}_patch_serial`] !== values[0].value) {
                     disAllocatePatch(props.patchData[type]);
                 }
@@ -193,14 +189,19 @@ const PatchForm = (props) => {
                     type_device: type
                 };
 
+                if (type !== 'gateway') {
+                    const deviceFound = listDeviceAssociated?.find(device => device?.["patches.patch_type"] === "gateway");
+                    payload[type].gateway = deviceFound?.["patches.patch_serial"];
+                }
+
                 props.savePatchDetails(payload);
                 break;
             }
 
             case `${type}_duration`: {
                 if (values[0].value != null) {
-                    let startDate = values[0].value[0]?.format("YYYY-MM-DD");
-                    let endDate = values[0].value[1]?.format("YYYY-MM-DD");
+                    let startDate = values[0].value[0]?.format("MMM DD YYYY");
+                    let endDate = values[0].value[1]?.format("MMM DD YYYY");
                     let payload = props.patchData;
 
                     payload[type] = {
@@ -326,18 +327,18 @@ const PatchForm = (props) => {
         let type = props.type;
         if (props.type === 'bps') { type = valueBpType; }
 
-        const deviceFound = props.listDeviceAssociated.find(device => device?.["patches.patch_type"] === type);
+        const deviceFound = listDeviceAssociated?.find(device => device?.["patches.patch_type"] === type);
         if (!!deviceFound) {
             const arrDuration = deviceFound.duration.split(',');
-            const firstDay = moment(arrDuration[0], 'YYYY-MM-DD');
-            const lastDate = moment(arrDuration[1], 'YYYY-MM-DD');
+            const firstDay = moment(arrDuration[0], 'MMM DD YYYY');
+            const lastDate = moment(arrDuration[1], 'MMM DD YYYY');
 
             props.form.setFieldsValue({
                 [`${type}_patch_serial`]: deviceFound?.["patches.patch_serial"],
                 [`${type}_duration`]: [firstDay, lastDate]
             });
         }
-    }, [props.listDeviceAssociated, valueBpType]);
+    }, [listDeviceAssociated, valueBpType]);
 
     return summary.isVisible ? (
         <Summary status={summary.status} title={summary.title}>
@@ -469,33 +470,35 @@ const PatchForm = (props) => {
                             </Col>
                         )}
 
-                        <Col
-                            span={6}
-                            style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                            }}
-                        >
-                            <Popconfirm
-                                title="Are you sure to remove this patch?"
-                                onConfirm={confirm}
-                                okText="Yes"
-                                cancelText="No"
+                        {!props.disabled && (
+                            <Col
+                                span={6}
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                }}
                             >
-                                <Button
-                                    type="utility"
-                                    style={{
-                                        height: "32px",
-                                        padding: "4px",
-                                        width: "36px",
-                                    }}
-                                    disabled={props.patchData[props.type] !== null ? false : true}
+                                <Popconfirm
+                                    title="Are you sure to remove this patch?"
+                                    onConfirm={confirm}
+                                    okText="Yes"
+                                    cancelText="No"
                                 >
-                                    X
-                                </Button>
-                            </Popconfirm>
-                        </Col>
+                                    <Button
+                                        type="utility"
+                                        style={{
+                                            height: "32px",
+                                            padding: "4px",
+                                            width: "36px",
+                                        }}
+                                        disabled={props.patchData[props.type] !== null ? false : true}
+                                    >
+                                        X
+                                    </Button>
+                                </Popconfirm>
+                            </Col>
+                        )}
                     </Row>
 
                     <Form.Item
@@ -516,6 +519,7 @@ const PatchForm = (props) => {
                             disabledDate={(current) => {
                                 return current < moment().subtract({ days: 1 });
                             }}
+                            format="MMM DD YYYY"
                         />
                     </Form.Item>
                     {/* <Form.Item>

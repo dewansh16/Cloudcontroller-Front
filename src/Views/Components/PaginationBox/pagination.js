@@ -111,6 +111,7 @@ const PaginationBox = ({ totalPages, currentPageVal, setCurrentPageVal, valuePag
                     <Option style={{ display: 'flex', height: '100%' }} value={10}>10</Option>
                     <Option style={{ display: 'flex', height: '100%' }} value={25}>25</Option>
                     <Option style={{ display: 'flex', height: '100%' }} value={50}>50</Option>
+                    <Option style={{ display: 'flex', height: '100%' }} value={100}>50</Option>
                 </Select>
             </div>
         )}

@@ -11,6 +11,8 @@ import { takeDecimalNumber } from "../../../Utils/utils";
 import { io } from "socket.io-client";
 import { InfluxDB } from "@influxdata/influxdb-client";
 
+import "./ecgChart.css";
+
 export default function ECGChart({ pid, themeMode, ThemeButton }) {
     //FIXME: handle error using hasError
     const {
@@ -58,14 +60,13 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                // console.log("dataQueryInFlux", dataQueryInFlux);
             },
             error(error) {
                 console.error(error)
                 console.log('nFinished ERROR')
             },
             complete() {
-              
+                
             },
         })
     }
