@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
 import { Spin } from "antd";
-import { InfluxDB } from "@influxdata/influxdb-client";
+import { queryApi } from "../../../../Utils/influx";
+
+// import { InfluxDB } from "@influxdata/influxdb-client";
 
 const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
     const [loading, setLoading] = useState(false);
@@ -23,12 +25,6 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
         if (start?.getTime() < firstDayOfMonth?.getTime()) {
             start = firstDayOfMonth;
         }
-
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
-
-        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-        const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})

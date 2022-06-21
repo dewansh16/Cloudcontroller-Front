@@ -5,6 +5,7 @@ import { isJsonString, takeDecimalNumber } from "../../../Utils/utils";
 
 import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
+import { queryApi } from "../../../Utils/influx";
 import VitalGraphs from "./vitalGraphs.patientJourney";
 import moment from 'moment';
 import { minBy, maxBy } from "lodash";
@@ -459,12 +460,6 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     }
 
     const onGetDataSensorFromInfluxByKey = (keySensor, data, type, index) => {
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
-
-        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-        const queryApi = client.getQueryApi(org);
-
         const dateQuery = new Date(antd_selected_date_val);
 
         const start = new Date(dateQuery.setHours(0, 0, 1));

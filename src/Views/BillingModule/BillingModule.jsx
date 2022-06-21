@@ -35,6 +35,8 @@ import "./billingModule.css";
 import billingApi from "../../Apis/billingApis";
 import tenantApi from "../../Apis/tenantApis";
 import { CPT_CODE, CPT } from "../../Utils/utils";
+import { queryApi } from "../../Utils/influx";
+
 import { isArray } from 'lodash';
 
 import HeaderBilling from "./component/Header";
@@ -2288,9 +2290,6 @@ function BillingModule() {
     }
 
     const checkDateFromInflux = (startDate, sensorType, patch) => {
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
-
         const start = new Date(startDate);
         const end = new Date();
         const timeFilter = currentDateApi ? new Date(currentDateApi) : new Date();
@@ -2303,9 +2302,6 @@ function BillingModule() {
         if (start?.getTime() < firstDayOfMonth?.getTime()) {
             start = firstDayOfMonth;
         }
-
-        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-        const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})

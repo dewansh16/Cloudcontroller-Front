@@ -9,6 +9,7 @@ import { Row, Col, Divider, Grid, Tooltip } from "antd";
 
 import Colors from "../../../Theme/Colors/colors";
 import Icons from "../../../Utils/iconMap";
+import { queryApi } from "../../../Utils/influx";
 import ChartsBlock from "./listComponent/chartsBlock";
 import { Button } from "../../../Theme/Components/Button/button";
 import moment from "moment";
@@ -162,12 +163,6 @@ const PatientListItem = (props) => {
     }
 
     const processDataForSensor = (key, newArrChart, chart) => {
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
-
-        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-        const queryApi = client.getQueryApi(org);
-
         const query = `from(bucket: "emr_dev")
                 |> range(start: -${props.dataFilterOnHeader.valDuration})
                 |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")

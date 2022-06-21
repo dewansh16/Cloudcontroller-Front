@@ -13,6 +13,8 @@ import medicationApi from '../../Apis/medicationApis';
 import alertApi from '../../Apis/alertApis'
 
 import Icons from "../../Utils/iconMap";
+import { queryApi } from "../../Utils/influx";
+
 import { isJsonString, takeDecimalNumber } from "../../Utils/utils";
 
 import VisualStandingIcon from '../../Assets/Icons/visualStanding';
@@ -1981,12 +1983,6 @@ function GraphVisualizer() {
     }
 
     const onGetDataSensorFromInfluxByKey = (keySensor, data, type, index) => {
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
-
-        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-        const queryApi = client.getQueryApi(org);
-
         const dateQuery = antd_selected_date_val ? new Date(antd_selected_date_val) : new Date();
         const start = new Date(dateQuery.setHours(0, 0, 1));
         const end = new Date(dateQuery.setHours(23, 59, 59));

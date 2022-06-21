@@ -9,7 +9,8 @@ import * as htmlToImage from "html-to-image";
 import { takeDecimalNumber } from "../../../Utils/utils";
 
 import { io } from "socket.io-client";
-import { InfluxDB } from "@influxdata/influxdb-client";
+// import { InfluxDB } from "@influxdata/influxdb-client";
+import { queryApi } from "../../../Utils/influx";
 
 import "./ecgChart.css";
 
@@ -40,15 +41,9 @@ export default function ECGChart({ pid, themeMode, ThemeButton }) {
     const [arrChartEcg, setArrChartEcg] = useState([]);
 
     const processDataForSensor = (key, newArrChart, chart) => {
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
-
         const end = new Date();
         const date = new Date();
         const start = new Date(date.setDate(date.getDate() - 7));
-
-        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-        const queryApi = client.getQueryApi(org);
 
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
