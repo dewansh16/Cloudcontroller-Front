@@ -41,11 +41,11 @@ import { Input, GlobalSearch } from "../../Theme/Components/Input/input";
 import { Button as Buttons } from "../../Theme/Components/Button/button";
 
 import Icons from "../../Utils/iconMap";
+import { queryApi } from "../../Utils/influx";
 import { UserStore } from "../../Stores/userStore";
 
 import iconDelete from "../../Assets/Images/iconDelete.png";
 import notification from 'antd/lib/notification'
-import { InfluxDB } from "@influxdata/influxdb-client";
 
 import {
     SearchOutlined,
@@ -115,7 +115,7 @@ function PatchInventory() {
         if (loading) {
             timerFetchData.current = setTimeout(() => {
                 setLoading(false);
-            }, 3000);
+            }, 3500);
         }
         return () => {
             clearTimeout(timerFetchData.current);
@@ -137,14 +137,12 @@ function PatchInventory() {
         deviceApi
             .getPatchList(dataBody)
             .then((res) => {
-                const data = res.data?.response?.patches;
-                if (data?.length > 0) {
+                const patches = res.data?.response?.patches || [];
+                if (patches?.length > 0) {
                     // modifyData(data);
-                    data.map(device => {
-                        if (device.patch_type === "gateway") {
-                            const patient_data = device?.patch_patient_map?.patient_data?.[0] || {};
-                            processDataForSensor(patient_data?.pid, "gateway_keep_alive_time", device, data)
-                        }
+                    patches?.map(device => {
+                        const patient_data = device?.patch_patient_map?.patient_data?.[0] || {};
+                        processDataForSensor(patient_data?.pid, "gateway_keep_alive_time", device, patches)
                     })
                 } else {
                     setFilteredList([])
@@ -159,12 +157,6 @@ function PatchInventory() {
     }
 
     const processDataForSensor = (pid, key, device, newArr, time) => {
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
-
-        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-        const queryApi = client.getQueryApi(org);
-
         let start = "-336h";
         if (key !== "gateway_keep_alive_time") {
             start = new Date(time).toISOString();
@@ -175,7 +167,7 @@ function PatchInventory() {
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${key}")
                 |> yield(name: "mean")`;
 
-        // let lastTime = null;
+        let lastTime = null;
         let value = null;
 
         queryApi.queryRows(query, {
@@ -183,6 +175,7 @@ function PatchInventory() {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 if (key === "gateway_keep_alive_time") {
                     value = dataQueryInFlux?._value;
+                    lastTime = dataQueryInFlux?._time;
                 }
                
                 if (key === "gateway_battery") {
@@ -201,15 +194,13 @@ function PatchInventory() {
                 device[key] = value;
 
                 if (key === "gateway_keep_alive_time") {
-                    processDataForSensor(pid, "gateway_version", device, newArr, device.gateway_keep_alive_time);
+                    processDataForSensor(pid, "gateway_version", device, newArr, lastTime);
                     setTimeout(() => {
-                        processDataForSensor(pid, "gateway_battery", device, newArr, device.gateway_keep_alive_time);
+                        processDataForSensor(pid, "gateway_battery", device, newArr, lastTime);
                     }, 250);
                 }
 
-                if (key === "gateway_battery" && !!newArr) {
-                    setFilteredList(newArr);
-                }
+                setFilteredList(newArr);
             },
         })
     }

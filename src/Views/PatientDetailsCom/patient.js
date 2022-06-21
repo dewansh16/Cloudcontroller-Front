@@ -11,6 +11,8 @@ import { Button } from "../../Theme/Components/Button/button";
 import alertApi from "../../Apis/alertApis";
 import patientApi from "../../Apis/patientApis";
 import Icons from "../../Utils/iconMap";
+import { queryApi } from "../../Utils/influx";
+
 import Colors from "../../Theme/Colors/colors";
 
 import BasicInfo from "./components/basicInfo";
@@ -101,12 +103,6 @@ function PatientParticular(props) {
     ];
 
     const processDataForSensor = (key, newArrChart, chart) => {
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
-
-        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-        const queryApi = client.getQueryApi(org);
-
         const query = `from(bucket: "emr_dev")
                 |> range(start: -${props.dataFilterOnHeader.valDuration})
                 |> filter(fn: (r) => r["_measurement"] == "${props.patient.patientDetails?.demographic_map.pid}_${key}")

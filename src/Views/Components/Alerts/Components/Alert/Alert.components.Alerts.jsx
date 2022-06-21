@@ -37,6 +37,7 @@ import patientApi from "../../../../../Apis/patientApis";
 import userApi from "../../../../../Apis/userApis";
 import { InfluxDB } from "@influxdata/influxdb-client";
 import moment from "moment";
+import { queryApi } from "../../../../../Utils/influx";
 
 const { Panel } = Collapse;
 
@@ -321,12 +322,6 @@ const Alert = (props) => {
     }[type]);
 
     const processDataForSensor = () => {
-        const token = 'WcOjz3fEA8GWSNoCttpJ-ADyiwx07E4qZiDaZtNJF9EGlmXwswiNnOX9AplUdFUlKQmisosXTMdBGhJr0EfCXw==';
-        const org = 'live247';
-
-        const client = new InfluxDB({ url: 'http://20.230.234.202:8086', token: token });
-        const queryApi = client.getQueryApi(org);
-
         const date = new Date(props?.data?.time);
         const start = new Date(date.setMinutes(date.getMinutes() - 5));
         const end = new Date(date.setMinutes(date.getMinutes() + 5));
