@@ -503,10 +503,9 @@ function AddPatient() {
         const { errorFirstName = false, errorLastName = false } = patientClass.list[0];
         if (errorFirstName || errorLastName) return null;
 
-        setButtonLoading(true);
+        // setButtonLoading(true);
 
         try {
-            console.log("patient", patientClass);
             addPatientForm.submit();
 
             let list = patientClass.list;
@@ -746,8 +745,8 @@ function AddPatient() {
         } catch (e) {
             setButtonLoading(false);
             notification.warn({
-                message: "Fill mandatory values",
-                description: "Mandatory values are marked with *",
+                message: "Invalid fields",
+                description: "Please check the value some field!",
                 placement: "topRight",
             });
         }

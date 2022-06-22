@@ -38,7 +38,7 @@ const demographicSchema = Joy.object({
     DOB: Joy.string().required(),
     phone_contact: Joy.string().required(),
     phone_cell: Joy.string(),
-    email: Joy.string().min(3).max(40),
+    email: Joi.string().email({ tlds: { allow: false } }),
     idtype: Joy.string(),
     idnumber: Joy.string(),
     mothersname: Joy.string(),
@@ -66,7 +66,7 @@ const guardianSchema = Joy.object({
     guardianrelationship: Joy.string(),
     guardianphone: Joy.string(),
     guardianworkphone: Joy.string(),
-    guardianemail: Joy.string().min(3).max(40),
+    guardianemail: Joi.string().email({ tlds: { allow: false } }),
     guardianaddress: Joy.string(),
     guardiancity: Joy.string(),
     guardiancountry: Joy.string(),
@@ -89,10 +89,10 @@ const demographicsFormItems = (
     patientType
 ) => [
         {
-            required: props.required,
+            required: !props.required,
             label: "Patient Type",
             name: "patient_type",
-            rules: [{ required: props.required, message: "Patient type is required!" }],
+            rules: [{ required: !props.required, message: "Patient type is required!" }],
             className: "addPatientDetailsModal",
             Input: (
                 <Radio.Group onChange={(event) => setPatientType(event?.target?.value)} defaultValue={patientType}>
@@ -305,7 +305,7 @@ const demographicsFormItems = (
             required: !props.required,
             label: "Email",
             name: "email",
-            rules: [{ required: !props.required, message: "email is required!" }],
+            rules: [{ type: "email", message: "Not a valid email" }],
             className: "addPatientDetailsModal",
             Input: <Input />,
         },
