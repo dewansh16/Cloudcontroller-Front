@@ -862,14 +862,15 @@ export default function Vitals({
     };
 
     const VitalThreshold = () => {
+        const [vitalthresholds, isLoading] = FetchVitalThresholds(pid);
         const [addThresholdForm] = Form.useForm();
+
         const onFinish = (values) => {
             const user = UserStore.getUser();
             let data = {};
             data["pid"] = pid;
             data["tenant_uuid"] = user.tenant;
-            // data["weight_min"] = ""
-            // data["weight_max"] = ""
+       
             Object.keys(values).map((field) => {
                 if (values[field].type === "float") {
                     data[`min_${field}`] = parseFloat(values[field].value[0]);
@@ -889,7 +890,7 @@ export default function Vitals({
             });
         };
 
-        const [formData, setFormData] = useState({
+        const dataForm = {
             spo2: {
                 label: "SpO2",
                 value: [96, 100],
@@ -939,11 +940,32 @@ export default function Vitals({
                 unit: "lbs",
                 type: "string",
             },
-        });
+        }; 
+
+        const [formData, setFormData] = useState(dataForm);
 
         addThresholdForm.setFieldsValue({ ...formData });
 
-        console.log("formData", formData);
+        useEffect(() => {
+            if (vitalthresholds?.length > 0) {
+                const vitalthreshold = vitalthresholds?.[0];
+                const { min_spo2, max_spo2, min_temp, max_temp, min_hr, max_hr, min_rr, max_rr, 
+                    bps_min, bps_max, bpd_min, bpd_max, weight_min, weight_max } = vitalthreshold; 
+
+                if (!!vitalthreshold) {
+                    const newData = {...formData};
+                    newData.spo2.value = [min_spo2, max_spo2];
+                    newData.temp.value = [min_temp, max_temp];
+                    newData.hr.value = [min_hr, max_hr];
+                    newData.rr.value = [min_rr, max_rr];
+                    newData.bps.value = [bps_min, bps_max];
+                    newData.bpd.value = [bpd_min, bpd_max];
+                    newData.weight.value = [weight_min, weight_max];
+                    addThresholdForm.setFieldsValue({ ...formData });
+                    setFormData(newData);
+                }
+            }
+        }, [vitalthresholds]);
 
         return (
             <Form
@@ -953,8 +975,8 @@ export default function Vitals({
                 name="addThresholdForm"
                 initialValues={{ remember: true }}
                 className="myform"
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
+                // onFinish={onFinish}
+                // onFinishFailed={onFinishFailed}
             >
                 <Row gutter={[24, 24]} justify="space-between">
                     {Object.keys(formData).map((item, id) => {
@@ -986,7 +1008,7 @@ export default function Vitals({
                                                 style={{ width: "4rem" }}
                                                 onChange={(e) => {
                                                     formData[item].value[0] =
-                                                        e.target.value || formData[item].range[0];
+                                                        parseInt(e.target.value || formData[item].range[0]);
                                                     setFormData({ ...formData });
                                                     addThresholdForm.setFieldsValue({ ...formData });
                                                 }}
@@ -1000,8 +1022,8 @@ export default function Vitals({
                                             <Input
                                                 style={{ width: "4rem" }}
                                                 onChange={(e) => {
-                                                    formData[item].value[1] =
-                                                        e.target.value || formData[item].range[1];
+                                                    formData[item].value[1] = 
+                                                        parseInt(e.target.value || formData[item].range[1]);
                                                     setFormData({ ...formData });
                                                     addThresholdForm.setFieldsValue({ ...formData });
                                                 }}
@@ -1036,7 +1058,7 @@ export default function Vitals({
                         span={12}
                     >
                         <Form.Item>
-                            <Button htmlType="submit" type="primary-outlined">
+                            <Button onClick={() => onFinish(formData)} type="primary-outlined">
                                 Add
                             </Button>
                         </Form.Item>

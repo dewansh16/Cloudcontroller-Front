@@ -14,6 +14,7 @@ import alertApi from '../../Apis/alertApis'
 
 import Icons from "../../Utils/iconMap";
 import { queryApi } from "../../Utils/influx";
+import getAge from "../../Utils/getAge";
 
 import { isJsonString, takeDecimalNumber } from "../../Utils/utils";
 
@@ -2222,21 +2223,34 @@ function GraphVisualizer() {
                         <div className="gv-header">
                             Visualizer
                         </div>
-                        <div
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                borderRadius: '6px',
-                                padding: '0.3% 2%',
-                                width: '',
-                                fontSize: '1.2rem'
-                            }}
-                            className='gv-observation'
-                            onClick={() => { observationState ? setObservationState(false) : setObservationState(true) }}
-                        >
-                            <FileSearchOutlined style={{ fontSize: '1.5rem', marginRight: '5%' }} />
-                            Observation
+                        <div>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderRadius: '6px',
+                                    padding: '0.25rem 1rem',
+                                    width: '',
+                                    fontSize: '1.2rem'
+                                }}
+                                className='gv-observation'
+                                onClick={() => { observationState ? setObservationState(false) : setObservationState(true) }}
+                            >
+                                <FileSearchOutlined style={{ fontSize: '1.5rem', marginRight: '5%' }} />
+                                Observation
+                            </div>
+                            {!!location?.state?.dob && (
+                                <div 
+                                    className="gv-patient-mr" 
+                                    style={{ fontSize: '1rem', color: 'rgba(0, 0, 0, 0.5)', textAlign: "center", marginTop: "0.25rem" }}
+                                >
+                                    {
+                                        `Birthday: ${moment(location.state.dob).format("MMM DD YYYY")} 
+                                        (${getAge(new Date(), new Date(location.state.dob))}Y)`
+                                    }
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div style={observationState || patientInfoState ? { filter: 'blur(4px)' } : null} className="gv-bottom-container">

@@ -254,13 +254,13 @@ const PatientListItem = (props) => {
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        const timeInterval = setInterval(() => {
-            getDataSensorFromInfluxDB();
-        }, 10000);
+        // const timeInterval = setInterval(() => {
+        //     getDataSensorFromInfluxDB();
+        // }, 10000);
 
-        return () => {
-            clearInterval(timeInterval);
-        }
+        // return () => {
+        //     clearInterval(timeInterval);
+        // }
     }, [props?.pid, props?.dataFilterOnHeader?.valDuration, props?.patientListToShow]);
 
     const pushToPatientDetails = () => {
@@ -366,7 +366,10 @@ const PatientListItem = (props) => {
 
             <div style={{
                 marginLeft: "1rem",
-                textAlign: "center"
+                textAlign: "center",
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
             }}>
                 <div>
                     <Tooltip
@@ -374,7 +377,12 @@ const PatientListItem = (props) => {
                         // title={`${totalDay} ${totalDay > 1 ? "days" : "day"}`}
                         // onVisibleChange={(visible) => { getTotalDayReadingOfSensor(visible) }}
                     >
-                        <div style={{ color: `${activeTheme}`, fontWeight: "bold" }}>
+                        <div style={{ 
+                            color: `${activeTheme}`, fontWeight: "bold",
+                            textOverflow: "ellipsis",
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                        }}>
                             {props.Name}
                         </div>
                     </Tooltip>
@@ -397,6 +405,9 @@ const PatientListItem = (props) => {
                         color: `${activeTheme}`,
                         opacity: "0.6",
                         letterSpacing: "1px",
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
                     }}
                 >
                     MR: {props.data.demographic_map.med_record}

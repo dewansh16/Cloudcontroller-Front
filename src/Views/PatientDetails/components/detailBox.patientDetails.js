@@ -83,13 +83,13 @@ function DetailBox({ detailsBox, setDetailBox, patient }) {
                         <span className="patient-detailbox-col-icon">
                             {Icons.calenderIcon({})}
                         </span>
-                        Birth date: {patient.demographic_map.DOB}
+                        Birth date: {moment(patient.demographic_map.DOB).format("MMM DD YYYY")}
                     </Col>
                     <Col className="patient-detailbox-cols" span={24}>
                         <span className="patient-detailbox-col-icon">
                             {Icons.admittedOnIcon({})}
                         </span>
-                        Admitted On: {patient.demographic_map.admission_date}
+                        Admitted On: {moment(patient.demographic_map.admission_date).format("MMM DD YYYY")}
                     </Col>
                     <Col className="patient-detailbox-cols" span={24}>
                         <span className="patient-detailbox-col-icon">

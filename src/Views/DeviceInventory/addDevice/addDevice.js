@@ -37,6 +37,10 @@ const PatchForm = (props) => {
     const [isBpSensor, setIsBpSensor] = useState(false);
     const [gatewayList, setGatewayList] = useState([]);
 
+    const [tagList, setTagList] = useState([]);
+    const [tagSelected, setTagSelected] = useState([]);
+    const [valSelectSearch, setValSelectSearch] = useState("");
+
     useEffect(() => {
         const user = UserStore.getUser();
         deviceApi
@@ -174,12 +178,25 @@ const PatchForm = (props) => {
         props.setClass({ list: [...newList] });
     };
 
+    const onAddTag = () => {
+        setValSelectSearch("");
+        setTagList([valSelectSearch, ...tagList]);
+        setTagSelected([valSelectSearch, ...tagSelected]);
+        addDeviceForm.setFieldsValue({
+            [`tags`]: [valSelectSearch, ...tagSelected]
+        })
+    };
+
+    const [addDeviceForm] = Form.useForm();
+    const initialValues = {};
+
     return (
         <Form
             {...props.layout}
+            form={addDeviceForm}
             layout="vertical"
             name="basic"
-            initialValues={{ remember: true }}
+            initialValues={{ remember: true, ...initialValues }}
             onFinish={addPatchDetails}
             onFinishFailed={raiseError}
         >
@@ -270,13 +287,88 @@ const PatchForm = (props) => {
                     >
                         <Input placeholder="Enter Mac address" maxLength={30} />
                     </Form.Item>
+                    {/* <Form.Item
+                        required={!props.required}
+                        label="Tags"
+                        name="tags"
+                        rules={[
+                            {
+                                required: !props.required,
+                            },
+                        ]}
+                        className="addPatchFormItem"
+                    >
+                        <Select
+                            showSearch
+                            mode="multiple"
+                            placeholder="Search to Select"
+                            filterOption={true}
+                            onSearch={(val) => setValSelectSearch(val)}
+                            autoClearSearchValue={false}
+                            searchValue={valSelectSearch}
+                            onDeselect={(val) => {
+                                const newArr = tagSelected.filter(tag => tag !== val);
+                                setTagSelected(newArr);
+                            }}
+                            notFoundContent={
+                                valSelectSearch && (
+                                    <div>
+                                        <Button
+                                            onClick={onAddTag}
+                                            style={{ 
+                                                fontSize: "12px",
+                                                padding: "4px 10px",
+                                                fontWeight: "400",
+                                            }}
+                                        >Add Tag</Button>
+                                    </div>
+                                )
+                            }
+                        >
+                            {tagList?.map(tag => {
+                                return (
+                                    <Option key={tag} value={tag}>{tag}</Option>
+                                )
+                            })}
+                        </Select>
+                    </Form.Item>
+                    {deviceImg?.patchHead === "Gateway Sensor" && (
+                        <>
+                            <Form.Item
+                                required={!props.required}
+                                label="SIM Card Number"
+                                name="simCard"
+                                rules={[
+                                    {
+                                        required: !props.required,
+                                        message: "SIM Card Number is required",
+                                    },
+                                ]}
+                                className="addPatientDetailsModal"
+                            >
+                                <Input placeholder="Enter SIM Card Number" maxLength={30} />
+                            </Form.Item>
+                            <Form.Item
+                                required={!props.required}
+                                label="Phone Number"
+                                name="phone"
+                                rules={[
+                                    {
+                                        required: !props.required,
+                                        message: "Phone Number is required",
+                                    },
+                                ]}
+                                className="addPatientDetailsModal"
+                            >
+                                <Input placeholder="Enter Phone Number" maxLength={30} />
+                            </Form.Item>
+                        </>
+                    )} */}
                     <Row>
                         <Col span={12}>
-                            <Form.Item>
-                                <Button className="primary" htmlType="submit">
-                                    Add Device
-                                </Button>
-                            </Form.Item>
+                            <Button className="primary" htmlType="submit">
+                                Add Device
+                            </Button>
                         </Col>
                         {/* <Col span={12}>
                             <Button type="primary" onClick={deletePatch}>
@@ -481,7 +573,7 @@ export default function PatchInventoryModal(props) {
                         </Col>
 
                         <Col
-                            style={{ padding: "2em", maxWidth: "65em", paddingRight: "0" }}
+                            style={{ paddingLeft: "2em", maxWidth: "65em" }}
                             sm={24}
                             lg={16}
                             className="patchFormScrollContainer"
