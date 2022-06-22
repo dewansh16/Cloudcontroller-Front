@@ -804,6 +804,7 @@ export default function PatientDetails(props) {
                                                                         " " +
                                                                         patient.demographic_map.lname,
                                                                     mr: patient.demographic_map.med_record,
+                                                                    dob: patient.demographic_map.DOB,
                                                                 },
                                                             })
                                                         }
