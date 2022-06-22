@@ -140,7 +140,7 @@ const PatchForm = (props) => {
                 {
                     patch_type: values.patchType !== "bps" ? values.patchType : values.bpType,
                     patch_status: "Active",
-                    patch_serial: serialNumber,
+                    device_serial: serialNumber,
                     tenant_id: tenantUser.tenant,
                     patch_mac: macAddress,
                 },
@@ -213,34 +213,6 @@ const PatchForm = (props) => {
                             <Option value="bps">BP Sensor</Option>
                         </Select>
                     </Form.Item>
-
-                    {/* {deviceImg.patchHead !== "Gateway Sensor" && (
-                        <Form.Item
-                            required={props.required}
-                            label="Gateway"
-                            name="gateway"
-                            rules={[
-                                {
-                                    required: props.required,
-                                    message: "Gateway is required",
-                                },
-                            ]}
-                            className="addPatchFormItem"
-                        >
-                            <Select
-                                showSearch
-                                placeholder="Search to Select"
-                                optionFilterProp="children"
-                                filterOption={true}
-                            >
-                                {gatewayList.map(item => {
-                                    return (
-                                        <Option key={item.patch_serial} value={item.patch_serial}>{item.patch_serial}</Option>
-                                    )
-                                })}
-                            </Select>
-                        </Form.Item>
-                    )} */}
 
                     {isBpSensor && (
                         <Form.Item

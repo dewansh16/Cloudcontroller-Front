@@ -1,25 +1,14 @@
 import React from 'react';
-import Colors from '../../../Theme/Colors/colors';
 import { Button, Select } from 'antd';
+
+import Colors from '../../../Theme/Colors/colors';
 import Icons from '../../../Utils/iconMap';
+
+import { titlePageLength, arrPagiLength, controlButtonStyle } from "./constant"; 
+
 import './pagination.css';
+
 const { Option } = Select;
-
-
-const controlButtonStyle = {
-    height: 'auto',
-    width: '1em',
-    padding: '1rem 1.5rem',
-    border: "none",
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1rem',
-    fontWeight: '400',
-    color: `${Colors.orange}`,
-    borderRadius: '6px',
-    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)'
-}
 
 function computeTotalPages(maxItems, pageSize) {
     // storage.setItem('pageSize', value)
@@ -91,7 +80,7 @@ const PaginationBox = ({ totalPages, currentPageVal, setCurrentPageVal, valuePag
         {valuePageLength && (
             <div className='pagination-box-length'>
                 <div className="total-page-box">
-                    <h1>Page length</h1>
+                    <h1>{titlePageLength}</h1>
                 </div>
                 <Select value={valuePageLength} bordered={false}
                     style={{
@@ -108,10 +97,9 @@ const PaginationBox = ({ totalPages, currentPageVal, setCurrentPageVal, valuePag
                     }}
                     onSelect={setValPageLengthOnSelect}
                 >
-                    <Option style={{ display: 'flex', height: '100%' }} value={10}>10</Option>
-                    <Option style={{ display: 'flex', height: '100%' }} value={25}>25</Option>
-                    <Option style={{ display: 'flex', height: '100%' }} value={50}>50</Option>
-                    <Option style={{ display: 'flex', height: '100%' }} value={100}>50</Option>
+                    {arrPagiLength.map(length => (
+                        <Option key={length} style={{ display: 'flex', height: '100%' }} value={length}>{length}</Option>
+                    ))}
                 </Select>
             </div>
         )}

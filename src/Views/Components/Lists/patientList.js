@@ -171,6 +171,7 @@ const PatientListItem = (props) => {
         const arrayRes = [];
         const arrayTime = [];
         let val_bpd = 0;
+        
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
@@ -207,7 +208,16 @@ const PatientListItem = (props) => {
         })
     }
 
-    const disabledBloodPressure = !associatedList?.includes("alphamed") && !associatedList?.includes("ihealth");
+    const formatKeyCompare = (keySensor) => ({
+        "temp": "temperature",
+        "spo2": "spo2",
+        "ecg_hr": "ecg",
+        "ecg_rr": "ecg",
+        "weight": "digital",
+        "gateway_keep_alive_time": "gateway"
+    }[keySensor]);
+
+    const enableBloodPressure = associatedList?.includes("alphamed") || associatedList?.includes("ihealth");
 
     const getDataSensorFromInfluxDB = () => {
         const newArrChart = [...arrDataChart];
@@ -217,8 +227,11 @@ const PatientListItem = (props) => {
             const key = chart?._key;
 
             if (key !== "blood_pressuer") {
-                processDataForSensor(key, newArrChart, chart)
-            } else if (!disabledBloodPressure) {
+                const keyCheck = formatKeyCompare(key);
+                if (associatedList?.includes(keyCheck)) {
+                    processDataForSensor(key, newArrChart, chart)
+                }
+            } else if (enableBloodPressure) {
                 let arrKeyChild = [];
 
                 if (associatedList?.includes("alphamed")) {
@@ -249,20 +262,6 @@ const PatientListItem = (props) => {
             clearInterval(timeInterval);
         }
     }, [props?.pid, props?.dataFilterOnHeader?.valDuration, props?.patientListToShow]);
-
-    // React.useEffect(() => {
-    //     var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
-    //     socket.on('SENSOR_LOG', function (data) {
-    //         const dataSocket = data.body;
-    //         console.log("data SENSOR_LOG", data);
-
-    //         if (dataSocket.patientUUID === props.pid) {
-    //             const sensorFound = chartBlockData.find(item => item._key === dataSocket.deviceType);
-    //             sensorFound.val = dataSocket.bps || 0;
-    //             setChartBlockData([...chartBlockData]);
-    //         }
-    //     })
-    // }, []);
 
     const pushToPatientDetails = () => {
         props.parentProps.history.push({

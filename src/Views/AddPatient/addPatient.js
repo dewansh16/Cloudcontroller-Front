@@ -300,7 +300,7 @@ function AddPatient() {
                                             patch_uuid: individualPatch.patch_uuid,
                                             duration: patch.duration,
                                             ecg_duration: duration,
-                                            ecg_patch_serial: individualPatch.patch_serial,
+                                            ecg_device_serial: individualPatch.device_serial,
                                         };
                                         break;
                                     }
@@ -309,7 +309,7 @@ function AddPatient() {
                                             patch_uuid: individualPatch.patch_uuid,
                                             duration: patch.duration,
                                             temperature_duration: duration,
-                                            temperature_patch_serial: individualPatch.patch_serial,
+                                            temperature_device_serial: individualPatch.device_serial,
                                         };
                                         break;
                                     }
@@ -318,7 +318,7 @@ function AddPatient() {
                                             patch_uuid: individualPatch.patch_uuid,
                                             duration: patch.duration,
                                             spo2_duration: duration,
-                                            spo2_patch_serial: individualPatch.patch_serial,
+                                            spo2_device_serial: individualPatch.device_serial,
                                         };
                                         break;
                                     }
@@ -327,7 +327,7 @@ function AddPatient() {
                                             patch_uuid: individualPatch.patch_uuid,
                                             duration: patch.duration,
                                             gateway_duration: duration,
-                                            gateway_patch_serial: individualPatch.patch_serial,
+                                            gateway_device_serial: individualPatch.device_serial,
                                         };
                                         break;
                                     }
@@ -362,7 +362,7 @@ function AddPatient() {
                                             patch_uuid: individualPatch.patch_uuid,
                                             duration: patch.duration,
                                             ecg_duration: duration,
-                                            ecg_patch_serial: individualPatch.patch_serial,
+                                            ecg_device_serial: individualPatch.device_serial,
                                         };
                                         break;
                                     }
@@ -371,7 +371,7 @@ function AddPatient() {
                                             patch_uuid: individualPatch.patch_uuid,
                                             duration: patch.duration,
                                             temperature_duration: duration,
-                                            temperature_patch_serial: individualPatch.patch_serial,
+                                            temperature_device_serial: individualPatch.device_serial,
                                         };
                                         break;
                                     }
@@ -380,7 +380,7 @@ function AddPatient() {
                                             patch_uuid: individualPatch.patch_uuid,
                                             duration: patch.duration,
                                             spo2_duration: duration,
-                                            spo2_patch_serial: individualPatch.patch_serial,
+                                            spo2_device_serial: individualPatch.device_serial,
                                         };
                                         break;
                                     }
@@ -389,7 +389,7 @@ function AddPatient() {
                                             patch_uuid: individualPatch.patch_uuid,
                                             duration: patch.duration,
                                             gateway_duration: duration,
-                                            gateway_patch_serial: individualPatch.patch_serial,
+                                            gateway_device_serial: individualPatch.device_serial,
                                         };
                                         break;
                                     }
@@ -449,17 +449,17 @@ function AddPatient() {
         //         setDeboarded(true);
         //         addPatchBundleForm.setFieldsValue({
         //             gateway_duration: null,
-        //             gateway_patch_serial: null,
+        //             gateway_device_serial: null,
         //         });
         //         addPatchForm.setFieldsValue({
         //             [`ecg_duration`]: null,
-        //             [`ecg_patch_serial`]: null,
+        //             [`ecg_device_serial`]: null,
         //             [`spo2_duration`]: null,
-        //             [`spo2_patch_serial`]: null,
+        //             [`spo2_device_serial`]: null,
         //             [`temperature_duration`]: null,
-        //             [`temperature_patch_serial`]: null,
+        //             [`temperature_device_serial`]: null,
         //             [`gateway_duration`]: null,
-        //             [`gateway_patch_serial`]: null,
+        //             [`gateway_device_serial`]: null,
         //         });
         //         setPatchData({
         //             ecg: null,
@@ -829,7 +829,7 @@ function AddPatient() {
                     {
                         patch_type: dataNewDevice.type_device,
                         patch_status: "Active",
-                        patch_serial: dataNewDevice[`${dataNewDevice.type_device}_patch_serial`],
+                        device_serial: dataNewDevice[`${dataNewDevice.type_device}_device_serial`],
                         tenant_id: tenantId,
                         patch_mac: dataNewDevice.mac_address,
                     },
@@ -922,7 +922,7 @@ function AddPatient() {
     const disabledBtnSaveSensor = useMemo(() => {
         let disabled = true;
         Object.keys(patchData).forEach(patch => {
-            if (!!patchData?.[patch]?.[`${patch}_patch_serial`] && !!patchData?.[patch]?.duration) {
+            if (!!patchData?.[patch]?.[`${patch}_device_serial`] && !!patchData?.[patch]?.duration) {
                 if (patchData?.[patch]?.isNewDevice) {
                     if (!!patchData?.[patch]?.mac_address) {
                         disabled = false;

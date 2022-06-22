@@ -29,6 +29,7 @@ const PatchForm = (props) => {
     const [valueBpType, setValueBpType] = useState(associatedList?.includes('ihealth') ? "ihealth" : "alphamed");
     const [isNewDevice, setIsNewDevice] = useState(false);
     const [valSearch, setValSearch] = useState("");
+    const [isGateway, setIsGateway] = useState(false);
 
     const refValSearch = useRef();
 
@@ -63,7 +64,7 @@ const PatchForm = (props) => {
             type = valueBpType;
         }
 
-        props.form.setFieldsValue({ [`${type}_patch_serial`]: null });
+        props.form.setFieldsValue({ [`${type}_device_serial`]: null });
         props.form.setFieldsValue({ [`${type}_duration`]: null });
         refValSearch.current = "";
         setDeviceSelected(null);
@@ -76,8 +77,8 @@ const PatchForm = (props) => {
         let tenantId = userData.tenant;
         if (
             patchData !== null &&
-            patchData[`${props.type}_patch_serial`] !== undefined &&
-            patchData[`${props.type}_patch_serial`] !== null
+            patchData[`${props.type}_device_serial`] !== undefined &&
+            patchData[`${props.type}_device_serial`] !== null
         ) {
             patchData.duration = null;
             patchData[`${props.type}_duration`] = null;
@@ -109,14 +110,14 @@ const PatchForm = (props) => {
 
         props.form.setFieldsValue({
             [`${type}_duration`]: null,
-            [`${type}_patch_serial`]: null,
+            [`${type}_device_serial`]: null,
         });
         props.resetDataSelect('patch');
         const patchData = props.patchData[type];
         if (
             patchData !== null &&
-            patchData[`${type}_patch_serial`] !== undefined &&
-            patchData[`${type}_patch_serial`] !== null
+            patchData[`${type}_device_serial`] !== undefined &&
+            patchData[`${type}_device_serial`] !== null
         ) {
             patchData.duration = null;
             patchData[`${type}_duration`] = null;
@@ -133,7 +134,7 @@ const PatchForm = (props) => {
                     props.savePatchDetails(payload);
                     props.form.setFieldsValue({
                         [`${type}_duration`]: null,
-                        [`${type}_patch_serial`]: null,
+                        [`${type}_device_serial`]: null,
                     });
                 })
                 .catch((err) => {
@@ -172,26 +173,26 @@ const PatchForm = (props) => {
 
         switch (values[0].name[0]) {
             //FIXME: use delimiter as ampersand
-            case `${type}_patch_serial`: {
-                if (props.patchData[type]?.[`${type}_patch_serial`] !== values[0].value) {
+            case `${type}_device_serial`: {
+                if (props.patchData[type]?.[`${type}_device_serial`] !== values[0].value) {
                     disAllocatePatch(props.patchData[type]);
                 }
 
                 props.form.setFieldsValue({ [`${type}_duration`]: null });
                 let selectedPatch = patchList.filter(
-                    (patch) => patch.patch_serial === values[0].value
+                    (patch) => patch.device_serial === values[0].value
                 );
 
                 let payload = props.patchData;
                 payload[type] = {
                     patch_uuid: selectedPatch[0].patch_uuid,
-                    [`${type}_patch_serial`]: selectedPatch[0].patch_serial,
+                    [`${type}_device_serial`]: selectedPatch[0].device_serial,
                     type_device: type
                 };
 
                 if (type !== 'gateway') {
                     const deviceFound = listDeviceAssociated?.find(device => device?.["patches.patch_type"] === "gateway");
-                    payload[type].gateway = deviceFound?.["patches.patch_serial"];
+                    payload[type].gateway = deviceFound?.["patches.device_serial"];
                 }
 
                 props.savePatchDetails(payload);
@@ -295,7 +296,7 @@ const PatchForm = (props) => {
         }
 
         const data = {
-            patch_serial: refValSearch.current,
+            device_serial: refValSearch.current,
             patch_type: type
         }
         const newList = [data, ...patchList];
@@ -304,17 +305,17 @@ const PatchForm = (props) => {
 
         let payload = props.patchData;
         payload[type] = {
-            [`${type}_patch_serial`]: data.patch_serial,
+            [`${type}_device_serial`]: data.device_serial,
             type_device: type,
             isNewDevice: true
         };
 
         props.savePatchDetails(payload);
         props.form.setFieldsValue({
-            [`${type}_patch_serial`]: data.patch_serial,
+            [`${type}_device_serial`]: data.device_serial,
         });
         setIsNewDevice(true);
-        setDeviceSelected(data.patch_serial);
+        setDeviceSelected(data.device_serial);
     };
 
     useEffect(() => {
@@ -334,9 +335,19 @@ const PatchForm = (props) => {
             const lastDate = moment(arrDuration[1], 'MMM DD YYYY');
 
             props.form.setFieldsValue({
-                [`${type}_patch_serial`]: deviceFound?.["patches.patch_serial"],
+                [`${type}_device_serial`]: deviceFound?.["patches.device_serial"],
                 [`${type}_duration`]: [firstDay, lastDate]
             });
+        }
+
+        if (type !== "gateway") {
+            const gatewayFound = listDeviceAssociated?.find(device => device?.["patches.patch_type"] === "gateway");
+            props.form.setFieldsValue({
+                [`gateway_serial`]: gatewayFound?.["patches.device_serial"],
+            });
+            if (!!gatewayFound) {
+                setIsGateway(true);
+            }
         }
     }, [listDeviceAssociated, valueBpType]);
 
@@ -365,6 +376,23 @@ const PatchForm = (props) => {
                     onFieldsChange={handleChange}
                 >
                     <Row>
+                        {(props.type !== "gateway" && isGateway) && (
+                            <Col span={18}>
+                                <Form.Item
+                                    required={!props.required}
+                                    label="Gateway Serial"
+                                    name="gateway_serial"
+                                    rules={[
+                                        {
+                                            required: !props.required,
+                                        },
+                                    ]}
+                                >
+                                    <Input disabled={true} className="custom-input-disabled" />
+                                </Form.Item>
+                            </Col>
+                        )}
+
                         {props.type === "bps" && (
                             <Col span={18}>
                                 <Form.Item
@@ -408,7 +436,7 @@ const PatchForm = (props) => {
                             <Form.Item
                                 required={props.required}
                                 label="Serial Number"
-                                name={`${props.type === 'bps' ? valueBpType : props.type}_patch_serial`}
+                                name={`${props.type === 'bps' ? valueBpType : props.type}_device_serial`}
                                 rules={[
                                     {
                                         required: props.required,
@@ -429,8 +457,8 @@ const PatchForm = (props) => {
                                 >
                                     {patchList?.map((item) => {
                                         return (
-                                            <Option key={item.patch_serial} value={item.patch_serial}>
-                                                {item.patch_serial}
+                                            <Option key={item.device_serial} value={item.device_serial}>
+                                                {item.device_serial}
                                             </Option>
                                         );
                                     })}

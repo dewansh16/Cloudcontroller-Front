@@ -3197,16 +3197,16 @@ function BillingModule() {
                                                     {item["patches.patch_mac"]}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "20%" }}>
-                                                    {item["patches.patch_serial"]}
+                                                    {item["patches.device_serial"]}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "17%" }}>
                                                     {item["patches.patch_type"]}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "15%" }}>
-                                                    {moment(item?.datesInflux?.[0]).format('YYYY-MM-DD')}
+                                                    {moment(item?.datesInflux?.[0]).format('MMM DD YYYY')}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "15%" }}>
-                                                    {moment(item?.datesInflux?.[item?.datesInflux?.length - 1]).format('YYYY-MM-DD')}
+                                                    {moment(item?.datesInflux?.[item?.datesInflux?.length - 1]).format('MMM DD YYYY')}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "13%" }}>
                                                     {item?.totalDay || 0}
