@@ -469,6 +469,8 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                 |> range(start: ${start.toISOString()}, stop: ${end.toISOString()})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
                 |> yield(name: "mean")`;
+            
+        console.log("quẻy", query);
 
         const arrayRes = [];
         const newArrayData = [...activeTrendsArray];
@@ -504,6 +506,13 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
     };
 
     const disabledBloodPressure = !associatedList?.includes("alphamed") && !associatedList?.includes("ihealth");
+    const formatKeyCompare = (keySensor) => ({
+        "temp": "temperature",
+        "spo2": "spo2",
+        "ecg_hr": "ecg",
+        "ecg_rr": "ecg",
+        "weight": "digital",
+    }[keySensor]);
 
     const getDataChartsActive = () => {
         activeTrendsArray.forEach((chart, index) => {
@@ -522,7 +531,10 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                 onGetDataSensorFromInfluxByKey(`${keySensor}_${chart?._key}`, chart, "delete", index);
 
             }  else {
-                onGetDataSensorFromInfluxByKey(chart._key, chart, "delete", index);
+                const keyCheck = formatKeyCompare(chart?._key);
+                if (associatedList?.includes(keyCheck)) {
+                    onGetDataSensorFromInfluxByKey(chart._key, chart, "delete", index);
+                }
             }
         });
     };

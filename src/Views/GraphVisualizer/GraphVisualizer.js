@@ -1853,6 +1853,13 @@ function GraphVisualizer() {
     };
 
     const disabledBloodPressure = !associatedList?.includes("alphamed") && !associatedList?.includes("ihealth");
+    const formatKeyCompare = (keySensor) => ({
+        "temp": "temperature",
+        "spo2": "spo2",
+        "ecg_hr": "ecg",
+        "ecg_rr": "ecg",
+        "weight": "digital",
+    }[keySensor]);
 
     const getDataChartsActive = () => {
         activeTrendsArray.forEach((chart, index) => {
@@ -1873,7 +1880,10 @@ function GraphVisualizer() {
                 onGetDataSensorFromInfluxByKey(`${keySensor}_${chart?._key}`, chart, "delete", index);
 
             } else {
-                onGetDataSensorFromInfluxByKey(chart._key, chart, "delete", index);
+                const keyCheck = formatKeyCompare(chart?._key);
+                if (associatedList?.includes(keyCheck)) {
+                    onGetDataSensorFromInfluxByKey(chart._key, chart, "delete", index);
+                }
             }
 
         });
@@ -1893,7 +1903,7 @@ function GraphVisualizer() {
     useEffect(() => {
         setGraphLoading(true);
         getDataChartsActive();
-    }, [antd_selected_date_val, disabledBloodPressure]);
+    }, [antd_selected_date_val, disabledBloodPressure, patient]);
 
     const CustomTooltip = (payload) => {
         try {
@@ -1992,6 +2002,7 @@ function GraphVisualizer() {
                 |> range(start: ${start.toISOString()}, stop: ${end.toISOString()})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
                 |> yield(name: "mean")`;
+        console.log("query", query);
 
         const arrayRes = [];
         const newArrayData = [...activeTrendsArray];
@@ -2005,6 +2016,7 @@ function GraphVisualizer() {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 const value = dataQueryInFlux?._value || 0;
                 arrayRes.push({ value: takeDecimalNumber(value, 2), time: dataQueryInFlux?._time });
+                console.log("dataQueryInFlux", dataQueryInFlux);
             },
             error(error) {
                 console.error(error)
