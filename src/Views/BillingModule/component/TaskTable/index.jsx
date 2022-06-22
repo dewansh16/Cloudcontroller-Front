@@ -79,7 +79,7 @@ const TaskTable = (props) => {
                                 }}
                             >
                                 <div className="bm-item-body" style={{ width: "20%" }}>
-                                    {moment(item["task_date"]).format("YYYY-MM-DD")}
+                                    {moment(item["task_date"]).format("MMM DD YYYY")}
                                 </div>
                                 <div className="bm-item-body" style={{ width: "30%" }}>
                                     {item["staff_name"]}
