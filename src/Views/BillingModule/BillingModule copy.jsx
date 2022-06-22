@@ -2487,7 +2487,7 @@ function BillingModule() {
                                                             {item.patch_name}
                                                         </div>
                                                         <div style={{ width: "38%", fontSize: "1rem" }}>
-                                                            {item.patch_serial}
+                                                            {item.device_serial}
                                                         </div>
                                                         <div style={{ fontSize: "1rem" }}>
                                                             {item.patch_type}

@@ -210,7 +210,7 @@ function PatchInventory() {
         return () => {
             clearTimeout(timerFetchData.current);
         };
-    }, [currentPageVal]);
+    }, [currentPageVal, valuePageLength]);
 
     const success = () => {
         const key = "warning";
@@ -228,7 +228,7 @@ function PatchInventory() {
                 patch_type: data.patch_type,
                 patch_uuid: data.patch_uuid,
                 patch_status: value,
-                patch_serial: data.patch_serial,
+                device_serial: data.device_serial,
                 tenant_id: data.tenant_id,
             },
         ];
@@ -236,38 +236,43 @@ function PatchInventory() {
         deviceApi
             .editPatch(sendData, data.patch_uuid)
             .then((res) => {
-                if (data.AssociatedPatch.length > 1) {
-                    data.AssociatedPatch.map((item, index) => {
-                        const sendData = [
-                            {
-                                patch_type: item.patch_type,
-                                patch_uuid: item.patch_uuid,
-                                patch_status: value,
-                                patch_serial: item.patch_serial,
-                                tenant_id: item.tenant_id,
-                            },
-                        ];
-                        deviceApi
-                            .editPatch(sendData, item.patch_uuid)
-                            .then((res) => {
-                                if (index === data.AssociatedPatch.length - 1) {
-                                    setIsUploading(false);
-                                    openPopover("closePopOver");
-                                    fetchPatchList();
-                                }
-                                success();
-                            })
-                            .catch((err) => {
-                                console.log(err);
-                                setIsUploading(false);
-                            });
-                    });
-                } else {
-                    setIsUploading(false);
-                    openPopover("closePopOver");
-                    success();
-                    fetchPatchList();
-                }
+                setIsUploading(false);
+                openPopover("closePopOver");
+                success();
+                fetchPatchList();
+                
+                // if (data.AssociatedPatch.length > 1) {
+                //     data.AssociatedPatch.map((item, index) => {
+                //         const sendData = [
+                //             {
+                //                 patch_type: item.patch_type,
+                //                 patch_uuid: item.patch_uuid,
+                //                 patch_status: value,
+                //                 device_serial: item.device_serial,
+                //                 tenant_id: item.tenant_id,
+                //             },
+                //         ];
+                //         deviceApi
+                //             .editPatch(sendData, item.patch_uuid)
+                //             .then((res) => {
+                //                 if (index === data.AssociatedPatch.length - 1) {
+                //                     setIsUploading(false);
+                //                     openPopover("closePopOver");
+                //                     fetchPatchList();
+                //                 }
+                //                 success();
+                //             })
+                //             .catch((err) => {
+                //                 console.log(err);
+                //                 setIsUploading(false);
+                //             });
+                //     });
+                // } else {
+                //     setIsUploading(false);
+                //     openPopover("closePopOver");
+                //     success();
+                //     fetchPatchList();
+                // }
             })
             .catch((err) => {
                 console.log(err);
@@ -589,8 +594,8 @@ function PatchInventory() {
 
         {
             title: "Device Serial",
-            dataIndex: "patch_serial",
-            key: "patch_serial",
+            dataIndex: "device_serial",
+            key: "device_serial",
             ellipsis: true,
             width: 80,
             render: (dataIndex) => {
@@ -703,7 +708,7 @@ function PatchInventory() {
                     const gatewayFound = dataIndex?.length > 0 ? dataIndex?.find(item => item.patch_type === "gateway") : {};
                     return (
                         <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
-                            {gatewayFound?.patch_serial}
+                            {gatewayFound?.device_serial}
                         </span>
                     )
                 }
@@ -1159,7 +1164,7 @@ function PatchInventory() {
 
     const bundleModel = (record) => {
         return (
-            <div key={record.patch_serial} style={{ width: "100%" }}>
+            <div key={record.device_serial} style={{ width: "100%" }}>
                 <Row style={{ height: "auto" }}>
                     {record.AssociatedPatch.map((item, index) => {
                         return (
@@ -1198,7 +1203,7 @@ function PatchInventory() {
                                                 >
                                                     {" "}
                                                     <span>SN:</span>{" "}
-                                                    {record.AssociatedPatch[index].patch_serial}
+                                                    {record.AssociatedPatch[index].device_serial}
                                                 </h1>
                                             </div>
                                             <div>

@@ -216,7 +216,7 @@ function DeviceManagement({ pid, associated_list, valDuration }) {
                                         (Item, index) =>
                                             menuState === `${Item["patches.patch_type"]}-${index}` && (
                                                 <DeviceDetails
-                                                    serial={Item["patches.patch_serial"]}
+                                                    serial={Item["patches.device_serial"]}
                                                     key={`${Item["patches.patch_type"]}-${index}`}
                                                     uuid={Item["patches.patch_uuid"]}
                                                     duration={Item["duration"]}

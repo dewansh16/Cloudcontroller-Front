@@ -263,20 +263,6 @@ const PatientListItem = (props) => {
         }
     }, [props?.pid, props?.dataFilterOnHeader?.valDuration, props?.patientListToShow]);
 
-    // React.useEffect(() => {
-    //     var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
-    //     socket.on('SENSOR_LOG', function (data) {
-    //         const dataSocket = data.body;
-    //         console.log("data SENSOR_LOG", data);
-
-    //         if (dataSocket.patientUUID === props.pid) {
-    //             const sensorFound = chartBlockData.find(item => item._key === dataSocket.deviceType);
-    //             sensorFound.val = dataSocket.bps || 0;
-    //             setChartBlockData([...chartBlockData]);
-    //         }
-    //     })
-    // }, []);
-
     const pushToPatientDetails = () => {
         props.parentProps.history.push({
             pathname: `/dashboard/patient/details/${props.pid}`,

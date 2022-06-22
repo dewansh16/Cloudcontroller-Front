@@ -3197,7 +3197,7 @@ function BillingModule() {
                                                     {item["patches.patch_mac"]}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "20%" }}>
-                                                    {item["patches.patch_serial"]}
+                                                    {item["patches.device_serial"]}
                                                 </div>
                                                 <div className="bm-item-body" style={{ width: "17%" }}>
                                                     {item["patches.patch_type"]}
