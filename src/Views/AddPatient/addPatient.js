@@ -543,7 +543,7 @@ function AddPatient() {
             );
             let locationError = validate(
                 {
-                    country: patientData.country,
+                    country_name: patientData.country_name,
                     street: patientData.street,
                     city: patientData.city,
                     state: patientData.state,
@@ -582,6 +582,10 @@ function AddPatient() {
                 },
                 guardianSchema
             );
+            console.log("demographicError", demographicError);
+            console.log("locationError", locationError);
+            console.log("demographicError", demographicError);
+
             
             if (demographicError !== undefined) {
                 list[0].error = true;

@@ -24,6 +24,8 @@ import deviceApi from "../../../Apis/deviceApis";
 import { Button } from "../../../Theme/Components/Button/button";
 import { UserStore } from "../../../Stores/userStore";
 
+import { arrayDeviceSelect, toProperName } from "./constant";
+
 const { Option } = Select;
 
 const PatchForm = (props) => {
@@ -122,10 +124,6 @@ const PatchForm = (props) => {
         }
     };
 
-    // const success = () => {
-    //     message.success("New device added successfully");
-    // };
-
     const addPatchDetails = (values) => {
         const newList = props.patientClass.list;
         const serialNumber = values.serialNumber.trim();
@@ -178,13 +176,21 @@ const PatchForm = (props) => {
         props.setClass({ list: [...newList] });
     };
 
-    const onAddTag = () => {
-        setValSelectSearch("");
-        setTagList([valSelectSearch, ...tagList]);
-        setTagSelected([valSelectSearch, ...tagSelected]);
-        addDeviceForm.setFieldsValue({
-            [`tags`]: [valSelectSearch, ...tagSelected]
-        })
+    const onChangeValInputSelect = (val) => {
+        if (val.includes(";") || val.includes(",")) {
+            setValSelectSearch("");
+
+            if (!tagSelected.includes(valSelectSearch)) {
+                setTagList([...tagList, valSelectSearch]);
+                setTagSelected([...tagSelected, valSelectSearch]);
+                
+                addDeviceForm.setFieldsValue({
+                    [`tags`]: [...tagSelected, valSelectSearch]
+                })
+            }
+        } else {
+            setValSelectSearch(val);
+        }
     };
 
     const [addDeviceForm] = Form.useForm();
@@ -222,12 +228,11 @@ const PatchForm = (props) => {
                             filterOption={true}
                             onChange={handleimg}
                         >
-                            <Option value="gateway">Gateway Sensor (EV-04)</Option>
-                            <Option value="temperature">Temperature Sensor</Option>
-                            <Option value="spo2">SpO2 (CheckMe)</Option>
-                            <Option value="ecg">ECG Sensor</Option>
-                            <Option value="digital">Digital Scale</Option>
-                            <Option value="bps">BP Sensor</Option>
+                            {arrayDeviceSelect?.map(device => {
+                                return (
+                                    <Option key={device.value} value={device.value}>{device.label}</Option>
+                                )
+                            })}
                         </Select>
                     </Form.Item>
 
@@ -249,8 +254,6 @@ const PatchForm = (props) => {
                                 showSearch
                                 placeholder="Search to Select"
                                 optionFilterProp="children"
-                                // filterOption={true}
-                                // defaultValue="temperature"
                                 onChange={handleimg}
                             >
                                 <Option value="alphamed">Alphamed</Option>
@@ -287,7 +290,7 @@ const PatchForm = (props) => {
                     >
                         <Input placeholder="Enter Mac address" maxLength={30} />
                     </Form.Item>
-                    {/* <Form.Item
+                    <Form.Item
                         required={!props.required}
                         label="Tags"
                         name="tags"
@@ -303,7 +306,8 @@ const PatchForm = (props) => {
                             mode="multiple"
                             placeholder="Search to Select"
                             filterOption={true}
-                            onSearch={(val) => setValSelectSearch(val)}
+                            // onSearch={(val) => setValSelectSearch(val)}
+                            onSearch={onChangeValInputSelect}
                             autoClearSearchValue={false}
                             searchValue={valSelectSearch}
                             onDeselect={(val) => {
@@ -312,16 +316,9 @@ const PatchForm = (props) => {
                             }}
                             notFoundContent={
                                 valSelectSearch && (
-                                    <div>
-                                        <Button
-                                            onClick={onAddTag}
-                                            style={{ 
-                                                fontSize: "12px",
-                                                padding: "4px 10px",
-                                                fontWeight: "400",
-                                            }}
-                                        >Add Tag</Button>
-                                    </div>
+                                    <span style={{ fontSize: "12px", color: "#ff7529" }}>
+                                        Enter , or ; to create a new tag
+                                    </span>
                                 )
                             }
                         >
@@ -363,7 +360,7 @@ const PatchForm = (props) => {
                                 <Input placeholder="Enter Phone Number" maxLength={30} />
                             </Form.Item>
                         </>
-                    )} */}
+                    )}
                     <Row>
                         <Col span={12}>
                             <Button className="primary" htmlType="submit">
@@ -393,27 +390,6 @@ const PatchForm = (props) => {
             </Row>
         </Form>
     );
-};
-
-const toProperName = (itemType) => {
-    switch (itemType) {
-        case "temperature":
-            return "Temperature Sensor";
-        case "ecg":
-            return "ECG Sensor";
-        case "spo2":
-            return "SpO2 Sensor";
-        case "gateway":
-            return "Gateway Sensor";
-        case "digital":
-            return "Digital Scale";
-        case "alphamed":
-            return "Alphamed";
-        case "ihealth":
-            return "iHealth";
-        default:
-            return null;
-    }
 };
 
 const PatchDisplay = (props) => {

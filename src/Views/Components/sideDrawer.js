@@ -170,20 +170,24 @@ function SideDrawer(props) {
 
     }
     const logout = () => {
-        userApi
-            .logout()
-            .then((res) => {
-                localStorage.clear();
-                UserStore.forgetUser();
-                props.history.push("/");
-            })
-            .catch((err) => {
-                console.error(err);
-                //TODO: delete this once the above issue is resolved
-                localStorage.clear();
-                UserStore.forgetUser();
-                props.history.push("/");
-            });
+        localStorage.clear();
+        UserStore.forgetUser();
+        props.history.push("/");
+        
+        // userApi
+        //     .logout()
+        //     .then((res) => {
+        //         localStorage.clear();
+        //         UserStore.forgetUser();
+        //         props.history.push("/");
+        //     })
+        //     .catch((err) => {
+        //         console.error(err);
+        //         //TODO: delete this once the above issue is resolved
+        //         localStorage.clear();
+        //         UserStore.forgetUser();
+        //         props.history.push("/");
+        //     });
         // Auth.logout(props);
     };
     //FIXME:add a global icon style

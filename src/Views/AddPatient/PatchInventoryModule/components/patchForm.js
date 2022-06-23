@@ -27,9 +27,14 @@ const PatchForm = (props) => {
     const [patchList, setPatchList] = useState([]);
     const [deviceSelected, setDeviceSelected] = useState(null);
     const [valueBpType, setValueBpType] = useState(associatedList?.includes('ihealth') ? "ihealth" : "alphamed");
-    const [isNewDevice, setIsNewDevice] = useState(false);
     const [valSearch, setValSearch] = useState("");
+
+    const [isNewDevice, setIsNewDevice] = useState(false);
     const [isGateway, setIsGateway] = useState(false);
+
+    const [tagList, setTagList] = useState([]);
+    const [tagSelected, setTagSelected] = useState([]);
+    const [valSelectSearch, setValSelectSearch] = useState("");
 
     const refValSearch = useRef();
 
@@ -64,8 +69,14 @@ const PatchForm = (props) => {
             type = valueBpType;
         }
 
-        props.form.setFieldsValue({ [`${type}_device_serial`]: null });
-        props.form.setFieldsValue({ [`${type}_duration`]: null });
+        props.form.setFieldsValue({ 
+            [`${type}_device_serial`]: null,
+            [`${type}_duration`]: null,
+            [`tags_filter`]: [],
+            [`tags`]: [],
+            [`gateway_device_phone_number`]: null,
+        });
+
         refValSearch.current = "";
         setDeviceSelected(null);
         setValSearch("");
@@ -112,46 +123,55 @@ const PatchForm = (props) => {
             [`${type}_duration`]: null,
             [`${type}_device_serial`]: null,
         });
-        props.resetDataSelect('patch');
-        const patchData = props.patchData[type];
-        if (
-            patchData !== null &&
-            patchData[`${type}_device_serial`] !== undefined &&
-            patchData[`${type}_device_serial`] !== null
-        ) {
-            patchData.duration = null;
-            patchData[`${type}_duration`] = null;
-            patchData.tenant_id = tenantId;
-            patchData.pid = "0";
-            patchData.config = {};
-            let payload = [];
-            payload.push(patchData);
-            patientApi
-                .EditOneAssociatedPatchToPatient(props.pid, payload)
-                .then((res) => {
-                    let updateNull = props.patchData;
-                    updateNull[type] = null;
-                    props.savePatchDetails(payload);
-                    props.form.setFieldsValue({
-                        [`${type}_duration`]: null,
-                        [`${type}_device_serial`]: null,
-                    });
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-        };
 
+        if (props.type === "gateway") {
+            props.form.setFieldsValue({
+                [`tags_filter`]: [],
+                [`tags`]: [],
+                [`gateway_device_phone_number`]: null,
+            });
+        }
+
+        props.resetDataSelect('patch');
 
         if (isNewDevice) {
             refValSearch.current = "";
             const newArr = [...patchList];
             newArr.splice(0, 1);
             setPatchList(newArr);
-            setDeviceSelected(null);
             setValSearch("");
             setIsNewDevice(false);
         }
+        setDeviceSelected(null);
+
+        // const patchData = props.patchData[type];
+        // if (
+        //     patchData !== null &&
+        //     patchData[`${type}_device_serial`] !== undefined &&
+        //     patchData[`${type}_device_serial`] !== null
+        // ) {
+        //     patchData.duration = null;
+        //     patchData[`${type}_duration`] = null;
+        //     patchData.tenant_id = tenantId;
+        //     patchData.pid = "0";
+        //     patchData.config = {};
+        //     let payload = [];
+        //     payload.push(patchData);
+        //     patientApi
+        //         .EditOneAssociatedPatchToPatient(props.pid, payload)
+        //         .then((res) => {
+        //             let updateNull = props.patchData;
+        //             updateNull[type] = null;
+        //             props.savePatchDetails(payload);
+        //             props.form.setFieldsValue({
+        //                 [`${type}_duration`]: null,
+        //                 [`${type}_device_serial`]: null,
+        //             });
+        //         })
+        //         .catch((err) => {
+        //             console.log(err);
+        //         });
+        // };
     };
 
     useEffect(() => {
@@ -351,6 +371,22 @@ const PatchForm = (props) => {
         }
     }, [listDeviceAssociated, valueBpType]);
 
+    const onChangeValInputSelect = (val) => {
+        if (val.includes(";") || val.includes(",")) {
+            setValSelectSearch("");
+
+            if (!tagSelected.includes(valSelectSearch)) {
+                setTagList([...tagList, valSelectSearch]);
+                setTagSelected([...tagSelected, valSelectSearch]);
+                props.form.setFieldsValue({
+                    [`tags`]: [...tagSelected, valSelectSearch]
+                })
+            }
+        } else {
+            setValSelectSearch(val);
+        }
+    };
+
     return summary.isVisible ? (
         <Summary status={summary.status} title={summary.title}>
             <p>P.S: Don't forget to save changes after adding all the patches.</p>
@@ -432,6 +468,67 @@ const PatchForm = (props) => {
                             </Col>
                         )}
 
+                        {(!props.disabled && !isNewDevice) && (
+                            <Col span={18}>
+                                <Form.Item
+                                    required={!props.required}
+                                    label="Tags"
+                                    name="tags_filter"
+                                    rules={[
+                                        {
+                                            required: !props.required,
+                                        },
+                                    ]}
+                                    className="addPatchFormItem"
+                                >
+                                    <Select
+                                        showSearch
+                                        mode="multiple"
+                                        placeholder="Select tags to search sensor"
+                                        filterOption={true}
+                                        onDeselect={(val) => {
+                                            const newArr = tagSelected.filter(tag => tag !== val);
+                                            setTagSelected(newArr);
+                                        }}
+                                    >
+                                        {tagList?.map(tag => {
+                                            return (
+                                                <Option key={tag} value={tag}>{tag}</Option>
+                                            )
+                                        })}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        )}
+
+                        {(props.type === "gateway" && !isNewDevice) && (
+                            <Col span={18} style={{ position: "relative" }}>
+                                <Form.Item
+                                    required={!props.required}
+                                    label="Phone number"
+                                    name={`gateway_device_phone_number`}
+                                    rules={[
+                                        {
+                                            required: !props.required,
+                                        },
+                                    ]}
+                                    className="addPatientDetailsModal"
+                                >
+                                    <Select
+                                        disabled={props.disabled || isNewDevice}
+                                        showSearch
+                                        placeholder="Search to Select"
+                                        optionFilterProp="children"
+                                        filterOption={true}
+                                        className={isNewDevice ? "select-sensor-associate" : ""}
+                                        onChange={(val) => setDeviceSelected(val)}
+                                        onSearch={(val) => setValSearch(val)}
+                                    >
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        )}
+
                         <Col span={18} style={{ position: "relative" }}>
                             <Form.Item
                                 required={props.required}
@@ -479,24 +576,8 @@ const PatchForm = (props) => {
                                 </div>
                             )}
                         </Col>
-                        {isNewDevice && (
-                            <Col span={18}>
-                                <Form.Item
-                                    required={props.required}
-                                    label="MAC address"
-                                    name={`${props.type === 'bps' ? valueBpType : props.type}_mac_address`}
-                                    rules={[
-                                        {
-                                            required: props.required,
-                                            message: "mac address is required",
-                                        },
-                                    ]}
-                                    className="addPatientDetailsModal"
-                                >
-                                    <Input />
-                                </Form.Item>
-                            </Col>
-                        )}
+
+
 
                         {!props.disabled && (
                             <Col
@@ -527,29 +608,135 @@ const PatchForm = (props) => {
                                 </Popconfirm>
                             </Col>
                         )}
+
+                        {isNewDevice && (
+                            <Col span={18}>
+                                <Form.Item
+                                    required={props.required}
+                                    label="MAC address"
+                                    placeholder="MAC address"
+                                    name={`${props.type === 'bps' ? valueBpType : props.type}_mac_address`}
+                                    rules={[
+                                        {
+                                            required: props.required,
+                                            message: "mac address is required",
+                                        },
+                                    ]}
+                                    className="addPatientDetailsModal"
+                                >
+                                    <Input />
+                                </Form.Item>
+                            </Col>
+                        )}
+
+                        <Col span={18}>
+                            <Form.Item
+                                required={props.required}
+                                label="Duration"
+                                name={`${props.type === 'bps' ? valueBpType : props.type}_duration`}
+                                rules={[
+                                    {
+                                        required: props.required,
+                                        message: "Duration is required",
+                                    },
+                                ]}
+                                className="addPatientDetailsModal"
+                            >
+                                <RangePicker
+                                    className="range-picker-device"
+                                    disabled={props.disabled}
+                                    disabledDate={(current) => {
+                                        return current < moment().subtract({ days: 1 });
+                                    }}
+                                    format="MMM DD YYYY"
+                                />
+                            </Form.Item>
+                        </Col>
+
+                        {isNewDevice && (
+                            <>
+                                <Col span={18}>
+                                    <Form.Item
+                                        required={!props.required}
+                                        label="Tags"
+                                        name="tags"
+                                        rules={[
+                                            {
+                                                required: !props.required,
+                                            },
+                                        ]}
+                                        className="addPatchFormItem"
+                                    >
+                                        <Select
+                                            showSearch
+                                            mode="multiple"
+                                            placeholder="Select tags"
+                                            filterOption={true}
+                                            onSearch={(val) => onChangeValInputSelect(val)}
+                                            autoClearSearchValue={false}
+                                            searchValue={valSelectSearch}
+                                            onDeselect={(val) => {
+                                                const newArr = tagSelected.filter(tag => tag !== val);
+                                                setTagSelected(newArr);
+                                            }}
+                                            notFoundContent={
+                                                valSelectSearch && (
+                                                    <span style={{ fontSize: "12px", color: "#ff7529" }}>
+                                                        Enter , or ; to create a new tag
+                                                    </span>
+                                                )
+                                            }
+                                        >
+                                            {tagList?.map(tag => {
+                                                return (
+                                                    <Option key={tag} value={tag}>{tag}</Option>
+                                                )
+                                            })}
+                                        </Select>
+                                    </Form.Item>
+                                </Col>
+
+                                {props.type === "gateway" && (
+                                    <>
+                                        <Col span={18}>
+                                            <Form.Item
+                                                required={!props.required}
+                                                label="SIM Card Number"
+                                                name="simCard"
+                                                rules={[
+                                                    {
+                                                        required: !props.required,
+                                                        message: "SIM Card Number is required",
+                                                    },
+                                                ]}
+                                                className="addPatientDetailsModal"
+                                            >
+                                                <Input placeholder="Enter SIM Card Number" maxLength={30} />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={18}>
+                                            <Form.Item
+                                                required={!props.required}
+                                                label="Phone Number"
+                                                name="phone"
+                                                rules={[
+                                                    {
+                                                        required: !props.required,
+                                                        message: "Phone Number is required",
+                                                    },
+                                                ]}
+                                                className="addPatientDetailsModal"
+                                            >
+                                                <Input placeholder="Enter Phone Number" maxLength={30} />
+                                            </Form.Item>
+                                        </Col>
+                                    </>
+                                )}
+                            </>
+                        )}
                     </Row>
 
-                    <Form.Item
-                        required={props.required}
-                        label="Duration"
-                        name={`${props.type === 'bps' ? valueBpType : props.type}_duration`}
-                        rules={[
-                            {
-                                required: props.required,
-                                message: "Duration is required",
-                            },
-                        ]}
-                        className="addPatientDetailsModal"
-                    >
-                        <RangePicker
-                            className="range-picker-device"
-                            disabled={props.disabled}
-                            disabledDate={(current) => {
-                                return current < moment().subtract({ days: 1 });
-                            }}
-                            format="MMM DD YYYY"
-                        />
-                    </Form.Item>
+
                     {/* <Form.Item>
                         <Button type="primary" htmlType="submit">
                             Add
