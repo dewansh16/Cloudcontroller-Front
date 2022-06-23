@@ -41,11 +41,11 @@ import { Input, GlobalSearch } from "../../Theme/Components/Input/input";
 import { Button as Buttons } from "../../Theme/Components/Button/button";
 
 import Icons from "../../Utils/iconMap";
-import { queryApi } from "../../Utils/influx";
 import { UserStore } from "../../Stores/userStore";
 
 import iconDelete from "../../Assets/Images/iconDelete.png";
 import notification from 'antd/lib/notification'
+import GatewayStatus from "./gatewayStatus";
 
 import {
     SearchOutlined,
@@ -79,8 +79,6 @@ function PatchInventory() {
 
     const [arrayChecked, setArrayChecked] = useState([]);
     
-    const timerFetchData = useRef();
-
     const modifyData = (fetchedData) => {
         const modifiedData = fetchedData.map((device, index) => {
             if (device.AssociatedPatch.length > 1) {
@@ -111,19 +109,7 @@ function PatchInventory() {
         .filter((device) => device !== null);
     };
 
-    useEffect(() => {
-        if (loading) {
-            timerFetchData.current = setTimeout(() => {
-                setLoading(false);
-            }, 3500);
-        }
-        return () => {
-            clearTimeout(timerFetchData.current);
-        }
-    }, [loading])
-
     function fetchPatchList() {
-        clearTimeout(timerFetchData.current);
         setLoading(true);
         const { tenant } = UserStore.getUser();
 
@@ -138,17 +124,9 @@ function PatchInventory() {
             .getPatchList(dataBody)
             .then((res) => {
                 const patches = res.data?.response?.patches || [];
-                if (patches?.length > 0) {
-                    // modifyData(data);
-                    patches?.map(device => {
-                        const patient_data = device?.patch_patient_map?.patient_data?.[0] || {};
-                        processDataForSensor(patient_data?.pid, "gateway_keep_alive_time", device, patches)
-                    })
-                } else {
-                    setFilteredList([])
-                    setLoading(false);
-                }
+                setFilteredList(patches);
                 setTotalPages(Math.ceil(res.data?.response?.patchTotalCount / valuePageLength));
+                setLoading(false);
             })
             .catch((err) => {
                 console.log(err);
@@ -156,60 +134,8 @@ function PatchInventory() {
             });
     }
 
-    const processDataForSensor = (pid, key, device, newArr, time) => {
-        let start = "-336h";
-        if (key !== "gateway_keep_alive_time") {
-            start = new Date(time).toISOString();
-        }
-
-        const query = `from(bucket: "emr_dev")
-                |> range(start: ${start})
-                |> filter(fn: (r) => r["_measurement"] == "${pid}_${key}")
-                |> yield(name: "mean")`;
-
-        let lastTime = null;
-        let value = null;
-
-        queryApi.queryRows(query, {
-            next(row, tableMeta) {
-                const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                if (key === "gateway_keep_alive_time") {
-                    value = dataQueryInFlux?._value;
-                    lastTime = dataQueryInFlux?._time;
-                }
-               
-                if (key === "gateway_battery") {
-                    value = dataQueryInFlux?._value;
-                }
-
-                if (key === "gateway_version") {
-                    value = dataQueryInFlux?._value;
-                }
-            },
-            error(error) {
-                console.error(error)
-                console.log('nFinished ERROR')
-            },
-            complete() {
-                device[key] = value;
-
-                if (key === "gateway_keep_alive_time") {
-                    processDataForSensor(pid, "gateway_version", device, newArr, lastTime);
-                    setTimeout(() => {
-                        processDataForSensor(pid, "gateway_battery", device, newArr, lastTime);
-                    }, 250);
-                }
-
-                setFilteredList(newArr);
-            },
-        })
-    }
-
     useEffect(() => {
         fetchPatchList();
-        return () => {
-            clearTimeout(timerFetchData.current);
-        };
     }, [currentPageVal, valuePageLength]);
 
     const success = () => {
@@ -560,23 +486,21 @@ function PatchInventory() {
             width: 60,
             render: (dataIndex, record) => (
                 <div style={{ display: "flex", alignItems: "center" }}>
-                    {/* {record.AssociatedPatch?.length < 2 && ( */}
-                        <Checkbox 
-                            onChange={() => {
-                                let newArr = [...arrayChecked]
-                                if (newArr?.includes(record.patch_uuid)) {
-                                    newArr = newArr.filter(item => item !== record.patch_uuid);
-                                } else {
-                                    newArr.push(record.patch_uuid)
-                                }
-                                setArrayChecked(newArr);
-                            }}
-                            disabled={record.patch_patient_map !== null}
-                            className="checkbox-delete-device"
-                            checked={arrayChecked?.includes(record.patch_uuid)}
-                            style={{ marginLeft: "6px" }}
-                        />
-                    {/* )} */}
+                    <Checkbox 
+                        onChange={() => {
+                            let newArr = [...arrayChecked]
+                            if (newArr?.includes(record.patch_uuid)) {
+                                newArr = newArr.filter(item => item !== record.patch_uuid);
+                            } else {
+                                newArr.push(record.patch_uuid)
+                            }
+                            setArrayChecked(newArr);
+                        }}
+                        disabled={record.patch_patient_map !== null}
+                        className="checkbox-delete-device"
+                        checked={arrayChecked?.includes(record.patch_uuid)}
+                        style={{ marginLeft: "6px" }}
+                    />
                     <div>
                         <img 
                             alt="someimage" 
@@ -650,68 +574,22 @@ function PatchInventory() {
 
         {
             title: "Gateway Status",
-            dataIndex: "gateway",
-            key: "gateway",
+            dataIndex: "patch_serial",
+            key: "patch_serial",
             ellipsis: true,
             width: 85,
             render: (dataIndex, record) => {
                 if (record?.patch_type === "gateway") {
                     return (
-                        <div>
-                            {!!record?.gateway_battery && (
-                                <div style={{
-                                    width: "100%",
-                                    textAlign: "center",
-                                    fontSize: "16px",
-                                }}>
-                                    <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
-                                        Battery: 
-                                    </span>
-                                    <span style={{ fontWeight: "500", marginLeft: "2px" }}>
-                                        {record?.gateway_battery}%
-                                    </span>
-                                </div>
-                            )}
+                        <GatewayStatus dataGateway={record} />
+                    )
+                } 
 
-                            {!!record?.gateway_version && (
-                                <div style={{
-                                    width: "100%",
-                                    textAlign: "center",
-                                }}>
-                                    <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
-                                        Version: 
-                                    </span>
-                                    <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
-                                        {record?.gateway_version}
-                                    </span>
-                                </div>
-                            )}
-    
-                            {!!record?.gateway_keep_alive_time && (
-                                <div style={{
-                                    width: "100%",
-                                    textAlign: "center",
-                                    fontSize: "16px",
-                                    display: "grid"
-                                }}>
-                                    <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
-                                        Last received: 
-                                    </span>
-                                    <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
-                                        {moment(record?.gateway_keep_alive_time).format("MMM DD hh:mm:ss a")} 
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    )
-                } else if (!!dataIndex) {
-                    const gatewayFound = dataIndex?.length > 0 ? dataIndex?.find(item => item.patch_type === "gateway") : {};
-                    return (
-                        <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
-                            {gatewayFound?.device_serial}
-                        </span>
-                    )
-                }
+                return (
+                    <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
+                        {dataIndex}
+                    </span>
+                )
             }
         },
 
@@ -723,7 +601,6 @@ function PatchInventory() {
             align: "center",
             width: 75,
             render: (dataIndex, record) => {
-                // console.log('dataIndex, record', dataIndex, record);
                 return (
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <div
