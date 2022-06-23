@@ -582,10 +582,6 @@ function AddPatient() {
                 },
                 guardianSchema
             );
-            console.log("demographicError", demographicError);
-            console.log("locationError", locationError);
-            console.log("demographicError", demographicError);
-
             
             if (demographicError !== undefined) {
                 list[0].error = true;
