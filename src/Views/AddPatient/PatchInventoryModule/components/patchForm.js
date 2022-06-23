@@ -71,6 +71,7 @@ const PatchForm = (props) => {
 
         props.form.setFieldsValue({ 
             [`${type}_device_serial`]: null,
+            [`${type}_mac_address`]: null,
             [`${type}_duration`]: null,
             [`tags_filter`]: [],
             [`tags`]: [],
@@ -122,6 +123,7 @@ const PatchForm = (props) => {
         props.form.setFieldsValue({
             [`${type}_duration`]: null,
             [`${type}_device_serial`]: null,
+            [`${type}_mac_address`]: null,
         });
 
         if (props.type === "gateway") {
