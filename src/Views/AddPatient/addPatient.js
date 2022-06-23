@@ -745,8 +745,7 @@ function AddPatient() {
         } catch (e) {
             setButtonLoading(false);
             notification.warn({
-                message: "Invalid fields",
-                description: "Please check the value some field!",
+                message: "Invalid form",
                 placement: "topRight",
             });
         }

@@ -116,7 +116,9 @@ function DetailBox({ detailsBox, setDetailBox, patient }) {
                             </span>{" "}
                             {`${patient.demographic_map.street || ""}
                                 ${patient.demographic_map.city || ""} 
-                                ${patient.demographic_map.state || ""}`}
+                                ${patient.demographic_map.state || ""}
+                                ${patient.demographic_map.country_name || ""}
+                            `}
                         </Col>
                     )}
                 </Row>
