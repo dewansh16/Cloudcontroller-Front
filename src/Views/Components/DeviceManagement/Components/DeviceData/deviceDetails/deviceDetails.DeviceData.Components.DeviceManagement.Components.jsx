@@ -73,10 +73,6 @@ function CreateGraphData(pid, deviceType, valDuration) {
                         time: `${time.getHours() < 10 ? `0${time.getHours()}` : time.getHours()}:${time.getMinutes() < 10 ? `0${time.getMinutes()}` : time.getMinutes()} Hrs`,
                         value: dataQueryInFlux?._value
                     });
-
-                    // if (arrBattery?.length > 30) {
-                    //     arrBattery.splice(0, 1);
-                    // }
                 }
             },
             error(error) {

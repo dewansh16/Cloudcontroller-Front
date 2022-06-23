@@ -2258,7 +2258,7 @@ function GraphVisualizer() {
                                     style={{ fontSize: '1rem', color: 'rgba(0, 0, 0, 0.5)', textAlign: "center", marginTop: "0.25rem" }}
                                 >
                                     {
-                                        `Birthday: ${moment(location.state.dob).format("MMM DD YYYY")} 
+                                        `DOB: ${moment(location.state.dob).format("MMM DD YYYY")} 
                                         (${getAge(new Date(), new Date(location.state.dob))}Y)`
                                     }
                                 </div>

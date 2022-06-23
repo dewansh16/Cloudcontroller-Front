@@ -24,6 +24,8 @@ import deviceApi from "../../../Apis/deviceApis";
 import { Button } from "../../../Theme/Components/Button/button";
 import { UserStore } from "../../../Stores/userStore";
 
+import { arrayDeviceSelect } from "./constant";
+
 const { Option } = Select;
 
 const PatchForm = (props) => {
@@ -187,6 +189,23 @@ const PatchForm = (props) => {
         })
     };
 
+    const onChangeValInputSelect = (val) => {
+        if (val.includes(";") || val.includes(",")) {
+            setValSelectSearch("");
+
+            if (!tagSelected.includes(valSelectSearch)) {
+                setTagList([...tagList, valSelectSearch]);
+                setTagSelected([...tagSelected, valSelectSearch]);
+                
+                addDeviceForm.setFieldsValue({
+                    [`tags`]: [...tagSelected, valSelectSearch]
+                })
+            }
+        } else {
+            setValSelectSearch(val);
+        }
+    };
+
     const [addDeviceForm] = Form.useForm();
     const initialValues = {};
 
@@ -287,7 +306,7 @@ const PatchForm = (props) => {
                     >
                         <Input placeholder="Enter Mac address" maxLength={30} />
                     </Form.Item>
-                    {/* <Form.Item
+                    <Form.Item
                         required={!props.required}
                         label="Tags"
                         name="tags"
@@ -303,7 +322,8 @@ const PatchForm = (props) => {
                             mode="multiple"
                             placeholder="Search to Select"
                             filterOption={true}
-                            onSearch={(val) => setValSelectSearch(val)}
+                            // onSearch={(val) => setValSelectSearch(val)}
+                            onSearch={onChangeValInputSelect}
                             autoClearSearchValue={false}
                             searchValue={valSelectSearch}
                             onDeselect={(val) => {
@@ -312,16 +332,9 @@ const PatchForm = (props) => {
                             }}
                             notFoundContent={
                                 valSelectSearch && (
-                                    <div>
-                                        <Button
-                                            onClick={onAddTag}
-                                            style={{ 
-                                                fontSize: "12px",
-                                                padding: "4px 10px",
-                                                fontWeight: "400",
-                                            }}
-                                        >Add Tag</Button>
-                                    </div>
+                                    <span style={{ fontSize: "12px", color: "#ff7529" }}>
+                                        Enter , or ; to create a new tag
+                                    </span>
                                 )
                             }
                         >
@@ -363,7 +376,7 @@ const PatchForm = (props) => {
                                 <Input placeholder="Enter Phone Number" maxLength={30} />
                             </Form.Item>
                         </>
-                    )} */}
+                    )}
                     <Row>
                         <Col span={12}>
                             <Button className="primary" htmlType="submit">

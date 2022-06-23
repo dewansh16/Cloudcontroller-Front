@@ -470,8 +470,6 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
                 |> yield(name: "mean")`;
             
-        console.log("quẻy", query);
-
         const arrayRes = [];
         const newArrayData = [...activeTrendsArray];
 
