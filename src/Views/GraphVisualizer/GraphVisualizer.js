@@ -52,6 +52,8 @@ import { nullableTypeAnnotation } from '@babel/types';
 import { InfluxDB } from "@influxdata/influxdb-client";
 import { minBy, maxBy } from "lodash";
 
+import Procedure from "./Procedure";
+
 import './graphVisualizer.css'
 
 const { TextArea } = Input;
@@ -366,7 +368,7 @@ function GraphVisualizer() {
     const [isLoading, setIsLoading] = useState(false)
 
     const [alertState, setAlertState] = useState(true)
-    const [alertLoading, setAlertLoading] = useState(true)
+    const [loadingSidebarLeft, setLoadingSidebarLeft] = useState(true)
 
     const [medState, setMedState] = useState(false)
     const [pieState, setPieState] = useState(false)
@@ -441,8 +443,7 @@ function GraphVisualizer() {
     const [alertsApiData, setAlertsApiData] = useState()
 
     const [trendsLoading, setTrendsLoading] = useState(false)
-    const [trendsApiData, setTrendsApiData] = useState()
-
+    const [trendsApiData, setTrendsApiData] = useState();
 
     useEffect(() => {
         return null;
@@ -1848,7 +1849,7 @@ function GraphVisualizer() {
             }
 
             setActiveTrendsArray([...activeTrendsArray]);
-            setAlertLoading(false);
+            setLoadingSidebarLeft(false);
         })
     };
 
@@ -1888,7 +1889,7 @@ function GraphVisualizer() {
 
         });
 
-        setAlertLoading(true);
+        setLoadingSidebarLeft(true);
         fetchDataAlert();
     };
 
@@ -2839,7 +2840,7 @@ function GraphVisualizer() {
                             }
                             {
                                 alertState ?
-                                    alertLoading ? (
+                                    loadingSidebarLeft ? (
                                         <div style={{ width: "100%", height: "300px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                                             <Spin />
                                         </div>
@@ -3058,45 +3059,9 @@ function GraphVisualizer() {
                                     null
                             }
                             {
-                                procedureState
-                                    ?
-                                    (
-                                        <div className='procedure-container' >
-                                            <div style={{ display: 'flex', alignItems: 'center', width: '100%', margin: '5% 0%', fontSize: '1rem' }} >
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '70%', marginRight: '2%' }} >
-                                                    <div>
-                                                        Date of surgery
-                                                    </div>
-                                                    <div>
-                                                        :
-                                                    </div>
-                                                </div>
-                                                <Input defaultValue='9:00 A.M.' style={{ padding: '3% 5%', fontSize: '1rem', border: '1px solid orange' }} />
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', width: '100%', margin: '5% 0%', fontSize: '1rem' }} >
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '70%', marginRight: '2%' }} >
-                                                    <div>
-                                                        Provider
-                                                    </div>
-                                                    <div>
-                                                        :
-                                                    </div>
-                                                </div>
-                                                <Input defaultValue='Lawrence' style={{ padding: '3% 5%', fontSize: '1rem', border: '1px solid orange' }} />
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', width: '100%', margin: '5% 0%', fontSize: '1rem' }} >
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '70%', marginRight: '2%' }} >
-                                                    <div>
-                                                        Procedure
-                                                    </div>
-                                                    <div>
-                                                        :
-                                                    </div>
-                                                </div>
-                                                <Input defaultValue='Right Hemithyroidectomy' style={{ padding: '3% 5%', fontSize: '1rem', border: '1px solid orange' }} />
-                                            </div>
-                                        </div>
-                                    )
+                                procedureState ?
+                                    <div></div>
+                                    // <Procedure pid={pid} />
                                     :
                                     null
                             }
