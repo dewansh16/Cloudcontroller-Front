@@ -38,14 +38,14 @@ const demographicSchema = Joy.object({
     DOB: Joy.string().required(),
     phone_contact: Joy.string().required(),
     phone_cell: Joy.string(),
-    email: Joi.string().empty('').email({ tlds: { allow: false } }),
+    email: Joi.string().allow(null, '').email({ tlds: { allow: false } }),
     idtype: Joy.string(),
     idnumber: Joy.string(),
     mothersname: Joy.string(),
     deceased_date: Joy.string(),
 });
 const locationSchema = Joy.object({
-    country: Joy.string(),
+    country_name: Joy.string(),
     street: Joy.string(),
     city: Joy.string(),
     state: Joy.string(),
@@ -66,7 +66,7 @@ const guardianSchema = Joy.object({
     guardianrelationship: Joy.string(),
     guardianphone: Joy.string(),
     guardianworkphone: Joy.string(),
-    guardianemail: Joi.string().empty('').email({ tlds: { allow: false } }),
+    guardianemail: Joi.string().allow(null, '').email({ tlds: { allow: false } }),
     guardianaddress: Joy.string(),
     guardiancity: Joy.string(),
     guardiancountry: Joy.string(),
@@ -575,7 +575,7 @@ const AddressFormItems = (props, setCountry, selectedCountry) => [
     {
         required: !props.required,
         label: "Country",
-        name: "country",
+        name: "country_name",
         rules: [{ required: !props.required, message: "Country is required!" }],
         className: "addPatientDetailsModal",
         Input: (
