@@ -721,15 +721,10 @@ const PatchForm = (props) => {
                                                 required={!props.required}
                                                 label="Phone Number"
                                                 name="phone"
-                                                rules={[
-                                                    {
-                                                        required: !props.required,
-                                                        message: "Phone Number is required",
-                                                    },
-                                                ]}
+                                                rules={[ { pattern: '^([-]?[1-9][0-9]*|0)$', message: "phone is not a valid number" } ]}
                                                 className="addPatientDetailsModal"
                                             >
-                                                <Input placeholder="Enter Phone Number" maxLength={30} />
+                                                <Input placeholder="Enter Phone Number" />
                                             </Form.Item>
                                         </Col>
                                     </>

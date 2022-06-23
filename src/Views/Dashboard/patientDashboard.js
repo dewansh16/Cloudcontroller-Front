@@ -273,6 +273,7 @@ export default function PatientDashboard(props) {
 
     // set type of patients -- all, discharged, in care
     const showSelectedPatient = (val) => {
+        setCurrentPageVal(1);
         setSelectedPatient(val);
     }
 
@@ -340,7 +341,7 @@ export default function PatientDashboard(props) {
 
     useEffect(() => {
         fetchPatientList();
-    }, [currentPageVal, valuePageLength, valSearch]);
+    }, [currentPageVal, valuePageLength, valSearch, patientType]);
 
     const showBlur = (type) => {
         setBlur({ ...isBlur, [type]: !isBlur[type] });
@@ -589,6 +590,7 @@ export default function PatientDashboard(props) {
                                     onSelect={showSelectedPatient}
                                 >
                                     <Option value="remote">Remote</Option>
+                                    <Option value="hospital">Hospital</Option>
                                 </Select>
                             </Col>
 
@@ -649,7 +651,7 @@ export default function PatientDashboard(props) {
                                 renderItem={(item) => (
                                     //TODO:optimize the props -- unnecessary props
                                     <PatientListItem
-                                        patientType={patientType}
+                                        patientType={item.demographic_map.patient_type}
                                         parentProps={props}
                                         key={item.demographic_map.pid}
                                         showTrend={showTrend}
@@ -672,7 +674,6 @@ export default function PatientDashboard(props) {
                                         dataFilterOnHeader={dataFilterOnHeader}
                                         patientListToShow={patientListToShow}
                                         sensorShow={sensorShow}
-                                        patientTypeIcon="remote"
                                     />
                                 )}
                             ></List>
