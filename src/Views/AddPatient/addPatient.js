@@ -685,7 +685,7 @@ function AddPatient() {
                 .catch((err) => {
                     const error = err?.response?.data?.error;
                     setButtonLoading(false);
-                    const isExist = error.isExist || false;
+                    const isExist = error?.isExist || false;
                     setButtonLoading(false);
                     setSummary({
                         isVisible: true,
@@ -830,6 +830,9 @@ function AddPatient() {
                         device_serial: dataNewDevice[`${dataNewDevice.type_device}_device_serial`],
                         tenant_id: tenantId,
                         patch_mac: dataNewDevice.mac_address,
+                        tags: dataNewDevice?.tags,
+                        sim: dataNewDevice?.sim,
+                        phone: dataNewDevice?.phone
                     },
                 ],
                 tenantId: tenantId,

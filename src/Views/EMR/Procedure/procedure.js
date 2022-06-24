@@ -122,10 +122,14 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
     }
 
     useEffect(() => {
-        procedureForm.setFieldsValue({
-            ...data
-        })
-    }, [])
+        if (!data) {
+            procedureForm.setFieldsValue({
+                "diagnosis_date": moment(),
+                "label": "normal",
+                "status": "complete"
+            })
+        }
+    }, [data])
     return (
         <Form
             form={procedureForm}
@@ -145,7 +149,7 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
                             message: "required"
                         }]}
                     >
-                        <DatePicker />
+                        <DatePicker format="MMM DD YYYY" />
                     </Form.Item>
                 </Col>
                 <Col style={{}} span={24}>
@@ -298,15 +302,18 @@ export default function Procedure({ pid, setComponentSupportContent, setPadding,
             })
         },
     ]
+
     const successCallBack = () => {
         console.log(`/dashboard/patient/EMR/${pid}`)
         window.location.reload(false)
     }
+
     const backToPatientDetails = () => {
         // the below code to always redirect to 
         history.push(`/dashboard/patient/details/${pid}`)
         // history.goBack()
     }
+
     useEffect(() => {
         setComponentSupportContent(
             <div style={{

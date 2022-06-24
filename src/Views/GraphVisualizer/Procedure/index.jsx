@@ -4,14 +4,14 @@ import { Input, notification, Spin, Tooltip } from 'antd';
 import patientApi from '../../../Apis/patientApis';
 import moment from 'moment';
 
-const Procedure = ({ pid }) => {
+const Procedure = ({ pid, date }) => {
     const [procedure, setProcedure] = useState({
         loading: false,
         data: [],
     });
 
     useEffect(() => {
-        patientApi.getPatientProcedure(pid).then((res) => {
+        patientApi.getPatientProcedure(pid, "", "", "", moment(date).format("YYYY-MM-DD")).then((res) => {
             setProcedure({
                 loading: false,
                 data: res.data.response['procedure_list']
@@ -31,7 +31,6 @@ const Procedure = ({ pid }) => {
         })
     }, [pid]);
 
-    console.log("procedure", procedure);
     return (
         <>
             {procedure.loading ? (
@@ -57,29 +56,37 @@ const Procedure = ({ pid }) => {
                             }}
                         >
                             <div>
-                                <Tooltip title={item?.label}>
-                                    <div style={{ width: "0.85rem", height: "0.85rem", borderRadius: "50%", background: "green" }}></div>
+                                <Tooltip title={item?.status || "complete"}>
+                                    <div style={{ 
+                                        width: "0.85rem", height: "0.85rem", 
+                                        borderRadius: "50%", 
+                                        background: item?.status === "incomplete" ? "orange" : "green" 
+                                    }}></div>
                                 </Tooltip>
                             </div>
-                            <div style={{ marginLeft: "1rem", fontSize: "0.9rem", color: "#000000c7" }}>
+                            <div style={{ marginLeft: "1rem", fontSize: "0.9rem", color: "#000", width: "100%" }}>
                                 <div>
-                                    <span style={{ color: "#000", marginRight: "3px" }}>Date: </span>
+                                    <span style={{ color: "#000000c7", marginRight: "3px" }}>Date: </span>
                                     {moment(item?.date).format("MMM DD YYYY")}
                                 </div>
-                                <div>
+                                <div style={{ display: "flex", alignItems:"center" }}>
+                                    {!!item?.code_type && (
+                                        <div style={{ marginRight: "2rem", width: "60%" }}>
+                                            <span style={{ color: "#000000c7", marginRight: "3px" }}>Code: </span>
+                                            <span>{item?.code_type}</span>
+                                        </div>
+                                    )}
+                                    <div style={{ width: "40%" }}>
+                                        <span style={{ color: "#000000c7", marginRight: "3px" }}>Label: </span>
+                                        {item?.label || "Normal"}
+                                    </div>
+                                </div>
+                                {!!item?.description && (
                                     <div>
-                                        <span style={{ color: "#000", marginRight: "3px" }}>Code: </span>
-                                        {item?.code_type}
+                                        <span style={{ color: "#000000c7", marginRight: "3px" }}>Procedure: </span>
+                                        {item?.description}
                                     </div>
-                                    <div style={{ marginLeft: "2rem" }}>
-                                        <span style={{ color: "#000", marginRight: "3px" }}>Status: </span>
-                                        {item?.status}
-                                    </div>
-                                </div>
-                                <div>
-                                    <span style={{ color: "#000", marginRight: "3px" }}>Procedure: </span>
-                                    {item?.description}
-                                </div>
+                                )}
                             </div>
                         </div>
                     ))}

@@ -50,7 +50,7 @@
     },
     "scripts": {
         "start": "nodemon -w antd.customize.less -w craco.config.js  --exec 'craco start'",
-        "local": "craco start && NODE_ENV=dev",
+        "local": "craco start && node build.js",
         "windows-start": "nodemon -w antd.customize.less -w craco.config.js  --exec 'node_modules/.bin/craco start'",
         "build-webpack": "rm -rf build && webpack",
         "test": "react-scripts test",

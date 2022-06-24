@@ -6,6 +6,7 @@ import { InboxOutlined } from '@ant-design/icons';
 
 import patientApi from "../../../Apis/patientApis";
 import { UserStore } from "../../../Stores/userStore";
+import { isJsonString } from "../../../Utils/utils";
 
 import "./DeviceManagement.css";
 
@@ -34,7 +35,7 @@ const { Dragger } = Upload;
 //     return [response, loading]
 // }
 
-function DeviceManagement({ pid, associated_list, valDuration }) {
+function DeviceManagement({ pid, valDuration, patient, setPatient }) {
     const [deviceClass, setClass] = useState({
         isLoading: true,
         list: [],
@@ -43,7 +44,7 @@ function DeviceManagement({ pid, associated_list, valDuration }) {
     const [isUpload, setIsUpload] = useState(false);
     const [fileList, setFileList] = useState([]);
     const [menuState, setMenuState] = useState();
-    const [uploadTypeList, setUploadTypeList] = useState({})
+    const [uploadTypeList, setUploadTypeList] = useState({});
 
     const handleMenuState = ({ item, key }) => {
         setMenuState(key);
@@ -114,10 +115,12 @@ function DeviceManagement({ pid, associated_list, valDuration }) {
     }
 
     const onDetachAssociate = (uuid, type) => () => {
+        let associatedList = isJsonString(patient?.demographic_map?.associated_list) ? JSON.parse(patient?.demographic_map?.associated_list) : [];
+
         patientApi.detachSensorOfPatient({
             patch_uuid: uuid,
             type_device: type,
-            associated_list: JSON.parse(associated_list),
+            associated_list: associatedList,
             action: "unassociate",
             pid: pid
         })
@@ -137,6 +140,10 @@ function DeviceManagement({ pid, associated_list, valDuration }) {
                     message: 'Detach',
                     description: "Detach sensor succesfully!"
                 })
+
+                associatedList = associatedList?.filter(item => item !== type);
+                patient.demographic_map.associated_list = JSON.stringify(associatedList);
+                setPatient(patient);
             })
             .catch(() => {
                 notification.error({

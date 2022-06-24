@@ -126,10 +126,10 @@ const PatchForm = (props) => {
 
     const addPatchDetails = (values) => {
         const newList = props.patientClass.list;
-        const serialNumber = values.serialNumber.trim();
-        const macAddress = values.macAddress.trim();
-        const sim = values.simCard.trim();
-        const phone = values.phone.trim();
+        const serialNumber = values?.serialNumber?.trim();
+        const macAddress = values?.macAddress?.trim();
+        const sim = values?.simCard?.trim();
+        const phone = values?.phone?.trim();
 
         newList[props.menuState].error = false;
         newList[[props.menuState]].delete = false;
@@ -313,6 +313,7 @@ const PatchForm = (props) => {
                             placeholder="Search to Select"
                             filterOption={true}
                             // onSearch={(val) => setValSelectSearch(val)}
+                            maxTagCount={2}
                             onSearch={onChangeValInputSelect}
                             autoClearSearchValue={false}
                             searchValue={valSelectSearch}
@@ -356,10 +357,10 @@ const PatchForm = (props) => {
                                 required={!props.required}
                                 label="Phone Number"
                                 name="phone"
-                                rules={[ { pattern: '^([-]?[1-9][0-9]*|0)$', message: "phone is not a valid number" } ]}
+                                rules={[ { pattern: new RegExp("^[0-9]{10}$"), message: "Please recheck the number entered." }]}
                                 className="addPatientDetailsModal"
                             >
-                                <Input placeholder="Enter Phone Number" />
+                                <Input placeholder="Enter Phone Number" type="tel" />
                             </Form.Item>
                         </>
                     )}

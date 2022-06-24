@@ -150,10 +150,11 @@ export default function PatchInventoryModal(props) {
                             form={props.form}
                             type={Item.class}
                             resetDataSelect={props.resetDataSelect}
-                            disabled={Item.class !== "gateway" 
-                                    ? (checkDisableLayout(Item.class) || !associatedList?.includes("gateway"))
-                                    : checkDisableLayout(Item.class)
-                                }
+                            // disabled={Item.class !== "gateway" 
+                            //         ? (checkDisableLayout(Item.class) || !associatedList?.includes("gateway"))
+                            //         : checkDisableLayout(Item.class)
+                            //     }
+                            disabled={checkDisableLayout(Item.class)}
                             listDeviceAssociated={listDeviceAssociated}
                             associatedList={associatedList}
                         />

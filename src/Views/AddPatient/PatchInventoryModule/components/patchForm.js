@@ -15,6 +15,8 @@ import { getImageSrc } from "../getPatchesUtility";
 import { UserStore } from "../../../../Stores/userStore";
 import patientApi from "../../../../Apis/patientApis";
 import deviceApi from "../../../../Apis/deviceApis";
+import { isJsonString } from "../../../../Utils/utils";
+
 import moment from "moment";
 
 import "../patchInventory.css";
@@ -73,9 +75,14 @@ const PatchForm = (props) => {
             [`${type}_device_serial`]: null,
             [`${type}_mac_address`]: null,
             [`${type}_duration`]: null,
+
             [`tags_filter`]: [],
-            [`tags`]: [],
-            [`gateway_device_phone_number`]: null,
+            [`gateway_phone_number_filter`]: null,
+            [`gateway_sim_filter`]: null,
+
+            [`tags_add`]: [],
+            [`gateway_phone_number_add`]: null,
+            [`gateway_sim_add`]: null,
         });
 
         refValSearch.current = "";
@@ -115,24 +122,7 @@ const PatchForm = (props) => {
         let userData = UserStore.getUser();
         let tenantId = userData.tenant;
 
-        let type = props.type;
-        if (props.type === 'bps') {
-            type = valueBpType;
-        }
-
-        props.form.setFieldsValue({
-            [`${type}_duration`]: null,
-            [`${type}_device_serial`]: null,
-            [`${type}_mac_address`]: null,
-        });
-
-        if (props.type === "gateway") {
-            props.form.setFieldsValue({
-                [`tags_filter`]: [],
-                [`tags`]: [],
-                [`gateway_device_phone_number`]: null,
-            });
-        }
+        resetValueForm();
 
         props.resetDataSelect('patch');
 
@@ -269,6 +259,48 @@ const PatchForm = (props) => {
                 }
                 break;
             }
+
+            case "gateway_sim_add": {
+                let payload = props.patchData;
+
+                if (values[0].value != null) {
+                    payload[type] = {
+                        ...payload[type],
+                        sim: values[0].value,
+                    };
+
+                    props.savePatchDetails(payload);
+                } else {
+                    payload[type] = {
+                        ...payload[type],
+                        sim: null,
+                    };
+
+                    props.savePatchDetails(payload);
+                }
+                break;
+            }
+
+            case "gateway_phone_number_add": {
+                let payload = props.patchData;
+
+                if (values[0].value != null) {
+                    payload[type] = {
+                        ...payload[type],
+                        phone: values[0].value,
+                    };
+
+                    props.savePatchDetails(payload);
+                } else {
+                    payload[type] = {
+                        ...payload[type],
+                        phone: null,
+                    };
+
+                    props.savePatchDetails(payload);
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -283,6 +315,16 @@ const PatchForm = (props) => {
         deviceApi
             .getPatchesData(deviceType, -1, patchSerial, user.tenant)
             .then((res) => {
+                const patches = res.data?.response?.patches;
+                let arrTag = [];
+                patches.map(patch => {
+                    let tags = [];
+                    if (!!patch?.tags && isJsonString(patch?.tags)) {
+                        tags = JSON.parse(patch?.tags);
+                    }
+                    arrTag = [...arrTag, ...tags];
+                })
+                setTagList(arrTag);
                 setPatchList(res.data?.response?.patches);
             })
             .catch((err) => {
@@ -373,7 +415,7 @@ const PatchForm = (props) => {
         }
     }, [listDeviceAssociated, valueBpType]);
 
-    const onChangeValInputSelect = (val) => {
+    const onChangeValInputTagsAdd = (val) => {
         if (val.includes(";") || val.includes(",")) {
             setValSelectSearch("");
 
@@ -381,13 +423,72 @@ const PatchForm = (props) => {
                 setTagList([...tagList, valSelectSearch]);
                 setTagSelected([...tagSelected, valSelectSearch]);
                 props.form.setFieldsValue({
-                    [`tags`]: [...tagSelected, valSelectSearch]
+                    [`tags_add`]: [...tagSelected, valSelectSearch]
                 })
+                
+               
             }
         } else {
             setValSelectSearch(val);
         }
     };
+
+    useEffect(() => {
+        if (isNewDevice) {
+            let type = props.type;
+            if (props.type === 'bps') { type = valueBpType; }
+
+            let payload = props.patchData;
+            payload[type] = {
+                ...payload[type],
+                tags: tagSelected,
+            };
+            props.savePatchDetails(payload);
+        }
+    }, [tagSelected, isNewDevice]);
+
+    const onSelectTagFilter = (tag_filter) => {
+        const patchFound = patchList?.find(patch => patch?.tags?.includes(tag_filter));
+        onUpdatePatchDetails(patchFound, "tag_filter");
+    };
+
+    const onSelectDataGateway = (val, type) => {
+        const patchFound = patchList?.find(patch => patch[type] === val);
+        onUpdatePatchDetails(patchFound);
+    }
+
+    const onUpdatePatchDetails = (patchFound, typeUpdate) => {
+        if (!!patchFound) {
+            let type = props.type;
+            if (props.type === 'bps') { type = valueBpType; }
+
+            if (type === "gateway") {
+                props.form.setFieldsValue({
+                    [`gateway_phone_number_filter`]: patchFound?.phone,
+                    [`gateway_sim_filter`]: patchFound?.sim,
+                });
+            }
+            props.form.setFieldsValue({
+                [`${type}_device_serial`]: patchFound?.device_serial,
+            });
+
+            if (typeUpdate !== "tag_filter") {
+                props.form.setFieldsValue({
+                    [`tags_filter`]: isJsonString(patchFound?.tags) ? JSON.parse(patchFound?.tags)?.[0] : "",
+                });
+            }
+
+            let payload = props.patchData;
+            payload[type] = {
+                patch_uuid: patchFound?.patch_uuid,
+                [`${type}_device_serial`]: patchFound?.device_serial,
+                type_device: type
+            };
+
+            setDeviceSelected(patchFound?.device_serial);
+            props.savePatchDetails(payload);
+        }
+    }
 
     return summary.isVisible ? (
         <Summary status={summary.status} title={summary.title}>
@@ -485,50 +586,90 @@ const PatchForm = (props) => {
                                 >
                                     <Select
                                         showSearch
-                                        mode="multiple"
-                                        placeholder="Select tags to search sensor"
+                                        placeholder="Search to Select"
+                                        optionFilterProp="children"
                                         filterOption={true}
-                                        onDeselect={(val) => {
-                                            const newArr = tagSelected.filter(tag => tag !== val);
-                                            setTagSelected(newArr);
-                                        }}
+                                        onSelect={onSelectTagFilter}
                                     >
-                                        {tagList?.map(tag => {
+                                        {tagList?.map((tag) => {
                                             return (
-                                                <Option key={tag} value={tag}>{tag}</Option>
-                                            )
+                                                <Option key={tag} value={tag}>
+                                                    {tag}
+                                                </Option>
+                                            );
                                         })}
                                     </Select>
                                 </Form.Item>
                             </Col>
                         )}
 
-                        {(props.type === "gateway" && !isNewDevice) && (
-                            <Col span={18} style={{ position: "relative" }}>
-                                <Form.Item
-                                    required={!props.required}
-                                    label="Phone number"
-                                    name={`gateway_device_phone_number`}
-                                    rules={[
-                                        {
-                                            required: !props.required,
-                                        },
-                                    ]}
-                                    className="addPatientDetailsModal"
-                                >
-                                    <Select
-                                        disabled={props.disabled || isNewDevice}
-                                        showSearch
-                                        placeholder="Search to Select"
-                                        optionFilterProp="children"
-                                        filterOption={true}
-                                        className={isNewDevice ? "select-sensor-associate" : ""}
-                                        onChange={(val) => setDeviceSelected(val)}
-                                        onSearch={(val) => setValSearch(val)}
+                        {(!props.disabled && props.type === "gateway" && !isNewDevice) && (
+                            <>
+                                <Col span={18} style={{ position: "relative" }}>
+                                    <Form.Item
+                                        required={!props.required}
+                                        label="Sim card"
+                                        name={`gateway_sim_filter`}
+                                        rules={[
+                                            {
+                                                required: !props.required,
+                                            },
+                                        ]}
+                                        className="addPatientDetailsModal"
                                     >
-                                    </Select>
-                                </Form.Item>
-                            </Col>
+                                        <Select
+                                            disabled={props.disabled || isNewDevice}
+                                            showSearch
+                                            placeholder="Search to Select"
+                                            optionFilterProp="children"
+                                            filterOption={true}
+                                            onSelect={(val) => onSelectDataGateway(val, "sim")}
+                                        >
+                                            {patchList?.map((item) => {
+                                                if (!!item?.sim) {
+                                                    return (
+                                                        <Option key={item?.sim} value={item?.sim}>
+                                                            {item?.sim}
+                                                        </Option>
+                                                    );
+                                                }
+                                            })}
+                                        </Select>
+                                    </Form.Item>
+                                </Col>
+                                <Col span={18} style={{ position: "relative" }}>
+                                    <Form.Item
+                                        required={!props.required}
+                                        label="Phone number"
+                                        name={`gateway_phone_number_filter`}
+                                        rules={[
+                                            {
+                                                required: !props.required,
+                                            },
+                                        ]}
+                                        className="addPatientDetailsModal"
+                                    >
+                                        <Select
+                                            disabled={props.disabled || isNewDevice}
+                                            showSearch
+                                            placeholder="Search to Select"
+                                            optionFilterProp="children"
+                                            filterOption={true}
+                                            onSelect={(val) => onSelectDataGateway(val, "phone")}
+                                        >
+                                            {patchList?.map((item) => {
+                                                if (!!item?.phone) {
+                                                    return (
+                                                        <Option key={item?.phone} value={item?.phone}>
+                                                            {item?.phone}
+                                                        </Option>
+                                                    );
+                                                }
+                                            })}
+                                        </Select>
+                                    </Form.Item>
+                                </Col>
+                            </>
                         )}
 
                         <Col span={18} style={{ position: "relative" }}>
@@ -555,16 +696,18 @@ const PatchForm = (props) => {
                                     onSearch={(val) => setValSearch(val)}
                                 >
                                     {patchList?.map((item) => {
-                                        return (
-                                            <Option key={item.device_serial} value={item.device_serial}>
-                                                {item.device_serial}
-                                            </Option>
-                                        );
+                                        if (!!item?.device_serial) {
+                                            return (
+                                                <Option key={item.device_serial} value={item.device_serial}>
+                                                    {item.device_serial}
+                                                </Option>
+                                            );
+                                        }
                                     })}
                                 </Select>
                             </Form.Item>
 
-                            {(deviceSelected === null && !props.disabled) && (
+                            {(deviceSelected === null) && (
                                 <div
                                     style={{
                                         position: "absolute", top: "50%", right: "8px", transform: "translateY(-50%)", color: "#ff7529", cursor: "pointer",
@@ -578,8 +721,6 @@ const PatchForm = (props) => {
                                 </div>
                             )}
                         </Col>
-
-
 
                         {!props.disabled && (
                             <Col
@@ -661,7 +802,7 @@ const PatchForm = (props) => {
                                     <Form.Item
                                         required={!props.required}
                                         label="Tags"
-                                        name="tags"
+                                        name="tags_add"
                                         rules={[
                                             {
                                                 required: !props.required,
@@ -674,7 +815,7 @@ const PatchForm = (props) => {
                                             mode="multiple"
                                             placeholder="Select tags"
                                             filterOption={true}
-                                            onSearch={(val) => onChangeValInputSelect(val)}
+                                            onSearch={(val) => onChangeValInputTagsAdd(val)}
                                             autoClearSearchValue={false}
                                             searchValue={valSelectSearch}
                                             onDeselect={(val) => {
@@ -704,7 +845,7 @@ const PatchForm = (props) => {
                                             <Form.Item
                                                 required={!props.required}
                                                 label="SIM Card Number"
-                                                name="simCard"
+                                                name="gateway_sim_add"
                                                 rules={[
                                                     {
                                                         required: !props.required,
@@ -720,7 +861,7 @@ const PatchForm = (props) => {
                                             <Form.Item
                                                 required={!props.required}
                                                 label="Phone Number"
-                                                name="phone"
+                                                name="gateway_phone_number_add"
                                                 rules={[ { pattern: '^([-]?[1-9][0-9]*|0)$', message: "phone is not a valid number" } ]}
                                                 className="addPatientDetailsModal"
                                             >

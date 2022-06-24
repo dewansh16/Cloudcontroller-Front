@@ -3060,8 +3060,7 @@ function GraphVisualizer() {
                             }
                             {
                                 procedureState ?
-                                    <div></div>
-                                    // <Procedure pid={pid} />
+                                    <Procedure pid={pid} date={antd_selected_date_val} />
                                     :
                                     null
                             }
