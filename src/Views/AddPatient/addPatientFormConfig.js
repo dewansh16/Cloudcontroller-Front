@@ -86,7 +86,12 @@ const demographicsFormItems = (
     errorLastName,
     onInputChange,
     setPatientType,
-    patientType
+    patientType,
+    tagList,
+    valSelectSearch,
+    tagSelected,
+    setTagSelected,
+    onChangeValInputTagsAdd
 ) => [
         {
             required: !props.required,
@@ -99,6 +104,40 @@ const demographicsFormItems = (
                     <Radio value="remote">Remote</Radio>
                     <Radio value="hospital" style={{ marginLeft: "2rem" }}>Hospital</Radio>
                 </Radio.Group>
+            ),
+        },
+        {
+            required: !props.required,
+            label: "Tags",
+            name: "tags",
+            className: "addPatientDetailsModal",
+            Input: (
+                <Select
+                    showSearch
+                    mode="multiple"
+                    placeholder="Select tags"
+                    filterOption={true}
+                    onSearch={(val) => onChangeValInputTagsAdd(val)}
+                    autoClearSearchValue={false}
+                    searchValue={valSelectSearch}
+                    onDeselect={(val) => {
+                        const newArr = tagSelected.filter(tag => tag !== val);
+                        setTagSelected(newArr);
+                    }}
+                    notFoundContent={
+                        valSelectSearch && (
+                            <span style={{ fontSize: "12px", color: "#ff7529" }}>
+                                Enter , or ; to create a new tag
+                            </span>
+                        )
+                    }
+                >
+                    {tagList?.map(tag => {
+                        return (
+                            <Option key={tag} value={tag}>{tag}</Option>
+                        )
+                    })}
+                </Select>
             ),
         },
         {

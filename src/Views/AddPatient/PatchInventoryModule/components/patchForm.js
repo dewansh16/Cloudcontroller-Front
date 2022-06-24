@@ -707,7 +707,7 @@ const PatchForm = (props) => {
                                 </Select>
                             </Form.Item>
 
-                            {(deviceSelected === null) && (
+                            {(deviceSelected === null && !props.disabled) && (
                                 <div
                                     style={{
                                         position: "absolute", top: "50%", right: "8px", transform: "translateY(-50%)", color: "#ff7529", cursor: "pointer",

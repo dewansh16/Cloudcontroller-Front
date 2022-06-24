@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Col, Row } from "antd";
 import moment from "moment";
 import { demographicsFormItems } from "../../addPatientFormConfig";
@@ -13,7 +13,12 @@ const PatientDemographics = (props) => {
     );
     const [patientType, setPatientType] = useState(
         props.patientData.patient_type ? props.patientData.patient_type : "remote"
-    )
+    );
+
+    const [tagList, setTagList] = useState([]);
+    const [tagSelected, setTagSelected] = useState([]);
+    const [valSelectSearch, setValSelectSearch] = useState("");
+
     const StoreDemographics = (fieldValues) => {
         //FIXME:remove hardfix deceased date
         // console.log(props.patientData);
@@ -74,6 +79,27 @@ const PatientDemographics = (props) => {
         props.setClass(newClass);
     }
 
+    const onChangeValInputTagsAdd = (val) => {
+        if (val.includes(";") || val.includes(",")) {
+            setValSelectSearch("");
+
+            if (!tagSelected.includes(valSelectSearch)) {
+                setTagList([...tagList, valSelectSearch]);
+                setTagSelected([...tagSelected, valSelectSearch]);
+               
+            }
+        } else {
+            setValSelectSearch(val);
+        }
+    };
+
+    useEffect(() => {
+        props.form.setFieldsValue({
+            [`tags`]: tagSelected
+        })
+        props.patientData.tags = tagSelected;
+    }, [tagSelected]);
+
     return (
         <Form
             {...props.layout}
@@ -96,25 +122,30 @@ const PatientDemographics = (props) => {
                     errorLastName,
                     onInputChange,
                     setPatientType,
-                    patientType
+                    patientType,
+                    tagList,
+                    valSelectSearch,
+                    tagSelected,
+                    setTagSelected,
+                    onChangeValInputTagsAdd
                 ).map((item) => {
-                    if (item.name === "patient_type") {
-                        // console.log("admisiion wala kaam krra");
-                        return (
-                            <Col key={item.name} span={24}>
-                                <Form.Item
-                                    required={item.required}
-                                    hasFeedback={item.hasFeedback}
-                                    label={item.label}
-                                    name={item.name}
-                                    validateFirst={item.validateFirst}
-                                    rules={item.rules}
-                                >
-                                    {item.Input}
-                                </Form.Item>
-                            </Col>
-                        );
-                    }
+                    // if (item.name === "patient_type") {
+                    //     // console.log("admisiion wala kaam krra");
+                    //     return (
+                    //         <Col key={item.name} span={24}>
+                    //             <Form.Item
+                    //                 required={item.required}
+                    //                 hasFeedback={item.hasFeedback}
+                    //                 label={item.label}
+                    //                 name={item.name}
+                    //                 validateFirst={item.validateFirst}
+                    //                 rules={item.rules}
+                    //             >
+                    //                 {item.Input}
+                    //             </Form.Item>
+                    //         </Col>
+                    //     );
+                    // }
                     return (
                         <Col key={item.name} span={12}>
                             <Form.Item

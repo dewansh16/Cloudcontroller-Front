@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import { Select, SelectOption } from "../../Theme/Components/Select/select";
 import tenantApi from "../../Apis/tenantApis";
+import { UserStore } from '../../Stores/userStore';
 
 export default function UserInventory() {
     const [currentPageVal, setCurrentPageVal] = useState(1);
@@ -33,23 +34,25 @@ export default function UserInventory() {
     const [isLoading, setLoading] = useState(true);
 
     useEffect(() => {
-        userApi
-            .getMyself()
-            .then((res) => {
-                setActiveTenant(res.data.response?.users[0]?.tenant_id);
-                tenantApi
-                    .getTenantList()
-                    .then((res) => {
-                        setTenantList(res.data.response?.tenants[0]);
-                        setLoading(false);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+        const { tenant } = UserStore.getUser();
+        setActiveTenant(tenant);
+        // userApi
+        //     .getMyself()
+        //     .then((res) => {
+        //         setActiveTenant(res.data.response?.users[0]?.tenant_id);
+        //         tenantApi
+        //             .getTenantList()
+        //             .then((res) => {
+        //                 setTenantList(res.data.response?.tenants[0]);
+        //                 setLoading(false);
+        //             })
+        //             .catch((err) => {
+        //                 console.log(err);
+        //             });
+        //     })
+        //     .catch((err) => {
+        //         console.log(err);
+        //     });
     }, []);
 
     const showUserModal = () => {
