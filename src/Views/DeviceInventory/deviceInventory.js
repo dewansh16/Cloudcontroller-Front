@@ -562,7 +562,7 @@ function PatchInventory() {
                                 <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
                                     MR:
                                 </span>
-                                <span style={{ fontWeight: "500", marginLeft: "2px" }}>
+                                <span style={{ fontWeight: "500", marginLeft: "2px",  textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", }}>
                                     {patient_data?.med_record || ""}
                                 </span>
                             </span> 

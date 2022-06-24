@@ -596,7 +596,7 @@ export default function PatientDetails(props) {
                                                                     : patient.demographic_map.title
                                                                 }` +
                                                                 " " +
-                                                                patient.demographic_map.fname +
+                                                                patient.demograppatient<dEVIhic_map.fname +
                                                                 " " +
                                                                 patient.demographic_map.lname,
                                                             mr: patient.demographic_map.med_record,
@@ -986,7 +986,12 @@ export default function PatientDetails(props) {
                                 onCancel={closeQuickInfo}
                                 bodyStyle={{ backgroundColor: "white", padding: "2em 4em" }}
                             >
-                                <DeviceManagement pid={pid} associated_list={patient?.demographic_map?.associated_list} valDuration={props?.location?.state?.dataFilterHeader?.valDuration || "7d"} />
+                                <DeviceManagement 
+                                    pid={pid} 
+                                    patient={patient}
+                                    setPatient={setPatient}
+                                    valDuration={props?.location?.state?.dataFilterHeader?.valDuration || "7d"} 
+                                />
                             </Modal>
                         </Row>{" "}
                         {
