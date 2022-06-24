@@ -14,10 +14,19 @@ import {
     Checkbox,
     Spin
 } from "antd";
+
+import notification from 'antd/lib/notification'
+import moment from "moment";
+
 import { withRouter } from "react-router-dom";
-import "./device.css";
+
+import deviceApi from "../../Apis/deviceApis";
+import Icons from "../../Utils/iconMap";
+import { UserStore } from "../../Stores/userStore";
+
 import PatchInventoryModal from "./addDevice/addDevice";
 import AddBundleModal from "./addBundle/addBundle";
+import GatewayStatus from "./gatewayStatus";
 
 import device1 from "../../Assets/Images/ecg.png";
 import device2 from "../../Assets/Images/temp1.png";
@@ -29,23 +38,16 @@ import imgIHealth from "../../Assets/Images/ihealth.png";
 import digitalScale from "../../Assets/Images/DigitalScale.png";
 import gatewayImg from "../../Assets/Images/gateway.png";
 import bpImg from "../../Assets/Images/BP-sensor.png";
+import iconDelete from "../../Assets/Images/iconDelete.png";
+import IconScan from "../../Assets/Images/iconScan.svg";
+import IconReset from "../../Assets/Images/iconReset.svg";
 
-import deviceApi from "../../Apis/deviceApis";
 // import PaginationBox from '../Components/paginationBox';
 import { PaginationBox } from "../Components/PaginationBox/pagination";
 
 import Navbar from "../../Theme/Components/Navbar/navbar";
-
 import { Input, GlobalSearch } from "../../Theme/Components/Input/input";
-
 import { Button as Buttons } from "../../Theme/Components/Button/button";
-
-import Icons from "../../Utils/iconMap";
-import { UserStore } from "../../Stores/userStore";
-
-import iconDelete from "../../Assets/Images/iconDelete.png";
-import notification from 'antd/lib/notification'
-import GatewayStatus from "./gatewayStatus";
 
 import {
     SearchOutlined,
@@ -54,7 +56,8 @@ import {
     CheckOutlined,
     CloseCircleOutlined,
 } from "@ant-design/icons";
-import moment from "moment";
+
+import "./device.css";
 
 function PatchInventory() {
     // const { url } = useRouteMatch();
@@ -458,6 +461,16 @@ function PatchInventory() {
         "ihealth": "iHealth",
     }[type]);
 
+    const checkWidthForImgSensor = (type) => ({
+        "gateway": "100px",
+        "temperature": "100px",
+        "spo2": "90px",
+        "ecg": "77px",
+        "alphamed": "70px",
+        "ihealth": "70px",
+        "digital": "80px"
+    }[type]);
+
     const columns = [
         {
             title: () => {
@@ -486,30 +499,38 @@ function PatchInventory() {
             width: 60,
             render: (dataIndex, record) => (
                 <div style={{ display: "flex", alignItems: "center" }}>
-                    <Checkbox 
-                        onChange={() => {
-                            let newArr = [...arrayChecked]
-                            if (newArr?.includes(record.patch_uuid)) {
-                                newArr = newArr.filter(item => item !== record.patch_uuid);
-                            } else {
-                                newArr.push(record.patch_uuid)
-                            }
-                            setArrayChecked(newArr);
-                        }}
-                        disabled={record.patch_patient_map !== null}
-                        className="checkbox-delete-device"
-                        checked={arrayChecked?.includes(record.patch_uuid)}
-                        style={{ marginLeft: "6px" }}
-                    />
-                    <div>
+                   
+                    {/* {record?.patch_type === "gateway" ? (
+                        <div style={{ display: "flex", flexDirection: "column", marginLeft: "4px" }}>
+                            <img className="icon_gateway" style={{marginBottom: "4px" }} src={IconScan} />
+                            <img className="icon_gateway" style={{marginTop: "4px" }} src={IconReset} />
+                        </div>
+                    ) : ( */}
+                        <Checkbox 
+                            onChange={() => {
+                                let newArr = [...arrayChecked]
+                                if (newArr?.includes(record.patch_uuid)) {
+                                    newArr = newArr.filter(item => item !== record.patch_uuid);
+                                } else {
+                                    newArr.push(record.patch_uuid)
+                                }
+                                setArrayChecked(newArr);
+                            }}
+                            disabled={record.patch_patient_map !== null}
+                            className="checkbox-delete-device"
+                            checked={arrayChecked?.includes(record.patch_uuid)}
+                            style={{ marginLeft: "6px", marginRight: "2px" }}
+                        />
+                    {/* )} */}
+                    <div style={{ width: "80px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <img 
                             alt="someimage" 
                             src={handleImg(record)} 
-                            width="80px" 
-                            style={{ 
-                                transform: (record?.patch_type === "gateway" || record?.patch_type === "temperature") ? "scale(1.25)" :
-                                (record?.patch_type === "alphamed" || record?.patch_type === "ihealth") ? "scale(0.7)" : "scale(1)"
-                            }}
+                            width={checkWidthForImgSensor(record.patch_type)}
+                            // style={{ 
+                            //     transform: (record?.patch_type === "gateway" || record?.patch_type === "temperature") ? "scale(1.25)" :
+                            //     (record?.patch_type === "alphamed" || record?.patch_type === "ihealth") ? "scale(0.7)" : "scale(1)"
+                            // }}
                         ></img>
                     </div>
                 </div>
@@ -797,7 +818,7 @@ function PatchInventory() {
                                 // marginRight: "16px",
                                 width: "fit-content",
                                 color: "#DD4A34",
-                                background: "#ffffff",
+                                background: "transparent",
                                 fontSize: "16px",
                                 // border: "2px solid #FFBEB4",
                                 display: "flex",
@@ -822,7 +843,7 @@ function PatchInventory() {
                                 // marginLeft: "5px",
                                 width: "fit-content",
                                 color: "#06A400",
-                                background: "#ffffff    ",
+                                background: "transparent",
                                 fontSize: "16px",
                                 // border: "2px solid #06A00020",
                                 display: "flex",
