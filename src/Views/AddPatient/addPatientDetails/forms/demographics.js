@@ -16,7 +16,7 @@ const PatientDemographics = (props) => {
     );
 
     const [tagList, setTagList] = useState([]);
-    const [tagSelected, setTagSelected] = useState([]);
+    const [tagSelected, setTagSelected] = useState(props.patientData?.tags || []);
     const [valSelectSearch, setValSelectSearch] = useState("");
 
     const StoreDemographics = (fieldValues) => {
