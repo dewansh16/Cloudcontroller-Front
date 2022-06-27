@@ -968,103 +968,117 @@ export default function Vitals({
         }, [vitalthresholds]);
 
         return (
-            <Form
-                style={{ padding: "2rem", width: "100%" }}
-                form={addThresholdForm}
-                layout="vertical"
-                name="addThresholdForm"
-                initialValues={{ remember: true }}
-                className="myform"
-                // onFinish={onFinish}
-                // onFinishFailed={onFinishFailed}
-            >
-                <Row gutter={[24, 24]} justify="space-between">
-                    {Object.keys(formData).map((item, id) => {
-                        return (
-                            <Col key={id} style={{}} span={12}>
-                                <Form.Item
-                                    required={false}
-                                    label={`${formData[item].label}`}
-                                    name={item}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "required",
-                                        },
-                                    ]}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                        }}
-                                    >
-                                        <span
-                                            style={{ display: "inline-block", fontWeight: "medium" }}
+            <>
+                {isLoading ? (
+                    <div style={{
+                        height: "100%",
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}>
+                        <Spin />
+                    </div>
+                ) : (
+                    <Form
+                        style={{ padding: "2rem", width: "100%" }}
+                        form={addThresholdForm}
+                        layout="vertical"
+                        name="addThresholdForm"
+                        initialValues={{ remember: true }}
+                        className="myform"
+                        // onFinish={onFinish}
+                        // onFinishFailed={onFinishFailed}
+                    >
+                        <Row gutter={[24, 24]} justify="space-between">
+                            {Object.keys(formData).map((item, id) => {
+                                return (
+                                    <Col key={id} style={{}} span={12}>
+                                        <Form.Item
+                                            required={false}
+                                            label={`${formData[item].label}`}
+                                            name={item}
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "required",
+                                                },
+                                            ]}
                                         >
-                                            Min:{" "}
-                                            <Input
-                                                style={{ width: "4rem" }}
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "space-between",
+                                                }}
+                                            >
+                                                <span
+                                                    style={{ display: "inline-block", fontWeight: "medium" }}
+                                                >
+                                                    Min:{" "}
+                                                    <Input
+                                                        style={{ width: "4rem" }}
+                                                        onChange={(e) => {
+                                                            formData[item].value[0] =
+                                                                parseInt(e.target.value || formData[item].range[0]);
+                                                            setFormData({ ...formData });
+                                                            addThresholdForm.setFieldsValue({ ...formData });
+                                                        }}
+                                                        value={formData[item].value[0]}
+                                                    />
+                                                </span>
+                                                <span
+                                                    style={{ display: "inline-block", fontWeight: "medium" }}
+                                                >
+                                                    Max:{" "}
+                                                    <Input
+                                                        style={{ width: "4rem" }}
+                                                        onChange={(e) => {
+                                                            formData[item].value[1] = 
+                                                                parseInt(e.target.value || formData[item].range[1]);
+                                                            setFormData({ ...formData });
+                                                            addThresholdForm.setFieldsValue({ ...formData });
+                                                        }}
+                                                        value={formData[item].value[1]}
+                                                    />
+                                                </span>
+                                            </div>
+                                            <Slider
                                                 onChange={(e) => {
-                                                    formData[item].value[0] =
-                                                        parseInt(e.target.value || formData[item].range[0]);
+                                                    formData[item].value = e;
                                                     setFormData({ ...formData });
                                                     addThresholdForm.setFieldsValue({ ...formData });
                                                 }}
-                                                value={formData[item].value[0]}
+                                                min={formData[item].range[0]}
+                                                max={formData[item].range[1]}
+                                                range
+                                                value={[formData[item].value[0], formData[item].value[1]]}
                                             />
-                                        </span>
-                                        <span
-                                            style={{ display: "inline-block", fontWeight: "medium" }}
-                                        >
-                                            Max:{" "}
-                                            <Input
-                                                style={{ width: "4rem" }}
-                                                onChange={(e) => {
-                                                    formData[item].value[1] = 
-                                                        parseInt(e.target.value || formData[item].range[1]);
-                                                    setFormData({ ...formData });
-                                                    addThresholdForm.setFieldsValue({ ...formData });
-                                                }}
-                                                value={formData[item].value[1]}
-                                            />
-                                        </span>
-                                    </div>
-                                    <Slider
-                                        onChange={(e) => {
-                                            formData[item].value = e;
-                                            setFormData({ ...formData });
-                                            addThresholdForm.setFieldsValue({ ...formData });
-                                        }}
-                                        min={formData[item].range[0]}
-                                        max={formData[item].range[1]}
-                                        range
-                                        value={[formData[item].value[0], formData[item].value[1]]}
-                                    />
+                                        </Form.Item>
+                                    </Col>
+                                );
+                            })}
+                        </Row>
+                        <Row gutter={[24, 24]} justify="space-between">
+                            <Col style={{}} span={12}></Col>
+                            <Col
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "flex-end",
+                                }}
+                                span={12}
+                            >
+                                <Form.Item>
+                                    <Button onClick={() => onFinish(formData)} type="primary-outlined">
+                                        Add
+                                    </Button>
                                 </Form.Item>
                             </Col>
-                        );
-                    })}
-                </Row>
-                <Row gutter={[24, 24]} justify="space-between">
-                    <Col style={{}} span={12}></Col>
-                    <Col
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                        }}
-                        span={12}
-                    >
-                        <Form.Item>
-                            <Button onClick={() => onFinish(formData)} type="primary-outlined">
-                                Add
-                            </Button>
-                        </Form.Item>
-                    </Col>
-                </Row>
-            </Form>
+                        </Row>
+                    </Form>
+                )}
+            </>
         );
     };
 

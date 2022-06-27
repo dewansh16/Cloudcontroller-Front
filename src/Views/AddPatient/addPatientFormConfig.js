@@ -535,7 +535,7 @@ const BedAllocationForm = (
         },
     ];
 
-const practitionersForm = (props, doctorList) => [
+const practitionersForm = (props, primaryConsultantList, secondaryConsultantList) => [
     {
         required: !props.required,
         label: "Primary Consultant",
@@ -544,7 +544,6 @@ const practitionersForm = (props, doctorList) => [
             { required: !props.required, message: "Primary consultant is required" },
         ],
         className: "addPatientDetailsModal",
-
         Input: (
             <Select
                 showSearch
@@ -556,12 +555,14 @@ const practitionersForm = (props, doctorList) => [
                     option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
             >
-                {doctorList.map((item) => {
-                    return (
-                        <Option value={item.user_uuid}>
-                            {item.fname + " " + item.lname}
-                        </Option>
-                    );
+                {primaryConsultantList?.map((item) => {
+                    if (!item.isSelected) {
+                        return (
+                            <Option key={`secondary_consultant_${item?.user_uuid}`} value={item?.user_uuid}>
+                                {item?.fname + " " + item?.lname}
+                            </Option>
+                        );
+                    }
                 })}
             </Select>
         ),
@@ -577,7 +578,6 @@ const practitionersForm = (props, doctorList) => [
             },
         ],
         className: "addPatientDetailsModal",
-
         Input: (
             <Select
                 showSearch
@@ -589,12 +589,14 @@ const practitionersForm = (props, doctorList) => [
                     option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
             >
-                {doctorList.map((item) => {
-                    return (
-                        <Option value={item.user_uuid}>
-                            {item.fname + " " + item.lname}
-                        </Option>
-                    );
+                {secondaryConsultantList?.map((item) => {
+                    if (!item.isSelected) {
+                        return (
+                            <Option key={`secondary_consultant_${item?.user_uuid}`} value={item?.user_uuid}>
+                                {item?.fname + " " + item?.lname}
+                            </Option>
+                        );
+                    }
                 })}
             </Select>
         ),

@@ -243,14 +243,14 @@ function AddPatient() {
 
                     let primary_consultant = [];
                     let secondary_consultant = [];
-                    if (demographic_map.practictioner_patient_map !== null) {
-                        // console.log(demographic_map.practictioner_patient_map);
-                        demographic_map.practictioner_patient_map?.primary_consultant?.map(
+                    if (demographic_map !== null) {
+                        // console.log(demographic_map);
+                        demographic_map?.primary_consultant?.map(
                             (item) => {
                                 primary_consultant.push(item.uuid);
                             }
                         );
-                        demographic_map.practictioner_patient_map?.secondary_consultant?.map(
+                        demographic_map?.secondary_consultant?.map(
                             (item) => {
                                 secondary_consultant.push(item.uuid);
                             }
@@ -642,25 +642,25 @@ function AddPatient() {
 
                     setPatientData(demographic_map);
 
-                    let practitionersData = {
-                        ...practitioners,
-                        tenant_id: tenantId,
-                        pid:
-                            demographic_map?.pid ||
-                            patientId,
-                    };
+                    // let practitionersData = {
+                    //     ...practitioners,
+                    //     tenant_id: tenantId,
+                    //     pid:
+                    //         demographic_map?.pid ||
+                    //         patientId,
+                    // };
 
-                    patientApi
-                        .addPatientPractitioners(
-                            practitionersData,
-                            demographic_map?.pid || patientId
-                        )
-                        .then((res) => {
-                            console.log(res.data.response);
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                        });
+                    // patientApi
+                    //     .addPatientPractitioners(
+                    //         practitionersData,
+                    //         demographic_map?.pid || patientId
+                    //     )
+                    //     .then((res) => {
+                    //         console.log(res.data.response);
+                    //     })
+                    //     .catch((err) => {
+                    //         console.log(err);
+                    //     });
 
                     // if (patientData.location_uuid !== patientLocationUUID) {
                     //     const locationData = {
