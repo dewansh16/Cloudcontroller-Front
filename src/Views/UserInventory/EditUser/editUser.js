@@ -82,14 +82,15 @@ export default function EditUser(props) {
                 tenant_id: record.tenant_id,
                 phone: values.phone,
                 password: values.password || record.password,
+                user_uuid: record.user_uuid
             };
             userApi
                 .editUser(record.user_uuid, data)
                 .then((res) => {
-                    console.log("success", res);
                     setIsUploading(false);
                     success();
                     props.state();
+                    props.getList();
                 })
                 .catch((err) => {
                     console.error(err);
@@ -115,8 +116,6 @@ export default function EditUser(props) {
         height: "54px",
     };
 
-    console.log("record.password", record.password);
-    
     return (
         <>
             <Row
@@ -254,6 +253,7 @@ export default function EditUser(props) {
                                             className="addPatientDetailsModal"
                                         >
                                             <Input
+                                                disabled={true}
                                                 onChange={(e) => {
                                                     e.target.value === record.username
                                                         ? (e.target.style.color = "#474747")
@@ -340,6 +340,7 @@ export default function EditUser(props) {
                                         >
                                             <Input
                                                 type="email"
+                                                disabled={true}
                                                 onChange={(e) => {
                                                     e.target.value === record.email
                                                         ? (e.target.style.color = "#474747")

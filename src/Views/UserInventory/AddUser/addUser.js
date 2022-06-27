@@ -78,7 +78,7 @@ export default function AddUser(props) {
 
     const addFail = (err) => {
         const key = "warning";
-        message.error({ content: "" + err, key, duration: 3 });
+        message.error({ content: "" + err.response?.data?.message, key, duration: 3 });
     };
 
     function validate(data, schema) {
@@ -128,8 +128,8 @@ export default function AddUser(props) {
                 .then((res) => {
                     form.resetFields();
                     setIsUploading(false);
-                    console.log(res);
                     success();
+                    props.getList();
                     props.state();
                 })
                 .catch((err) => {

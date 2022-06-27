@@ -16,17 +16,11 @@ const userApi = {
             // withCredentials: true,
         }),
     // getUserList: "/users/userinventory?limit=100&offset=0&filter=0",
-    getUserList: (searchType, firstName, lastName, limit, offset, tenant_uuid) =>
+    getUserList: (tenant_uuid, limit, offset, search) =>
         axiosInstance.request({
             method: "GET",
             url: `/users/userinventory?limit=${limit || 10}&offset=${offset || 0
-                }&tenantId=tenant8ea56b12-ff44-4b5c-839c-f609363ba385&filter=${firstName !== null && firstName !== undefined
-                    ? `fname=${firstName}`
-                    : ""
-                }${lastName !== null && lastName !== undefined && lastName !== ""
-                    ? `&lname=${lastName}`
-                    : ""
-                }`,
+                }&tenantId=${tenant_uuid}`,
             // withCredentials: true,
         }),
     addUser: (data) =>

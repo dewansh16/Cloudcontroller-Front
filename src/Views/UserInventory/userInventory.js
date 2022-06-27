@@ -76,6 +76,7 @@ export default function UserInventory() {
     const [record, setRecord] = useState(null);
     const [index, setIndex] = useState(null);
     const [searchType, setSearchType] = useState("Name");
+    const [valSearch, setValSearch] = useState("");
 
     const showEditModal = (record, index) => {
         setEditModal(true);
@@ -89,18 +90,14 @@ export default function UserInventory() {
 
     const [userListToShow, setUserListToShow] = useState([]);
 
-    function fetchUserList(searchType, value) {
+    function fetchUserList() {
         setLoading(true);
-        const firstName = value?.split(" ").slice(0, 1).join(" ");
-        const lastName = value?.split(" ").slice(-1).join(" ");
         userApi
             .getUserList(
-                searchType,
-                firstName,
-                lastName,
+                activeTenant,
                 10,
                 10 * (currentPageVal - 1),
-                activeTenant
+                valSearch
             )
             .then((res) => {
                 const data = res.data?.response.users;
@@ -122,7 +119,6 @@ export default function UserInventory() {
     }
 
     const onClickMenuItem = function ({ key }) {
-        console.log(`Click on item ${key}`);
         setActiveTenant(key);
     };
 
@@ -140,11 +136,10 @@ export default function UserInventory() {
         if (activeTenant) {
             return fetchUserList();
         }
-    }, [userModal, editModal, currentPageVal, activeTenant]);
+    }, [currentPageVal, activeTenant, valSearch]);
 
     const searchUser = (value) => {
-        console.log(value);
-        fetchUserList(searchType, value);
+        setValSearch(value)
     };
 
     const getTenantName = (tenant_id) => {
@@ -504,7 +499,7 @@ export default function UserInventory() {
                 closable={false}
                 width="68%"
             >
-                <AddUser state={closeAddUser} visible={userModal} activeTenant={activeTenant} />
+                <AddUser state={closeAddUser} visible={userModal} activeTenant={activeTenant} getList={fetchUserList} />
             </Modal>
 
             <Modal
@@ -523,6 +518,7 @@ export default function UserInventory() {
                     index={index}
                     title={"Edit Details"}
                     showCancel
+                    getList={fetchUserList}
                 />
             </Modal>
         </>
