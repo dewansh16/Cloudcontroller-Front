@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Form, Col, Row } from "antd";
 import moment from "moment";
 import { demographicsFormItems } from "../../addPatientFormConfig";
+import { isJsonString } from "../../../../Utils/utils";
 
 const PatientDemographics = (props) => {
+    const tags = isJsonString(props.patientData?.tags) ? JSON.parse(props.patientData?.tags) : [];
     // const [initialState,setInitialState]
     const [admissionDate, setAdmissionDate] = useState(
         props.patientData.admission_date ? props.patientData.admission_date : null
@@ -15,8 +17,8 @@ const PatientDemographics = (props) => {
         props.patientData.patient_type ? props.patientData.patient_type : "remote"
     );
 
-    const [tagList, setTagList] = useState([]);
-    const [tagSelected, setTagSelected] = useState([]);
+    const [tagList, setTagList] = useState(tags);
+    const [tagSelected, setTagSelected] = useState(tags);
     const [valSelectSearch, setValSelectSearch] = useState("");
 
     const StoreDemographics = (fieldValues) => {

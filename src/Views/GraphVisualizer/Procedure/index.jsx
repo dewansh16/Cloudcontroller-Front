@@ -29,7 +29,7 @@ const Procedure = ({ pid, date }) => {
                 });
             }
         })
-    }, [pid]);
+    }, [pid, date]);
 
     return (
         <>
