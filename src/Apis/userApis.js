@@ -47,7 +47,14 @@ const userApi = {
     getMyself: (tenant_uuid) =>
         axiosInstance.request({
             method: "GET",
-            url: `users/_self?tenantId={${tenant_uuid}}&limit=100&offset=0&filter=0`,
+            url: `users/_self?tenantId={${tenant_uuid || ""}}&limit=100&offset=0&filter=0`,
+            // withCredentials: true,
+        }),
+
+    getProfile: (user_uuid) => 
+        axiosInstance.request({
+            method: "GET",
+            url: `/users/profile?user_uuid=${user_uuid || ""}`,
             // withCredentials: true,
         }),
 };
