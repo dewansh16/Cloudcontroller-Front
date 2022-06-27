@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { Spin } from "antd";
 import { queryApi } from "../../../../Utils/influx";
+import moment from 'moment';
 
 // import { InfluxDB } from "@influxdata/influxdb-client";
 
@@ -105,6 +106,8 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
         return result;
     }
 
+    const TOTAL_HOURS_FOR_EACH_SENSOR_BILLED = 16;
+
     useEffect(() => {
         setLoading(true);
         setTotalDay(0);
@@ -157,6 +160,15 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
             }
 
             billFound.total = totalDayMonitored;
+            if (totalDayMonitored >= TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
+                billFound["99454"] = {
+                    code: "99454",
+                    date: maxDate,
+                    desc: "1 billed",
+                    duration: "16 days",
+                }
+            }
+           
             setTotalDay(totalDayMonitored);
             setLoading(false);
         }, 2000);

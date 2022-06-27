@@ -14,7 +14,8 @@ export default function ChartsBlock({
     strokeColor,
     span = [1, 1, 2],
     keyChart,
-    lastTime
+    lastTime,
+    indexChart
 }) {
     const toolTipConfig = {
         // "Temperature": `${value}° F`,
@@ -169,7 +170,10 @@ export default function ChartsBlock({
 
     return (
         <>
-            <div style={{ display: "flex", alignItems: "center", flexDirection: "column", width: "100%", height: "100%" }}>
+            <div style={{ 
+                    display: "flex", alignItems: "center", flexDirection: "column", 
+                    width: "100%", height: "100%", /* borderBottom: indexChart < 4 ? "1px solid #ddd" : "" */
+            }}>
                 <div style={{ display: "flex", alignItems: "center", width: "100%", height: "80%" }}>
                     <Tooltip title={name}>
                         <div

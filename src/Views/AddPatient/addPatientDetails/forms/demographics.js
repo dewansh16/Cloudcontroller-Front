@@ -5,7 +5,7 @@ import { demographicsFormItems } from "../../addPatientFormConfig";
 import { isJsonString } from "../../../../Utils/utils";
 
 const PatientDemographics = (props) => {
-    const tags = isJsonString(props.patientData?.tags) ? JSON.parse(props.patientData?.tags) : [];
+    const tags = !!props?.patientData?.tags && isJsonString(props?.patientData?.tags) ? JSON.parse(props?.patientData?.tags) : [];
     // const [initialState,setInitialState]
     const [admissionDate, setAdmissionDate] = useState(
         props.patientData.admission_date ? props.patientData.admission_date : null

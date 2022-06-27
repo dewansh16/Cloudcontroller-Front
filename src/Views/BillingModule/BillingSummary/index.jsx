@@ -657,7 +657,7 @@ const BillingModule = () => {
 
     return (
         <div>
-            <ModalSummary pid={pidModalSummary} onClose={onCloseModalSummary} currentDate={valueDate} />
+            <ModalSummary pid={pidModalSummary} onClose={onCloseModalSummary} currentDate={valueDate} billingSummary={billingSummary?.billings} />
 
             <div>
                 <Navbar

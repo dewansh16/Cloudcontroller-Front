@@ -148,6 +148,16 @@ const PatientListItem = (props) => {
             color: Colors.yellow,
             trendData: []
         },
+        // {
+        //     _key: 'weight',
+        //     name: "Gluco",
+        //     icon: Icons.bpIcon({
+        //         Style: { color: Colors.yellow, fontSize: "24px" },
+        //     }),
+        //     val: 0,
+        //     color: Colors.yellow,
+        //     trendData: []
+        // },
         {
             _key: 'gateway_keep_alive_time',
             valueGateway: 0
@@ -518,6 +528,7 @@ const PatientListItem = (props) => {
                             style={{
                                 display: "flex", alignItems: "center",
                                 width: item?._key === "gateway_keep_alive_time" ? "8%" : "15%"
+                                // width: "25%",
                             }}
                         >
                             {item?._key !== "gateway_keep_alive_time" ? (
@@ -540,6 +551,7 @@ const PatientListItem = (props) => {
                                         strokeColor={item.color}
                                         keyChart={item?._key}
                                         lastTime={item?.lastTime}
+                                        indexChart={i}
                                     />
                                 </>
                             ) : (

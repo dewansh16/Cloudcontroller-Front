@@ -12,7 +12,8 @@ import {
     message,
     Popconfirm,
     Checkbox,
-    Spin
+    Spin,
+    Tooltip
 } from "antd";
 
 import notification from 'antd/lib/notification'
@@ -471,6 +472,14 @@ function PatchInventory() {
         "digital": "80px"
     }[type]);
 
+    const onScanGateway = () => {
+
+    };
+
+    const onResetGateway = () => {
+
+    };
+
     const columns = [
         {
             title: () => {
@@ -500,12 +509,26 @@ function PatchInventory() {
             render: (dataIndex, record) => (
                 <div style={{ display: "flex", alignItems: "center" }}>
                    
-                    {/* {record?.patch_type === "gateway" ? (
+                    {record?.patch_type === "gateway" ? (
                         <div style={{ display: "flex", flexDirection: "column", marginLeft: "4px" }}>
-                            <img className="icon_gateway" style={{marginBottom: "4px" }} src={IconScan} />
-                            <img className="icon_gateway" style={{marginTop: "4px" }} src={IconReset} />
+                            <Tooltip title="Scan gateway">
+                                <img 
+                                    className="icon_gateway" 
+                                    style={{marginBottom: "4px" }} 
+                                    src={IconScan} 
+                                    onClick={onScanGateway}
+                                />
+                            </Tooltip>
+                            <Tooltip title="Reset gateway">
+                                <img    
+                                    className="icon_gateway"
+                                    style={{marginTop: "4px" }} 
+                                    src={IconReset} 
+                                    onClick={onResetGateway}
+                                />
+                            </Tooltip>
                         </div>
-                    ) : ( */}
+                    ) : (
                         <Checkbox 
                             onChange={() => {
                                 let newArr = [...arrayChecked]
@@ -521,7 +544,7 @@ function PatchInventory() {
                             checked={arrayChecked?.includes(record.patch_uuid)}
                             style={{ marginLeft: "6px", marginRight: "2px" }}
                         />
-                    {/* )} */}
+                    )}
                     <div style={{ width: "80px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <img 
                             alt="someimage" 
