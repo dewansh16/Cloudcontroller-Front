@@ -19,6 +19,7 @@ const PractitionerDetails = (props) => {
         let name = `${values[0].name[0]}`;
         let value = values[0].value;
         let modifiedData = [];
+
         value.map((id) => {
             doctorList.map((item) => {
                 if (id === item.user_uuid) {
@@ -30,7 +31,9 @@ const PractitionerDetails = (props) => {
                 }
             });
         });
-        props.savePractitionersDetails({ [name]: modifiedData });
+
+        props.savePatientDetails({ [name]: modifiedData });
+        // props.savePractitionersDetails({ [name]: modifiedData });
     };
 
     useEffect(() => {
@@ -38,8 +41,8 @@ const PractitionerDetails = (props) => {
         userApi
             .getUserList( "", "", "", "", "", userData?.tenant)
             .then((res) => {
-                const doctorsData = res.data?.response?.users[0].filter(
-                    (item) => item.role.toLowerCase() === "doctor"
+                const doctorsData = res.data?.response?.users.filter(
+                    (item) => item?.role?.toLowerCase() === "doctor"
                 );
                 setDoctorList(doctorsData);
             })

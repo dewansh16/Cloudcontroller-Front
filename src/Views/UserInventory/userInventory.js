@@ -36,28 +36,38 @@ export default function UserInventory() {
     useEffect(() => {
         const { tenant } = UserStore.getUser();
         setActiveTenant(tenant);
-        userApi
-            .getMyself(tenant)
+
+        tenantApi
+            .getTenantList()
             .then((res) => {
-                setActiveTenant(res.data.response?.users[0]?.tenant_id);
-                tenantApi
-                    .getTenantList()
-                    .then((res) => {
-                        setTenantList(res.data.response?.tenants[0]);
-                        setLoading(false);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
+                setTenantList(res.data.response?.tenants);
             })
             .catch((err) => {
                 console.log(err);
             });
+        // userApi
+        //     .getMyself(tenant)
+        //     .then((res) => {
+        //         setActiveTenant(res.data.response?.users[0]?.tenant_id);
+        //         tenantApi
+        //             .getTenantList()
+        //             .then((res) => {
+        //                 setTenantList(res.data.response?.tenants[0]);
+        //                 setLoading(false);
+        //             })
+        //             .catch((err) => {
+        //                 console.log(err);
+        //             });
+        //     })
+        //     .catch((err) => {
+        //         console.log(err);
+        //     });
     }, []);
 
     const showUserModal = () => {
         setUserModal(true);
     };
+
     const closeAddUser = () => {
         setUserModal(false);
     };
@@ -72,6 +82,7 @@ export default function UserInventory() {
         setRecord(record);
         setIndex(index);
     };
+
     const closeEditUser = () => {
         setEditModal(false);
     };
@@ -79,6 +90,7 @@ export default function UserInventory() {
     const [userListToShow, setUserListToShow] = useState([]);
 
     function fetchUserList(searchType, value) {
+        setLoading(true);
         const firstName = value?.split(" ").slice(0, 1).join(" ");
         const lastName = value?.split(" ").slice(-1).join(" ");
         userApi
@@ -99,7 +111,8 @@ export default function UserInventory() {
                     };
                 });
                 setUserListToShow(moodifiedData);
-                setTotalPages(Math.ceil(res.data?.response.userTotalCount / 10));
+                // setTotalPages(Math.ceil(res.data?.response.userTotalCount / 10));
+                setTotalPages(1);
                 setLoading(false);
             })
             .catch((err) => {
@@ -108,16 +121,16 @@ export default function UserInventory() {
             });
     }
 
-    const onClick = function ({ key }) {
+    const onClickMenuItem = function ({ key }) {
         console.log(`Click on item ${key}`);
         setActiveTenant(key);
     };
 
     const menu = (
-        <Menu onClick={onClick} className='list-user-dropdown-select'>
-            {tenantList.map((tenant, index) => (
-                <Menu.Item key={tenant.tenant_uuid}>
-                    <p>{tenant.tenant_name}</p>
+        <Menu onClick={onClickMenuItem} className='list-user-dropdown-select'>
+            {tenantList?.map((tenant, index) => (
+                <Menu.Item key={tenant?.tenant_uuid}>
+                    <span>{tenant?.tenant_name}</span>
                 </Menu.Item>
             ))}
         </Menu>
@@ -135,11 +148,11 @@ export default function UserInventory() {
     };
 
     const getTenantName = (tenant_id) => {
-        const selectedTenant = tenantList.filter(
-            (item) => item.tenant_uuid === tenant_id
+        const selectedTenant = tenantList?.find(
+            (item) => item?.tenant_uuid === tenant_id
         );
         // console.log(selectedTenant);
-        return selectedTenant[0]?.tenant_name;
+        return selectedTenant?.tenant_name;
     };
 
     const columns = [
@@ -188,7 +201,7 @@ export default function UserInventory() {
                     </Row>
                 </>
             ),
-            sorter: (a, b) => a.fname.localeCompare(b.fname),
+            sorter: (a, b) => a.fname?.localeCompare(b.fname),
         },
         {
             title: "Username",
@@ -199,7 +212,7 @@ export default function UserInventory() {
             render: (dataIndex) => (
                 <text className="table-body-text">{dataIndex}</text>
             ),
-            sorter: (a, b) => a.username.localeCompare(b.username),
+            sorter: (a, b) => a.username?.localeCompare(b.username),
         },
         {
             title: "User Status",
@@ -249,7 +262,7 @@ export default function UserInventory() {
             render: (dataIndex) => (
                 <text className="table-body-text">{dataIndex}</text>
             ),
-            sorter: (a, b) => a.email.localeCompare(b.email),
+            sorter: (a, b) => a.email?.localeCompare(b.email),
         },
         {
             title: "Role",
@@ -262,7 +275,7 @@ export default function UserInventory() {
                     {dataIndex.charAt(0).toUpperCase() + dataIndex.slice(1)}
                 </text>
             ),
-            sorter: (a, b) => a.role.localeCompare(b.role),
+            sorter: (a, b) => a.role?.localeCompare(b.role),
             filters: [
                 {
                     text: "Doctor",
@@ -289,7 +302,7 @@ export default function UserInventory() {
                     value: "technician",
                 },
             ],
-            onFilter: (value, record) => record.role.toLowerCase() === value,
+            onFilter: (value, record) => record?.role?.toLowerCase() === value,
         },
         {
             title: "Phone",
@@ -354,22 +367,24 @@ export default function UserInventory() {
                 startChildren={
                     // <div className="user-header-heading">
                     <Dropdown className="dropdown-select-user" overlay={menu} trigger={["click"]}>
-                        <p
+                        <div
                             style={{
-                                marginTop: "10px",
+                                marginTop: "5px",
                                 // marginLeft: "12%",
                                 fontWeight: 600,
                                 fontSize: "18px",
                                 marginBottom: "0px",
                                 cursor: "pointer",
                                 textAlign: "left",
+                                display: "flex",
+                                alignItems: "center"
                             }}
                         >
                             {getTenantName(activeTenant)}{" "}
-                            <span style={{ cursor: "pointer" }}>
+                            <span style={{ cursor: "pointer", marginLeft: "8px", marginTop: "-4px" }}>
                                 <DropdownIcon />
                             </span>
-                        </p>
+                        </div>
                     </Dropdown>
                     // </div>
                 }
@@ -469,9 +484,10 @@ export default function UserInventory() {
                             <Table
                                 columns={columns}
                                 dataSource={userListToShow}
+                                pagination={false}
                                 size="middle"
                                 bordered={true}
-                                scroll={{ y: "75vh" }}
+                                scroll={{ y: "calc(100vh - 210px)" }}
                                 onRow={onClickRow}
                             />
                         </Row>
@@ -488,7 +504,7 @@ export default function UserInventory() {
                 closable={false}
                 width="68%"
             >
-                <AddUser state={closeAddUser} />
+                <AddUser state={closeAddUser} visible={userModal} activeTenant={activeTenant} />
             </Modal>
 
             <Modal
