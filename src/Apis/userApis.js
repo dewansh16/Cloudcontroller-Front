@@ -20,7 +20,7 @@ const userApi = {
         axiosInstance.request({
             method: "GET",
             url: `/users/userinventory?limit=${limit || 10}&offset=${offset || 0
-                }&tenant_id=${tenant_uuid || 0}&filter=${firstName !== null && firstName !== undefined
+                }&tenantId=tenant8ea56b12-ff44-4b5c-839c-f609363ba385&filter=${firstName !== null && firstName !== undefined
                     ? `fname=${firstName}`
                     : ""
                 }${lastName !== null && lastName !== undefined && lastName !== ""
@@ -44,10 +44,10 @@ const userApi = {
             // withCredentials: true,
         }),
 
-    getMyself: () =>
+    getMyself: (tenant_uuid) =>
         axiosInstance.request({
             method: "GET",
-            url: `users/_self?limit=100&offset=0&filter=0`,
+            url: `users/_self?tenantId={${tenant_uuid}}&limit=100&offset=0&filter=0`,
             // withCredentials: true,
         }),
 };

@@ -36,23 +36,23 @@ export default function UserInventory() {
     useEffect(() => {
         const { tenant } = UserStore.getUser();
         setActiveTenant(tenant);
-        // userApi
-        //     .getMyself()
-        //     .then((res) => {
-        //         setActiveTenant(res.data.response?.users[0]?.tenant_id);
-        //         tenantApi
-        //             .getTenantList()
-        //             .then((res) => {
-        //                 setTenantList(res.data.response?.tenants[0]);
-        //                 setLoading(false);
-        //             })
-        //             .catch((err) => {
-        //                 console.log(err);
-        //             });
-        //     })
-        //     .catch((err) => {
-        //         console.log(err);
-        //     });
+        userApi
+            .getMyself(tenant)
+            .then((res) => {
+                setActiveTenant(res.data.response?.users[0]?.tenant_id);
+                tenantApi
+                    .getTenantList()
+                    .then((res) => {
+                        setTenantList(res.data.response?.tenants[0]);
+                        setLoading(false);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     }, []);
 
     const showUserModal = () => {
@@ -91,18 +91,20 @@ export default function UserInventory() {
                 activeTenant
             )
             .then((res) => {
-                const data = res.data?.response.users[0];
+                const data = res.data?.response.users;
                 const moodifiedData = data.map((item) => {
                     return {
                         ...item,
-                        key: item.id,
+                        key: item?.id,
                     };
                 });
                 setUserListToShow(moodifiedData);
                 setTotalPages(Math.ceil(res.data?.response.userTotalCount / 10));
+                setLoading(false);
             })
             .catch((err) => {
                 console.log(err);
+                setLoading(false);
             });
     }
 
@@ -122,7 +124,9 @@ export default function UserInventory() {
     );
 
     useEffect(() => {
-        return fetchUserList();
+        if (activeTenant) {
+            return fetchUserList();
+        }
     }, [userModal, editModal, currentPageVal, activeTenant]);
 
     const searchUser = (value) => {

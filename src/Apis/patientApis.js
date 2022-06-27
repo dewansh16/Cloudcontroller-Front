@@ -314,7 +314,7 @@ const patientApi = {
         axiosInstance.request({
             method: "GET",
             url: `/patients/${pid}/procedure?limit=${limit || 100}&offset=${offset || 0
-                }&filter=${filter || 0}${date ? `date=${date}` : ""}`,
+                }&filter=${filter || 0}${date ? `&date=${date}` : ""}`,
             // withCredentials: true,
         }),
     createPatientProcedure: (pid, data) =>

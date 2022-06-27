@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import moment from "moment";
 import html2canvas from "html2canvas";
 
 import { jsPDF } from "jspdf";
 import { Modal, Table, Button } from "antd";
 import { CPT_CODE } from "../../../../Utils/utils";
+import { queryApi } from "../../../../Utils/influx";
 
 import billingApi from "../../../../Apis/billingApis"
 import "./summary.css";
@@ -15,7 +16,7 @@ const TOTAL_HOURS_FOR_CODE_99457_BILLED = 20;
 const TOTAL_HOURS_FOR_EACH_99091_BILLED = 30;
 
 
-const ModalSummary = ({ pid, onClose, currentDate }) => {
+const ModalSummary = ({ pid, onClose, currentDate, billingSummary }) => {
     const [dataSource, setDataSource] = useState([]);
 
     const getDateFromISO = (dateiso) => {
@@ -150,6 +151,11 @@ const ModalSummary = ({ pid, onClose, currentDate }) => {
                         }
                     );
 
+                    const billingFound = billingSummary?.find(billing => billing?.pid === pid);
+
+                    if (!!billingFound && !!billingFound["99454"]) {
+                        tempDataSource.splice(1, 0, billingFound["99454"]);
+                    }
                     setDataSource(tempDataSource);
                 })
         }
@@ -160,16 +166,21 @@ const ModalSummary = ({ pid, onClose, currentDate }) => {
             title: "Service Date",
             dataIndex: "date",
             key: "date",
+            render: (dataIndex) => (
+                <span>{moment(dataIndex).format("MMM DD YYYY hh:mm:ss a")}</span>
+            ),
         },
         {
             title: "CPT Code",
             dataIndex: "code",
             key: "code",
+            with: 50
         },
         {
             title: "CPT Description",
             dataIndex: "desc",
             key: "desc",
+            with: 50
         },
         {
             title: "Duration",
@@ -216,7 +227,7 @@ const ModalSummary = ({ pid, onClose, currentDate }) => {
 
     return (
         <Modal
-            width={900}
+            width={1100}
             visible={!!pid}
             onCancel={onClose}
             footer={null}

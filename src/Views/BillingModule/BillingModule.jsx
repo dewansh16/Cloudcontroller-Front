@@ -70,6 +70,9 @@ const columns = [
         title: "Service Date",
         dataIndex: "date",
         key: "date",
+        render: (dataIndex) => (
+            <span>{moment(dataIndex).format("MMM DD YYYY hh:mm:ss a")}</span>
+        )
     },
     {
         title: "CPT Code",
@@ -2007,16 +2010,16 @@ function BillingModule() {
                                 desc: getReportDes(item),
                                 duration: getReportTotalDuration(item),
                             });
-                            const dataCode99454 = filterDeviceAssociatedByDate;
-                            if (isArray(dataCode99454.list) && dataCode99454.list.length > 0) {
-                                let lastItem99454 = dataCode99454.list[dataCode99454.list.length - 1];
-                                tempDataSource.push({
-                                    date: moment(lastItem99454.datesInflux?.[lastItem99454?.datesInflux?.length - 1]).format('YYYY-MM-DD'),
-                                    code: CPT_CODE.CPT_99454,
-                                    desc: dataCode99454.billedUnit,
-                                    duration: `${dataCode99454.totalDayMonitored} day(s)`,
-                                });
-                            }
+                            // const dataCode99454 = filterDeviceAssociatedByDate;
+                            // if (isArray(dataCode99454.list) && dataCode99454.list.length > 0) {
+                            //     let lastItem99454 = dataCode99454.list[dataCode99454.list.length - 1];
+                            //     tempDataSource.push({
+                            //         date: moment(lastItem99454.datesInflux?.[lastItem99454?.datesInflux?.length - 1]).format('YYYY-MM-DD'),
+                            //         code: CPT_CODE.CPT_99454,
+                            //         desc: dataCode99454.billedUnit,
+                            //         duration: `${dataCode99454.totalDayMonitored} day(s)`,
+                            //     });
+                            // }
                             if (item.code == CPT_CODE.CPT_99453) {
                                 const d = new Date(item.bill_date);
                                 initialStepDone = true;
@@ -2406,7 +2409,7 @@ function BillingModule() {
             setActiveCode99454(true);
         }
 
-        return { list: newArr, totalDayMonitored, billedUnit: result };
+        return { list: newArr, totalDayMonitored, billedUnit: result, minDate, maxDate };
     }, [patchArray, currentDateApi]);
 
     const timerPatchLoading = useRef(null); 
@@ -2431,6 +2434,22 @@ function BillingModule() {
 
         setPatchArray(newArr);
     }
+
+    const formatDataSummary = () => {
+        let newArrSummary = [...dataSource];
+        newArrSummary = newArrSummary?.filter(item => item?.code !== "99454");
+      
+        if (filterDeviceAssociatedByDate.billedUnit > 0) {
+            const data = {
+                code: "99454",
+                date: filterDeviceAssociatedByDate.maxDate,
+                desc: "1 billed",
+                duration: "16 days",
+            }
+            newArrSummary.splice(1, 0, data);
+        }
+        return newArrSummary;
+    };
 
     return rightSideLoading ? (
         <div
@@ -4374,7 +4393,7 @@ function BillingModule() {
                                             Billing Procedure
                                         </div>
                                         <Table
-                                            dataSource={dataSource}
+                                            dataSource={formatDataSummary()}
                                             columns={columns}
                                             pagination={false}
                                             bordered={true}
