@@ -327,7 +327,6 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
         })
 
         if (flag) AddPrescriptions(pid, data, () => {
-            console.log("--------------------------------", flag);
             setEmrView(<EmrView pid={pid} setPadding={setPadding} setEmrView={setEmrView} defaultState="subgroup-3-element-1" />)
             // setLoadingPage(false);
         })
