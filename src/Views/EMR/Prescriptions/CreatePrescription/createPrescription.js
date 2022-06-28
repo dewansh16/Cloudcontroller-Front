@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Select from 'antd/lib/select';
 
@@ -19,6 +19,7 @@ import { MedicineListItem } from './Components/components'
 
 import productApi from '../../../../Apis/productApis'
 import patientApi from '../../../../Apis/patientApis'
+import moment from 'moment';
 
 const { Option } = Select;
 
@@ -39,7 +40,7 @@ function AddPrescriptions(pid, data, successCallBack) {
     })
 }
 
-function AddMedicineToDB() {
+function AddMedicineToDB({ handleAddDrug, onCancel }) {
     const [addMedForm] = Form.useForm()
     useEffect(() => {
         addMedForm.resetFields()
@@ -56,6 +57,9 @@ function AddMedicineToDB() {
                     message: "Success",
                     description: res.message
                 })
+                handleAddDrug(res?.data?.response?.data);
+                addMedForm.resetFields();
+                onCancel();
             } else {
                 notification.info({
                     message: "Something went wrong",
@@ -218,12 +222,13 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
     const [medicineIdx, setMedicineIdx] = useState(0)
     const [addNew, setAddNew] = useState(true)
     const [nameType, setNameType] = useState("product_name")
-    const [calendarDate, setCalendarDate] = useState(null)
+    const [calendarDate, setCalendarDate] = useState(new Date())
 
     const [searching, setSearching] = useState(false);
     const [source, setSource] = useState(new axios.CancelToken.source());
     const [medicineSearchList, setMedicineSearchList] = useState([]);
-    const [loadingAdd, setLoadingAdd] = useState(false);
+    const [loadingDrug, setLoadingDrug] = useState(false);
+    const [loadingPage, setLoadingPage] = useState(true);
 
     const [form] = Form.useForm();
 
@@ -231,16 +236,29 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
         console.log(medicineStore)
     }, [medicineStore, medicineIdx])
 
+    // const timerLoading = useRef(null);
+    // useEffect(() => {
+    //     if (loadingPage) {
+    //         timerLoading.current = setTimeout(() => {
+    //             setLoadingPage(false)
+    //         }, 1500);
+    //     }
+    //     return () => {
+    //         clearTimeout(timerLoading.current);
+    //     }
+    // }, [loadingPage]);
+
       function SearchMedicine(value, nameType) {
-        setLoadingAdd(true);
+        setLoadingPage(true);
         const genericName = nameType === "generic_name" ? `${value}` : null
         const productName = nameType === "product_name" ? `${value}` : null
        
         productApi.getMedicineList(genericName, productName, 100, 0, 0, source.token)
             .then((res) => {
+                console.log("res.data?.response", res.data?.response);
                 setMedicineSearchList(res.data?.response.products);
                 setSearching(false);
-                setLoadingAdd(false);
+                setLoadingPage(false);
             })
             .catch(function (thrown) {
                 if (axios.isCancel(thrown)) {
@@ -248,13 +266,13 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                 } else {
                     setSearching(false);
                 }
-                setLoadingAdd(false);
+                setLoadingPage(false);
             });
     }
 
     useEffect(() => {
-        SearchMedicine("", "product_name");
-    }, []);
+        SearchMedicine("", nameType);
+    }, [nameType]);
 
     const savePrescriptions = () => {
         if (medicineStore.length < 1) {
@@ -265,17 +283,18 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
             return
         }
 
+        // setLoadingPage(true);
+
         const user = UserStore.getUser()
 
         const timeElapsed = Date.now();
         const today = new Date(timeElapsed).toISOString().slice(0, 10);
-        console.log(calendarDate, today)
         let data = {
             "prescription_uuid": "",
             "pid": pid,
             // current date or input from the calendar
             "date_added": today,
-            "date_modified": calendarDate || today,
+            "date_modified": new Date(calendarDate).toISOString().slice(0, 10),
             "drug": [],
             "active": 1,
             // TODO: add end_data
@@ -307,8 +326,12 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
             }
 
         })
-        console.log(data["drug"])
-        if (flag) AddPrescriptions(pid, data, () => setEmrView(<EmrView pid={pid} setPadding={setPadding} setEmrView={setEmrView} defaulState={"subgroup-3-element-1"} />))
+
+        if (flag) AddPrescriptions(pid, data, () => {
+            console.log("--------------------------------", flag);
+            setEmrView(<EmrView pid={pid} setPadding={setPadding} setEmrView={setEmrView} defaultState="subgroup-3-element-1" />)
+            // setLoadingPage(false);
+        })
     }
 
     const [addMedicineToDatabaseModalVisibility, setAddMedicineToDatabaseModalVisibility] = useState(false)
@@ -320,6 +343,11 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
         setAddMedicineToDatabaseModalVisibility(false)
     }
 
+    const handleAddDrug = (dataDrug) => {
+        const newDataDrug = [dataDrug, ...medicineSearchList];
+        setMedicineSearchList([...newDataDrug]);
+    }
+
     return (
         <div style={{ height: "100%", width: "100%", }}>
             <Modal
@@ -329,7 +357,7 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                 centered
                 footer={null}
             >
-                <AddMedicineToDB />
+                <AddMedicineToDB handleAddDrug={handleAddDrug} onCancel={showAddMedicineToDatabaseModalOnCancel} />
             </Modal>
 
             {/* Header */}
@@ -378,7 +406,11 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                             fontSize: "18px",
                             color: "#000000",
                         }}>Date:</p>
-                        <DatePicker format="YYYY-MM-DD" onChange={(date, datestring) => { setCalendarDate(datestring) }} />
+                        <DatePicker 
+                            format="MMM DD YYYY" 
+                            defaultValue={moment(calendarDate, "MMM DD YYYY")}
+                            onChange={(date, datestring) => { setCalendarDate(date) }} 
+                        />
                     </div>
                 </Col>
                 <Col lg={4} md={6} style={{
@@ -392,17 +424,16 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
             {/* <Row style={{ padding: "12px 3rem", width: "100%" }}>
                 <RenderForm idx={medicineIdx} />
             </Row> */}
-            {/* {loadingAdd ? (
+            {loadingPage ? (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "70vh" }}>
                     <Spin />
                 </div>
-            ) : ( */}
+            ) : (
                 <Row style={{ padding: "12px", height: "54%", width: "100%" }}>
                     {
                         medicineStore.length > 0 && <List style={{
                             margin: "0", padding: "0", width: "100%", maxHeight: "80vh", overflowY: "scroll"
                         }}>
-
                             <List.Item
                                 style={{
                                     borderRadius: "6px",
@@ -448,7 +479,7 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                                     setMedicineStore={setMedicineStore}
                                     medicineSearchList={medicineSearchList}
                                     showAddMedicineToDatabaseModal={showAddMedicineToDatabaseModal} 
-                                    loadingDrug={loadingAdd}
+                                    loadingDrug={loadingDrug}
                                 />
                             })}
                         </List>
@@ -458,7 +489,8 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                             <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
                                 <Button onClick={() => setAddNew(true)} type="utility">{"+ Add New Medicine"}</Button>
                             </div>
-                        ) : <MedicineListItem 
+                        ) 
+                        : <MedicineListItem 
                             showAddMedicineToDatabaseModal={showAddMedicineToDatabaseModal} 
                             nameType={nameType} 
                             setAddNew={setAddNew} 
@@ -467,11 +499,11 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                             idx={medicineStore.length} 
                             setMedicineStore={setMedicineStore} 
                             medicineSearchList={medicineSearchList}
-                            loadingDrug={loadingAdd}
+                            loadingDrug={loadingDrug}
                         />
                     }
                 </Row>
-            {/* )} */}
+            )}
         </div >
     )
 }

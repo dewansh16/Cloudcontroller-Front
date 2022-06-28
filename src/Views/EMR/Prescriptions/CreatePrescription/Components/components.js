@@ -16,7 +16,7 @@ const { Option } = Select;
 
 function MedicineListItem({ 
     medicine, medicineStore, setAddNew, setMedicineStore, nameType, newMed = false, idx, 
-    showAddMedicineToDatabaseModal, medicineSearchList, loadingDrug, ...rest 
+    showAddMedicineToDatabaseModal, medicineSearchList, loadingDrug, type, ...rest 
 }) {
     const [form] = Form.useForm();
 
@@ -55,7 +55,6 @@ function MedicineListItem({
                 },
                 valid: true
             }
-            console.log(formData)
 
             if (formData.data.dosage_morning + formData.data.dosage_afternoon + formData.data.dosage_evening < 1) {
                 message.error("Add at least one medicine dosage detail")
@@ -401,7 +400,7 @@ function MedicineListItem({
     }
 
     return (
-        !editView ? (
+        (!editView && !!medicine) ? (
             <List.Item
                 style={{
                     background: "#fff",
@@ -415,12 +414,10 @@ function MedicineListItem({
             >
                 <Row style={{ width: "100%" }} >
                     <Col span={5}>
-                        {medicine?.drugName.slice(0, 25)} {medicine?.drugName.length > 25 ? "..." : ""}
-                        {/* drugName */}
+                        {type} {medicine?.drugName.slice(0, 25)} {medicine?.drugName.length > 25 ? "..." : ""}
                     </Col>
                     <Col span={5}>
                         {medicine?.dosage_morning}-{medicine?.dosage_afternoon}-{medicine?.dosage_evening} {medicine?.occurrence}
-                        {/* {"dosage_morning"}-{"dosage_afternoon"}-{"dosage_evening"} {"occurrence"} */}
                     </Col>
                     <Col span={5}>
                         for {medicine?.frequencyPeriod} {medicine?.frequency}
@@ -437,10 +434,8 @@ function MedicineListItem({
                         </Tooltip>
                     </Col>
                 </Row>
-
             </List.Item>
         ) : <RenderForm_ medicine={medicine} />
-
     )
 }
 
