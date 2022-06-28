@@ -82,7 +82,7 @@ function PatchInventory() {
     const [filteredlist, setFilteredList] = useState([]);
 
     const [arrayChecked, setArrayChecked] = useState([]);
-    
+
     const modifyData = (fetchedData) => {
         const modifiedData = fetchedData.map((device, index) => {
             if (device.AssociatedPatch.length > 1) {
@@ -110,7 +110,7 @@ function PatchInventory() {
                 };
             } else return null;
         })
-        .filter((device) => device !== null);
+            .filter((device) => device !== null);
     };
 
     function fetchPatchList() {
@@ -170,7 +170,7 @@ function PatchInventory() {
                 openPopover("closePopOver");
                 success();
                 fetchPatchList();
-                
+
                 // if (data.AssociatedPatch.length > 1) {
                 //     data.AssociatedPatch.map((item, index) => {
                 //         const sendData = [
@@ -426,7 +426,7 @@ function PatchInventory() {
         const { tenant } = UserStore.getUser();
 
         const listPatch = [];
-        for(let i = 0; i < arrayChecked?.length; i++) {
+        for (let i = 0; i < arrayChecked?.length; i++) {
             listPatch.push({ patch_uuid: arrayChecked[i] })
         }
 
@@ -441,7 +441,7 @@ function PatchInventory() {
                     message: "Delete",
                     description: `Delete list item selected successfully!`,
                 })
-                
+
                 // setFilteredList(newData);
                 setArrayChecked([]);
                 fetchPatchList();
@@ -508,52 +508,30 @@ function PatchInventory() {
             width: 60,
             render: (dataIndex, record) => (
                 <div style={{ display: "flex", alignItems: "center" }}>
-                   
-                    {record?.patch_type === "gateway" ? (
-                        <div style={{ display: "flex", flexDirection: "column", marginLeft: "4px" }}>
-                            <Tooltip title="Scan gateway">
-                                <img 
-                                    className="icon_gateway" 
-                                    style={{marginBottom: "4px" }} 
-                                    src={IconScan} 
-                                    onClick={onScanGateway}
-                                />
-                            </Tooltip>
-                            <Tooltip title="Reset gateway">
-                                <img    
-                                    className="icon_gateway"
-                                    style={{marginTop: "4px" }} 
-                                    src={IconReset} 
-                                    onClick={onResetGateway}
-                                />
-                            </Tooltip>
-                        </div>
-                    ) : (
-                        <Checkbox 
-                            onChange={() => {
-                                let newArr = [...arrayChecked]
-                                if (newArr?.includes(record.patch_uuid)) {
-                                    newArr = newArr.filter(item => item !== record.patch_uuid);
-                                } else {
-                                    newArr.push(record.patch_uuid)
-                                }
-                                setArrayChecked(newArr);
-                            }}
-                            disabled={record.patch_patient_map !== null}
-                            className="checkbox-delete-device"
-                            checked={arrayChecked?.includes(record.patch_uuid)}
-                            style={{ marginLeft: "6px", marginRight: "2px" }}
-                        />
-                    )}
+                    <Checkbox
+                        onChange={() => {
+                            let newArr = [...arrayChecked]
+                            if (newArr?.includes(record.patch_uuid)) {
+                                newArr = newArr.filter(item => item !== record.patch_uuid);
+                            } else {
+                                newArr.push(record.patch_uuid)
+                            }
+                            setArrayChecked(newArr);
+                        }}
+                        disabled={record.patch_patient_map !== null}
+                        className="checkbox-delete-device"
+                        checked={arrayChecked?.includes(record.patch_uuid)}
+                        style={{ marginLeft: "6px", marginRight: "2px", borderSpacing: "0" }}
+                    />
                     <div style={{ width: "80px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <img 
-                            alt="someimage" 
-                            src={handleImg(record)} 
+                        <img
+                            alt="someimage"
+                            src={handleImg(record)}
                             width={checkWidthForImgSensor(record.patch_type)}
-                            // style={{ 
-                            //     transform: (record?.patch_type === "gateway" || record?.patch_type === "temperature") ? "scale(1.25)" :
-                            //     (record?.patch_type === "alphamed" || record?.patch_type === "ihealth") ? "scale(0.7)" : "scale(1)"
-                            // }}
+                        // style={{ 
+                        //     transform: (record?.patch_type === "gateway" || record?.patch_type === "temperature") ? "scale(1.25)" :
+                        //     (record?.patch_type === "alphamed" || record?.patch_type === "ihealth") ? "scale(0.7)" : "scale(1)"
+                        // }}
                         ></img>
                     </div>
                 </div>
@@ -606,10 +584,10 @@ function PatchInventory() {
                                 <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
                                     MR:
                                 </span>
-                                <span style={{ fontWeight: "500", marginLeft: "2px",  textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", }}>
+                                <span style={{ fontWeight: "500", marginLeft: "2px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", }}>
                                     {patient_data?.med_record || ""}
                                 </span>
-                            </span> 
+                            </span>
                         )}
                     </span>
                 )
@@ -627,7 +605,7 @@ function PatchInventory() {
                     return (
                         <GatewayStatus dataGateway={record} />
                     )
-                } 
+                }
 
                 return (
                     <span style={{ fontSize: "15px", fontWeight: "500", marginLeft: "2px" }}>
@@ -911,65 +889,59 @@ function PatchInventory() {
             dataIndex: "",
             key: "deleteIcon",
             ellipsis: true,
-            width: 25,
+            width: 45,
             render: (dataIndex, record) => {
-                if (record.patch_patient_map !== null) {
-                    return (
-                        <div 
-                            style={{ marginTop: "-4px", opacity: "0.5" }} 
-                            onClick={() => showMessageCanNotDelete(
-                                record.AssociatedPatch?.length > 1 ? "Bundle" : "Device"
+                return (
+                    <>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            {record?.patch_type === "gateway" && (
+                                <>
+                                    <Tooltip title="Reset gateway">
+                                        <img
+                                            className="icon_gateway"
+                                            src={IconReset}
+                                            onClick={onResetGateway}
+                                        />
+                                    </Tooltip>
+                                    <Tooltip title="Scan gateway">
+                                        <img
+                                            className="icon_gateway"
+                                            src={IconScan}
+                                            onClick={onScanGateway}
+                                        />
+                                    </Tooltip>
+                                </>
                             )}
-                        >
-                            <img src={iconDelete} width="22px"></img>
+
+                            {record.patch_patient_map !== null ? (
+                                <div
+                                    style={{ marginTop: "-4px", opacity: "0.5" }}
+                                    onClick={() => showMessageCanNotDelete(
+                                        record.AssociatedPatch?.length > 1 ? "Bundle" : "Device"
+                                    )}
+                                >
+                                    <img src={iconDelete} width="22px"></img>
+                                </div>
+                            ) : (
+                                <Popconfirm
+                                    placement="left"
+                                    title="Are you sure to delete this device?"
+                                    onConfirm={() => onDeleteDeviceItem(
+                                        record?.patch_uuid,
+                                        record.AssociatedPatch?.length > 1 ? "bundle" : "device"
+                                    )}
+                                    okText="Yes"
+                                    cancelText="No"
+                                >
+                                    <div style={{ marginTop: "-3px", cursor: "pointer" }}>
+                                        <img src={iconDelete} width="22px"></img>
+                                    </div>
+                                </Popconfirm>
+                            )}
                         </div>
-                    )
-                } 
-                
-                return <Popconfirm
-                    placement="left"
-                    title="Are you sure to delete this device?"
-                    onConfirm={() => onDeleteDeviceItem(
-                        record?.patch_uuid, 
-                        record.AssociatedPatch?.length > 1 ? "bundle" : "device"
-                    )}
-                    okText="Yes"
-                    cancelText="No"
-                >
-                    <div style={{ marginTop: "-4px", cursor: "pointer" }}>
-                        <img src={iconDelete} width="22px"></img>
-                    </div>
-                </Popconfirm>
-                // if (record.AssociatedPatch?.length < 2) {
-                //     if (record.patch_patient_map !== null) {
-                //         return (
-                //             <div 
-                //                 style={{ marginTop: "-4px", opacity: "0.5" }} 
-                //                 onClick={() => showMessageCanNotDelete(
-                //                     record.AssociatedPatch?.length > 1 ? "Bundle" : "Device"
-                //                 )}
-                //             >
-                //                 <img src={iconDelete} width="22px"></img>
-                //             </div>
-                //         )
-                //     } else {
-                //         return <Popconfirm
-                //             placement="left"
-                //             title="Are you sure to delete this device?"
-                //             onConfirm={() => onDeleteDeviceItem(
-                //                 record?.patch_uuid, 
-                //                 record.AssociatedPatch?.length > 1 ? "bundle" : "device"
-                //             )}
-                //             okText="Yes"
-                //             cancelText="No"
-                //         >
-                //             <div style={{ marginTop: "-4px", cursor: "pointer" }}>
-                //                 <img src={iconDelete} width="22px"></img>
-                //             </div>
-                //         </Popconfirm>
-                //     }
-                // }
-            } 
+                    </>
+                )
+            }
         },
 
         // {

@@ -76,7 +76,7 @@ const PractitionerDetails = (props) => {
             .getUserList(userData?.tenant)
             .then((res) => {
                 const doctorsData = res.data?.response?.users.filter(
-                    (item) => item?.role?.toLowerCase() === "doctor"
+                    (item) => item?.role?.toLowerCase() === "doctor" || item?.role?.toLowerCase() === "nurse"
                 );
                 setDoctorList(doctorsData)
                 // setPrimary(doctorsData);
@@ -110,7 +110,6 @@ const PractitionerDetails = (props) => {
                     onFinishFailed={raiseError}
                     form={props.form}
                 >
-                    {console.log(props.patientDetails)}
                     <Row span={24} gutter={[12, 8]}>
                         {practitionersForm(props, primaryConsultantList, secondaryConsultantList).map((item) => (
                             <Col span={12} key={item.name}>

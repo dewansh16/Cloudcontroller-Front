@@ -60,25 +60,25 @@ function getCurrentDate(dateTime) {
 
 function FetchUser_self() {
     const [response, setResponse] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        userApi
-            .getMyself()
-            .then((res) => {
-                setResponse(res.data.response["users"][0]);
-                setLoading(false);
-            })
-            .catch((err) => {
-                if (err) {
-                    notification.error({
-                        message: "Error",
-                        description: `${err.response?.data.result}` || "",
-                    });
-                    setLoading(false);
-                }
-            });
-    }, []);
+    // useEffect(() => {
+    //     userApi
+    //         .getMyself()
+    //         .then((res) => {
+    //             setResponse(res.data.response["users"][0]);
+    //             setLoading(false);
+    //         })
+    //         .catch((err) => {
+    //             if (err) {
+    //                 notification.error({
+    //                     message: "Error",
+    //                     description: `${err.response?.data.result}` || "",
+    //                 });
+    //                 setLoading(false);
+    //             }
+    //         });
+    // }, []);
     return [response, loading];
 }
 

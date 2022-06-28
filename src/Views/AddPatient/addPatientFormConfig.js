@@ -53,11 +53,11 @@ const locationSchema = Joy.object({
 });
 const bedAllocationSchema = Joy.object({
     location_uuid: Joy.string(),
-    bed: Joy.number(),
+    bed: Joy.number().allow(null, ''),
 });
 const practitionersSchema = Joy.object({
-    primary_consultant: Joy.array(),
-    secondary_consultant: Joy.array(),
+    primary_consultant: Joy.array().allow(null, ''),
+    secondary_consultant: Joy.array().allow(null, ''),
     // medical_state: Joy.string(),
 });
 const guardianSchema = Joy.object({
@@ -493,7 +493,7 @@ const BedAllocationForm = (
                     optionFilterProp="children"
                     filterOption={true}
                     // onChange={wardChange}
-                    disabled={floor === null ? true : false}
+                    disabled={!!floor ? false : true}
                 >
                     {wardsArray.map((item, i) => (
                         <Option key={i} value={i + 1}>
@@ -523,7 +523,7 @@ const BedAllocationForm = (
                     optionFilterProp="children"
                     filterOption={true}
                     // onChange={bedChange}
-                    disabled={ward === null ? true : false}
+                    disabled={!!ward ? false : true}
                 >
                     {bedsArray.map((item, i) => (
                         <Option key={i} value={i + 1}>
