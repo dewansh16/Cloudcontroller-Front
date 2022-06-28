@@ -16,7 +16,6 @@ import CaretUpOutlined from '@ant-design/icons'
 
 const { Panel } = Collapse
 
-
 function FetchPrescriptions(pid, limit) {
     const [response, setResponse] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -137,8 +136,8 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
         const dateModified_ = new Date(prescription["date_modified"])
         const endDate_ = new Date(prescription["end_date"])
 
-        const dateModified = `${dateModified_.getDate()} ${monthMap[dateModified_.getMonth()]}, ${dateModified_.getFullYear()}`
-        const endDate = `${endDate_.getDate()} ${monthMap[endDate_.getMonth()]}, ${endDate_.getFullYear()}`
+        const dateModified = `${monthMap[dateModified_.getMonth()]} ${dateModified_.getDate()} ${dateModified_.getFullYear()}`
+        const endDate = `${monthMap[endDate_.getMonth()]} ${endDate_.getDate()} ${endDate_.getFullYear()}`
 
         return (
             <Panel
@@ -147,7 +146,7 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
                     <div
                         className="prescriptions-list-item"
                     >
-                        <div className="prescription-heading">
+                        <div className="prescription-heading" style={{ paddingRight: "1rem" }}>
                             <span>{`${dateModified}  -  ${endDate}`}</span>
                         </div>
                         <div className="duplicate">
@@ -180,9 +179,14 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
                     {prescription["drug"].map((medicine, id) => {
                         return (
                             <Row key={id} className="tr" gutter={[24, 24]} style={{ width: "100%" }}>
-                                <Col className="td" span={3} style={{ padding: "0.5rem 0" }}></Col>
-                                <Col className="td" span={6} style={{ padding: "0.5rem 0", fontWeight: 500, color: "#525151" }}>{medicine.drugName.slice(0, 13)}</Col>
-                                <Col className="td" span={15} style={{ padding: "0.5rem 0" }}>{`${medicine.dosage_morning || medicine.dosage_afternoon || medicine.dosage_evening} ${medicine.type} ${medicine.occurrence} for ${medicine.frequencyPeriod} ${medicine.frequency}`}</Col>
+                                <Col className="td" span={1}></Col>
+                                <Col className="td" span={8} style={{ padding: "0.5rem 0", fontWeight: 500, color: "#525151" }}>
+                                    {/* {medicine.drugName.slice(0, 13)} */}
+                                    {medicine.drugName}
+                                </Col>
+                                <Col className="td" span={15} style={{ padding: "0.5rem 0" }}>
+                                    {`${medicine.dosage_morning || medicine.dosage_afternoon || medicine.dosage_evening} ${medicine.type} ${medicine.occurrence} for ${medicine.frequencyPeriod} ${medicine.frequency}`}
+                                </Col>
                             </Row>
                         )
                     })}
@@ -216,7 +220,11 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                }}><h1 style={{ margin: 0, fontSize: "87px", opacity: 0.15, padding: 0, color: "rgba(0, 0, 0, 0.85)", fontWeight: "500" }}>No Prescriptions</h1></div>)}
+                }}>
+                    <h1 style={{ margin: 0, fontSize: "87px", opacity: 0.15, padding: 0, color: "rgba(0, 0, 0, 0.85)", fontWeight: "500" }}>
+                        No Prescriptions
+                    </h1>
+                </div>)}
         </div>
     )
 }
