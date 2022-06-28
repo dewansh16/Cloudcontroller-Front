@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from 'react'
-// import { Prompt } from 'react-router'
-// import axios from 'axios'
-import { Form, Row, Col, Avatar, notification, Spin, Modal, Tooltip, Switch, List } from '../../../../Theme/antdComponents'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Select from 'antd/lib/select';
 
+import { 
+    Form, Row, Col, Avatar, notification, Spin, Modal, Tooltip, Switch, List 
+} from '../../../../Theme/antdComponents'
 import { Input, InputNumber } from '../../../../Theme/Components/Input/input'
-import { Select, SelectOption as Option } from '../../../../Theme/Components/Select/select'
-
-// import { MenuListItem, MedicineSearchListItem, MedicineSearchListHeader } from './Components/components'
 import { Button } from '../../../../Theme/Components/Button/button'
 import { DatePicker, RangePicker } from '../../../../Theme/Components/DateTimePicker/dateTimePicker'
+
+// import { Select, SelectOption as Option } from '../../../../Theme/Components/Select/select'
+// import { MenuListItem, MedicineSearchListItem, MedicineSearchListHeader } from './Components/components'
+
 import Icons from '../../../../Utils/iconMap'
 import { createName, EmrView } from '../../EMR'
-import productApi from '../../../../Apis/productApis'
-import patientApi from '../../../../Apis/patientApis'
-// import './createPrescription.css'
-
 import { UserStore } from '../../../../Stores/userStore'
 import { MedicineListItem } from './Components/components'
 
+import productApi from '../../../../Apis/productApis'
+import patientApi from '../../../../Apis/patientApis'
+
+const { Option } = Select;
 
 function AddPrescriptions(pid, data, successCallBack) {
     patientApi.addPrescriptions(pid, data).then((res) => {
@@ -216,11 +219,42 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
     const [addNew, setAddNew] = useState(true)
     const [nameType, setNameType] = useState("product_name")
     const [calendarDate, setCalendarDate] = useState(null)
-    const [form] = Form.useForm()
+
+    const [searching, setSearching] = useState(false);
+    const [source, setSource] = useState(new axios.CancelToken.source());
+    const [medicineSearchList, setMedicineSearchList] = useState([]);
+    const [loadingAdd, setLoadingAdd] = useState(false);
+
+    const [form] = Form.useForm();
 
     useEffect(() => {
         console.log(medicineStore)
     }, [medicineStore, medicineIdx])
+
+      function SearchMedicine(value, nameType) {
+        setLoadingAdd(true);
+        const genericName = nameType === "generic_name" ? `${value}` : null
+        const productName = nameType === "product_name" ? `${value}` : null
+       
+        productApi.getMedicineList(genericName, productName, 100, 0, 0, source.token)
+            .then((res) => {
+                setMedicineSearchList(res.data?.response.products);
+                setSearching(false);
+                setLoadingAdd(false);
+            })
+            .catch(function (thrown) {
+                if (axios.isCancel(thrown)) {
+                    setSearching(false)
+                } else {
+                    setSearching(false);
+                }
+                setLoadingAdd(false);
+            });
+    }
+
+    useEffect(() => {
+        SearchMedicine("", "product_name");
+    }, []);
 
     const savePrescriptions = () => {
         if (medicineStore.length < 1) {
@@ -322,7 +356,7 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                     </Row>
                 </Col>
                 <Col lg={6} md={12} style={{ padding: "12px", fontSize: "35px", color: "#000000", fontWeight: "400" }}>
-                    Create Prescription 2
+                    Create Prescription
                 </Col>
                 <Col lg={8} md={18} style={{
                     display: "flex",
@@ -354,68 +388,90 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                 }}>
                     <Button onClick={savePrescriptions} style={{ width: "70%" }} type="primary">Save</Button>
                 </Col>
-
-
             </Row>
             {/* <Row style={{ padding: "12px 3rem", width: "100%" }}>
                 <RenderForm idx={medicineIdx} />
             </Row> */}
-            <Row style={{ padding: "12px", height: "54%", width: "100%" }}>
-                {
-                    medicineStore.length > 0 && <List style={{
-                        margin: "0", padding: "0", width: "100%", maxHeight: "80vh", overflowY: "scroll"
-                    }}>
+            {/* {loadingAdd ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "70vh" }}>
+                    <Spin />
+                </div>
+            ) : ( */}
+                <Row style={{ padding: "12px", height: "54%", width: "100%" }}>
+                    {
+                        medicineStore.length > 0 && <List style={{
+                            margin: "0", padding: "0", width: "100%", maxHeight: "80vh", overflowY: "scroll"
+                        }}>
 
-                        <List.Item
-                            style={{
-                                borderRadius: "6px",
-                                margin: "0.5rem 0",
-                                padding: "12px",
-                                border: "none",
-                                width: "100%",
-                                position: "sticky",
-                                top: "0.5rem",
-                                zIndex: 1,
-                                boxShadow:
-                                    "0px 25px 10px rgb(255 255 255 / 90%), 0 -25px 10px rgb(255 255 255 / 90%)"
+                            <List.Item
+                                style={{
+                                    borderRadius: "6px",
+                                    margin: "0.5rem 0",
+                                    padding: "12px",
+                                    border: "none",
+                                    width: "100%",
+                                    position: "sticky",
+                                    top: "0.5rem",
+                                    zIndex: 1,
+                                    boxShadow:
+                                        "0px 25px 10px rgb(255 255 255 / 90%), 0 -25px 10px rgb(255 255 255 / 90%)"
 
-                            }}
-                            className="prescription-medicine-list-header"
-                        >
-                            <Row style={{ width: "100%", marginBottom: "1rem" }} >
-                                <Col span={5}>
-                                    Drug Name
-                                </Col>
-                                <Col span={5}>
-                                    Dosage
-                                </Col>
-                                <Col span={5}>
-                                    Frequency
-                                </Col>
-                                <Col span={5}>
-                                    Details
-                                </Col>
-                                <Col span={4} style={{ textAlign: "right" }}>
-                                    Actions
-                                </Col>
-                            </Row>
-                        </List.Item>
-                        {medicineStore.map((medicine, id) => {
-                            // return <h1 onClick={() => { setMedicineIdx(id); console.log(medicineIdx) }} key={id}>{medicine.data?.drugName}</h1>
-                            return <MedicineListItem showAddMedicineToDatabaseModal={showAddMedicineToDatabaseModal} nameType={nameType} idx={id} searchFieldValue={nameType} medicineStore={medicineStore} setMedicineStore={setMedicineStore} medicine={medicine.data} key={id} />
-                        })}
-
-
-                    </List>
-                }
-                {
-                    !addNew ? (
-                        <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-                            <Button onClick={() => setAddNew(true)} type="utility">{"+ Add New Medicine"}</Button>
-                        </div>
-                    ) : <MedicineListItem showAddMedicineToDatabaseModal={showAddMedicineToDatabaseModal} nameType={nameType} setAddNew={setAddNew} medicineStore={medicineStore} setMedicineStore={setMedicineStore} newMed={true} idx={medicineStore.length} />
-                }
-            </Row>
+                                }}
+                                className="prescription-medicine-list-header"
+                            >
+                                <Row style={{ width: "100%", marginBottom: "1rem" }} >
+                                    <Col span={5}>
+                                        Drug Name
+                                    </Col>
+                                    <Col span={5}>
+                                        Dosage
+                                    </Col>
+                                    <Col span={5}>
+                                        Frequency
+                                    </Col>
+                                    <Col span={5}>
+                                        Details
+                                    </Col>
+                                    <Col span={4} style={{ textAlign: "right" }}>
+                                        Actions
+                                    </Col>
+                                </Row>
+                            </List.Item>
+                            {medicineStore.map((medicine, id) => {
+                                // return <h1 onClick={() => { setMedicineIdx(id); console.log(medicineIdx) }} key={id}>{medicine.data?.drugName}</h1>
+                                return <MedicineListItem 
+                                    key={id} 
+                                    medicine={medicine.data} 
+                                    nameType={nameType} idx={id}
+                                    searchFieldValue={nameType}
+                                    medicineStore={medicineStore} 
+                                    setMedicineStore={setMedicineStore}
+                                    medicineSearchList={medicineSearchList}
+                                    showAddMedicineToDatabaseModal={showAddMedicineToDatabaseModal} 
+                                    loadingDrug={loadingAdd}
+                                />
+                            })}
+                        </List>
+                    }
+                    {
+                        !addNew ? (
+                            <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+                                <Button onClick={() => setAddNew(true)} type="utility">{"+ Add New Medicine"}</Button>
+                            </div>
+                        ) : <MedicineListItem 
+                            showAddMedicineToDatabaseModal={showAddMedicineToDatabaseModal} 
+                            nameType={nameType} 
+                            setAddNew={setAddNew} 
+                            medicineStore={medicineStore} 
+                            newMed={true} 
+                            idx={medicineStore.length} 
+                            setMedicineStore={setMedicineStore} 
+                            medicineSearchList={medicineSearchList}
+                            loadingDrug={loadingAdd}
+                        />
+                    }
+                </Row>
+            {/* )} */}
         </div >
     )
 }

@@ -1,28 +1,41 @@
-import React, { useState, useEffect } from 'react'
-import Icons from '../../../../../Utils/iconMap'
-import { Form, Row, Col, Switch, List, Tooltip, Message } from '../../../../../Theme/antdComponents'
+import React, { useState, useEffect, useRef } from 'react'
+import axios from 'axios';
+import { message } from 'antd';
+import Select from 'antd/lib/select';
+
+import Icons from '../../../../../Utils/iconMap';
+import { Form, Row, Col, Switch, List, Tooltip, Message, Spin } from '../../../../../Theme/antdComponents'
 import { Input, InputNumber } from '../../../../../Theme/Components/Input/input'
-import { Select, SelectOption as Option } from '../../../../../Theme/Components/Select/select'
+// import { Select, SelectOption as Option } from '../../../../../Theme/Components/Select/select'
 import { Button } from '../../../../../Theme/Components/Button/button'
-import axios from 'axios'
 import productApi from '../../../../../Apis/productApis'
+
 import './components.css'
-import { message } from 'antd'
 
-function MedicineListItem({ medicine, medicineStore, setAddNew, setMedicineStore, nameType, newMed = false, idx, showAddMedicineToDatabaseModal, ...rest }) {
-    const [form] = Form.useForm()
-    const [addNewMedView, setAddNewMedView] = useState(newMed)
-    const [editView, setEditView] = useState(newMed)
+const { Option } = Select;
 
+function MedicineListItem({ 
+    medicine, medicineStore, setAddNew, setMedicineStore, nameType, newMed = false, idx, 
+    showAddMedicineToDatabaseModal, medicineSearchList, loadingDrug, ...rest 
+}) {
+    const [form] = Form.useForm();
+
+    const [addNewMedView, setAddNewMedView] = useState(newMed);
+    const [editView, setEditView] = useState(newMed);
 
     function RenderForm_({ medicine }) {
-        const [medicineSearchList, setMedicineSearchList] = useState([]);
+        // const [medicineSearchList, setMedicineSearchList] = useState([]);
+        const [loading, setLoading] = useState(false);
 
         useEffect(() => {
             form.setFieldsValue(medicine)
             return () => {
             }
         }, [medicine, nameType, medicineSearchList]);
+
+        // useEffect(() => {
+        //     SearchMedicine("", "product_name");
+        // }, []);
 
         const onFinish = (values) => {
             let formData = {
@@ -72,28 +85,31 @@ function MedicineListItem({ medicine, medicineStore, setAddNew, setMedicineStore
         const [source, setSource] = useState(new axios.CancelToken.source())
         const [searching, setSearching] = useState(false)
 
-        function SearchMedicine(value, nameType) {
-            const genericName = nameType === "generic_name" ? `${value}` : null
-            const productName = nameType === "product_name" ? `${value}` : null
-            console.log(nameType, genericName, productName)
-            // if (searching) {
-            //     source.cancel()
-            //     setSource(new axios.CancelToken.source())
-            // }
-            // setSearching(true)
-            productApi.getMedicineList(genericName, productName, 100, 0, 0, source.token)
-                .then((res) => {
-                    setMedicineSearchList(res.data?.response.products);
-                    setSearching(false);
-                })
-                .catch(function (thrown) {
-                    if (axios.isCancel(thrown)) {
-                        setSearching(false)
-                    } else {
-                        setSearching(false);
-                    }
-                });
-        }
+        // function SearchMedicine(value, nameType) {
+        //     setLoading(true);
+        //     const genericName = nameType === "generic_name" ? `${value}` : null
+        //     const productName = nameType === "product_name" ? `${value}` : null
+        //     console.log(nameType, genericName, productName)
+        //     // if (searching) {
+        //     //     source.cancel()
+        //     //     setSource(new axios.CancelToken.source())
+        //     // }
+        //     // setSearching(true)
+        //     productApi.getMedicineList(genericName, productName, 100, 0, 0, source.token)
+        //         .then((res) => {
+        //             setMedicineSearchList(res.data?.response.products);
+        //             setSearching(false);
+        //             setLoading(false);
+        //         })
+        //         .catch(function (thrown) {
+        //             if (axios.isCancel(thrown)) {
+        //                 setSearching(false)
+        //             } else {
+        //                 setSearching(false);
+        //             }
+        //             setLoading(false);
+        //         });
+        // }
 
         return (
             <Form
@@ -132,7 +148,15 @@ function MedicineListItem({ medicine, medicineStore, setAddNew, setMedicineStore
                                         showSearch
                                         optionFilterProp="children"
                                         filterOption={true}
-                                        onInput={(e) => { SearchMedicine(e.target.value, nameType) }}
+                                        // onInput={(e) => { 
+                                        //     if (timerFilterDrug.current) {
+                                        //         clearTimeout(timerFilterDrug.current);
+                                        //     };
+
+                                        //     timerFilterDrug.current = setTimeout(() => {
+                                        //         SearchMedicine(e.target.value, nameType) 
+                                        //     }, 1000);
+                                        // }}
                                         suffixIcon={Icons.downArrowFilled({ style: { color: "#1479FF" } })}
                                         onSelect={(id, option) => {
                                             let medicine = medicineSearchList[option.key]
@@ -146,14 +170,18 @@ function MedicineListItem({ medicine, medicineStore, setAddNew, setMedicineStore
                                         }}
                                         showArrow={false}
                                         notFoundContent={
-                                            <div>Search for medicine or 
-                                                <span 
-                                                    style={{ cursor: "pointer", color: "red" }} 
-                                                    onClick={showAddMedicineToDatabaseModal}
-                                                >
-                                                    Add new medicine to database
-                                                </span>
-                                            </div>
+                                            loadingDrug ? (
+                                                <div style={{ display: "flex", justifyContent: "center" }}><Spin /></div>
+                                            ) : (
+                                                <div>Search for medicine or 
+                                                    <span 
+                                                        style={{ cursor: "pointer", color: "red" }} 
+                                                        onClick={showAddMedicineToDatabaseModal}
+                                                    >
+                                                        Add new medicine to database
+                                                    </span>
+                                                </div>
+                                            )
                                         }
                                         placeholder="Drug Name"
                                     >
@@ -388,9 +416,11 @@ function MedicineListItem({ medicine, medicineStore, setAddNew, setMedicineStore
                 <Row style={{ width: "100%" }} >
                     <Col span={5}>
                         {medicine?.drugName.slice(0, 25)} {medicine?.drugName.length > 25 ? "..." : ""}
+                        {/* drugName */}
                     </Col>
                     <Col span={5}>
                         {medicine?.dosage_morning}-{medicine?.dosage_afternoon}-{medicine?.dosage_evening} {medicine?.occurrence}
+                        {/* {"dosage_morning"}-{"dosage_afternoon"}-{"dosage_evening"} {"occurrence"} */}
                     </Col>
                     <Col span={5}>
                         for {medicine?.frequencyPeriod} {medicine?.frequency}

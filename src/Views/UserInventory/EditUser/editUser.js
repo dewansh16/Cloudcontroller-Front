@@ -274,10 +274,10 @@ export default function EditUser(props) {
                                             className="addPatientDetailsModal"
                                         >
                                             <Select
-                                                showSearch
+                                                // showSearch
                                                 placeholder="Search to Select"
-                                                optionFilterProp="children"
-                                                filterOption={true}
+                                                // optionFilterProp="children"
+                                                // filterOption={true}
                                                 style={selectStyle}
                                             >
                                                 <SelectOption value={1}>Active</SelectOption>

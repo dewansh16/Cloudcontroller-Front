@@ -35,6 +35,7 @@ const BedAllocationDetails = (props) => {
     const handleChange = (values) => {
         let name = `${values[0].name[0]}`;
         let value = values[0].value;
+
         switch (name) {
             case "floor": {
                 props.form.setFieldsValue({ ward: null, bed: null });
@@ -43,8 +44,8 @@ const BedAllocationDetails = (props) => {
                 setFloor(value);
                 setWardsArray(
                     Object.keys(
-                        locationDetail.buildings["building_1"]?.floors[`floor_${value}`]
-                            ?.wards
+                        locationDetail?.buildings?.["building_1"]?.floors?.[`floor_${value}`]
+                            ?.wards || []
                     )
                 );
                 break;
@@ -56,24 +57,24 @@ const BedAllocationDetails = (props) => {
                 setBedsArray(
                     arrayGen(
                         parseInt(
-                            locationDetail.buildings["building_1"].floors[
-                                floorsArray[floor - 1]
-                            ]?.wards[`ward_${value}`]?.bed_count
+                            locationDetail?.buildings?.["building_1"]?.floors[
+                                floorsArray?.[floor - 1]
+                            ]?.wards?.[`ward_${value}`]?.bed_count
                         ),
                         "bed_"
                     )
                 );
                 console.log(
                     parseInt(
-                        locationDetail.buildings["building_1"].floors[
-                            floorsArray[floor - 1]
-                        ]?.wards[`ward_${value}`]?.bed_count
+                        locationDetail?.buildings?.["building_1"]?.floors?.[
+                            floorsArray?.[floor - 1]
+                        ]?.wards?.[`ward_${value}`]?.bed_count
                     )
                 );
                 // console.log(locationArray, value, floor)
-                const locationObj = locationArray.filter((item) => {
+                const locationObj = locationArray?.filter((item) => {
                     // console.log(parseInt(item.floor), values.floor, item.ward, values.ward)
-                    if (parseInt(item.floor) === floor && parseInt(item.ward) === value) {
+                    if (parseInt(item?.floor) === floor && parseInt(item?.ward) === value) {
                         return true;
                     }
                     return false;
@@ -85,7 +86,7 @@ const BedAllocationDetails = (props) => {
                 break;
             }
             case "bed": {
-                props.savePatientDetails({ [name]: value });
+                props.savePatientDetails({ [name]: value || "" });
                 break;
             }
             default:
@@ -106,10 +107,10 @@ const BedAllocationDetails = (props) => {
                 setLocationArray(res.data.response?.locations);
                 setFloorsArray(
                     Object.keys(
-                        res.data.response?.facilities[0]?.facility_map.buildings[
+                        res.data.response?.facilities[0]?.facility_map?.buildings?.[
                             "building_1"
                         ]?.floors
-                    )
+                    ) || []
                 );
             })
             .catch((err) => {
