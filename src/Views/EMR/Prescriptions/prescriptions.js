@@ -180,11 +180,11 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
                         return (
                             <Row key={id} className="tr" gutter={[24, 24]} style={{ width: "100%" }}>
                                 <Col className="td" span={1}></Col>
-                                <Col className="td" span={8} style={{ padding: "0.5rem 0", fontWeight: 500, color: "#525151" }}>
+                                <Col className="td" span={8} style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem", fontWeight: 500, color: "#525151" }}>
                                     {/* {medicine.drugName.slice(0, 13)} */}
                                     {medicine.drugName}
                                 </Col>
-                                <Col className="td" span={15} style={{ padding: "0.5rem 0" }}>
+                                <Col className="td" span={15} style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem", }}>
                                     {`${medicine.dosage_morning || medicine.dosage_afternoon || medicine.dosage_evening} ${medicine.type} ${medicine.occurrence} for ${medicine.frequencyPeriod} ${medicine.frequency}`}
                                 </Col>
                             </Row>

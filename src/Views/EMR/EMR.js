@@ -59,7 +59,6 @@ function FetchDetails(pid) {
 }
 
 export function EmrView({ pid, setEmrView, setPadding, defaultState = "subgroup-2-element-2" }) {
-    console.log("defaultState", defaultState);
     const [patient, isLoading] = FetchDetails(pid);
 
     const menuData = [

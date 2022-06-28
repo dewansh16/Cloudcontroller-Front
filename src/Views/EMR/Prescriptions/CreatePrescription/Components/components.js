@@ -70,7 +70,6 @@ function MedicineListItem({
             }
 
             setMedicineStore([...medicineStore])
-            console.log(medicineStore)
             form.resetFields()
             // setEditView(false)
         }
@@ -158,7 +157,7 @@ function MedicineListItem({
                                         // }}
                                         suffixIcon={Icons.downArrowFilled({ style: { color: "#1479FF" } })}
                                         onSelect={(id, option) => {
-                                            let medicine = medicineSearchList[option.key]
+                                            let medicine = medicineSearchList[option.key];
                                             form.setFieldsValue({
                                                 drugName: medicine[nameType],
                                                 tradeName: medicine.marketing_status,
@@ -185,8 +184,8 @@ function MedicineListItem({
                                         placeholder="Drug Name"
                                     >
                                         {medicineSearchList.map((medicine, id) => {
-                                            return <Option key={id} value={medicine.generic_name}>
-                                                {medicine.generic_name}
+                                            return <Option key={id} value={medicine[nameType]}>
+                                                {medicine[nameType]}
                                             </Option>
                                         })}
                                     </Select>

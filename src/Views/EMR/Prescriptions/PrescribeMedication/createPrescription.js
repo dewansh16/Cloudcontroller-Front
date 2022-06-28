@@ -318,7 +318,6 @@ export default function CreatePrescription({ pid, setEmrView, patient, setPaddin
             }
 
         })
-        console.log(data["drug"])
         if (flag) AddPrescriptions(pid, data, () => setEmrView(<EmrView pid={pid} setPadding={setPadding} setEmrView={setEmrView} defaulState={"subgroup-3-element-1"} />))
     }
 
