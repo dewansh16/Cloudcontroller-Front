@@ -248,14 +248,13 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
     //     }
     // }, [loadingPage]);
 
-      function SearchMedicine(value, nameType) {
+      function SearchMedicine() {
         setLoadingPage(true);
-        const genericName = nameType === "generic_name" ? `${value}` : null
-        const productName = nameType === "product_name" ? `${value}` : null
+        // const genericName = nameType === "generic_name" ? `${value}` : null
+        // const productName = nameType === "product_name" ? `${value}` : null
        
-        productApi.getMedicineList(genericName, productName, 100, 0, 0, source.token)
+        productApi.getMedicineList("", "", 100, 0, 0, source.token)
             .then((res) => {
-                console.log("res.data?.response", res.data?.response);
                 setMedicineSearchList(res.data?.response.products);
                 setSearching(false);
                 setLoadingPage(false);
@@ -271,8 +270,8 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
     }
 
     useEffect(() => {
-        SearchMedicine("", nameType);
-    }, [nameType]);
+        SearchMedicine();
+    }, []);
 
     const savePrescriptions = () => {
         if (medicineStore.length < 1) {
@@ -328,7 +327,6 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
         })
 
         if (flag) AddPrescriptions(pid, data, () => {
-            console.log("--------------------------------", flag);
             setEmrView(<EmrView pid={pid} setPadding={setPadding} setEmrView={setEmrView} defaultState="subgroup-3-element-1" />)
             // setLoadingPage(false);
         })
@@ -394,7 +392,7 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                 }}>
                     <Select onChange={(e) => { setNameType(e) }} defaultValue={nameType} bordered={false} suffixIcon={Icons.downArrowFilled({ style: { color: "#1479FF" } })}>
                         <Option value="product_name"><span style={{ color: "#1479FF" }}>Product Name</span></Option>
-                        <Option value="generic_name"><span style={{ color: "#1479FF" }}>Generic/Trade Name</span></Option>
+                        <Option value="generic_name"><span style={{ color: "#1479FF" }}>Generic Name</span></Option>
                     </Select>
                     <div>
                         <p style={{
