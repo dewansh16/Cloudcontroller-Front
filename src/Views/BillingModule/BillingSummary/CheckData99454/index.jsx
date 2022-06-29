@@ -137,10 +137,14 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
             let maxDate = null;
             let totalDayMonitored = 0;
 
+            totalArr = [...new Set(totalArr)];
+            
             const timeFilter = new Date(valueDate);
             if (totalArr?.length > 0) {
                 const firstDateMonitored = new Date(totalArr[0]);
                 const lastDateMonitored = new Date(totalArr[totalArr?.length - 1]);
+                // arrayTotalDate = arrayTotalDate?.concat(patch?.datesInflux);
+
                 if (
                     Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear())
                     && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
@@ -156,17 +160,16 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
             }
 
             if (minDate !== null && maxDate !== null) {
-                totalDayMonitored = numberOfNightsBetweenDates(new Date(minDate), new Date(maxDate));
+                // totalDayMonitored = numberOfNightsBetweenDates(new Date(minDate), new Date(maxDate));
+                totalDayMonitored = totalArr?.length;
             }
 
             billFound.total = totalDayMonitored;
-            if (totalDayMonitored >= TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
-                billFound["99454"] = {
-                    code: "99454",
-                    date: maxDate,
-                    desc: "1 billed",
-                    duration: "16 days",
-                }
+            billFound["99454"] = {
+                code: "99454",
+                date: maxDate,
+                desc: totalDayMonitored > 15 ? "1 billed" : "",
+                duration: `${totalDayMonitored} ${totalDayMonitored > 1 ? "days" : "day"}`,
             }
            
             setTotalDay(totalDayMonitored);

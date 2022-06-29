@@ -2460,7 +2460,7 @@ function BillingModule() {
     const formatDataSummary = () => {
         let newArrSummary = [...dataSource];
         newArrSummary = newArrSummary?.filter(item => item?.code !== "99454");
-        const timeDuration = numberOfNightsBetweenDates(filterDeviceAssociatedByDate?.minDate, filterDeviceAssociatedByDate?.maxDate);
+        const timeDuration = filterDeviceAssociatedByDate?.totalDayMonitored;
 
         const data = {
             code: "99454",
