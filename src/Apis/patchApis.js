@@ -1,16 +1,20 @@
 import axiosInstance from "./index";
 
 const patchApi = {
-  getPatchInventory: (deviceType, inuse, limit, offset, patchSerial) =>
-    axiosInstance.request({
-      method: "GET",
-      url: `/patch/patchinventory?devicetype=${deviceType || ""}&limit=${
-        limit || 10
-      }&offset=${offset || 0}&inuse=${inuse}&patch_serial=${
-        patchSerial || "0"
-      }`,
-      withCredentials: true,
-    }),
+    getPatchInventory: (deviceType, inuse, limit, offset, patchSerial) =>
+        axiosInstance.request({
+            method: "GET",
+            url: `/patch/patchinventory?devicetype=${deviceType || ""}&limit=${limit || 10
+                }&offset=${offset || 0}&inuse=${inuse}&patch_serial=${patchSerial || "0"
+                }`,
+            withCredentials: true,
+        }),
+    gatewayAction: (data) => 
+        axiosInstance.request({
+            method: "POST",
+            url: "/patch/reset",
+            data: data
+        })
 };
 // /patchinventory?limit=10&offset=0&inuse=-1
 

@@ -16,6 +16,7 @@ import PatientJourney from "../../Views/PatientJourney/patientJourney";
 import BillingSummary from "../../Views/BillingModule/BillingSummary";
 import Logger from "../../Views/logger";
 import UploadLogger from "../../Views/UploadLogger";
+import CareDashboard from "../../Views/CareDashboard";
 
 import { FaPlusSquare } from "react-icons/fa";
 import { MdAddAlert } from "react-icons/md";
@@ -28,7 +29,7 @@ const iconStyle = {
 
 const patientRoutes = [
     {
-        id: "0022",
+        id: "0021",
         name: "Dashboard",
         path: "/patient/list",
         component: PatientDashboard,
@@ -36,6 +37,16 @@ const patientRoutes = [
         exact: true,
         showOnMenu: true,
         icon: Icons.ledger({ Style: iconStyle }),
+    },
+    {
+        id: "0022",
+        name: "Care Dashboard",
+        path: "/care-dashboard",
+        component: CareDashboard,
+        isPrivate: true,
+        exact: true,
+        showOnMenu: true,
+        icon: <AiOutlineAudit style={iconStyle} />,
     },
     {
         id: "0023",

@@ -59,6 +59,7 @@ import {
 } from "@ant-design/icons";
 
 import "./device.css";
+import patchApi from "../../Apis/patchApis";
 
 function PatchInventory() {
     // const { url } = useRouteMatch();
@@ -472,12 +473,32 @@ function PatchInventory() {
         "digital": "80px"
     }[type]);
 
-    const onScanGateway = () => {
-
+    const onScanGateway = (patch_uuid) => {
+        patchApi.gatewayAction({ patch_uuid, scan: 0 })
+            .then(res => {
+                notification.success({
+                    message: "Scan gateway successfully!",
+                })
+            })
+            .catch(err => {
+                notification.success({
+                    message: "Scan gateway failed!",
+                })
+            })
     };
 
-    const onResetGateway = () => {
-
+    const onResetGateway = (patch_uuid) => {
+        patchApi.gatewayAction({ patch_uuid, reset: 0 })
+            .then(res => {
+                notification.success({
+                    message: "Reset gateway successfully!",
+                })
+            })
+            .catch(err => {
+                notification.success({
+                    message: "Reset gateway failed!",
+                })
+            })
     };
 
     const columns = [
@@ -900,14 +921,14 @@ function PatchInventory() {
                                         <img
                                             className="icon_gateway"
                                             src={IconReset}
-                                            onClick={onResetGateway}
+                                            onClick={() => onResetGateway(record?.patch_uuid)}
                                         />
                                     </Tooltip>
                                     <Tooltip title="Scan gateway">
                                         <img
                                             className="icon_gateway"
                                             src={IconScan}
-                                            onClick={onScanGateway}
+                                            onClick={() => onScanGateway(record?.patch_uuid)}
                                         />
                                     </Tooltip>
                                 </>
@@ -920,7 +941,7 @@ function PatchInventory() {
                                         record.AssociatedPatch?.length > 1 ? "Bundle" : "Device"
                                     )}
                                 >
-                                    <img src={iconDelete} width="22px"></img>
+                                    <img src={iconDelete} width="20px"></img>
                                 </div>
                             ) : (
                                 <Popconfirm
@@ -934,7 +955,7 @@ function PatchInventory() {
                                     cancelText="No"
                                 >
                                     <div style={{ marginTop: "-3px", cursor: "pointer" }}>
-                                        <img src={iconDelete} width="22px"></img>
+                                        <img src={iconDelete} width="20px"></img>
                                     </div>
                                 </Popconfirm>
                             )}

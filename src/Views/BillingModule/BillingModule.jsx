@@ -457,6 +457,19 @@ function BillingModule() {
         clearInterval(clockCounter);
     }
 
+    useEffect(() => {
+        if (!addTaskState) {
+            stopCountTimer();
+            timeCount = 0;
+        }
+    }, [addTaskState]);
+
+    useEffect(() => {
+        setTimerTask(false);
+        stopCountTimer();
+        timeCount = 0;
+    }, [taskCodeActive]);
+
     function enrollForPatch() {
         console.log("PATCH INFO : ", patchArray);
         console.log("PATCH INFO : ", patchInformation);
@@ -1880,6 +1893,7 @@ function BillingModule() {
             taskData.map(item => {
                 tempTotal += Number(item.task_time_spend)
             })
+            tempTotal = Math.floor(tempTotal / 60);
             if (tempTotal >= TOTAL_HOURS_FOR_EACH_99091_BILLED) {
                 return `1 billed`;
             } else {
@@ -2302,6 +2316,7 @@ function BillingModule() {
 
         const typeQuery = shortTypeQueryOfSensor(sensorType, true);
         if (start.getTime() > end.getTime()) return;
+
         if (start?.getTime() < firstDayOfMonth?.getTime()) {
             start = firstDayOfMonth;
         }
@@ -2311,7 +2326,7 @@ function BillingModule() {
                 |> filter(fn: (r) => r["_measurement"] == "${location.state.pid}_${typeQuery}_timestamp")
                 |> yield(name: "mean")
             `
-
+        
         const arrDateQuery = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {
@@ -2333,7 +2348,7 @@ function BillingModule() {
             },
             complete() {
                 patch.totalDay = arrDateQuery?.length;
-                patch.datesInflux = arrDateQuery;
+                patch.datesInflux = arrDateQuery?.sort(sortDate);;
                 let temp = effect;
                 temp += 1;
                 setEffect(temp);
@@ -2366,13 +2381,18 @@ function BillingModule() {
         let maxDate = null;
         const timeFilter = new Date(currentDateApi);
 
+        let arrayTotalDate = [];
+
         for (let index = 0; index < patchArray.length; index++) {
             const patch = patchArray[index];
             patch?.datesInflux?.sort(sortDate);
 
             if (patch?.datesInflux?.length > 0) {
+                arrayTotalDate = arrayTotalDate?.concat(patch?.datesInflux);
+
                 const firstDateMonitored = new Date(patch?.datesInflux[0]);
                 const lastDateMonitored = new Date(patch?.datesInflux[patch?.datesInflux?.length - 1]);
+
                 if (
                     Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear())
                     && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
@@ -2390,8 +2410,10 @@ function BillingModule() {
             }
         }
 
+        arrayTotalDate = [...new Set(arrayTotalDate)];
+
         if (minDate !== null && maxDate !== null) {
-            totalDayMonitored = numberOfNightsBetweenDates(new Date(minDate), new Date(maxDate));
+            totalDayMonitored = arrayTotalDate?.length || 0;
         }
 
         if (totalDayMonitored >= TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
@@ -2438,16 +2460,15 @@ function BillingModule() {
     const formatDataSummary = () => {
         let newArrSummary = [...dataSource];
         newArrSummary = newArrSummary?.filter(item => item?.code !== "99454");
-      
-        if (filterDeviceAssociatedByDate.billedUnit > 0) {
-            const data = {
-                code: "99454",
-                date: filterDeviceAssociatedByDate.maxDate,
-                desc: "1 billed",
-                duration: "16 days",
-            }
-            newArrSummary.splice(1, 0, data);
+        const timeDuration = numberOfNightsBetweenDates(filterDeviceAssociatedByDate?.minDate, filterDeviceAssociatedByDate?.maxDate);
+
+        const data = {
+            code: "99454",
+            date: filterDeviceAssociatedByDate.maxDate,
+            desc: filterDeviceAssociatedByDate.billedUnit > 0 ? "1 billed" : "",
+            duration: `${timeDuration} ${timeDuration > 1 ? "days" : "day"}`,
         }
+        newArrSummary.splice(1, 0, data);
         return newArrSummary;
     };
 
@@ -2499,9 +2520,9 @@ function BillingModule() {
                                         setLastBillingState(false);
                                         setBillProcessedState(false);
                                         setSummaryState(false);
-
                                         setTaskDeleteArray([]);
-
+                                        timeCount = 0;
+                                        stopCountTimer();
                                     }}
                                     className={
                                         initialSetupState ? "bm-selected-active" : "bm-selected"
@@ -2636,7 +2657,9 @@ function BillingModule() {
                                             : null
                                     }
                                 ></div>
-                                <div className="bm-header-below">{`${Math.floor(firstTotalTimeDisplay / 60)} mins monitored`}</div>
+                                <div className="bm-header-below">
+                                    {`${Math.floor(firstTotalTimeDisplay / 60)} ${Math.floor(firstTotalTimeDisplay / 60) > 1 ? "mins" : "min"} monitored`}
+                                </div>
                             </div>
                         </div>
                         <div className="bm-cptcode-container">
@@ -2682,13 +2705,17 @@ function BillingModule() {
                                     className="bm-header-line"
                                     style={
                                         initialStepDoneState ?
-                                            Math.floor(secondTotalTime / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
+                                            Math.floor(secondTotalTime / 60 / TOTAL_HOURS_FOR_EACH_99458_BILLED) > 0
                                                 ? { background: "#81ff00" }
                                                 : { background: "#ffcd00" }
                                             : null
                                     }
                                 ></div>
-                                <div className="bm-header-below">{`${Math.floor(secondTotalTime / 60) >= (TOTAL_HOURS_FOR_EACH_99458_BILLED * 2) ? `${TOTAL_HOURS_FOR_EACH_99458_BILLED * 2}` : `${Math.floor(secondTotalTime / 60)}`} mins monitored`}</div>
+                                <div className="bm-header-below">
+                                    {`${Math.floor(secondTotalTime / 60) >= (TOTAL_HOURS_FOR_EACH_99458_BILLED * 2) ? 
+                                    `${TOTAL_HOURS_FOR_EACH_99458_BILLED * 2} ${TOTAL_HOURS_FOR_EACH_99458_BILLED * 2 > 1 ? "mins" : "min"} ` : 
+                                    `${Math.floor(secondTotalTime / 60)} ${Math.floor(secondTotalTime / 60) > 1 ? "mins" : "min"}`} monitored`}
+                                </div>
                             </div>
                             {/* <div className="bm-cptcode-b-header">
                                 <div
