@@ -171,7 +171,7 @@ export default function PatientDashboard(props) {
     const [patientListToShow, setPatientList] = useState([]);
     const [showNotes, setShowNotes] = useState(false);
     const [wardDetails, setWardDetails] = useState({ text: null, value: null });
-    const [patientType, setSelectedPatient] = useState("remote");
+    const [patientType, setSelectedPatient] = useState(dataFilterHeader?.patientType || "remote");
     // const [showModal, setShowModal] = useState(false);
     const [sensorShow, setSensorShow] = useState(dataFilterHeader?.sensorShow || ["temp", "spo2", "ecg_hr", "ecg_rr", "blood_pressuer", "weight"]);
 
@@ -382,9 +382,10 @@ export default function PatientDashboard(props) {
             valuePageLength,
             valSearch,
             valDuration,
-            sensorShow
+            sensorShow,
+            patientType
         };
-    }, [currentPageVal, valuePageLength, valSearch, valDuration, sensorShow]);
+    }, [currentPageVal, valuePageLength, valSearch, valDuration, sensorShow, patientType]);
 
     const onSelectValDuration = (val) => {
         setValDuration(val);
@@ -585,9 +586,10 @@ export default function PatientDashboard(props) {
                                     <h3 style={{ width: "7.5rem", margin: "0" }}>Patient Type: </h3>
                                 </div>
                                 <Select
-                                    defaultValue="remote"
+                                    // defaultValue="remote"
                                     style={{ width: "9rem", height: '32px' }}
                                     onSelect={showSelectedPatient}
+                                    value={patientType}
                                 >
                                     <Option value="remote">Remote</Option>
                                     <Option value="hospital">Hospital</Option>
