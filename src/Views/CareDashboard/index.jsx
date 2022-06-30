@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Button, Col, Input, Row, Select, Spin, Table } from 'antd';
+import { Button, Col, DatePicker, Input, Row, Select, Spin, Table } from 'antd';
 
 import {
     CaretRightOutlined,
@@ -17,6 +17,7 @@ import BulbIcon from "./component/BulbIcon";
 import TotalReading from './component/TotalReading';
 
 import "./styles.css";
+import moment from 'moment';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -27,6 +28,7 @@ const CareDashboard = () => {
     const [patientType, setPatientType] = useState("remote");
     const [valSearch, setValSearch] = useState("");
     const [totalPages, setTotalPages] = useState(1);
+    const [valueDate, setValueDate] = useState(new Date());
 
     const [careDashboard, setCareDashboard] = useState({
         loading: false,
@@ -93,10 +95,15 @@ const CareDashboard = () => {
             dataIndex: "Sensor",
             key: "Sensor",
             width: 10,
+            render: () => {
+                return (
+                    <span>1 device</span>
+                )
+            }
         },
 
         {
-            title: "Total all",
+            title: "Total reading",
             dataIndex: "total",
             key: "5",
             width: 50,
@@ -104,9 +111,10 @@ const CareDashboard = () => {
             render: (dataIndex, record) => {
                 return (
                     <TotalReading
-                        pid={record?.pid} 
-                        associateList={record?.associateList} 
+                        pid={record?.pid}
+                        associateList={record?.associateList}
                         patientList={careDashboard?.dataSource}
+                        valueDate={valueDate}
                     />
                 )
             }
@@ -118,9 +126,9 @@ const CareDashboard = () => {
             width: 25,
             className: "column-cpt-code",
             align: "center",
-            render: () => {
+            render: (dataIndex, record) => {
                 return (
-                    <ChartCPTCode />
+                    <ChartCPTCode CPT_CODE="99543" />
                 )
             }
         },
@@ -131,9 +139,9 @@ const CareDashboard = () => {
             width: 25,
             className: "column-cpt-code",
             align: "center",
-            render: () => {
+            render: (dataIndex, record) => {
                 return (
-                    <ChartCPTCode />
+                    <ChartCPTCode CPT_CODE="99454" record={record} />
                 )
             }
         },
@@ -184,6 +192,10 @@ const CareDashboard = () => {
         );
     }
 
+    const handleMonthChange = (date) => {
+        setValueDate(date);
+    }
+
     console.log("careDashboard", careDashboard);
 
     return (
@@ -195,13 +207,41 @@ const CareDashboard = () => {
                     </Button>
                 }
                 centerChildren={
-                    <Search
-                        placeholder="input search text"
-                        onSearch={setValSearch}
-                        enterButton
-                        allowClear
-                        defaultValue={valSearch}
-                    />
+                    <>
+                        <div
+                            style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                marginLeft: "2rem"
+                            }}
+                        >
+                            <h3 style={{ marginRight: "1rem", marginBottom: "0" }}>Search: </h3>
+                            <Search
+                                placeholder="input search text"
+                                onSearch={setValSearch}
+                                enterButton
+                                allowClear
+                                defaultValue={valSearch}
+                            />
+                        </div>
+                        <div
+                            style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                marginLeft: "2rem"
+                            }}
+                        >
+                            <h3 style={{ marginRight: "1rem", marginBottom: "0" }}>Date: </h3>
+                            <DatePicker
+                                onChange={handleMonthChange}
+                                allowClear={false}
+                                picker="month"
+                                defaultValue={moment(valueDate, "YYYY-MM-DD")}
+                                style={{ minWidth: "10rem" }}
+                            />
+                        </div>
+                    </>
+
                 }
                 endChildren={
                     <>
@@ -254,12 +294,12 @@ const CareDashboard = () => {
                             pagination={false}
                             // scroll={{ y: "calc(100vh - 237px)" }}
                             dataSource={careDashboard?.dataSource}
-                            // expandable={{
-                            //     expandedRowRender: (record) => {
-                            //         console.log(record);
-                            //     },
-                            //     expandIcon: (props) => customExpandIcon(props)
-                            // }}
+                        // expandable={{
+                        //     expandedRowRender: (record) => {
+                        //         console.log(record);
+                        //     },
+                        //     expandIcon: (props) => customExpandIcon(props)
+                        // }}
                         />
                     </div>
                 </Row>
