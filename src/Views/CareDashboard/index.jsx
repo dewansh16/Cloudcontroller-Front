@@ -10,11 +10,11 @@ import {
 import Navbar from '../../Theme/Components/Navbar/navbar';
 import { PaginationBox } from '../Components/PaginationBox/pagination';
 
-
 import Icons from '../../Utils/iconMap';
 
 import ChartCPTCode from "./component/ChartCPTCode";
 import BulbIcon from "./component/BulbIcon";
+import TotalReading from './component/TotalReading';
 
 import "./styles.css";
 
@@ -41,11 +41,11 @@ const CareDashboard = () => {
             width: 50,
             render: () => {
                 return (
-                    <>
-                        <div>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                        <div style={{ marginLeft: "2px", marginRight: "2px" }}>
                             <BulbIcon />
                         </div>
-                        <div>
+                        <div style={{ marginLeft: "0.25rem", textAlign: "start" }}>
                             <div style={{
                                 textOverflow: "ellipsis",
                                 overflow: "hidden",
@@ -61,7 +61,7 @@ const CareDashboard = () => {
                                 {"Phone: 0355320212"}
                             </div>
                         </div>
-                    </>
+                    </div>
                 )
             },
         },
@@ -87,13 +87,13 @@ const CareDashboard = () => {
                 )
             },
         },
-        // {
-        //     title: "Sensor",
-        //     dataIndex: "Sensor",
-        //     key: "Sensor",
-        //     width: 10,
-        // },
         // Table.EXPAND_COLUMN,
+        {
+            title: "Sensor",
+            dataIndex: "Sensor",
+            key: "Sensor",
+            width: 10,
+        },
 
         {
             title: "Total all",
@@ -101,6 +101,11 @@ const CareDashboard = () => {
             key: "5",
             width: 50,
             align: "center",
+            render: (dataIndex, record) => {
+                return (
+                    <TotalReading pid={record?.pid} associateList={record?.associateList} />
+                )
+            }
         },
         {
             title: "99453",
@@ -231,9 +236,9 @@ const CareDashboard = () => {
                 </div>
             ) : (
                 <Row
-                    className="table-body devie-inventory-table"
+                    className="table-body care-dashboard-table"
                     justify="start"
-                    style={{ padding: "0", backgroundColor: "white" }}
+                    style={{ padding: "0", backgroundColor: "white", marginTop: "-12px" }}
                 >
                     <div style={{ margin: "30px 2%", width: "100%" }}>
                         <Table
@@ -243,12 +248,12 @@ const CareDashboard = () => {
                             pagination={false}
                             // scroll={{ y: "calc(100vh - 237px)" }}
                             dataSource={careDashboard?.dataSource}
-                            expandable={{
-                                expandedRowRender: (record) => {
-                                    console.log(record);
-                                },
-                                expandIcon: (props) => customExpandIcon(props)
-                            }}
+                            // expandable={{
+                            //     expandedRowRender: (record) => {
+                            //         console.log(record);
+                            //     },
+                            //     expandIcon: (props) => customExpandIcon(props)
+                            // }}
                         />
                     </div>
                 </Row>

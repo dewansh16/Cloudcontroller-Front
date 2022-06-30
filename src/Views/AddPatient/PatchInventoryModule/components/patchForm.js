@@ -419,14 +419,14 @@ const PatchForm = (props) => {
         if (val.includes(";") || val.includes(",")) {
             setValSelectSearch("");
 
-            if (!tagSelected.includes(valSelectSearch)) {
-                setTagList([...tagList, valSelectSearch]);
-                setTagSelected([...tagSelected, valSelectSearch]);
+            if (!tagSelected.includes(valSelectSearch) && val?.length > 1) {
+                const newList = [...tagList, valSelectSearch];
+                const newSelected = [...tagSelected, valSelectSearch]
+                setTagList(newList);
+                setTagSelected(newSelected);
                 props.form.setFieldsValue({
-                    [`tags_add`]: [...tagSelected, valSelectSearch]
+                    [`tags_add`]: newSelected
                 })
-                
-               
             }
         } else {
             setValSelectSearch(val);

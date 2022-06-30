@@ -16,16 +16,18 @@ const { Option } = Select;
 
 function MedicineListItem({ 
     medicine, medicineStore, setAddNew, setMedicineStore, nameType, newMed = false, idx, 
-    showAddMedicineToDatabaseModal, medicineSearchList, loadingDrug, type, ...rest 
+    showAddMedicineToDatabaseModal, ...rest 
 }) {
     const [form] = Form.useForm();
 
     const [addNewMedView, setAddNewMedView] = useState(newMed);
     const [editView, setEditView] = useState(newMed);
+    const timerFilterDrug = useRef(null);
 
     function RenderForm_({ medicine }) {
-        // const [medicineSearchList, setMedicineSearchList] = useState([]);
+        const [medicineSearchList, setMedicineSearchList] = useState([]);
         const [loading, setLoading] = useState(false);
+        const [isDisable, setIsDisable] = useState(false);
 
         useEffect(() => {
             form.setFieldsValue(medicine)
@@ -33,9 +35,9 @@ function MedicineListItem({
             }
         }, [medicine, nameType, medicineSearchList]);
 
-        // useEffect(() => {
-        //     SearchMedicine("", "product_name");
-        // }, []);
+        useEffect(() => {
+            SearchMedicine("");
+        }, []);
 
         const onFinish = (values) => {
             let formData = {
@@ -83,31 +85,34 @@ function MedicineListItem({
         const [source, setSource] = useState(new axios.CancelToken.source())
         const [searching, setSearching] = useState(false)
 
-        // function SearchMedicine(value, nameType) {
-        //     setLoading(true);
-        //     const genericName = nameType === "generic_name" ? `${value}` : null
-        //     const productName = nameType === "product_name" ? `${value}` : null
-        //     console.log(nameType, genericName, productName)
-        //     // if (searching) {
-        //     //     source.cancel()
-        //     //     setSource(new axios.CancelToken.source())
-        //     // }
-        //     // setSearching(true)
-        //     productApi.getMedicineList(genericName, productName, 100, 0, 0, source.token)
-        //         .then((res) => {
-        //             setMedicineSearchList(res.data?.response.products);
-        //             setSearching(false);
-        //             setLoading(false);
-        //         })
-        //         .catch(function (thrown) {
-        //             if (axios.isCancel(thrown)) {
-        //                 setSearching(false)
-        //             } else {
-        //                 setSearching(false);
-        //             }
-        //             setLoading(false);
-        //         });
-        // }
+        function SearchMedicine(value) {
+            setLoading(true);
+            // setIsDisable(true);
+
+            const genericName = nameType === "generic_name" ? `${value}` : null
+            const productName = nameType === "product_name" ? `${value}` : null
+            // if (searching) {
+            //     source.cancel()
+            //     setSource(new axios.CancelToken.source())
+            // }
+            // setSearching(true)
+            productApi.getMedicineList(genericName, productName, 200, 0, 0, source.token)
+                .then((res) => {
+                    setMedicineSearchList(res.data?.response.products);
+                    setSearching(false);
+                    setLoading(false);
+                    setIsDisable(false);
+                })
+                .catch(function (thrown) {
+                    if (axios.isCancel(thrown)) {
+                        setSearching(false)
+                    } else {
+                        setSearching(false);
+                    }
+                    setLoading(false);
+                    setIsDisable(false);
+                });
+        }
 
         return (
             <Form
@@ -145,16 +150,18 @@ function MedicineListItem({
                                     <Select
                                         showSearch
                                         optionFilterProp="children"
-                                        filterOption={true}
-                                        // onInput={(e) => { 
-                                        //     if (timerFilterDrug.current) {
-                                        //         clearTimeout(timerFilterDrug.current);
-                                        //     };
+                                        filterOption={false}
+                                        // disabled={isDisable}
+                                        onInput={(e) => {
+                                            setLoading(true); 
+                                            if (timerFilterDrug.current) {
+                                                clearTimeout(timerFilterDrug.current);
+                                            };
 
-                                        //     timerFilterDrug.current = setTimeout(() => {
-                                        //         SearchMedicine(e.target.value, nameType) 
-                                        //     }, 1000);
-                                        // }}
+                                            timerFilterDrug.current = setTimeout(() => {
+                                                SearchMedicine(e.target.value); 
+                                            }, 1500);
+                                        }}
                                         suffixIcon={Icons.downArrowFilled({ style: { color: "#1479FF" } })}
                                         onSelect={(id, option) => {
                                             let medicine = medicineSearchList[option.key];
@@ -168,26 +175,28 @@ function MedicineListItem({
                                         }}
                                         showArrow={false}
                                         notFoundContent={
-                                            loadingDrug ? (
-                                                <div style={{ display: "flex", justifyContent: "center" }}><Spin /></div>
-                                            ) : (
-                                                <div>Search for medicine or 
-                                                    <span 
-                                                        style={{ cursor: "pointer", color: "red" }} 
-                                                        onClick={showAddMedicineToDatabaseModal}
-                                                    >
-                                                        Add new medicine to database
-                                                    </span>
-                                                </div>
-                                            )
+                                            <div>Search for medicine or 
+                                                <span 
+                                                    style={{ cursor: "pointer", color: "red" }} 
+                                                    onClick={showAddMedicineToDatabaseModal}
+                                                >
+                                                    Add new medicine to database
+                                                </span>
+                                            </div>
                                         }
                                         placeholder="Drug Name"
                                     >
-                                        {medicineSearchList.map((medicine, id) => {
-                                            return <Option key={id} value={medicine[nameType]}>
-                                                {medicine[nameType]}
-                                            </Option>
-                                        })}
+                                        {loading ? (
+                                            <Option className='spin-select-drug'><Spin /></Option>
+                                        ) : (
+                                            <>
+                                                {medicineSearchList.map((medicine, id) => {
+                                                    return <Option key={id} value={medicine[nameType]}>
+                                                        {medicine[nameType]}
+                                                    </Option>
+                                                })}
+                                            </>
+                                        )}
                                     </Select>
                                 </Form.Item>
                             </Col>
@@ -413,7 +422,7 @@ function MedicineListItem({
             >
                 <Row style={{ width: "100%" }} >
                     <Col span={5}>
-                        {type} {medicine?.drugName.slice(0, 25)} {medicine?.drugName.length > 25 ? "..." : ""}
+                        {medicine?.drugName.slice(0, 25)} {medicine?.drugName.length > 25 ? "..." : ""}
                     </Col>
                     <Col span={5}>
                         {medicine?.dosage_morning}-{medicine?.dosage_afternoon}-{medicine?.dosage_evening} {medicine?.occurrence}

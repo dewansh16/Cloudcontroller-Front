@@ -234,6 +234,8 @@ function AddPatient() {
                             ? moment(demographic_map.deceased_date)
                             : null;
 
+                    demographic_map.tags = isJsonString(demographic_map?.tags) ? JSON.parse(demographic_map?.tags) : [];
+
                     // demographic_map.patient_type = "remote";
                     setPatientData(demographic_map);
 
