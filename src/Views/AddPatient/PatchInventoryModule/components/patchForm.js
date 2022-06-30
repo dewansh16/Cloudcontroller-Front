@@ -862,7 +862,7 @@ const PatchForm = (props) => {
                                                 required={!props.required}
                                                 label="Phone Number"
                                                 name="gateway_phone_number_add"
-                                                rules={[ { pattern: '^([-]?[1-9][0-9]*|0)$', message: "phone is not a valid number" } ]}
+                                                rules={[ { pattern: new RegExp("^[0-9]{10}$"), message: "phone is not a valid number" } ]}
                                                 className="addPatientDetailsModal"
                                             >
                                                 <Input placeholder="Enter Phone Number" />
