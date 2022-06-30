@@ -186,7 +186,7 @@ const PatchForm = (props) => {
         if (val.includes(";") || val.includes(",")) {
             setValSelectSearch("");
 
-            if (!tagSelected.includes(valSelectSearch)) {
+            if (!tagSelected?.includes(valSelectSearch) && val?.length > 1) {
                 setTagList([...tagList, valSelectSearch]);
                 setTagSelected([...tagSelected, valSelectSearch]);
                 

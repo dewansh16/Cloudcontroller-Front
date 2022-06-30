@@ -15,8 +15,8 @@ const PatientDemographics = (props) => {
         props.patientData.patient_type ? props.patientData.patient_type : "remote"
     );
 
-    const [tagList, setTagList] = useState(props?.patientData?.tags);
-    const [tagSelected, setTagSelected] = useState(props?.patientData?.tags);
+    const [tagList, setTagList] = useState(props?.patientData?.tags ? props?.patientData?.tags : []);
+    const [tagSelected, setTagSelected] = useState(props?.patientData?.tags ? props?.patientData?.tags : []);
     const [valSelectSearch, setValSelectSearch] = useState("");
 
     const StoreDemographics = (fieldValues) => {
@@ -83,7 +83,7 @@ const PatientDemographics = (props) => {
         if (val.includes(";") || val.includes(",")) {
             setValSelectSearch("");
 
-            if (!tagSelected.includes(valSelectSearch) && val?.length > 1) {
+            if (!tagSelected?.includes(valSelectSearch) && val?.length > 1) {
                 setTagList([...tagList, valSelectSearch]);
                 setTagSelected([...tagSelected, valSelectSearch]);
                 props.savePatientDetails({ ["tags"]: [...tagSelected, valSelectSearch] });
