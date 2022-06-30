@@ -18,7 +18,6 @@ const LocationDetails = (props) => {
         let name = `${values[0].name[0]}`;
         let value = values[0].value;
         props.savePatientDetails({ [name]: value });
-
     }
 
     // props.patientClass.list.map(item=>)
@@ -27,13 +26,14 @@ const LocationDetails = (props) => {
     }
 
     const setCountry = () => {
-        const country = countryList.filter(country => country.countryName === props.form.getFieldValue('country'));
+        const country = countryList.filter(country => country.countryName === props.form.getFieldValue('country_name'));
         setSelectedCountry(country);
     }
 
     useEffect(() => {
 
     }, [selectedCountry]);
+
     return (
         <Form
             {...props.layout}

@@ -228,7 +228,7 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
     const [source, setSource] = useState(new axios.CancelToken.source());
     const [medicineSearchList, setMedicineSearchList] = useState([]);
     const [loadingDrug, setLoadingDrug] = useState(false);
-    const [loadingPage, setLoadingPage] = useState(true);
+    const [loadingPage, setLoadingPage] = useState(false);
 
     const [form] = Form.useForm();
 
@@ -248,30 +248,30 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
     //     }
     // }, [loadingPage]);
 
-      function SearchMedicine() {
-        setLoadingPage(true);
-        // const genericName = nameType === "generic_name" ? `${value}` : null
-        // const productName = nameType === "product_name" ? `${value}` : null
+    // function SearchMedicine(value) {
+    //     setLoadingDrug(true);
+    //     const genericName = nameType === "generic_name" ? `${value}` : null
+    //     const productName = nameType === "product_name" ? `${value}` : null
        
-        productApi.getMedicineList("", "", 100, 0, 0, source.token)
-            .then((res) => {
-                setMedicineSearchList(res.data?.response.products);
-                setSearching(false);
-                setLoadingPage(false);
-            })
-            .catch(function (thrown) {
-                if (axios.isCancel(thrown)) {
-                    setSearching(false)
-                } else {
-                    setSearching(false);
-                }
-                setLoadingPage(false);
-            });
-    }
+    //     productApi.getMedicineList(genericName, productName, 200, 0, 0, source.token)
+    //         .then((res) => {
+    //             setMedicineSearchList(res.data?.response.products);
+    //             setSearching(false);
+    //             setLoadingDrug(false);
+    //         })
+    //         .catch(function (thrown) {
+    //             if (axios.isCancel(thrown)) {
+    //                 setSearching(false)
+    //             } else {
+    //                 setSearching(false);
+    //             }
+    //             setLoadingDrug(false);
+    //         });
+    // }
 
-    useEffect(() => {
-        SearchMedicine();
-    }, []);
+    // useEffect(() => {
+    //     SearchMedicine("");
+    // }, []);
 
     const savePrescriptions = () => {
         if (medicineStore.length < 1) {
@@ -477,7 +477,6 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                                     setMedicineStore={setMedicineStore}
                                     medicineSearchList={medicineSearchList}
                                     showAddMedicineToDatabaseModal={showAddMedicineToDatabaseModal} 
-                                    loadingDrug={loadingDrug}
                                 />
                             })}
                         </List>
@@ -497,7 +496,6 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                             idx={medicineStore.length} 
                             setMedicineStore={setMedicineStore} 
                             medicineSearchList={medicineSearchList}
-                            loadingDrug={loadingDrug}
                         />
                     }
                 </Row>

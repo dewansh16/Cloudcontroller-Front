@@ -13,6 +13,7 @@ const BulbIcon = () => {
         <Popover
             title="Add Note"
             placement="right"
+            trigger={["click"]}
             content={
                 <div>
                     {arrayNote?.map((note, index) => {

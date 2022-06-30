@@ -62,23 +62,28 @@ function FetchUser_self() {
     const [response, setResponse] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // useEffect(() => {
-    //     userApi
-    //         .getMyself()
-    //         .then((res) => {
-    //             setResponse(res.data.response["users"][0]);
-    //             setLoading(false);
-    //         })
-    //         .catch((err) => {
-    //             if (err) {
-    //                 notification.error({
-    //                     message: "Error",
-    //                     description: `${err.response?.data.result}` || "",
-    //                 });
-    //                 setLoading(false);
-    //             }
-    //         });
-    // }, []);
+    let userLocalStore = localStorage.getItem("user");
+    if (!!userLocalStore) {
+        userLocalStore = JSON.parse(userLocalStore);
+    }
+
+    useEffect(() => {
+        userApi
+            .getProfile(userLocalStore.userUuid)
+            .then((res) => {
+                setResponse(res.data.response.users);
+                setLoading(false);
+            })
+            .catch((err) => {
+                if (err) {
+                    notification.error({
+                        message: "Error",
+                        description: `${err.response?.data.result}` || "",
+                    });
+                    setLoading(false);
+                }
+            });
+    }, []);
     return [response, loading];
 }
 
@@ -234,6 +239,7 @@ export default function Vitals({
     };
 
     const [user, userDataLoading] = FetchUser_self();
+
     const VitalAdd = () => {
         const [form] = Form.useForm();
 

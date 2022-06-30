@@ -207,7 +207,7 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
                 </Col>
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Allergy Type"
                         name="allergy_type"
                         rules={[{
@@ -220,7 +220,7 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
                 </Col>
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Allergy Name"
                         name="allergy_name"
                         rules={[{
@@ -233,7 +233,7 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
                 </Col>
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Reaction"
                         name="reaction"
                         rules={[{

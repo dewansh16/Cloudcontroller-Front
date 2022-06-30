@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { Prompt } from 'react-router'
 import axios from 'axios'
 import { Form, Row, Col, Avatar, notification, Spin, Modal, DatePicker, Tooltip } from '../../../../Theme/antdComponents'
+import Select from 'antd/lib/select';
 
 import { Input, InputNumber } from '../../../../Theme/Components/Input/input'
-import { Select, SelectOption as Option } from '../../../../Theme/Components/Select/select'
+// import { Select, SelectOption as Option } from '../../../../Theme/Components/Select/select'
 
 import { MenuListItem, MedicineSearchListItem, MedicineSearchListHeader } from './Components/components'
 import { Button } from '../../../../Theme/Components/Button/button'
@@ -15,6 +16,7 @@ import patientApi from '../../../../Apis/patientApis'
 import './createPrescription.css'
 
 import { UserStore } from '../../../../Stores/userStore'
+const { Option } = Select;
 
 const tempMedicineList = {
     0: {

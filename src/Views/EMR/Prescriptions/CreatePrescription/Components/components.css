@@ -16,3 +16,8 @@
 .prescription-medicine-list-item > i {
     color: rgba(255, 117, 41, 1); 
 }
+
+.spin-select-drug .ant-select-item-option-content {
+    display: flex;
+    justify-content: center;
+}

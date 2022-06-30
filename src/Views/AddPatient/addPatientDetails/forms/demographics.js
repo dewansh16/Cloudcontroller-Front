@@ -5,8 +5,6 @@ import { demographicsFormItems } from "../../addPatientFormConfig";
 import { isJsonString } from "../../../../Utils/utils";
 
 const PatientDemographics = (props) => {
-    const tags = !!props?.patientData?.tags && isJsonString(props?.patientData?.tags) ? JSON.parse(props?.patientData?.tags) : [];
-    // const [initialState,setInitialState]
     const [admissionDate, setAdmissionDate] = useState(
         props.patientData.admission_date ? props.patientData.admission_date : null
     );
@@ -17,8 +15,8 @@ const PatientDemographics = (props) => {
         props.patientData.patient_type ? props.patientData.patient_type : "remote"
     );
 
-    const [tagList, setTagList] = useState(tags);
-    const [tagSelected, setTagSelected] = useState(tags);
+    const [tagList, setTagList] = useState(props?.patientData?.tags);
+    const [tagSelected, setTagSelected] = useState(props?.patientData?.tags);
     const [valSelectSearch, setValSelectSearch] = useState("");
 
     const StoreDemographics = (fieldValues) => {
@@ -85,10 +83,10 @@ const PatientDemographics = (props) => {
         if (val.includes(";") || val.includes(",")) {
             setValSelectSearch("");
 
-            if (!tagSelected.includes(valSelectSearch)) {
+            if (!tagSelected.includes(valSelectSearch) && val?.length > 1) {
                 setTagList([...tagList, valSelectSearch]);
                 setTagSelected([...tagSelected, valSelectSearch]);
-               
+                props.savePatientDetails({ ["tags"]: [...tagSelected, valSelectSearch] });
             }
         } else {
             setValSelectSearch(val);
@@ -100,7 +98,7 @@ const PatientDemographics = (props) => {
             [`tags`]: tagSelected
         })
         props.patientData.tags = tagSelected;
-    }, [tagSelected]);
+    }, [tagSelected]);  
 
     return (
         <Form
