@@ -787,7 +787,7 @@ export default function Admin() {
         </div>
       ) : (
         <div className="tenants-table">
-          {tenants[0].map((tenant) => (
+          {tenants.map((tenant) => (
             <div
               className="tenant-card"
               onClick={() => {
