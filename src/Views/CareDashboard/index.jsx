@@ -103,7 +103,11 @@ const CareDashboard = () => {
             align: "center",
             render: (dataIndex, record) => {
                 return (
-                    <TotalReading pid={record?.pid} associateList={record?.associateList} />
+                    <TotalReading
+                        pid={record?.pid} 
+                        associateList={record?.associateList} 
+                        patientList={careDashboard?.dataSource}
+                    />
                 )
             }
         },
@@ -179,6 +183,8 @@ const CareDashboard = () => {
             <CaretDownOutlined onClick={onExpand} />
         );
     }
+
+    console.log("careDashboard", careDashboard);
 
     return (
         <div>
