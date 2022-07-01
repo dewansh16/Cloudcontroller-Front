@@ -2307,7 +2307,7 @@ function BillingModule() {
     }
 
     const checkDateFromInflux = (startDate, sensorType, patch) => {
-        const start = new Date(startDate);
+        let start = new Date(startDate);
         const end = new Date();
         const timeFilter = currentDateApi ? new Date(currentDateApi) : new Date();
         
