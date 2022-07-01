@@ -2462,13 +2462,15 @@ function BillingModule() {
         newArrSummary = newArrSummary?.filter(item => item?.code !== "99454");
         const timeDuration = filterDeviceAssociatedByDate?.totalDayMonitored;
 
-        const data = {
-            code: "99454",
-            date: filterDeviceAssociatedByDate.maxDate,
-            desc: filterDeviceAssociatedByDate.billedUnit > 0 ? "1 billed" : "",
-            duration: `${timeDuration} ${timeDuration > 1 ? "days" : "day"}`,
+        if (!!filterDeviceAssociatedByDate.maxDate) {
+            const data = {
+                code: "99454",
+                date: filterDeviceAssociatedByDate.maxDate,
+                desc: filterDeviceAssociatedByDate.billedUnit > 0 ? "1 billed" : "",
+                duration: `${timeDuration} ${timeDuration > 1 ? "days" : "day"}`,
+            }
+            newArrSummary.splice(1, 0, data);
         }
-        newArrSummary.splice(1, 0, data);
         return newArrSummary;
     };
 

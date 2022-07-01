@@ -164,12 +164,14 @@ const CheckData = ({ pid, sensorList, record, billingSummary, valueDate }) => {
                 totalDayMonitored = totalArr?.length;
             }
 
-            billFound.total = totalDayMonitored;
-            billFound["99454"] = {
-                code: "99454",
-                date: maxDate,
-                desc: totalDayMonitored > 15 ? "1 billed" : "",
-                duration: `${totalDayMonitored} ${totalDayMonitored > 1 ? "days" : "day"}`,
+            if (maxDate) {
+                billFound.total = totalDayMonitored;
+                billFound["99454"] = {
+                    code: "99454",
+                    date: maxDate,
+                    desc: totalDayMonitored > 15 ? "1 billed" : "",
+                    duration: `${totalDayMonitored} ${totalDayMonitored > 1 ? "days" : "day"}`,
+                }
             }
            
             setTotalDay(totalDayMonitored);

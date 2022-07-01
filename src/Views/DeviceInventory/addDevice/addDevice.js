@@ -183,10 +183,11 @@ const PatchForm = (props) => {
     };
 
     const onChangeValInputSelect = (val) => {
-        if (val.includes(";") || val.includes(",")) {
+        const value = val?.trim();
+        if (value.includes(";") || value.includes(",")) {
             setValSelectSearch("");
 
-            if (!tagSelected?.includes(valSelectSearch) && val?.length > 1) {
+            if (!tagSelected?.includes(valSelectSearch) && value?.length > 1) {
                 setTagList([...tagList, valSelectSearch]);
                 setTagSelected([...tagSelected, valSelectSearch]);
                 
@@ -195,7 +196,7 @@ const PatchForm = (props) => {
                 })
             }
         } else {
-            setValSelectSearch(val);
+            setValSelectSearch(value);
         }
     };
 
@@ -342,12 +343,7 @@ const PatchForm = (props) => {
                                 required={!props.required}
                                 label="SIM Card Number"
                                 name="simCard"
-                                rules={[
-                                    {
-                                        required: !props.required,
-                                        message: "SIM Card Number is required",
-                                    },
-                                ]}
+                                rules={[ { pattern: new RegExp("^[0-9]*$"), message: "Please recheck the sim entered." }]}
                                 className="addPatientDetailsModal"
                             >
                                 <Input placeholder="Enter SIM Card Number" maxLength={30} />
@@ -357,7 +353,7 @@ const PatchForm = (props) => {
                                 required={!props.required}
                                 label="Phone Number"
                                 name="phone"
-                                rules={[ { pattern: new RegExp("^[0-9]{10}$"), message: "Please recheck the number entered." }]}
+                                rules={[ { pattern: new RegExp("^[0-9]{10}$"), message: "Please recheck the phone entered." }]}
                                 className="addPatientDetailsModal"
                             >
                                 <Input placeholder="Enter Phone Number" type="tel" />

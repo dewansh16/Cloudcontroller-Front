@@ -416,10 +416,11 @@ const PatchForm = (props) => {
     }, [listDeviceAssociated, valueBpType]);
 
     const onChangeValInputTagsAdd = (val) => {
-        if (val.includes(";") || val.includes(",")) {
+        const value = val?.trim();
+        if (value.includes(";") || value.includes(",")) {
             setValSelectSearch("");
 
-            if (!tagSelected?.includes(valSelectSearch) && val?.length > 1) {
+            if (!tagSelected?.includes(valSelectSearch) && value?.length > 1) {
                 const newList = [...tagList, valSelectSearch];
                 const newSelected = [...tagSelected, valSelectSearch]
                 setTagList(newList);
@@ -429,7 +430,7 @@ const PatchForm = (props) => {
                 })
             }
         } else {
-            setValSelectSearch(val);
+            setValSelectSearch(value);
         }
     };
 
@@ -844,28 +845,24 @@ const PatchForm = (props) => {
                                         <Col span={18}>
                                             <Form.Item
                                                 required={!props.required}
-                                                label="SIM Card Number"
+                                                label="Phone Number"
                                                 name="gateway_sim_add"
-                                                rules={[
-                                                    {
-                                                        required: !props.required,
-                                                        message: "SIM Card Number is required",
-                                                    },
-                                                ]}
+                                                rules={[ { pattern: new RegExp("^[0-9]*$"), message: "Please recheck the sim entered." }]}
                                                 className="addPatientDetailsModal"
                                             >
-                                                <Input placeholder="Enter SIM Card Number" maxLength={30} />
+                                                <Input type="tel" placeholder="Enter SIM Card Number" />
                                             </Form.Item>
                                         </Col>
+                                        
                                         <Col span={18}>
                                             <Form.Item
                                                 required={!props.required}
                                                 label="Phone Number"
                                                 name="gateway_phone_number_add"
-                                                rules={[ { pattern: new RegExp("^[0-9]{10}$"), message: "phone is not a valid number" } ]}
+                                                rules={[ { pattern: new RegExp("^[0-9]{10}$"), message: "Please recheck the phone entered." } ]}
                                                 className="addPatientDetailsModal"
                                             >
-                                                <Input placeholder="Enter Phone Number" />
+                                                <Input type="tel" placeholder="Enter Phone Number" />
                                             </Form.Item>
                                         </Col>
                                     </>
@@ -873,8 +870,6 @@ const PatchForm = (props) => {
                             </>
                         )}
                     </Row>
-
-
                     {/* <Form.Item>
                         <Button type="primary" htmlType="submit">
                             Add

@@ -19,12 +19,12 @@ const TotalReading = ({ pid = "patient66750671-aadf-4012-bbf0-8db8c83fcf29", sen
 
     const queryDataFromInflux = (sensorType = "", patch) => {
         const dateFilter = new Date(valueDate);
-        const start = new Date(dateFilter.getFullYear(), dateFilter.getMonth(), 1);
+        const start = new Date(dateFilter.getFullYear(), dateFilter.getMonth() -1, 1);
         const end = new Date(dateFilter.getFullYear(), dateFilter.getMonth() + 1, 0, 23, 59, 59);
 
         const query = `from(bucket: "emr_dev")
                 |> range(start: ${start?.toISOString()}, stop: ${end?.toISOString()})
-                |> filter(fn: (r) => r["_measurement"] == "${pid}_${sensorType}")
+                |> filter(fn: (r) => r["_measurement"] == "${pid}_${sensorType}_timestamp")
                 |> yield(name: "mean")
             `
         const arrTotalValue = [];
@@ -58,13 +58,7 @@ const TotalReading = ({ pid = "patient66750671-aadf-4012-bbf0-8db8c83fcf29", sen
                 console.log('ERROR')
             },
             complete() {
-                const patientFound = patientList?.filter(patient => patient?.pid === pid);
-                if (!!patientFound) {
-                    patientList[0].todays = arrayValueToday;
-                    patientList[0].yesterday = arrayValueYesterday;
-                    patientList[0].totalValueInfux = arrayValueToday;
-                }
-
+               
                 // patch.todays = arrayValueToday;
                 // patch.yesterday = arrayValueYesterday;
                 patch.totalValueInfux = arrTotalValue;
@@ -80,15 +74,22 @@ const TotalReading = ({ pid = "patient66750671-aadf-4012-bbf0-8db8c83fcf29", sen
         let mounted = true;
 
         if (tempEffect === associatedList?.length && mounted) {
-            let total = 0;
+            let arrayDate = [];
 
             associatedList.map(patch => {
                 const totalValueInfux = patch?.totalValueInfux || [];
-                total += totalValueInfux?.length || 0;
+                totalValueInfux.map(item => {
+                    let timer = new Date(item?.time);
+                    timer = `${timer.getFullYear()}-${timer.getMonth() + 1}-${timer.getDate()}`;
+                    arrayDate.push(timer);
+                })
             })
 
+            arrayDate = [...new Set(arrayDate)];
+            patientList[0].totalValueInfux = arrayDate;
+
             setTotalReading({
-                total: total,
+                total: arrayDate?.length,
                 loading: false,
             });
         }

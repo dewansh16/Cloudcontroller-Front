@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+import caredashboardApi from "../../Apis/caredashboardApis"
 
 import { Button, Col, DatePicker, Input, Row, Select, Spin, Table } from 'antd';
 
@@ -32,8 +34,37 @@ const CareDashboard = () => {
 
     const [careDashboard, setCareDashboard] = useState({
         loading: false,
-        dataSource: [{ name: "ok" }]
+        dataSource: [{name: "ok"}]
     });
+
+    const getListCareDashboard = () => {
+        setCareDashboard({
+            loading: true,
+            ...careDashboard.dataSource,
+        })
+
+        caredashboardApi.getListDashboard(
+            moment(valueDate).format("YYYY-MM-DD"),
+            valuePageLength, 10 * (currentPageVal - 1)
+        ).then(res => {
+            console.log("res", res);
+            const billingData = res?.data?.response?.billingData || [];
+            setCareDashboard({
+                loading: false,
+                dataSource: billingData
+            })
+        })
+        .catch(err => {
+            setCareDashboard({
+                loading: false,
+                dataSource: []
+            })
+        })
+    };
+
+    useEffect(() => {
+        // getListCareDashboard();
+    }, []);
 
     const columns = [
         {
@@ -68,33 +99,22 @@ const CareDashboard = () => {
             },
         },
         {
-            title: "Primary Practitioner",
+            title: "Practitioner",
             dataIndex: "primary",
             key: "primary",
-            width: 100,
+            width: 80,
             render: () => {
                 return (
-                    <div>Primary Practitioner</div>
+                    <div>Practitioner</div>
                 )
             }
-        },
-        {
-            title: "Secondary Practitioner",
-            dataIndex: "secondary",
-            key: "secondary",
-            width: 100,
-            render: () => {
-                return (
-                    <div>Secondary Practitioner</div>
-                )
-            },
         },
         // Table.EXPAND_COLUMN,
         {
             title: "Sensor",
             dataIndex: "Sensor",
             key: "Sensor",
-            width: 10,
+            width: 300,
             render: () => {
                 return (
                     <span>1 device</span>
@@ -106,7 +126,7 @@ const CareDashboard = () => {
             title: "Total reading",
             dataIndex: "total",
             key: "5",
-            width: 50,
+            width: 30,
             align: "center",
             render: (dataIndex, record) => {
                 return (
@@ -128,7 +148,7 @@ const CareDashboard = () => {
             align: "center",
             render: (dataIndex, record) => {
                 return (
-                    <ChartCPTCode CPT_CODE="99543" />
+                    <span>Active</span>
                 )
             }
         },
