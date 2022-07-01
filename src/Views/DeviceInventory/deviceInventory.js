@@ -627,11 +627,11 @@ function PatchInventory() {
                                             <span style={{ cursor: "pointer" }} className="text-number-tag" onClick={() => onToggleDataMulti(record?.patch_uuid, "isFullPrimary")}>
                                                 {openPrimary ? (
                                                     <>
-                                                        {`(-${patient_data?.primary_consultant?.length - 2})`} primary <CaretDownOutlined />
+                                                        Less <CaretDownOutlined />
                                                     </>
                                                 ) : (
                                                     <>
-                                                        {`+${patient_data?.primary_consultant?.length - 2}`} primary <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
+                                                        More <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
                                                     </>
                                                 )}
                                             </span>
@@ -673,11 +673,11 @@ function PatchInventory() {
                                             <span style={{ cursor: "pointer" }} className="text-number-tag" onClick={() => onToggleDataMulti(record?.patch_uuid, "isFullSecond")}>
                                                 {openSecond ? (
                                                     <>
-                                                        {`(-${patient_data?.primary_consultant?.length - 2})`} second <CaretDownOutlined />
+                                                        Less <CaretDownOutlined />
                                                     </>
                                                 ) : (
                                                     <>
-                                                        {`+${patient_data?.primary_consultant?.length - 2}`} second <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
+                                                        More <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
                                                     </>
                                                 )}
                                             </span>
@@ -950,11 +950,11 @@ function PatchInventory() {
                                                     <span className="text-number-tag" onClick={() => onToggleDataMulti(record?.patch_uuid, "isFullTags")}>
                                                         {open ? (
                                                             <>
-                                                                {`(-${tags?.length - 2})`} tag <CaretDownOutlined />
+                                                                Less <CaretDownOutlined />
                                                             </>
                                                         ) : (
                                                             <>
-                                                                {`+${tags?.length - 2}`} tag <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
+                                                                More <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
                                                             </>
                                                         )}
                                                     </span>
