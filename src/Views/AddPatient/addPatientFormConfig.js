@@ -1,10 +1,11 @@
 import React from "react";
-import { DatePicker, Radio  } from "antd";
+import { DatePicker, Radio } from "antd";
 import { Input } from "../../Theme/Components/Input/input";
 // import { Select, SelectOption } from "../../Theme/Components/Select/select";
 import moment from "moment";
 import { governmentIdentity, phone } from "../../Utils/validators";
 import countryList from "country-region-data";
+import IconCheck from "../../Assets/Images/check.svg";
 
 import Select from 'antd/lib/select'
 const { Option } = Select;
@@ -76,6 +77,47 @@ const guardianSchema = Joy.object({
 
 const dateFormatList = ["MMM DD YYYY"];
 
+const arrayColor = ["#ff0000", "#ff00bf", "#4000ff", "#00ff00", "#ffff00", "#ff8000"];
+
+const renderColorsTags = (colorActive, setColorSelected) => {
+    return (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
+            {arrayColor?.map(color => {
+                const isActive = colorActive === color || false;
+                return (
+                    <div
+                        key={color}
+                        className="color-item"
+                        style={{ display: "flex", alignItems: "center" }}
+                        onClick={() => setColorSelected(color)}
+                    >
+                        <div className="box-color" style={{
+                            background: color,
+                        }}>
+                            {isActive && (
+                                <img src={IconCheck} className="icon-check-color" />
+                            )}
+                        </div>
+                        <div className={`color-text ${isActive ? "text-active" : ""}`}>{color}</div>
+                    </div>
+                )
+            })}
+        </div>
+    )
+};
+
+function tagRender(props, tagList) {
+    const tagFound = tagList?.find(tag => tag?.value === props?.value);
+    return (
+        <div
+            className="item-tag-render"
+            style={{ background: tagFound?.color }}
+        >
+            {props?.label}
+        </div>
+    );
+}
+
 const demographicsFormItems = (
     props,
     admissionDate,
@@ -91,7 +133,9 @@ const demographicsFormItems = (
     valSelectSearch,
     tagSelected,
     setTagSelected,
-    onChangeValInputTagsAdd
+    onChangeValInputTagsAdd,
+    colorSelected,
+    setColorSelected
 ) => [
         {
             required: !props.required,
@@ -121,20 +165,42 @@ const demographicsFormItems = (
                     autoClearSearchValue={false}
                     searchValue={valSelectSearch}
                     onDeselect={(val) => {
-                        const newArr = tagSelected.filter(tag => tag !== val);
+                        const newArr = tagSelected?.filter(tag => tag?.value !== val);
                         setTagSelected(newArr);
+                    }}
+                    onSelect={(val) => {
+                        const tagFound = tagList?.find(item => item?.value === val);
+                        setTagSelected([...tagSelected, tagFound]);
                     }}
                     notFoundContent={
                         valSelectSearch && (
-                            <span style={{ fontSize: "12px", color: "#ff7529" }}>
-                                Enter , or ; to create a new tag
-                            </span>
+                            <>
+                                {renderColorsTags(colorSelected, setColorSelected)}
+                                <span style={{ fontSize: "12px", color: "#ff7529" }}>
+                                    Enter , or ; to create a new tag
+                                </span>
+                            </>
                         )
                     }
+                    tagRender={(props) => tagRender(props, tagList)}
                 >
                     {tagList?.map(tag => {
                         return (
-                            <Option key={tag} value={tag}>{tag}</Option>
+                            <Option 
+                                key={tag?.value} 
+                                value={tag?.value} 
+                                className="item-option-tags"
+                            >
+                                <div className="box-color-option" style={{
+                                    width: "16px",
+                                    height: "16px",
+                                    borderRadius: "4px",
+                                    marginRight: "6px",
+                                    background: tag?.color,
+                                }}>
+                                </div>
+                                <div>{tag?.value}</div>
+                            </Option>
                         )
                     })}
                 </Select>
@@ -222,8 +288,8 @@ const demographicsFormItems = (
             required: props.required,
             label: "First Name",
             name: "fname",
-            rules: [{ 
-                required: props.required, message: "First Name is required!", 
+            rules: [{
+                required: props.required, message: "First Name is required!",
             }],
             className: "addPatientDetailsModal relative-error",
             Input: <Input onChange={(event) => onInputChange(event.target.value, "firstName")} status={errorFirstName ? "error" : ""} />
@@ -311,7 +377,7 @@ const demographicsFormItems = (
             name: "phone_contact",
             rules: [
                 {
-                    required: !props.required,
+                    required: props.required,
                     message: "Atleast one contact number is required!",
                 },
                 {

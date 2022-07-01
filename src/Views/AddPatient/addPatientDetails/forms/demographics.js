@@ -15,9 +15,12 @@ const PatientDemographics = (props) => {
         props.patientData.patient_type ? props.patientData.patient_type : "remote"
     );
 
-    const [tagList, setTagList] = useState(props?.patientData?.tags ? props?.patientData?.tags : []);
-    const [tagSelected, setTagSelected] = useState(props?.patientData?.tags ? props?.patientData?.tags : []);
+    const tags = props?.patientData?.tags ? props?.patientData?.tags : [];
+    const [tagList, setTagList] = useState(tags);
+    const [tagSelected, setTagSelected] = useState(tags);
+
     const [valSelectSearch, setValSelectSearch] = useState("");
+    const [colorSelected, setColorSelected] = useState("#ff0000");
 
     const StoreDemographics = (fieldValues) => {
         //FIXME:remove hardfix deceased date
@@ -80,26 +83,34 @@ const PatientDemographics = (props) => {
     }
 
     const onChangeValInputTagsAdd = (val) => {
-        if (val.includes(";") || val.includes(",")) {
+        const value = val?.trim();
+
+        if (value.includes(";") || value.includes(",")) {
             setValSelectSearch("");
 
-            if (!tagSelected?.includes(valSelectSearch) && val?.length > 1) {
-                setTagList([...tagList, valSelectSearch]);
-                setTagSelected([...tagSelected, valSelectSearch]);
-                props.savePatientDetails({ ["tags"]: [...tagSelected, valSelectSearch] });
+            if (!tagSelected?.includes(valSelectSearch) && value?.length > 1) {
+                const dataNew = {
+                    label: valSelectSearch,
+                    value: valSelectSearch,
+                    color: colorSelected
+                };
+                
+                setTagList([...tagList, dataNew]);
+                setTagSelected([...tagSelected, dataNew]);
+                props.savePatientDetails({ ["tags"]: [...tagSelected, dataNew] });
             }
         } else {
-            setValSelectSearch(val);
+            setValSelectSearch(value);
         }
     };
 
     useEffect(() => {
         props.form.setFieldsValue({
-            [`tags`]: tagSelected
+            [`tags`]: tagSelected?.map(item => item?.value)
         })
-        props.patientData.tags = tagSelected;
-    }, [tagSelected]);  
-
+        props.savePatientDetails({ ["tags"]: tagSelected });
+    }, [tagSelected]); 
+    
     return (
         <Form
             {...props.layout}
@@ -127,7 +138,9 @@ const PatientDemographics = (props) => {
                     valSelectSearch,
                     tagSelected,
                     setTagSelected,
-                    onChangeValInputTagsAdd
+                    onChangeValInputTagsAdd,
+                    colorSelected,
+                    setColorSelected
                 ).map((item) => {
                     // if (item.name === "patient_type") {
                     //     // console.log("admisiion wala kaam krra");

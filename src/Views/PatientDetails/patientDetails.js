@@ -35,6 +35,9 @@ import WardDetails from "../PatientJourney/wardDetails/wardDetails.patientJourne
 import Steps from "../PatientJourney/stepspatientJourney/steps.patientJourney";
 import DetailBox from "./components/detailBox.patientDetails";
 
+import IconTag from "../../Assets/Images/tag.png";
+import { isJsonString } from "../../Utils/utils";
+
 export default function PatientDetails(props) {
     const { pid } = useParams();
     let userData = UserStore.getUser();
@@ -109,6 +112,9 @@ export default function PatientDetails(props) {
 
     const [durationArray, setDurationArray] = useState([]);
     const [summaryModal, openSummaryModal] = useState(false);
+
+    const [tagsSelected, setTagsSelected] = useState([]);
+    const [arrayOptionTags, setArrOptionTags] = useState([]);
 
     useEffect(() => {
         const setWardName = (locationDetail) => {
@@ -294,6 +300,10 @@ export default function PatientDetails(props) {
             }
             setDurationArray(newDurationArray);
         }
+
+        const tags = isJsonString(patient?.demographic_map?.tags) ? JSON.parse(patient?.demographic_map?.tags) : [];
+        setTagsSelected(tags);
+        setArrOptionTags(tags);
     }, [patient]);
 
     const changeMode = () => {
@@ -544,6 +554,23 @@ export default function PatientDetails(props) {
                                             </h1>
                                         </div>
                                     </div>
+                                    {/* <div style={{ marginLeft: "15%" }}>
+                                        <div className="detail-tags-wrapper">
+                                            <div style={{ height: "25px", display: "flex", alignItems: "center" }}>
+                                                <img className="icon-tags" src={IconTag} />
+                                            </div>
+                                            
+                                            <div>
+                                                {tagsSelected?.map((tag, index) => {
+                                                    return (
+                                                        <div key={`${tag}-${index}`} className="tag-item">
+                                                            {tag}
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div> */}
                                 </Col>
 
                                 <Col span={17}>

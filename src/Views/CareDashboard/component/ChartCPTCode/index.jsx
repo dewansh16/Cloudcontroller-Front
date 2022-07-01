@@ -10,7 +10,7 @@ const ChartCPTCode = ({ pid, record, CPT_CODE }) => {
 
     const timeInterval = useRef(null);
 
-    const COLORS = ['#ff0000', '#008000'];
+    const COLORS = ['#ff0000a8', '#008000d1'];
     
     const RADIAN = Math.PI / 180;
     const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
@@ -36,11 +36,21 @@ const ChartCPTCode = ({ pid, record, CPT_CODE }) => {
             let i = 0;
             timeInterval.current = setInterval(() => {
                 i++;
-
                 if (!!record?.totalValueInfux) {
+                    const arrayData = record?.totalValueInfux;
+                    // let arrayDate = [];
+
+                    // arrayData.map(item => {
+                    //     let timer = new Date(item?.time);
+                    //     timer = `${timer.getFullYear()}-${timer.getMonth() + 1}-${timer.getDate()}`;
+                    //     arrayDate.push(timer);
+                    // });
+
+                    // arrayDate = [...new Set(arrayDate)];
+
                     setDataChart({
                         loading: false,
-                        data: record?.totalValueInfux
+                        data: [{ value: 16 }, { value: arrayData?.length }]
                     });
                     clearInterval(timeInterval.current);
                 }

@@ -42,6 +42,7 @@ import bpImg from "../../Assets/Images/BP-sensor.png";
 import iconDelete from "../../Assets/Images/iconDelete.png";
 import IconScan from "../../Assets/Images/iconScan.svg";
 import IconReset from "../../Assets/Images/iconReset.svg";
+import SettingLine from "../../Assets/Images/setting-lines.png";
 
 // import PaginationBox from '../Components/paginationBox';
 import { PaginationBox } from "../Components/PaginationBox/pagination";
@@ -58,8 +59,10 @@ import {
     CloseCircleOutlined,
 } from "@ant-design/icons";
 
-import "./device.css";
 import patchApi from "../../Apis/patchApis";
+
+import "./device.css";
+import { isJsonString } from "../../Utils/utils";
 
 function PatchInventory() {
     // const { url } = useRouteMatch();
@@ -453,8 +456,8 @@ function PatchInventory() {
     };
 
     const renderLabelPatchType = (type) => ({
-        "temperature": "Temperature Sensor",
-        "gateway": "Gateway Sensor (EV-04)",
+        "temperature": "Temperature",
+        "gateway": "Gateway (EV-04)",
         "spo2": "SpO2 (CheckMe)",
         "ecg": "ECG Sensor",
         "bps": "BP Sensor",
@@ -501,6 +504,13 @@ function PatchInventory() {
             })
     };
 
+    const onToggleDataMulti = (patchId, typeToggle) => {
+        const newArr = [...filteredlist];
+        const patchFound = newArr?.find(item => item?.patch_uuid === patchId);
+        patchFound[typeToggle] = !patchFound[typeToggle];
+        setFilteredList(newArr);
+    };
+
     const columns = [
         {
             title: () => {
@@ -545,70 +555,136 @@ function PatchInventory() {
                         style={{ marginLeft: "6px", marginRight: "2px", borderSpacing: "0" }}
                     />
                     <div style={{ width: "80px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <img
-                            alt="someimage"
-                            src={handleImg(record)}
-                            width={checkWidthForImgSensor(record.patch_type)}
-                        // style={{ 
-                        //     transform: (record?.patch_type === "gateway" || record?.patch_type === "temperature") ? "scale(1.25)" :
-                        //     (record?.patch_type === "alphamed" || record?.patch_type === "ihealth") ? "scale(0.7)" : "scale(1)"
-                        // }}
-                        ></img>
+                        <Tooltip title={renderLabelPatchType(record?.patch_type)}>
+                            <img
+                                alt="someimage"
+                                src={handleImg(record)}
+                                width={checkWidthForImgSensor(record.patch_type)}
+                            ></img>
+                        </Tooltip>
                     </div>
                 </div>
             )
         },
-
         {
-            title: "Device Serial",
-            dataIndex: "device_serial",
-            key: "device_serial",
-            ellipsis: true,
-            width: 80,
-            render: (dataIndex) => {
-                return (
-                    <span style={{ fontSize: "16px", fontWeight: "500" }}>{dataIndex}</span>
-                )
-            }
-        },
-
-        {
-            title: "Mac Address",
-            dataIndex: "patch_mac",
-            key: "patch_mac",
-            ellipsis: true,
-            width: 80,
-            render: (dataIndex) => {
-                return (
-                    <span style={{ fontSize: "16px", fontWeight: "500" }}>{dataIndex}</span>
-                )
-            }
-        },
-        {
-            title: "Patient",
+            title: "Patient Info",
             dataIndex: "patch_patient_map",
             key: "patch_patient_map",
             ellipsis: true,
             width: 80,
-            render: (dataIndex) => {
+            render: (dataIndex, record) => {
                 const patient_data = dataIndex?.patient_data?.[0] || {};
                 const patientName = `${patient_data?.fname || ""} ${patient_data?.lname || ""}`;
+
+                const openPrimary = record?.isFullPrimary || false;
+                const openSecond = record?.isFullSecond || false;
+
                 return (
                     <span>
-                        <span style={{ fontSize: "16px", fontWeight: "500" }}>{!!patient_data?.fname ? patientName : "No Patient"}</span>
+                        <span className="text-font-size-normal">
+                            {!!patient_data?.fname ? patientName : "No Patient"}
+                        </span>
+
                         {!!patient_data?.med_record && (
-                            <span style={{
-                                width: "100%",
-                                textAlign: "center",
-                                display: "grid"
-                            }}>
-                                <span style={{ fontSize: "12px", color: "#000000ad", fontWeight: "400" }}>
+                            <span className="wrapper-text-infor">
+                                <span style={{ color: "#000000ad", fontWeight: "400" }}>
                                     MR:
                                 </span>
-                                <span style={{ fontWeight: "500", marginLeft: "2px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", }}>
+                                <span className="text-truncate">
                                     {patient_data?.med_record || ""}
                                 </span>
                             </span>
+                        )}
+                        {(!!patient_data?.primary_consultant && patient_data?.primary_consultant?.length > 0) && (
+                            <>
+                                <span className="wrapper-text-infor" style={{ display: "grid" }}>
+                                    <span style={{ color: "#000000ad", fontWeight: "400" }}>
+                                        Primary Consultant:
+                                    </span>
+                                    <span
+                                        className="wrapper-text-infor"
+                                        style={{ flexDirection: "column", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
+                                    >
+                                        {patient_data?.primary_consultant?.map((item, index) => {
+                                            if (openPrimary) {
+                                                return (
+                                                    <span key={item?.uuid} className="text-truncate item-consultant">
+                                                        {`${item?.fname || ""} ${item?.lname || ""}`}
+                                                    </span>
+                                                )
+                                            } else {
+                                                if (index < 2) {
+                                                    return (
+                                                        <span key={item?.uuid} className="text-truncate item-consultant">
+                                                            {`${item?.fname || ""} ${item?.lname || ""}`}
+                                                        </span>
+                                                    )
+                                                }
+                                            }
+                                        })}
+
+                                        {patient_data?.primary_consultant?.length > 2 && (
+                                            <span style={{ cursor: "pointer" }} className="text-number-tag" onClick={() => onToggleDataMulti(record?.patch_uuid, "isFullPrimary")}>
+                                                {openPrimary ? (
+                                                    <>
+                                                        {`(-${patient_data?.primary_consultant?.length - 2})`} primary <CaretDownOutlined />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {`+${patient_data?.primary_consultant?.length - 2}`} primary <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
+                                                    </>
+                                                )}
+                                            </span>
+                                        )}
+                                    </span>
+                                </span>
+                            </>
+                        )}
+
+                        {(!!patient_data?.primary_consultant && patient_data?.primary_consultant?.length > 0) && (
+                            <>
+                                <span className="wrapper-text-infor" style={{ display: "grid" }}>
+                                    <span style={{ color: "#000000ad", fontWeight: "400" }}>
+                                        Second Consultant:
+                                    </span>
+                                    <span
+                                        className="wrapper-text-infor"
+                                        style={{ flexDirection: "column", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
+                                    >
+                                        {patient_data?.primary_consultant?.map((item, index) => {
+                                            if (openSecond) {
+                                                return (
+                                                    <span key={item?.uuid} className="text-truncate item-consultant">
+                                                        {`${item?.fname || ""} ${item?.lname || ""}`}
+                                                    </span>
+                                                )
+                                            } else {
+                                                if (index < 2) {
+                                                    return (
+                                                        <span key={item?.uuid} className="text-truncate item-consultant">
+                                                            {`${item?.fname || ""} ${item?.lname || ""}`}
+                                                        </span>
+                                                    )
+                                                }
+                                            }
+                                        })}
+
+                                        {patient_data?.primary_consultant?.length > 2 && (
+                                            <span style={{ cursor: "pointer" }} className="text-number-tag" onClick={() => onToggleDataMulti(record?.patch_uuid, "isFullSecond")}>
+                                                {openSecond ? (
+                                                    <>
+                                                        {`(-${patient_data?.primary_consultant?.length - 2})`} second <CaretDownOutlined />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {`+${patient_data?.primary_consultant?.length - 2}`} second <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
+                                                    </>
+                                                )}
+                                            </span>
+                                        )}
+                                    </span>
+                                </span>
+                            </>
                         )}
                     </span>
                 )
@@ -616,7 +692,7 @@ function PatchInventory() {
         },
 
         {
-            title: "Gateway Status",
+            title: "Gateway Info",
             dataIndex: "patch_serial",
             key: "patch_serial",
             ellipsis: true,
@@ -637,7 +713,33 @@ function PatchInventory() {
         },
 
         {
-            title: "Device Status",
+            title: "Serial",
+            dataIndex: "device_serial",
+            key: "device_serial",
+            ellipsis: true,
+            width: 80,
+            render: (dataIndex) => {
+                return (
+                    <span className="text-font-size-normal">{dataIndex}</span>
+                )
+            }
+        },
+
+        {
+            title: "Mac Address",
+            dataIndex: "patch_mac",
+            key: "patch_mac",
+            ellipsis: true,
+            width: 80,
+            render: (dataIndex) => {
+                return (
+                    <span className="text-font-size-normal">{dataIndex}</span>
+                )
+            }
+        },
+
+        {
+            title: "Status",
             dataIndex: "patch_status",
             key: "patch_status",
             ellipsis: true,
@@ -784,22 +886,88 @@ function PatchInventory() {
         },
 
         {
-            title: "Sensors",
+            title: "Sensors Info",
             dataIndex: "patch_type",
             key: "patch_type",
             ellipsis: true,
             width: 75,
-            render: (dataIndex, record) => (
-                <span
-                    style={{
-                        fontSize: "16px",
-                        fontWeight: "500",
-                        textTransform: "capitalize",
-                    }}
-                >
-                    {record.AssociatedPatch?.length > 1 ? "Bundle" : renderLabelPatchType(dataIndex)}
-                </span>
-            ),
+            render: (dataIndex, record) => {
+                const open = record?.isFullTags || false;
+                const tags = isJsonString(record?.tags) ? JSON.parse(record?.tags) : [];
+                return (
+                    <span>
+                        {record?.patch_type === "gateway" && (
+                            <>
+                                {!!record?.sim && (
+                                    <span className="wrapper-text-infor">
+                                        <span style={{ color: "#000000ad", fontWeight: "400" }}>
+                                            SIM:
+                                        </span>
+                                        <span className="text-truncate">
+                                            {record?.sim}
+                                        </span>
+                                    </span>
+                                )}
+                                {!!record?.phone && (
+                                    <span className="wrapper-text-infor">
+                                        <span style={{ color: "#000000ad", fontWeight: "400" }}>
+                                            PHONE:
+                                        </span>
+                                        <span className="text-truncate">
+                                            {record?.phone}
+                                        </span>
+                                    </span>
+                                )}
+                                {(!!tags && tags?.length > 0) && (
+                                    <>
+                                        <span className="wrapper-text-infor">
+                                            <span style={{ color: "#000000ad", fontWeight: "400", marginRight: "4px" }}>
+                                                Tags:
+                                            </span>
+                                            <span
+                                                className="wrapper-text-infor"
+                                                style={{ flexDirection: "column", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
+                                            >
+                                                {tags?.map((item, index) => {
+                                                    if (open) {
+                                                        return (
+                                                            <span key={index} className="text-truncate item-consultant">
+                                                                {item}
+                                                            </span>
+                                                        )
+                                                    } else {
+                                                        if (index < 2) {
+                                                            return (
+                                                                <span key={index} className="text-truncate item-consultant">
+                                                                    {item}
+                                                                </span>
+                                                            )
+                                                        }
+                                                    }
+                                                })}
+
+                                                {tags?.length > 2 && (
+                                                    <span className="text-number-tag" onClick={() => onToggleDataMulti(record?.patch_uuid, "isFullTags")}>
+                                                        {open ? (
+                                                            <>
+                                                                {`(-${tags?.length - 2})`} tag <CaretDownOutlined />
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                {`+${tags?.length - 2}`} tag <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
+                                                            </>
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </span>
+                                        </span>
+                                    </>
+                                )}
+                            </>
+                        )}
+                    </span>
+                )
+            },
             // filters: [
             //     {
             //         text: "Bundle",
@@ -825,63 +993,69 @@ function PatchInventory() {
             // onFilter: (value, record) => record.patch_type === value
         },
         {
-            title: "Device In Use",
+            title: "In Use",
             dataIndex: "patch_patient_map",
             key: "patchMap",
             ellipsis: true,
             align: "center",
-            width: 75,
+            width: 30,
             render: (dataIndex, record) => (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {dataIndex === null ? (
-                        <Tag
-                            icon={<CloseCircleOutlined />}
-                            style={{
-                                // marginRight: "16px",
-                                width: "fit-content",
-                                color: "#DD4A34",
-                                background: "transparent",
-                                fontSize: "16px",
-                                // border: "2px solid #FFBEB4",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                // fontWeight: "500",
-                                height: "40px",
-                                //     padding: "0px 16px",
-                                padding: "0px 0px",
-                                border: "none",
-                                margin: "0px"
-                            }}
-                            color="#FD505C"
-                        >
-                            Unregistered
-                        </Tag>
+                        // <Tag
+                        //     icon={<CloseCircleOutlined />}
+                        //     style={{
+                        //         // marginRight: "16px",
+                        //         width: "fit-content",
+                        //         color: "#DD4A34",
+                        //         background: "transparent",
+                        //         fontSize: "16px",
+                        //         // border: "2px solid #FFBEB4",
+                        //         display: "flex",
+                        //         alignItems: "center",
+                        //         justifyContent: "center",
+                        //         // fontWeight: "500",
+                        //         height: "40px",
+                        //         //     padding: "0px 16px",
+                        //         padding: "0px 0px",
+                        //         border: "none",
+                        //         margin: "0px"
+                        //     }}
+                        //     color="#FD505C"
+                        // >
+                        //     {/* Unregistered */}
+                        // </Tag>
+                        <Tooltip title="Unregistered">
+                            <CloseCircleOutlined style={{ color: "#FD505C", fontSize: "20px" }} />
+                        </Tooltip>
                     ) : (
-                        <Tag
-                            icon={<CheckOutlined />}
-                            style={{
-                                // marginRight: "5px",
-                                // marginLeft: "5px",
-                                width: "fit-content",
-                                color: "#06A400",
-                                background: "transparent",
-                                fontSize: "16px",
-                                // border: "2px solid #06A00020",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                // fontWeight: "500",
-                                height: "40px",
-                                // padding: "0px 16px",
-                                padding: "0px 0px",
-                                border: "none",
-                                margin: "0px"
-                            }}
-                            color="#06A400"
-                        >
-                            Registered
-                        </Tag>
+                        <Tooltip title="Registered">
+                            <CheckOutlined style={{ color: "#06A400", fontSize: "20px" }} />
+                        </Tooltip>
+                        // <Tag
+                        //     icon={<CheckOutlined />}
+                        //     style={{
+                        //         // marginRight: "5px",
+                        //         // marginLeft: "5px",
+                        //         width: "fit-content",
+                        //         color: "#06A400",
+                        //         background: "transparent",
+                        //         fontSize: "16px",
+                        //         // border: "2px solid #06A00020",
+                        //         display: "flex",
+                        //         alignItems: "center",
+                        //         justifyContent: "center",
+                        //         // fontWeight: "500",
+                        //         height: "40px",
+                        //         // padding: "0px 16px",
+                        //         padding: "0px 0px",
+                        //         border: "none",
+                        //         margin: "0px"
+                        //     }}
+                        //     color="#06A400"
+                        // >
+                        //     {/* Registered */}
+                        // </Tag>
                     )}
                 </div>
             ),
@@ -910,12 +1084,75 @@ function PatchInventory() {
             dataIndex: "",
             key: "deleteIcon",
             ellipsis: true,
-            width: 45,
+            width: 20,
             render: (dataIndex, record) => {
                 return (
                     <>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            {record?.patch_type === "gateway" && (
+                        <Popover
+                            trigger={["click"]}
+                            placement="left"
+                            content={
+                                <div style={{ display: "flex", flexDirection: "column" }}>
+                                    {record?.patch_type === "gateway" && (
+                                        <>
+                                            <Button className="icon-setting-device" onClick={() => onResetGateway(record?.patch_uuid)}>
+                                                Reset
+                                            </Button>
+                                            <Button className="icon-setting-device" onClick={() => onScanGateway(record?.patch_uuid)}>
+                                                Scan
+                                            </Button>
+                                            {/* <Tooltip title="Reset gateway">
+                                                <img
+                                                    className="icon_gateway"
+                                                    src={IconReset}
+                                                    onClick={() => onResetGateway(record?.patch_uuid)}
+                                                />
+                                            </Tooltip>
+                                            <Tooltip title="Scan gateway">
+                                                <img
+                                                    className="icon_gateway"
+                                                    src={IconScan}
+                                                    onClick={() => onScanGateway(record?.patch_uuid)}
+                                                />
+                                            </Tooltip> */}
+                                        </>
+                                    )}
+                                    {record.patch_patient_map !== null ? (
+                                        // <div
+                                        //     style={{ marginTop: "-4px", opacity: "0.5" }}
+                                        //     onClick={() => showMessageCanNotDelete(
+                                        //         record.AssociatedPatch?.length > 1 ? "Bundle" : "Device"
+                                        //     )}
+                                        // >
+                                        //     <img src={iconDelete} width="20px"></img>
+                                        // </div>
+                                        <Button className="icon-setting-device" disabled={true}>
+                                            Delete
+                                        </Button>
+                                    ) : (
+                                        <Popconfirm
+                                            placement="left"
+                                            title="Are you sure to delete this device?"
+                                            onConfirm={() => onDeleteDeviceItem(
+                                                record?.patch_uuid,
+                                                record.AssociatedPatch?.length > 1 ? "bundle" : "device"
+                                            )}
+                                            okText="Yes"
+                                            cancelText="No"
+                                        >
+                                            <Button className="icon-setting-device">Delete</Button>
+                                        </Popconfirm>
+                                    )}
+                                </div>
+                            }
+                        >
+                            <img
+                                className="icon_gateway"
+                                src={SettingLine}
+                            />
+                        </Popover>
+                        {/* <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}> */}
+                        {/* {record?.patch_type === "gateway" && (
                                 <>
                                     <Tooltip title="Reset gateway">
                                         <img
@@ -932,9 +1169,10 @@ function PatchInventory() {
                                         />
                                     </Tooltip>
                                 </>
-                            )}
+                            )} */}
 
-                            {record.patch_patient_map !== null ? (
+
+                        {/* {record.patch_patient_map !== null ? (
                                 <div
                                     style={{ marginTop: "-4px", opacity: "0.5" }}
                                     onClick={() => showMessageCanNotDelete(
@@ -958,8 +1196,8 @@ function PatchInventory() {
                                         <img src={iconDelete} width="20px"></img>
                                     </div>
                                 </Popconfirm>
-                            )}
-                        </div>
+                            )} */}
+                        {/* </div> */}
                     </>
                 )
             }
