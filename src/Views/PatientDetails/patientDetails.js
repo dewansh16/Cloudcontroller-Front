@@ -554,7 +554,7 @@ export default function PatientDetails(props) {
                                             </h1>
                                         </div>
                                     </div>
-                                    {/* <div style={{ marginLeft: "15%" }}>
+                                    <div style={{ marginLeft: "15%" }}>
                                         <div className="detail-tags-wrapper">
                                             <div style={{ height: "25px", display: "flex", alignItems: "center" }}>
                                                 <img className="icon-tags" src={IconTag} />
@@ -563,14 +563,14 @@ export default function PatientDetails(props) {
                                             <div>
                                                 {tagsSelected?.map((tag, index) => {
                                                     return (
-                                                        <div key={`${tag}-${index}`} className="tag-item">
-                                                            {tag}
+                                                        <div key={`${tag?.value}-${index}`} className="tag-item" style={{ background: tag?.color }}>
+                                                            {tag?.value}
                                                         </div>
                                                     )
                                                 })}
                                             </div>
                                         </div>
-                                    </div> */}
+                                    </div>
                                 </Col>
 
                                 <Col span={17}>

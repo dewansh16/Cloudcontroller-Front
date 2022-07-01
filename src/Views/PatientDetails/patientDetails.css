@@ -160,6 +160,8 @@
   display: inline-flex;
   margin-right: 6px;
   font-size: 13px;
+  color: #ffffff;
+  font-weight: 400;
 }
 
 .detail-tags-wrapper .tag-item:last-child {
