@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PieChart, Pie, Sector, Cell } from 'recharts';
 import { Spin } from 'antd';
+import {CPT_CODE} from '../../../../Utils/utils.js';
 
-const ChartCPTCode = ({ pid, record, CPT_CODE }) => {
+const ChartCPTCode = ({ pid, record, code }) => {
     const [dataChart, setDataChart] = useState({
         loading: true,
         data: []
     });
-
+    const maxValue99457 = 20;
+    const maxValue99458 = 40;
+    const maxValue99091 = 30;
     const timeInterval = useRef(null);
 
     const COLORS = ['#ff0000a8', '#008000d1'];
@@ -32,7 +35,7 @@ const ChartCPTCode = ({ pid, record, CPT_CODE }) => {
     };
 
     useEffect(() => {
-        if (CPT_CODE === "99454") {
+        if (code == CPT_CODE.CPT_99454) {
             let i = 0;
             timeInterval.current = setInterval(() => {
                 i++;
@@ -63,10 +66,31 @@ const ChartCPTCode = ({ pid, record, CPT_CODE }) => {
                     });
                 }
             }, 1000);
-        } else {
+        } 
+        if(code == CPT_CODE.CPT_99457){
+            let chartValue = Math.floor(record.task_99457 / 60) < maxValue99457 ?  Math.floor(record.task_99457 / 60) / maxValue99457 : 100;
+            chartValue = chartValue * 100;
             setDataChart({
                 loading: false,
-                data: [{ value: 1 }]
+                data: [{ value: chartValue }, { value: maxValue99457 }]
+            });
+        }
+
+        if(code == CPT_CODE.CPT_99458){
+            let chartValue = Math.floor(record.task_99458 / 60) < maxValue99458 ?  Math.floor(record.task_99458 / 60) / maxValue99458 : 100;
+            chartValue = chartValue * 100;
+            setDataChart({
+                loading: false,
+                data: [{ value: chartValue }, { value: maxValue99458 }]
+            });
+        }
+
+        if(code == CPT_CODE.CPT_99091){
+            let chartValue = Math.floor(record.task_99091 / 60) < maxValue99091 ?  Math.floor(record.task_99091 / 60) / maxValue99091 : 100;
+            chartValue = chartValue * 100
+            setDataChart({
+                loading: false,
+                data: [{ value: chartValue }, { value: maxValue99091 }]
             });
         }
 

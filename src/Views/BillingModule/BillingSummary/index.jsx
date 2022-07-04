@@ -40,6 +40,8 @@ const BillingModule = () => {
     const [pidEdit, setPidEdit] = useState(null);
     const [respondBillingData, setRespondBillingData] = useState([]);
     const [isEditRow, setIsEditRow] = useState(false);
+    const itemPerPage = 10;
+
 
     const history = useHistory();
     let val99457 = 0;
@@ -229,7 +231,7 @@ const BillingModule = () => {
     }
 
     const getDataBillingSummary = () => {
-        billingApi.getBillingSummary(moment(valueDate).format("YYYY-MM-DD"), 10 * (currentPageVal - 1), valSearch)
+        billingApi.getBillingSummary(moment(valueDate).format("YYYY-MM-DD"), itemPerPage * (currentPageVal - 1), valSearch, itemPerPage)
             .then((res) => {
                 const newArrPid = [];
                 const result = {
@@ -237,7 +239,13 @@ const BillingModule = () => {
                     patchData: []
                 };
                 const billingData = res?.data?.response?.billingData || [];
+                const totalItemCount = res?.data?.response?.count;
+                let totalPagesCal = Math.floor(totalItemCount / itemPerPage);
+                if(totalItemCount % itemPerPage != 0){
+                    totalPagesCal = totalPagesCal + 1;
+                }
                 setRespondBillingData(billingData); 
+                setTotalPages(totalPagesCal);
                 if (billingData?.length > 0) {
                     for (let index = 0; index < billingData.length; index++) {
                         const billing = billingData[index];
@@ -365,18 +373,7 @@ const BillingModule = () => {
     }
 
     const getTotalTimeTaskSpend = (dataIndex) => {
-        let tmpTime = 0;
-        if (isJsonString(dataIndex)) {
-            let arrayData = JSON.parse(dataIndex);
-            if (!isArray(arrayData)) arrayData = [];
-
-            if (arrayData.length > 0) {
-                arrayData.map(item => {
-                    tmpTime += Number(item.task_time_spend);
-                })
-            }
-        }
-        return tmpTime;
+        return dataIndex;
     };
 
     const columns = [
@@ -412,8 +409,8 @@ const BillingModule = () => {
         },
         {
             title: '99453',
-            dataIndex: "99453",
-            key: "99453",
+            dataIndex: "task_99453",
+            key: "task_99453",
             align: "center",
             render: (dataIndex) => {
                 if (!!dataIndex && isJsonString(dataIndex)) {
@@ -451,7 +448,7 @@ const BillingModule = () => {
         },
         {
             title: '99457',
-            dataIndex: "99457",
+            dataIndex: "task_99457",
             key: "99457",
             align: "center",
             render: (dataIndex, record) => {
@@ -479,8 +476,8 @@ const BillingModule = () => {
         },
         {
             title: '99458',
-            dataIndex: "99458",
-            key: "99458",
+            dataIndex: "task_99458",
+            key: "task_99458",
             align: "center",
             render: (dataIndex, record) => {
                 const tmpTime = getTotalTimeTaskSpend(dataIndex);
@@ -519,8 +516,8 @@ const BillingModule = () => {
         },
         {
             title: '99091',
-            dataIndex: "99091",
-            key: "99091",
+            dataIndex: "task_99091",
+            key: "task_99091",
             align: "center",
             render: (dataIndex, record) => {
                 const tmpTime = getTotalTimeTaskSpend(dataIndex);
