@@ -143,10 +143,10 @@
 .detail-tags-wrapper {
   margin: 6px 0;
   display: flex;
-  width: 100%;
+  width: fit-content;
 }
 
-.detail-tags-wrapper .icon-tags {
+.detail-tags-wrapper .icon-tags, .detail-tags-wrapper .icon-edit {
   width: 18px;
   height: 18px;
   margin-right: 10px;
@@ -166,4 +166,18 @@
 
 .detail-tags-wrapper .tag-item:last-child {
   margin-bottom: 0px;
+}
+
+
+.detail-tags-wrapper .icon-edit {
+  display: none;
+}
+.detail-tags-wrapper:hover .icon-edit {
+  display: revert;
+}
+.detail-tags-wrapper:hover .icon-tags {
+  display: none;
+}
+.detail-tags-wrapper .edit-active {
+  display: revert!important;
 }

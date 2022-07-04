@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Row, Col, Drawer, Form, notification, Table } from '../../../Theme/antdComponents'
 import { Button } from '../../../Theme/Components/Button/button'
 import { Input, GlobalTextArea as TextArea } from '../../../Theme/Components/Input/input'
-import { Select, SelectOption as Option } from '../../../Theme/Components/Select/select'
+// import { Select, SelectOption as Option } from '../../../Theme/Components/Select/select'
 import { DatePicker } from '../../../Theme/Components/DateTimePicker/dateTimePicker'
 import Icons from '../../../Utils/iconMap'
 import { modes } from './mode'
@@ -11,40 +11,42 @@ import { EmrView } from '../EMR'
 import { useHistory, useLocation } from 'react-router-dom'
 import moment from 'moment'
 import { UserStore } from "../../../Stores/userStore";
+import Select from 'antd/lib/select'
+const { Option } = Select;
 
 let status = 'active';
 let allergyEdit = null;
-function FetchAllergy(pid, limit) {
-    const [response, setResponse] = useState(null)
-    const [loading, setLoading] = useState(true)
-    const [dataSource, setDataSource] = useState([])
+// function FetchAllergy(pid, limit) {
+//     const [response, setResponse] = useState(null)
+//     const [loading, setLoading] = useState(true)
+//     const [dataSource, setDataSource] = useState([])
     
 
-    useEffect(() => {
-        patientApi.getPatientAllergy(pid, limit).then((res) => {
-            console.log(res.data.response)
-            res.data.response['data'].map((allergy, idx) => {
-                dataSource.push({
-                    key: idx,
-                    ...allergy
-                })
-            })
-            setDataSource([...dataSource])
-            setResponse(res.data.response)
-            setLoading(false);
-        }).catch((err) => {
-            console.log(err)
-            if (err) {
-                notification.error({
-                    message: 'Error',
-                    description: `${err.response?.data.result}` || ""
-                })
-                setLoading(false);
-            }
-        })
-    }, [pid])
-    return [response, loading, dataSource]
-}
+//     useEffect(() => {
+//         patientApi.getPatientAllergy(pid, limit).then((res) => {
+//             console.log(res.data.response)
+//             res.data.response['data'].map((allergy, idx) => {
+//                 dataSource.push({
+//                     key: idx,
+//                     ...allergy
+//                 })
+//             })
+//             setDataSource([...dataSource])
+//             setResponse(res.data.response)
+//             setLoading(false);
+//         }).catch((err) => {
+//             console.log(err)
+//             if (err) {
+//                 notification.error({
+//                     message: 'Error',
+//                     description: `${err.response?.data.result}` || ""
+//                 })
+//                 setLoading(false);
+//             }
+//         })
+//     }, [pid])
+//     return [response, loading, dataSource]
+// }
 
 function AddMedicalHistory(pid, data, successCallBack) {
     // "pid": "patiente9c617e0-4242-4828-ba08-66e8d4aa9009",
@@ -104,26 +106,16 @@ function UpdateAllergy(pid, data, successCallBack) {
     })
 }
 
-const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBack, pid }) => {
+const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBack, pid, visible }) => {
+    const reqd = mode === modes.ADD_NEW;
+    const allergy_uuid = allergyForm.getFieldValue("allergy_uuid");
 
-    const reqd = mode === modes.ADD_NEW
-    const allergy_uuid = allergyForm.getFieldValue("allergy_uuid")
     const onFinish = (values) => {
-        let formData = {
-            // "allergy_uuid": "medicalhistory-XXXX",
-            // "date_of_treatement": "2021-09-06T00:00:00.000Z",
-            // "treatment": "1",
-            // "hospital_name": "MB Hospital",
-            // "doctor_name": "Dr. Ansh",
-            // "note": "This is a note"
-        }
-        formData = { ...values }
+        let formData = { ...values };
         if (mode === modes.ADD_NEW) {
-            console.log(pid, formData)
             AddMedicalHistory(pid, formData, successCallBack = successCallBack)
         } else if (mode === modes.EDIT) {
             formData['allergy_uuid'] = allergy_uuid
-            console.log(pid, formData)
             UpdateAllergy(pid, formData, successCallBack = successCallBack)
         } else {
             notification.warning({
@@ -131,7 +123,6 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
                 description: `Unknown form mode is selected`
             })
         }
-        console.log("the form mode is", mode)
     }
 
     const onFinishFailed = (value) => {
@@ -143,10 +134,16 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
     }
 
     useEffect(() => {
-        allergyForm.setFieldsValue({
-            ...data
-        })
-    }, [])
+        if (mode === modes.ADD_NEW && visible) {
+            allergyForm.setFieldsValue({
+                ...data,
+                date_from: moment(),
+                date_to: moment(),
+                status: "active"
+            })
+        }
+    }, [visible, mode]);
+
     return (
         <Form
             form={allergyForm}
@@ -166,7 +163,7 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
                             message: "required"
                         }]}
                     >
-                        <DatePicker />
+                        <DatePicker format="MMM DD YYYY" allowClear={false} />
                     </Form.Item>
                 </Col>
                 <Col style={{}} span={8}>
@@ -179,7 +176,7 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
                             message: "required"
                         }]}
                     >
-                        <DatePicker />
+                        <DatePicker format="MMM DD YYYY" allowClear={false} />
                     </Form.Item>
                 </Col>
                  <Col style={{}} span={8}>
@@ -194,7 +191,7 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
                     >
                         <Select
                             // onChange={(e) => { setNameType(e) }}
-                            defaultValue={"active"}
+                            // defaultValue={"active"}
                             bordered={false}
                             onChange={(value) => {
                                 status = value;
@@ -265,17 +262,55 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
 export default function MedicalHistory({ pid, setComponentSupportContent, setPadding, setEmrView }) {
     let history = useHistory();
     let location = useLocation();
-    const [allergy, isLoading, dataSource] = FetchAllergy(pid, 20)
+
     const [allergyForm] = Form.useForm()
     const [visible, setVisible] = useState(false);
-    const [formMode, setFormMode] = useState(modes.ADD_NEW)
+    const [formMode, setFormMode] = useState(modes.ADD_NEW);
+    const [allergy, setAllergy] = useState({
+        isLoading: false,
+        dataSource: []
+    })
+
+    function FetchAllergy() {
+        patientApi.getPatientAllergy(pid, 20).then((res) => {
+            const dataSource = [];
+            res.data.response['data'].map((allergy, idx) => {
+                dataSource.push({
+                    key: idx,
+                    ...allergy
+                })
+            })
+            setAllergy({
+                isLoading: false,
+                dataSource: dataSource
+            })
+        }).catch((err) => {
+            console.log(err)
+            if (err) {
+                notification.error({
+                    message: 'Error',
+                    description: `${err.response?.data.result}` || ""
+                })
+                setAllergy({
+                    isLoading: false,
+                    dataSource: []
+                })
+            }
+        })
+    };
+
+    useEffect(() => {
+        if (pid) {
+            FetchAllergy();
+        };
+    }, [pid]);
+
     const showDrawer = () => {
         setVisible(true);
     };
     const onClose = () => {
         setVisible(false);
     };
-
 
     const columns = [
         {
@@ -296,12 +331,15 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
         {
             title: "Status",
             dataIndex: "status",
-            key: "status"
+            key: "status",
+            render: (dataIndex) => (
+                <span style={{ textTransform: "capitalize" }}>{dataIndex}</span>
+            )
         },
         {
-            title: "Report",
-            key: "report",
-            render: report => <p>"reports here"</p>
+            title: "Note",
+            dataIndex: "note",
+            key: "note",
         },
         {
             title: "",
@@ -320,14 +358,15 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
 
     ]
     const successCallBack = () => {
-        console.log(`/dashboard/patient/EMR/${pid}`)
-        window.location.reload(false)
+        FetchAllergy();
+        onClose();
     }
     const backToPatientDetails = () => {
-        // the below code to always redirect to 
+        // the below code to always redirect to     
         history.push(`/dashboard/patient/details/${pid}`)
         // history.goBack()
     }
+
     useEffect(() => {
         setComponentSupportContent(
             <div style={{
@@ -361,12 +400,12 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
                 visible={visible}
                 width={720}
             >
-                <AddAllergyForm pid={pid} allergyForm={allergyForm} mode={formMode} successCallBack={successCallBack} />
+                <AddAllergyForm visible={visible} pid={pid} allergyForm={allergyForm} mode={formMode} successCallBack={successCallBack} />
             </Drawer>
 
             <Row gutter={[0, 0]}>
                 <Col span={24}>
-                    <Table dataSource={dataSource} columns={columns} scroll={{ y: 360 }} pagination={{ position: ["bottomCenter"] }} />
+                    <Table dataSource={allergy?.dataSource} columns={columns} scroll={{ y: 360 }} pagination={{ position: ["bottomCenter"] }} />
                 </Col>
             </Row>
         </div >

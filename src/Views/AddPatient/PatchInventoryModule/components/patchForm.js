@@ -380,6 +380,8 @@ const PatchForm = (props) => {
         });
         setIsNewDevice(true);
         setDeviceSelected(data.device_serial);
+        setTagList([]);
+        setTagSelected([]);
     };
 
     useEffect(() => {
@@ -845,7 +847,7 @@ const PatchForm = (props) => {
                                         <Col span={18}>
                                             <Form.Item
                                                 required={!props.required}
-                                                label="Phone Number"
+                                                label="Sim Number"
                                                 name="gateway_sim_add"
                                                 rules={[ { pattern: new RegExp("^[0-9]*$"), message: "Please recheck the sim entered." }]}
                                                 className="addPatientDetailsModal"

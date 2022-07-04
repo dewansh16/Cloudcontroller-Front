@@ -216,6 +216,7 @@
   color: #ffffff;
   border-radius: 4px;
   margin-right: 6px;
+  margin: 2px 6px 2px 0;
 }
 
 .item-option-tags .ant-select-item-option-content {

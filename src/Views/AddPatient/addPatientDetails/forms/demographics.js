@@ -16,10 +16,9 @@ const PatientDemographics = (props) => {
     );
 
     const tags = props?.patientData?.tags ? props?.patientData?.tags : [];
-    const [tagList, setTagList] = useState(tags);
+    const [arrayOptionTags, setArrOptionTags] = useState(tags);
     const [tagSelected, setTagSelected] = useState(tags);
 
-    const [valSelectSearch, setValSelectSearch] = useState("");
     const [colorSelected, setColorSelected] = useState("#ff0000");
 
     const StoreDemographics = (fieldValues) => {
@@ -82,28 +81,6 @@ const PatientDemographics = (props) => {
         props.setClass(newClass);
     }
 
-    const onChangeValInputTagsAdd = (val) => {
-        const value = val?.trim();
-
-        if (value.includes(";") || value.includes(",")) {
-            setValSelectSearch("");
-
-            if (!tagSelected?.includes(valSelectSearch) && value?.length > 1) {
-                const dataNew = {
-                    label: valSelectSearch,
-                    value: valSelectSearch,
-                    color: colorSelected
-                };
-                
-                setTagList([...tagList, dataNew]);
-                setTagSelected([...tagSelected, dataNew]);
-                props.savePatientDetails({ ["tags"]: [...tagSelected, dataNew] });
-            }
-        } else {
-            setValSelectSearch(value);
-        }
-    };
-
     useEffect(() => {
         props.form.setFieldsValue({
             [`tags`]: tagSelected?.map(item => item?.value)
@@ -134,13 +111,10 @@ const PatientDemographics = (props) => {
                     onInputChange,
                     setPatientType,
                     patientType,
-                    tagList,
-                    valSelectSearch,
+                    arrayOptionTags,
+                    setArrOptionTags,
                     tagSelected,
                     setTagSelected,
-                    onChangeValInputTagsAdd,
-                    colorSelected,
-                    setColorSelected
                 ).map((item) => {
                     // if (item.name === "patient_type") {
                     //     // console.log("admisiion wala kaam krra");

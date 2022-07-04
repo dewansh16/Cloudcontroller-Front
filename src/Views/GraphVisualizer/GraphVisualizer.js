@@ -1839,14 +1839,15 @@ function GraphVisualizer() {
             let alerts = res.data?.response?.data || [];
 
             const length = alerts?.length;
-            for (let index = 0; index < length; index++) {
-                const alert = alerts[index];
-                activeTrendsArray.forEach(trend => {
+            activeTrendsArray.forEach(trend => {
+                trend.alerts = [];
+                for (let index = 0; index < length; index++) {
+                    const alert = alerts[index];
                     if (trend?._key === formatTypeSensor(alert?.value_of)) {
                         trend.alerts.push(alert);
                     }
-                });
-            }
+                }
+            });
 
             setActiveTrendsArray([...activeTrendsArray]);
             setLoadingSidebarLeft(false);
@@ -2003,7 +2004,6 @@ function GraphVisualizer() {
                 |> range(start: ${start.toISOString()}, stop: ${end.toISOString()})
                 |> filter(fn: (r) => r["_measurement"] == "${pid}_${keySensor}")
                 |> yield(name: "mean")`;
-        console.log("query", query);
 
         const arrayRes = [];
         const newArrayData = [...activeTrendsArray];
