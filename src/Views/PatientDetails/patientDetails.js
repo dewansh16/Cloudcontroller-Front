@@ -459,20 +459,20 @@ export default function PatientDetails(props) {
                 notification.success({
                     message: "Updated",
                     description: "Update tags successfullty!",
-                })
+                });
+                setIsEditTag(false);
             })
             .catch(err => {
                 notification.error({
                     message: "Updated",
                     description: "Update tags failed!",
                 })
-                const tags = isJsonString(patient?.demographic_map?.tags) ? JSON.parse(patient?.demographic_map?.tags) : [];
-                setTagsSelected(tags);
+                // const tags = isJsonString(patient?.demographic_map?.tags) ? JSON.parse(patient?.demographic_map?.tags) : [];
+                // setTagsSelected(tags);
             })
     }
 
     const onBlurSelectTags = () => {
-        setIsEditTag(false);
         updatePatient();
     };
 

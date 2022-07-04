@@ -11,28 +11,35 @@ const SelectTagsPatient = (props) => {
     const [valSelectSearch, setValSelectSearch] = useState("");
     const [colorSelected, setColorSelected] = useState("#ff0000");
 
-    const arrayColor = ["#ff0000", "#ff00bf", "#4000ff", "#00ff00", "#e5e515", "#ff8000"];
+    const arrayColor = [
+        {color: "#ff0000", title: "Red" },
+        {color: "#ff00bf", title: "Pink" },
+        {color: "#4000ff", title: "Blue" },
+        {color: "#00ff00", title: "Green" },
+        {color: "#e5e515", title: "Yellow" },
+        {color: "#ff8000", title: "Orange" },
+    ];
 
     const renderColorsTags = () => {
         return (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
-                {arrayColor?.map(color => {
-                    const isActive = colorSelected === color || false;
+                {arrayColor?.map(item => {
+                    const isActive = colorSelected === item?.color || false;
                     return (
                         <div
-                            key={color}
+                            key={item?.color}
                             className="color-item"
                             style={{ display: "flex", alignItems: "center" }}
-                            onClick={() => setColorSelected(color)}
+                            onClick={() => setColorSelected(item?.color)}
                         >
                             <div className="box-color" style={{
-                                background: color,
+                                background: item?.color,
                             }}>
                                 {isActive && (
                                     <img src={IconCheck} className="icon-check-color" />
                                 )}
                             </div>
-                            <div className={`color-text ${isActive ? "text-active" : ""}`}>{color}</div>
+                            <div className={`color-text ${isActive ? "text-active" : ""}`}>{item?.title}</div>
                         </div>
                     )
                 })}
@@ -85,6 +92,7 @@ const SelectTagsPatient = (props) => {
             showSearch
             mode="multiple"
             placeholder="Select tags"
+            style={{ width: "100%" }}
             filterOption={true}
             onSearch={(val) => onChangeValInputTagsAdd(val)}
             autoClearSearchValue={false}

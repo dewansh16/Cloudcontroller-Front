@@ -74,6 +74,7 @@ const AddProcedureForm = ({ visible, data, mode = modes.ADD_NEW, procedureForm, 
         if (mode === modes.ADD_NEW) {
             AddProcedure(pid, formData, successCallBack = successCallBack)
         } else if (mode === modes.EDIT) {
+            formData.procedure_uuid = procedure_uuid;
             UpdateProcedure(pid, formData, successCallBack = successCallBack)
         } else {
             notification.warning({
@@ -275,22 +276,34 @@ export default function Procedure({ pid, setComponentSupportContent, setPadding,
             title: "Date",
             dataIndex: "diagnosis_date",
             key: "diagnosis_date",
+            width: 150,
             render: data => moment(data).format("MMM DD YYYY")
         },
         {
-            title: "Procedure Code",
+            title: "Code type",
             dataIndex: "code_type",
-            key: "treatment"
+            key: "code_type"
         },
         {
-            title: "Procedure",
+            title: "Description",
             dataIndex: "description",
             key: "description"
+        },
+        {
+            title: "Result/Conclusion",
+            dataIndex: "result",
+            key: "result"
+        },
+        {
+            title: "Consulting Person",
+            dataIndex: "consulting_person",
+            key: "consulting_person"
         },
         {
             title: "Status",
             dataIndex: "status",
             key: "status",
+            width: 130,
             render: (dataIndex) => (
                 <span style={{ textTransform: "capitalize" }}>{dataIndex}</span>
             )
@@ -299,6 +312,7 @@ export default function Procedure({ pid, setComponentSupportContent, setPadding,
             title: "Labels",
             dataIndex: "label",
             key: "label",
+            width: 130,
             render: (dataIndex) => (
                 <span style={{ textTransform: "capitalize" }}>{dataIndex}</span>
             )
@@ -306,6 +320,7 @@ export default function Procedure({ pid, setComponentSupportContent, setPadding,
         {
             title: "",
             key: "data",
+            width: 60,
             render: data => Icons.edit({
                 onClick: () => {
                     showDrawer();

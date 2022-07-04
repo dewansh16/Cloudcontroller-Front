@@ -147,7 +147,6 @@ const Alerts = (props) => {
 
     const [data, isLoading] = FetchAlertData(pid, isAttended, currentPageVal, setTotalPages);
    
-
     const toPatientDetails = () => {
         props.history.push(`/dashboard/patient/details/${pid}`);
     }

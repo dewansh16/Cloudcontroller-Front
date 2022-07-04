@@ -61,7 +61,7 @@ function DetailBox({ detailsBox, setDetailBox, patient }) {
                         </span>
                         Age : {getAge(new Date(), new Date(patient.demographic_map.DOB))}
                     </Col>
-                    <Col className="patient-detailbox-cols" span={12}>
+                    <Col className="patient-detailbox-cols" span={10}>
                         <span className="patient-detailbox-col-icon">
                             {Icons.maleIcon({})}
                         </span>

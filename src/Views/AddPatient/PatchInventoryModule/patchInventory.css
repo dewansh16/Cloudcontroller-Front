@@ -15,3 +15,8 @@
     background: #f5f5f587;
     color: #000000a6!important;
 }
+
+.addPatchFormItem .ant-select-tags.ant-select-disabled .ant-select-selection-item {
+    background: #fff;
+    color: #000;
+}
