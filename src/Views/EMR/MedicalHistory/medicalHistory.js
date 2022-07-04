@@ -255,6 +255,7 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
             title: "Timeline",
             dataIndex: "date_of_treatment",
             key: "date_of_treatment",
+            width: 150,
             // render: date_of_treatment => <p>{new Date(date_of_treatment).getFullYear()}</p>
             render: data => moment(data).format("MMM DD YYYY")
         },
@@ -274,6 +275,11 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
             key: "doctor_name"
         },
         {
+            title: "Note",
+            dataIndex: "note",
+            key: "note"
+        },
+        {
             title: "Documents",
             dataIndex: "documents",
             key: "documents"
@@ -281,6 +287,7 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
         {
             title: "",
             key: "data",
+            width: 60,
             render: data => Icons.edit({
                 onClick: () => {
                     showDrawer();

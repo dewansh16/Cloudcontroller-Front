@@ -38,6 +38,7 @@ import {
 
 import Select from 'antd/lib/select'
 import "./vitals.css";
+import moment from "moment";
 
 const { Option } = Select;
 
@@ -591,7 +592,8 @@ export default function Vitals({
                                 <div className="vital-info">
                                     <p>
                                         <span style={{ opacity: "0.5" }}>Recorded on: </span>
-                                        {`${vital.date.slice(0, 10)}`}
+                                        {/* {`${vital.date.slice(0, 10)}`} */}
+                                        {moment(vital.date).format("MMM DD YYYY")}
                                     </p>
                                     <p>
                                         <span style={{ opacity: "0.5" }}>By: </span>
@@ -1108,7 +1110,8 @@ export default function Vitals({
                             <div className="vital-info">
                                 <p>
                                     <span style={{ opacity: "0.5" }}>Recorded on: </span>
-                                    {`${threshold.createdAt.slice(0, 10)}`}
+                                    {/* {`${threshold.createdAt.slice(0, 10)}`} */}
+                                    {moment(threshold.createdAt).format("MMM DD YYYY")}
                                 </p>
                                 {/* <p><span style={{ opacity: "0.5" }}>By: </span>{`${vitalthresholds.user}`}</p> */}
                             </div>

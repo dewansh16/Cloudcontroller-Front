@@ -60,7 +60,6 @@ const { TextArea } = Input;
 const { Panel } = Collapse;
 
 function GraphVisualizer() {
-
     const location = useLocation();
 
     const [observationData, setObservationData] = useState([
@@ -140,7 +139,6 @@ function GraphVisualizer() {
     const [alertName, setAlertName] = useState('')
 
     const { pid } = useParams();
-    // console.log("PID : ", pid);
     const dateFormat = 'MMM DD YYYY';
     const [antd_selected_date_val, setAntd_selected_date_val] = useState(new Date())
 
@@ -1790,10 +1788,12 @@ function GraphVisualizer() {
     const [patient, setPatient] = useState(null);
 
     useEffect(() => {
+        setIsLoading(true);
         patientApi
             .getDetailPatientById(pid)
             .then((res) => {
                 setPatient(res.data.response.patient);
+                setIsLoading(false);
             })
             .catch((err) => {
                 if (err) {
@@ -1802,6 +1802,7 @@ function GraphVisualizer() {
                         message: "Error",
                         description: `${error}` || "",
                     });
+                    setIsLoading(false);
                 }
             });
     }, [pid]);
@@ -2017,7 +2018,6 @@ function GraphVisualizer() {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 const value = dataQueryInFlux?._value || 0;
                 arrayRes.push({ value: takeDecimalNumber(value, 2), time: dataQueryInFlux?._time });
-                console.log("dataQueryInFlux", dataQueryInFlux);
             },
             error(error) {
                 console.error(error)
@@ -2041,21 +2041,24 @@ function GraphVisualizer() {
     return (
         isLoading
             ?
-            (
-                location.state
-                    ?
-                    (
-                        <div style={{ height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} >
-                            <Spin />
-                        </div>
-                    )
-                    :
-                    (
-                        <div style={{ height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} >
-                            <Spin />{history.goBack()}
-                        </div>
-                    )
-            )
+                <div style={{ height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} >
+                    <Spin />
+                </div>
+            // (
+            //     location.state
+            //         ?
+            //         (
+            //             <div style={{ height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} >
+            //                 <Spin />
+            //             </div>
+            //         )
+            //         :
+            //         (
+            //             <div style={{ height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} >
+            //                 <Spin />{history.goBack()}
+            //             </div>
+            //         )
+            // )
             :
             (
                 <div style={{ height: "100vh", width: "100%", position: 'relative' }} >
@@ -2220,16 +2223,18 @@ function GraphVisualizer() {
                             />
                             <Button onClick={() => { history.goBack() }} className='secondary' style={{ marginLeft: '10%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0% 10%' }} >
                                 <div className="gv-patient-name" style={{ fontSize: '1.4rem' }}>
-                                    {
-                                        location.state
-                                            ?
-                                            location.state.name
-                                            :
-                                            history.goBack()
+                                    {`${!!patient?.demographic_map?.title
+                                            ? patient?.demographic_map?.title
+                                            : ""
+                                        }` +
+                                            " " +
+                                            patient?.demographic_map?.fname +
+                                            " " +
+                                            patient?.demographic_map?.lname
                                     }
                                 </div>
                                 <div className="gv-patient-mr" style={{ fontSize: '0.9rem', color: 'rgba(0, 0, 0, 0.5)' }}>
-                                    {'MR: '}{location.state ? location.state.mr : history.goBack()}
+                                    {'MR: '}{patient?.demographic_map?.med_record}
                                 </div>
                             </Button>
                         </div>

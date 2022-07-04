@@ -38,7 +38,7 @@ const PatientDemographics = (props) => {
             value =
                 value === null || value === undefined
                     ? null
-                    : value.format("YYYY-MM-DD");
+                    : moment(value);
         }
         props.savePatientDetails({ [name]: value });
     };

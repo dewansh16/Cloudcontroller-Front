@@ -144,6 +144,7 @@
   margin: 6px 0;
   display: flex;
   width: fit-content;
+  min-width: 300px;
 }
 
 .detail-tags-wrapper .icon-tags, .detail-tags-wrapper .icon-edit {
