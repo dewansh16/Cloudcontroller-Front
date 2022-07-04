@@ -850,11 +850,18 @@ function AddPatient() {
                 })
                 .catch((err) => {
                     setButtonLoading(false);
-                    setSummary({
-                        isVisible: true,
-                        status: "error",
-                        title: `Couldn't associate Sensor`,
-                    });
+                    // setSummary({
+                    //     isVisible: true,
+                    //     status: "error",
+                    //     title: `Couldn't associate Sensor`,
+                    // });
+                    if (err) {
+                        const error = "" + err?.response?.data?.message;
+                        notification.error({
+                            message: "Error",
+                            description: `${error}` || "",
+                        });
+                    }
                 });
         } else {
             handleAssociateDevice(dataBody);

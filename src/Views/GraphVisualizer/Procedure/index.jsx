@@ -67,7 +67,7 @@ const Procedure = ({ pid, date }) => {
                             <div style={{ marginLeft: "1rem", fontSize: "0.9rem", color: "#000", width: "100%" }}>
                                 <div>
                                     <span style={{ color: "#000000c7", marginRight: "3px" }}>Date: </span>
-                                    {moment(item?.date).format("MMM DD YYYY")}
+                                    {moment(item?.diagnosis_date).format("MMM DD YYYY")}
                                 </div>
                                 <div style={{ display: "flex", alignItems:"center" }}>
                                     {!!item?.code_type && (

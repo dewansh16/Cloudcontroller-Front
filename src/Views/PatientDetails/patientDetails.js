@@ -36,6 +36,7 @@ import Steps from "../PatientJourney/stepspatientJourney/steps.patientJourney";
 import DetailBox from "./components/detailBox.patientDetails";
 
 import IconTag from "../../Assets/Images/tag.png";
+import IconEdit from "../../Assets/Images/icon-edit.svg";
 import { isJsonString } from "../../Utils/utils";
 
 import SelectTagsPatient from "../AddPatient/SelectTagsPatient";
@@ -121,8 +122,6 @@ export default function PatientDetails(props) {
     const [isEditTag, setIsEditTag] = useState(false);
     const [tagsSelected, setTagsSelected] = useState([]);
     const [arrayOptionTags, setArrOptionTags] = useState([]);
-    const [valSelectSearch, setValSelectSearch] = useState("");
-    const [colorSelected, setColorSelected] = useState("#ff0000");
 
     useEffect(() => {
         const setWardName = (locationDetail) => {
@@ -442,25 +441,39 @@ export default function PatientDetails(props) {
         background: "transparent",
     };
 
-    const onChangeValInputTagsAdd = (val) => {
-        const value = val?.trim();
+    const updatePatient = () => {
+        let userData = UserStore.getUser();
+        let tenantId = userData.tenant;
 
-        if (value.includes(";") || value.includes(",")) {
-            setValSelectSearch("");
+        const payload = {
+            tenantId, 
+            demographic_map: { ...patient?.demographic_map, tenant_id: tenantId, tags: tagsSelected } 
+        };
+        patientApi
+            .addPatient(payload, patient?.demographic_map?.pid)
+            .then(res => {
+                const newData = {...patient};
+                newData.demographic_map.tags = JSON.stringify(tagsSelected);
+                setPatient(newData);
 
-            if (!tagsSelected?.includes(valSelectSearch) && value?.length > 1) {
-                const dataNew = {
-                    label: valSelectSearch,
-                    value: valSelectSearch,
-                    color: colorSelected
-                };
-                
-                setArrOptionTags([...arrayOptionTags, dataNew]);
-                setTagsSelected([...tagsSelected, dataNew]);
-            }
-        } else {
-            setValSelectSearch(value);
-        }
+                notification.success({
+                    message: "Updated",
+                    description: "Update tags successfullty!",
+                })
+            })
+            .catch(err => {
+                notification.error({
+                    message: "Updated",
+                    description: "Update tags failed!",
+                })
+                const tags = isJsonString(patient?.demographic_map?.tags) ? JSON.parse(patient?.demographic_map?.tags) : [];
+                setTagsSelected(tags);
+            })
+    }
+
+    const onBlurSelectTags = () => {
+        setIsEditTag(false);
+        updatePatient();
     };
 
     return (
@@ -584,33 +597,46 @@ export default function PatientDetails(props) {
                                         </div>
                                     </div>
                                     <div style={{ marginLeft: "15%" }}>
-                                        <div className="detail-tags-wrapper" onClick={() => setIsEditTag(!isEditTag)}>
-                                            <div style={{ height: "25px", display: "flex", alignItems: "center" }}>
-                                                <img className="icon-tags" src={IconTag} />
+                                        {tagsSelected?.length > 0 && (
+                                            <div className="detail-tags-wrapper">
+                                                {!isEditTag ? (
+                                                    <div 
+                                                        style={{ height: "25px", display: "flex", alignItems: "center", cursor: "pointer" }}
+                                                        onClick={() => setIsEditTag(!isEditTag)}
+                                                    >
+                                                        <img className="icon-edit" src={IconEdit} />
+                                                        <img className="icon-tags" src={IconTag} />
+                                                    </div>
+                                                ) : (
+                                                    <div 
+                                                        style={{ height: "25px", display: "flex", alignItems: "center", cursor: "pointer" }}
+                                                        onClick={() => setIsEditTag(!isEditTag)}
+                                                    >
+                                                        <img className="icon-edit edit-active" src={IconEdit} />
+                                                    </div>
+                                                )}
+                                                
+                                                {isEditTag ? (
+                                                    <SelectTagsPatient 
+                                                        tagsSelected={tagsSelected}
+                                                        setTagsSelected={setTagsSelected}
+                                                        arrayOptionTags={arrayOptionTags}
+                                                        setArrOptionTags={setArrOptionTags}
+                                                        onBlur={onBlurSelectTags}
+                                                    />
+                                                ) : (
+                                                    <div>
+                                                        {tagsSelected?.map((tag, index) => {
+                                                            return (
+                                                                <div key={`${tag?.value}-${index}`} className="tag-item" style={{ background: tag?.color }}>
+                                                                    {tag?.value}
+                                                                </div>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                )}
                                             </div>
-                                            
-                                            {isEditTag ? (
-                                                <SelectTagsPatient 
-                                                    valSelectSearch={valSelectSearch}
-                                                    tagsSelected={tagsSelected}
-                                                    setTagsSelected={setTagsSelected}
-                                                    arrayOptionTags={arrayOptionTags}
-                                                    onInputChange={onChangeValInputTagsAdd}
-                                                    colorSelected={colorSelected}
-                                                    setColorSelected={setColorSelected}
-                                                />
-                                            ) : (
-                                                <div>
-                                                    {tagsSelected?.map((tag, index) => {
-                                                        return (
-                                                            <div key={`${tag?.value}-${index}`} className="tag-item" style={{ background: tag?.color }}>
-                                                                {tag?.value}
-                                                            </div>
-                                                        )
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
+                                        )}
                                     </div>
                                 </Col>
 

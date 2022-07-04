@@ -78,10 +78,10 @@ export function EmrView({ pid, setEmrView, setPadding, defaultState = "subgroup-
                     title: "Allergy",
                     disabled: false,
                 },
-                {
-                    title: "Lab Reports",
-                    disabled: false,
-                },
+                // {
+                //     title: "Lab Reports",
+                //     disabled: false,
+                // },
                 {
                     title: "Lifestyle",
                     disabled: true,
@@ -210,7 +210,7 @@ export function EmrView({ pid, setEmrView, setPadding, defaultState = "subgroup-
                             {createName(patient["demographic_map"]["title"], patient["demographic_map"]["fname"], patient["demographic_map"]["mname"], patient["demographic_map"]["lname"])}
                         </h1>
                         <span>
-                            MR{patient !== null ? `${patient["demographic_map"]["med_record"]}` : null}
+                            MR: {patient !== null ? `${patient["demographic_map"]["med_record"]}` : null}
                         </span>
                     </div>
 

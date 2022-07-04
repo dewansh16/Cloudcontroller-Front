@@ -144,3 +144,7 @@ padding-top: 8px;
     align-items: center;
     padding-top: 8px
 }
+
+.alerts-list-body .site-collapse-custom-collapse {
+    min-width: 900px;
+}

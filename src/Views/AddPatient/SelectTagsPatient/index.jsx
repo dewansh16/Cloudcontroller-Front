@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import Select from 'antd/lib/select'
 import IconCheck from "../../../Assets/Images/check.svg";
@@ -6,9 +6,12 @@ import IconCheck from "../../../Assets/Images/check.svg";
 const { Option } = Select;
 
 const SelectTagsPatient = (props) => {
-    const { valSelectSearch, tagsSelected, setTagsSelected, arrayOptionTags, onInputChange, colorSelected, setColorSelected } = props;
+    const { tagsSelected, setTagsSelected, arrayOptionTags, setArrOptionTags, onBlur } = props;
 
-    const arrayColor = ["#ff0000", "#ff00bf", "#4000ff", "#00ff00", "#ffff00", "#ff8000"];
+    const [valSelectSearch, setValSelectSearch] = useState("");
+    const [colorSelected, setColorSelected] = useState("#ff0000");
+
+    const arrayColor = ["#ff0000", "#ff00bf", "#4000ff", "#00ff00", "#e5e515", "#ff8000"];
 
     const renderColorsTags = () => {
         return (
@@ -49,13 +52,41 @@ const SelectTagsPatient = (props) => {
         );
     }
 
+    const onChangeValInputTagsAdd = (val) => {
+        const value = val?.trim();
+
+        if (value.includes(";") || value.includes(",")) {
+            setValSelectSearch("");
+
+            if (!tagsSelected?.includes(valSelectSearch) && value?.length > 1) {
+                const dataNew = {
+                    label: valSelectSearch,
+                    value: valSelectSearch,
+                    color: colorSelected
+                };
+                
+                setArrOptionTags([...arrayOptionTags, dataNew]);
+                setTagsSelected([...tagsSelected, dataNew]);
+            }
+        } else {
+            setValSelectSearch(value);
+        }
+    };
+
+    const onSelectBlur = () => {
+        if (typeof onBlur === "function") {
+            return onBlur();
+        }
+        return null;
+    }
+
     return (
         <Select
             showSearch
             mode="multiple"
             placeholder="Select tags"
             filterOption={true}
-            onSearch={(val) => onInputChange(val)}
+            onSearch={(val) => onChangeValInputTagsAdd(val)}
             autoClearSearchValue={false}
             searchValue={valSelectSearch}
             value={tagsSelected?.map(tag => tag?.value)}
@@ -67,6 +98,7 @@ const SelectTagsPatient = (props) => {
                 const tagFound = arrayOptionTags?.find(item => item?.value === val);
                 setTagsSelected([...tagsSelected, tagFound]);
             }}
+            onBlur={onSelectBlur}
             notFoundContent={
                 valSelectSearch && (
                     <>

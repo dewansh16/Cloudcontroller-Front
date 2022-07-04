@@ -109,7 +109,7 @@ function AddMedicineToDB({ handleAddDrug, onCancel }) {
                 <Row gutter={[24, 24]} justify="space-around">
                     <Col style={{}} span={8}>
                         <Form.Item
-                            required={false}
+                            required={true}
                             label="Product Name"
                             name="product_name"
                             rules={[{
@@ -122,7 +122,7 @@ function AddMedicineToDB({ handleAddDrug, onCancel }) {
                     </Col>
                     <Col style={{}} span={8}>
                         <Form.Item
-                            required={false}
+                            required={true}
                             label="Trade Name"
                             name="marketing_status"
                             rules={[{
@@ -138,7 +138,7 @@ function AddMedicineToDB({ handleAddDrug, onCancel }) {
                 <Row gutter={[24, 24]} justify="space-around">
                     <Col style={{}} span={8}>
                         <Form.Item
-                            required={false}
+                            required={true}
                             label="Generic Name"
                             name="generic_name"
                             rules={[{
@@ -151,7 +151,7 @@ function AddMedicineToDB({ handleAddDrug, onCancel }) {
                     </Col>
                     <Col style={{}} span={8}>
                         <Form.Item
-                            required={false}
+                            required={true}
                             label="Type"
                             name="form"
                             rules={[{
@@ -177,7 +177,7 @@ function AddMedicineToDB({ handleAddDrug, onCancel }) {
                 <Row gutter={[24, 24]} justify="space-around">
                     <Col style={{}} span={8}>
                         <Form.Item
-                            required={false}
+                            required={true}
                             label="NDC Product Code"
                             name="ndc_product_code"
                             rules={[{
@@ -190,7 +190,7 @@ function AddMedicineToDB({ handleAddDrug, onCancel }) {
                     </Col>
                     <Col style={{}} span={8}>
                         <Form.Item
-                            required={false}
+                            required={true}
                             label="Via"
                             name="route"
                             rules={[{

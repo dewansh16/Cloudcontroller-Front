@@ -177,7 +177,7 @@ function MedicineListItem({
                                         notFoundContent={
                                             <div>Search for medicine or 
                                                 <span 
-                                                    style={{ cursor: "pointer", color: "red" }} 
+                                                    style={{ cursor: "pointer", color: "red", marginLeft: "2px" }} 
                                                     onClick={showAddMedicineToDatabaseModal}
                                                 >
                                                     Add new medicine to database

@@ -90,13 +90,10 @@ const demographicsFormItems = (
     onInputChange,
     setPatientType,
     patientType,
-    tagList,
-    valSelectSearch,
+    arrayOptionTags,
+    setArrOptionTags,
     tagsSelected,
     setTagsSelected,
-    onChangeValInputTagsAdd,
-    colorSelected,
-    setColorSelected
 ) => [
         {
             required: !props.required,
@@ -118,13 +115,10 @@ const demographicsFormItems = (
             className: "addPatientDetailsModal",
             Input: (
                 <SelectTagsPatient 
-                    valSelectSearch={valSelectSearch}
                     tagsSelected={tagsSelected}
                     setTagsSelected={setTagsSelected}
-                    arrayOptionTags={tagList}
-                    onInputChange={onChangeValInputTagsAdd}
-                    colorSelected={colorSelected}
-                    setColorSelected={setColorSelected}
+                    arrayOptionTags={arrayOptionTags}
+                    setArrOptionTags={setArrOptionTags}
                 />
                 // <Select
                 //     showSearch

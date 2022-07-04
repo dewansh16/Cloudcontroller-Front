@@ -12,37 +12,6 @@ import { useHistory } from 'react-router-dom'
 import moment from 'moment'
 import { UserStore } from "../../../Stores/userStore";
 
-
-function FetchMedicalHistory(pid, limit) {
-    const [response, setResponse] = useState(null)
-    const [loading, setLoading] = useState(true)
-    const [dataSource, setDataSource] = useState([])
-
-    useEffect(() => {
-        patientApi.getPatientMedicalHistory(pid, limit).then((res) => {
-            res.data.response['data'].map((medicalhistory, idx) => {
-                dataSource.push({
-                    key: idx,
-                    ...medicalhistory
-                })
-            })
-            setDataSource([...dataSource])
-            setResponse(res.data.response)
-            setLoading(false);
-        }).catch((err) => {
-            console.log(err)
-            if (err) {
-                notification.error({
-                    message: 'Error',
-                    description: `${err.response?.data.result}` || ""
-                })
-                setLoading(false);
-            }
-        })
-    }, [pid])
-    return [response, loading, dataSource]
-}
-
 function AddMedicalHistory(pid, data, successCallBack) {
     // "date_of_treatment": "2022-06-21T09:01:15.000Z",
     // "doctor_name": "Doctor Name",
@@ -54,10 +23,11 @@ function AddMedicalHistory(pid, data, successCallBack) {
     // "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385
     let userData = UserStore.getUser();
     let tenantId = userData.tenant;
-    console.log(data)
-    data.date_of_treatment = data.date_of_treatment.toISOString();
+
+    data.date_of_treatment = data.date_of_treatment;
     data.pid = pid;
     data.tenant_id = tenantId;
+
     patientApi.createPatientMedicalHistory(pid, data).then((res) => {
         notification.success({
             message: "Success",
@@ -93,7 +63,7 @@ function UpdateMedicalHistory(pid, data, successCallBack) {
     })
 }
 
-const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm, successCallBack, pid }) => {
+const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm, successCallBack, pid, visible }) => {
     const reqd = mode === modes.ADD_NEW
     const medical_history_uuid = medicalHistoryForm.getFieldValue("medical_history_uuid")
     const onFinish = (values) => {
@@ -107,11 +77,9 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
         }
         formData = { ...values }
         if (mode === modes.ADD_NEW) {
-            console.log(pid, formData)
             AddMedicalHistory(pid, formData, successCallBack = successCallBack)
         } else if (mode === modes.EDIT) {
             formData['medical_history_uuid'] = medical_history_uuid
-            console.log(pid, formData)
             UpdateMedicalHistory(pid, formData, successCallBack = successCallBack)
         } else {
             notification.warning({
@@ -119,7 +87,6 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
                 description: `Unknown form mode is selected`
             })
         }
-        console.log("the form mode is", mode)
     }
 
     const onFinishFailed = (values) => {
@@ -131,10 +98,13 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
     }
 
     useEffect(() => {
-        medicalHistoryForm.setFieldsValue({
-            ...data
-        })
-    }, [])
+        if (mode === modes.ADD_NEW && visible) {
+            medicalHistoryForm.setFieldsValue({
+                ...data,
+                date_of_treatment: moment(),
+            })
+        }
+    }, [mode, visible])
     return (
         <Form
             form={medicalHistoryForm}
@@ -146,7 +116,7 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
             <Row gutter={[0, 0]} justify="space-around">
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Date of treatement"
                         name="date_of_treatment"
                         rules={[{
@@ -154,12 +124,12 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
                             message: "required"
                         }]}
                     >
-                        <DatePicker />
+                        <DatePicker format="MMM DD YYYY" allowClear={false} />
                     </Form.Item>
                 </Col>
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Treatment"
                         name="treatment"
                         rules={[{
@@ -172,7 +142,7 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
                 </Col>
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Hospital Name"
                         name="hospital_name"
                         rules={[{
@@ -185,7 +155,7 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
                 </Col>
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Doctor Name"
                         name="doctor_name"
                         rules={[{
@@ -229,10 +199,50 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
 
 export default function MedicalHistory({ pid, setComponentSupportContent, setPadding, setEmrView }) {
     let history = useHistory();
-    const [medicalHistory, isLoading, dataSource] = FetchMedicalHistory(pid, 20)
-    const [medicalHistoryForm] = Form.useForm()
+    const [medical, setMedical] = useState({
+        history: {},
+        isLoading: false,
+        dataSource: []
+    });
+    
+    const [medicalHistoryForm] = Form.useForm();
     const [visible, setVisible] = useState(false);
-    const [formMode, setFormMode] = useState(modes.ADD_NEW)
+    const [formMode, setFormMode] = useState(modes.ADD_NEW);
+
+    function FetchMedicalHistory() {
+        const dataSource = [];
+        patientApi.getPatientMedicalHistory(pid, 20).then((res) => {
+            res.data.response['data'].map((medicalhistory, idx) => {
+                dataSource.push({
+                    key: idx,
+                    ...medicalhistory
+                })
+            })
+            setMedical({
+                history: res.data.response,
+                isLoading: false,
+                dataSource: [...dataSource]
+            });
+        }).catch((err) => {
+            if (err) {
+                notification.error({
+                    message: 'Error',
+                    description: `${err.response?.data.result}` || ""
+                })
+            }
+            setMedical({
+                ...medical,
+                isLoading: false,
+            });
+        })
+    };
+
+    useEffect(() => {
+        if (pid) {
+            FetchMedicalHistory();
+        }
+    }, [pid]);
+
     const showDrawer = () => {
         setVisible(true);
     };
@@ -240,13 +250,13 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
         setVisible(false);
     };
 
-
     const columns = [
         {
             title: "Timeline",
-            dataIndex: "date",
-            key: "date",
-            render: date => <p>{new Date(date).getFullYear()}</p>
+            dataIndex: "date_of_treatment",
+            key: "date_of_treatment",
+            // render: date_of_treatment => <p>{new Date(date_of_treatment).getFullYear()}</p>
+            render: data => moment(data).format("MMM DD YYYY")
         },
         {
             title: "Treatment",
@@ -281,16 +291,21 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
             })
         },
 
-    ]
+    ];
+
     const successCallBack = () => {
-        console.log(`/dashboard/patient/EMR/${pid}`)
-        window.location.reload(false)
-    }
+        // console.log(`/dashboard/patient/EMR/${pid}`)
+        // window.location.reload(false)
+        FetchMedicalHistory();
+        onClose();
+    };
+
     const backToPatientDetails = () => {
         // the below code to always redirect to 
         history.push(`/dashboard/patient/details/${pid}`)
         // history.goBack()
-    }
+    };
+
     useEffect(() => {
         setComponentSupportContent(
             <div style={{
@@ -309,7 +324,7 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
             setComponentSupportContent(null)
             setPadding("0")
         }
-    }, [])
+    }, []);
 
     return (
         <div>
@@ -324,12 +339,18 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
                 visible={visible}
                 width={720}
             >
-                <AddMedicalHistoryForm pid={pid} medicalHistoryForm={medicalHistoryForm} mode={formMode} successCallBack={successCallBack} />
+                <AddMedicalHistoryForm 
+                    pid={pid} 
+                    visible={visible}
+                    medicalHistoryForm={medicalHistoryForm} 
+                    mode={formMode} 
+                    successCallBack={successCallBack}
+                />
             </Drawer>
 
             <Row gutter={[0, 0]}>
                 <Col span={24}>
-                    <Table dataSource={dataSource} columns={columns} scroll={{ y: 360 }} pagination={{ position: ["bottomCenter"] }} />
+                    <Table dataSource={medical?.dataSource} columns={columns} scroll={{ y: 360 }} pagination={{ position: ["bottomCenter"] }} />
                 </Col>
             </Row>
         </div >

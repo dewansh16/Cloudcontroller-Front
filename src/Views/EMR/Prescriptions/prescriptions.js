@@ -13,6 +13,7 @@ import Collapse from 'antd/lib/collapse'
 import Row from 'antd/lib/row'
 import Col from 'antd/lib/col'
 import CaretUpOutlined from '@ant-design/icons'
+import moment from 'moment'
 
 const { Panel } = Collapse
 
@@ -22,7 +23,7 @@ function FetchPrescriptions(pid, limit) {
 
     useEffect(() => {
         patientApi.getPatientPrescriptions(pid, limit).then((res) => {
-            setResponse(res.data.response["prescriptions"])
+            setResponse(res.data.response["procedure_list"])
             setLoading(false);
         }).catch((err) => {
             if (err) {
@@ -146,8 +147,18 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
                     <div
                         className="prescriptions-list-item"
                     >
-                        <div className="prescription-heading" style={{ paddingRight: "1rem" }}>
-                            <span>{`${dateModified}  -  ${endDate}`}</span>
+                        <div className="prescription-heading" style={{ paddingRight: "1rem", width: "250px" }}>
+                            <span>{`${moment(prescription["date_modified"]).format("MMM DD YYYY")}  -  ${moment(prescription["end_date"]).format("MMM DD YYYY")}`}</span>
+                        </div>
+                        <div className="medicines">
+                            <ul>
+                                {prescription["drug"].map((medicine, id) => {
+                                    if (id < 6) {
+                                        return <li style={{ fontSize: "16px" }} key={id}>{medicine.drugName[0].toUpperCase() + medicine.drugName.slice(1, 13)}</li>
+                                    }
+                                })}
+                                {prescription["drug"].length > 6 ? "..." : null}
+                            </ul>
                         </div>
                         <div className="duplicate">
                             <Button
@@ -159,16 +170,6 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
                             >
                                 Duplicate
                             </Button>
-                        </div>
-                        <div className="medicines">
-                            <ul>
-                                {prescription["drug"].map((medicine, id) => {
-                                    if (id < 6) {
-                                        return <li style={{ fontSize: "16px" }} key={id}>{medicine.drugName[0].toUpperCase() + medicine.drugName.slice(1, 13)}</li>
-                                    }
-                                })}
-                                {prescription["drug"].length > 6 ? "..." : null}
-                            </ul>
                         </div>
                     </div>
                 }
@@ -201,7 +202,7 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
             {isLoading ? <div style={{ height: "100%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Spin />
             </div>
-                : (prescriptions.length > 0 ? (
+                : (prescriptions?.length > 0 ? (
                     <Collapse
                         className="prescription-list-collapse"
                         expandIconPosition="right"
@@ -210,7 +211,7 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
                     // expandIcon={({ isActive }) => { Icons.upArrowFilled({ Style: { color: "#143765" }, rotate={ isActive? 180: 0 } }) }}
 
                     >
-                        {prescriptions.map((prescription, id) => {
+                        {prescriptions?.map((prescription, id) => {
                             return CollapsePanel(prescription, id)
                         })}
                     </Collapse>

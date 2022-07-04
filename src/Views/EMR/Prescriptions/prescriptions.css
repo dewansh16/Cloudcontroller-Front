@@ -7,21 +7,23 @@
 
 .prescriptions-list-item {
 
-    display: grid;
+    /* display: grid;
     grid-template-areas: "prescriptionheading medicines duplicate";
     grid-template-columns: 1.5fr 2fr auto;
-    gap: 0.5rem;
+    gap: 0.5rem; */
     cursor: pointer;
     margin: 0;
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .prescriptions-list-item .prescription-heading {
-    grid-area: prescriptionheading;
+    /* grid-area: prescriptionheading;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
+    flex-direction: column; */
     border-right: solid 1px rgba(0, 0, 0, 0.2);
 }
 
