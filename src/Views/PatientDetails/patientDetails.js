@@ -38,6 +38,11 @@ import DetailBox from "./components/detailBox.patientDetails";
 import IconTag from "../../Assets/Images/tag.png";
 import { isJsonString } from "../../Utils/utils";
 
+import SelectTagsPatient from "../AddPatient/SelectTagsPatient";
+
+import Select from 'antd/lib/select'
+const { Option } = Select;
+
 export default function PatientDetails(props) {
     const { pid } = useParams();
     let userData = UserStore.getUser();
@@ -113,8 +118,11 @@ export default function PatientDetails(props) {
     const [durationArray, setDurationArray] = useState([]);
     const [summaryModal, openSummaryModal] = useState(false);
 
+    const [isEditTag, setIsEditTag] = useState(false);
     const [tagsSelected, setTagsSelected] = useState([]);
     const [arrayOptionTags, setArrOptionTags] = useState([]);
+    const [valSelectSearch, setValSelectSearch] = useState("");
+    const [colorSelected, setColorSelected] = useState("#ff0000");
 
     useEffect(() => {
         const setWardName = (locationDetail) => {
@@ -434,6 +442,27 @@ export default function PatientDetails(props) {
         background: "transparent",
     };
 
+    const onChangeValInputTagsAdd = (val) => {
+        const value = val?.trim();
+
+        if (value.includes(";") || value.includes(",")) {
+            setValSelectSearch("");
+
+            if (!tagsSelected?.includes(valSelectSearch) && value?.length > 1) {
+                const dataNew = {
+                    label: valSelectSearch,
+                    value: valSelectSearch,
+                    color: colorSelected
+                };
+                
+                setArrOptionTags([...arrayOptionTags, dataNew]);
+                setTagsSelected([...tagsSelected, dataNew]);
+            }
+        } else {
+            setValSelectSearch(value);
+        }
+    };
+
     return (
         <>
             {" "}
@@ -555,20 +584,32 @@ export default function PatientDetails(props) {
                                         </div>
                                     </div>
                                     <div style={{ marginLeft: "15%" }}>
-                                        <div className="detail-tags-wrapper">
+                                        <div className="detail-tags-wrapper" onClick={() => setIsEditTag(!isEditTag)}>
                                             <div style={{ height: "25px", display: "flex", alignItems: "center" }}>
                                                 <img className="icon-tags" src={IconTag} />
                                             </div>
                                             
-                                            <div>
-                                                {tagsSelected?.map((tag, index) => {
-                                                    return (
-                                                        <div key={`${tag?.value}-${index}`} className="tag-item" style={{ background: tag?.color }}>
-                                                            {tag?.value}
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
+                                            {isEditTag ? (
+                                                <SelectTagsPatient 
+                                                    valSelectSearch={valSelectSearch}
+                                                    tagsSelected={tagsSelected}
+                                                    setTagsSelected={setTagsSelected}
+                                                    arrayOptionTags={arrayOptionTags}
+                                                    onInputChange={onChangeValInputTagsAdd}
+                                                    colorSelected={colorSelected}
+                                                    setColorSelected={setColorSelected}
+                                                />
+                                            ) : (
+                                                <div>
+                                                    {tagsSelected?.map((tag, index) => {
+                                                        return (
+                                                            <div key={`${tag?.value}-${index}`} className="tag-item" style={{ background: tag?.color }}>
+                                                                {tag?.value}
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </Col>
