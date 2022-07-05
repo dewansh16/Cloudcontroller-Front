@@ -148,7 +148,7 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
                         className="prescriptions-list-item"
                     >
                         <div className="prescription-heading" style={{ paddingRight: "1rem", width: "250px" }}>
-                            <span>{`${moment(prescription["date_modified"]).format("MMM DD YYYY")}  -  ${moment(prescription["end_date"]).format("MMM DD YYYY")}`}</span>
+                            <span>{`${moment(prescription["date_added"]).format("MMM DD YYYY")}  -  ${moment(prescription["end_date"]).format("MMM DD YYYY")}`}</span>
                         </div>
                         <div className="medicines">
                             <ul>
@@ -206,7 +206,7 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
                     <Collapse
                         className="prescription-list-collapse"
                         expandIconPosition="right"
-                        style={{ overflowY: "scroll", padding: "1rem", maxHeight: "calc(80vh - 6rem)", margin: "0 2rem 0 2rem", background: "#fff" }}
+                        style={{ overflowY: "scroll", padding: "1rem", maxHeight: "calc(100vh - 10rem)", margin: "0 2rem 0 2rem", background: "#fff" }}
                     // expandIcon={({ isActive }) => <CaretUpOutlined rotate={isActive ? 180 : 0} />}
                     // expandIcon={({ isActive }) => { Icons.upArrowFilled({ Style: { color: "#143765" }, rotate={ isActive? 180: 0 } }) }}
 

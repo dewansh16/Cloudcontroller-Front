@@ -314,6 +314,15 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
 
     const columns = [
         {
+            title: "Date",
+            dataIndex: "date",
+            key: "date",
+            width: 210,
+            render: (data, record) => (
+                <span>{`${moment(record?.date_from).format("MMM DD YYYY")} - ${moment(record?.date_to).format("MMM DD YYYY")}`}</span>
+            )
+        },
+        {
             title: "Allergy Type",
             dataIndex: "allergy_type",
             key: "allergy_type"
@@ -332,6 +341,7 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
             title: "Status",
             dataIndex: "status",
             key: "status",
+            width: 95,
             render: (dataIndex) => (
                 <span style={{ textTransform: "capitalize" }}>{dataIndex}</span>
             )
@@ -344,6 +354,7 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
         {
             title: "",
             key: "data",
+            width: 55,
             render: data => Icons.edit({
                 onClick: () => {
                     showDrawer();

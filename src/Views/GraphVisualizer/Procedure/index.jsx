@@ -66,7 +66,7 @@ const Procedure = ({ pid, date }) => {
                             </div>
                             <div style={{ marginLeft: "1rem", fontSize: "0.9rem", color: "#000", width: "100%" }}>
                                 <div>
-                                    <span style={{ color: "#000000c7", marginRight: "3px" }}>Date: </span>
+                                    <span style={{ color: "#000000c7", marginRight: "3px" }}>Diagnosis date: </span>
                                     {moment(item?.diagnosis_date).format("MMM DD YYYY")}
                                 </div>
                                 <div style={{ display: "flex", alignItems:"center" }}>
@@ -76,7 +76,7 @@ const Procedure = ({ pid, date }) => {
                                             <span>{item?.code_type}</span>
                                         </div>
                                     )}
-                                    <div style={{ width: "40%" }}>
+                                    <div style={{ width: "40%", textTransform: "capitalize" }}>
                                         <span style={{ color: "#000000c7", marginRight: "3px" }}>Label: </span>
                                         {item?.label || "Normal"}
                                     </div>

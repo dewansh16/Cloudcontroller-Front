@@ -163,6 +163,7 @@
   font-size: 13px;
   color: #ffffff;
   font-weight: 400;
+  max-width: 130px;
 }
 
 .detail-tags-wrapper .tag-item:last-child {
