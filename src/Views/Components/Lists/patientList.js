@@ -172,57 +172,57 @@ const PatientListItem = (props) => {
         associatedList = JSON.parse(props?.data?.demographic_map?.associated_list);
     }
 
-    const processDataForSensor = (queryFilter) => {
-        const query = `from(bucket: "test-bucket")
-            |> range(start: -${props.dataFilterOnHeader.valDuration})
-            |> filter(fn: (r) => r["_measurement"] == "${props.pid}")
-            |> filter(fn: (r) => ${queryFilter})
-            |> yield(name: "mean")`
+    // const processDataForSensor = (queryFilter) => {
+    //     const query = `from(bucket: "test-bucket")
+    //         |> range(start: -${props.dataFilterOnHeader.valDuration})
+    //         |> filter(fn: (r) => r["_measurement"] == "${props.pid}")
+    //         |> filter(fn: (r) => ${queryFilter})
+    //         |> yield(name: "mean")`
 
-        const arrayTotalData = [];
+    //     const arrayTotalData = [];
         
-        queryApi.queryRows(query, {
-            next(row, tableMeta) {
-                const dataQueryInFlux = tableMeta?.toObject(row) || {};
-                arrayTotalData.push(dataQueryInFlux);
-            },
-            error(error) {
-                console.error(error)
-                console.log('nFinished ERROR')
-            },
-            complete() {
-                const newArrayDataChart = [...chartBlockData];
-                const lengthFor = arrayTotalData?.length;
+    //     queryApi.queryRows(query, {
+    //         next(row, tableMeta) {
+    //             const dataQueryInFlux = tableMeta?.toObject(row) || {};
+    //             arrayTotalData.push(dataQueryInFlux);
+    //         },
+    //         error(error) {
+    //             console.error(error)
+    //             console.log('nFinished ERROR')
+    //         },
+    //         complete() {
+    //             const newArrayDataChart = [...chartBlockData];
+    //             const lengthFor = arrayTotalData?.length;
 
-                newArrayDataChart.map(itemChart => {
-                    itemChart.trendData = [];
+    //             newArrayDataChart.map(itemChart => {
+    //                 itemChart.trendData = [];
 
-                    for (let index = 0; index < lengthFor; index++) {
-                        const dataQuery = arrayTotalData[index];
-                        const { _field = "", _value = 0, _time = "" } = dataQuery;
+    //                 for (let index = 0; index < lengthFor; index++) {
+    //                     const dataQuery = arrayTotalData[index];
+    //                     const { _field = "", _value = 0, _time = "" } = dataQuery;
 
-                        if (_field === itemChart?._key) {
-                            itemChart.trendData?.push({ value: _value, time: _time })
-                        } 
+    //                     if (_field === itemChart?._key) {
+    //                         itemChart.trendData?.push({ value: _value, time: _time })
+    //                     } 
                         
-                        if (itemChart?._key === "blood_pressuer") {
-                            if (_field === "alphamed_bps" || _field === "ihealth_bps") {
-                                itemChart.trendData?.push({ value: _value, time: _time })
-                            } else {
-                                itemChart.val_bpd = _value
-                            }
-                        }
-                    }
+    //                     if (itemChart?._key === "blood_pressuer") {
+    //                         if (_field === "alphamed_bps" || _field === "ihealth_bps") {
+    //                             itemChart.trendData?.push({ value: _value, time: _time })
+    //                         } else {
+    //                             itemChart.val_bpd = _value
+    //                         }
+    //                     }
+    //                 }
 
-                    const itemLastchild = itemChart?.trendData?.[itemChart?.trendData?.length - 1]
-                    itemChart.val = itemLastchild?.value || 0;
-                    itemChart.lastTime = itemLastchild?.time;
-                })
+    //                 const itemLastchild = itemChart?.trendData?.[itemChart?.trendData?.length - 1]
+    //                 itemChart.val = itemLastchild?.value || 0;
+    //                 itemChart.lastTime = itemLastchild?.time;
+    //             })
 
-                setChartBlockData([...newArrayDataChart]);
-            },
-        })
-    }
+    //             setChartBlockData([...newArrayDataChart]);
+    //         },
+    //     })
+    // }
 
     const formatKeyCompare = (keySensor) => ({
         "temp": "temperature",
@@ -235,105 +235,105 @@ const PatientListItem = (props) => {
 
     const enableBloodPressure = associatedList?.includes("alphamed") || associatedList?.includes("ihealth");
 
-    // const processDataForSensor = (key, newArrChart, chart) => {
-    //     const query = `from(bucket: "emr_dev")
-    //             |> range(start: -${props.dataFilterOnHeader.valDuration})
-    //             |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
-    //             |> yield(name: "mean")`;
+    const processDataForSensor = (key, newArrChart, chart) => {
+        const query = `from(bucket: "emr_dev")
+                |> range(start: -${props.dataFilterOnHeader.valDuration})
+                |> filter(fn: (r) => r["_measurement"] == "${props.pid}_${key}")
+                |> yield(name: "mean")`;
 
-    //     const arrayRes = [];
-    //     const arrayTime = [];
-    //     let val_bpd = 0;
+        const arrayRes = [];
+        const arrayTime = [];
+        let val_bpd = 0;
         
-    //     queryApi.queryRows(query, {
-    //         next(row, tableMeta) {
-    //             const dataQueryInFlux = tableMeta?.toObject(row) || {};
-    //             if (key === "gateway_keep_alive_time") {
-    //                 chart.valueGateway = new Date(dataQueryInFlux?._value);
-    //             } else if (key === "alphamed_bpd" || key === "ihealth_bpd") {
-    //                 val_bpd = dataQueryInFlux?._value;
-    //             } else {
-    //                 let value = dataQueryInFlux?._value || 0;
-    //                 arrayRes.push({ value, time: dataQueryInFlux?._time });
-    //             }
+        queryApi.queryRows(query, {
+            next(row, tableMeta) {
+                const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                if (key === "gateway_keep_alive_time") {
+                    chart.valueGateway = new Date(dataQueryInFlux?._value);
+                } else if (key === "alphamed_bpd" || key === "ihealth_bpd") {
+                    val_bpd = dataQueryInFlux?._value;
+                } else {
+                    let value = dataQueryInFlux?._value || 0;
+                    arrayRes.push({ value, time: dataQueryInFlux?._time });
+                }
 
-    //             let time = new Date(dataQueryInFlux._time);
-    //             time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
-    //             if (!arrayTime.includes(time)) {
-    //                 arrayTime.push(time);
-    //             }
-    //         },
-    //         error(error) {
-    //             console.error(error)
-    //             console.log('nFinished ERROR')
-    //         },
-    //         complete() {
-    //             if (key !== "alphamed_bpd" && key !== "ihealth_bpd") {
-    //                 chart.trendData = arrayRes || [];
-    //                 chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
-    //                 chart.lastTime = arrayRes[arrayRes.length - 1]?.time;
-    //             } else {
-    //                 chart.val_bpd = val_bpd;
-    //             }
-    //             chart.arrayTime = arrayTime || [];
-    //             setChartBlockData([...newArrChart]);
-    //         },
-    //     })
-    // }
-
-    // const getDataSensorFromInfluxDB = () => {
-    //     const newArrChart = [...arrDataChart];
-        
-    //     for (let index = 0; index < newArrChart.length; index++) {
-    //         const chart = newArrChart[index];
-    //         const key = chart?._key;
-
-    //         if (key !== "blood_pressuer") {
-    //             const keyCheck = formatKeyCompare(key);
-    //             if (associatedList?.includes(keyCheck)) {
-    //                 processDataForSensor(key, newArrChart, chart)
-    //             }
-    //         } else if (enableBloodPressure) {
-    //             let arrKeyChild = [];
-
-    //             if (associatedList?.includes("alphamed")) {
-    //                 arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
-    //             } else {
-    //                 arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
-    //             }
-
-    //             if (!associatedList?.includes("ecg")) {
-    //                 processDataForSensor("ihealth_hr", newArrChart, newArrChart[2]);
-    //             }
-
-    //             for (let j = 0; j < arrKeyChild.length; j++) {
-    //                 processDataForSensor(arrKeyChild[j], newArrChart, chart);
-    //             }
-    //         }
-    //     }
-    // };
+                let time = new Date(dataQueryInFlux._time);
+                time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
+                if (!arrayTime.includes(time)) {
+                    arrayTime.push(time);
+                }
+            },
+            error(error) {
+                console.error(error)
+                console.log('nFinished ERROR')
+            },
+            complete() {
+                if (key !== "alphamed_bpd" && key !== "ihealth_bpd") {
+                    chart.trendData = arrayRes || [];
+                    chart.val = arrayRes[arrayRes.length - 1]?.value || 0;
+                    chart.lastTime = arrayRes[arrayRes.length - 1]?.time;
+                } else {
+                    chart.val_bpd = val_bpd;
+                }
+                chart.arrayTime = arrayTime || [];
+                setChartBlockData([...newArrChart]);
+            },
+        })
+    }
 
     const getDataSensorFromInfluxDB = () => {
         const newArrChart = [...arrDataChart];
-        let query = "";
         
         for (let index = 0; index < newArrChart.length; index++) {
             const chart = newArrChart[index];
             const key = chart?._key;
 
             if (key !== "blood_pressuer") {
-                query += `${index > 0 ? ' or' : ''} r["_field"] == "${key}"`
-            } else {
-                let arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
+                const keyCheck = formatKeyCompare(key);
+                if (associatedList?.includes(keyCheck)) {
+                    processDataForSensor(key, newArrChart, chart)
+                }
+            } else if (enableBloodPressure) {
+                let arrKeyChild = [];
 
-                arrKeyChild.map(item => {
-                    query += `${query?.length > 10 ? ' or' : ''} r["_field"] == "${item}"`
-                })
+                if (associatedList?.includes("alphamed")) {
+                    arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
+                } else {
+                    arrKeyChild = ["ihealth_bpd", "ihealth_bps"];
+                }
+
+                if (!associatedList?.includes("ecg")) {
+                    processDataForSensor("ihealth_hr", newArrChart, newArrChart[2]);
+                }
+
+                for (let j = 0; j < arrKeyChild.length; j++) {
+                    processDataForSensor(arrKeyChild[j], newArrChart, chart);
+                }
             }
         }
-
-        processDataForSensor(query);
     };
+
+    // const getDataSensorFromInfluxDB = () => {
+    //     const newArrChart = [...arrDataChart];
+    //     let query = "";
+        
+    //     for (let index = 0; index < newArrChart.length; index++) {
+    //         const chart = newArrChart[index];
+    //         const key = chart?._key;
+
+    //         if (key !== "blood_pressuer") {
+    //             query += `${index > 0 ? ' or' : ''} r["_field"] == "${key}"`
+    //         } else {
+    //             let arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
+
+    //             arrKeyChild.map(item => {
+    //                 query += `${query?.length > 10 ? ' or' : ''} r["_field"] == "${item}"`
+    //             })
+    //         }
+    //     }
+
+    //     processDataForSensor(query);
+    // };
 
     useEffect(() => {
         getDataSensorFromInfluxDB();
