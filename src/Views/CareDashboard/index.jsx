@@ -35,7 +35,7 @@ const CareDashboard = () => {
 
     const [careDashboard, setCareDashboard] = useState({
         loading: false,
-        dataSource: [{}]
+        dataSource: [{ name: "1"}]
     });
 
     const getListCareDashboard = () => {
@@ -63,7 +63,7 @@ const CareDashboard = () => {
     };
 
     useEffect(() => {
-        getListCareDashboard();
+        // getListCareDashboard();
     }, []);
 
     const columns = [
