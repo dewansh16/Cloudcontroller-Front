@@ -20,13 +20,14 @@ import TotalReading from './component/TotalReading';
 
 import "./styles.css";
 import moment from 'moment';
+import {CPT_CODE} from '../../Utils/utils';
 
 const { Search } = Input;
 const { Option } = Select;
 
 const CareDashboard = () => {
     const [currentPageVal, setCurrentPageVal] = useState(1);
-    const [valuePageLength, setValuePageLength] = useState(25);
+    const [valuePageLength, setValuePageLength] = useState(10);
     const [patientType, setPatientType] = useState("remote");
     const [valSearch, setValSearch] = useState("");
     const [totalPages, setTotalPages] = useState(1);
@@ -34,7 +35,7 @@ const CareDashboard = () => {
 
     const [careDashboard, setCareDashboard] = useState({
         loading: false,
-        dataSource: [{name: "ok"}]
+        dataSource: [{}]
     });
 
     const getListCareDashboard = () => {
@@ -47,7 +48,6 @@ const CareDashboard = () => {
             moment(valueDate).format("YYYY-MM-DD"),
             valuePageLength, 10 * (currentPageVal - 1)
         ).then(res => {
-            console.log("res", res);
             const billingData = res?.data?.response?.billingData || [];
             setCareDashboard({
                 loading: false,
@@ -63,16 +63,16 @@ const CareDashboard = () => {
     };
 
     useEffect(() => {
-        // getListCareDashboard();
+        getListCareDashboard();
     }, []);
 
     const columns = [
         {
             title: "Patient",
-            dataIndex: "patient",
-            key: "patient",
+            dataIndex: "patient_datum",
+            key: "patient_datum",
             width: 50,
-            render: () => {
+            render: (dataIndex) => {
                 return (
                     <div style={{ display: "flex", alignItems: "center" }}>
                         <div style={{ marginLeft: "2px", marginRight: "2px" }}>
@@ -84,14 +84,14 @@ const CareDashboard = () => {
                                 overflow: "hidden",
                                 whiteSpace: "nowrap",
                             }}>
-                                Patient Test
+                                {`${dataIndex?.fname} ${dataIndex?.lname}`}
                             </div>
 
                             <div>
-                                {"DOB: Jun 29 2022 (15Y)"}
+                                {`DOB: ${moment(dataIndex?.DOB).format('MMM DD YYYY')}  (${Number(moment().format('YYYY')) - Number(moment(dataIndex?.DOB).format('YYYY'))}Y)`}
                             </div>
                             <div>
-                                {"Phone: 0355320212"}
+                                {`Phone: ${dataIndex?.phone_contact}`}
                             </div>
                         </div>
                     </div>
@@ -103,9 +103,32 @@ const CareDashboard = () => {
             dataIndex: "primary",
             key: "primary",
             width: 80,
-            render: () => {
+            render: (dataIndex, record) => {
+                let primaryDoctor = '';
+                let secondDoctor = '';
+                try {
+                    const firstDoctorDb = record?.patient_datum?.primary_consultant;
+                    firstDoctorDb.map(item => {
+                        primaryDoctor += `${item?.fname} ${item?.lname}, `
+                    })
+                    primaryDoctor = primaryDoctor.slice(0, -2);
+                } catch(e){
+                    console.log(e)
+                }
+                try {
+                    const secondDoctorDb = record?.patient_datum?.secondary_consultant;
+                    secondDoctorDb.map(item => {
+                        secondDoctor += `${item?.fname} ${item?.lname},`
+                    })
+                    secondDoctor = secondDoctor.slice(0, -1);
+                } catch(e){
+                    console.log(e)
+                }
                 return (
-                    <div>Practitioner</div>
+                    <>
+                    <div style={{textAlign: 'left'}}>Primary: {primaryDoctor}</div>
+                <div style={{textAlign: 'left'}}>Secondary: {secondDoctor}</div>
+                    </>
                 )
             }
         },
@@ -141,14 +164,14 @@ const CareDashboard = () => {
         },
         {
             title: "99453",
-            dataIndex: "99453",
+            dataIndex: "task_99453",
             key: "6",
             width: 25,
             className: "column-cpt-code",
             align: "center",
             render: (dataIndex, record) => {
                 return (
-                    <span>Active</span>
+                    <span>{`${dataIndex == 1 ? 'Active' : 'Disable'}`}</span>
                 )
             }
         },
@@ -161,46 +184,46 @@ const CareDashboard = () => {
             align: "center",
             render: (dataIndex, record) => {
                 return (
-                    <ChartCPTCode CPT_CODE="99454" record={record} />
+                    <ChartCPTCode code={CPT_CODE.CPT_99454} record={record} pid={record.pid} />
                 )
             }
         },
         {
             title: "99457",
-            dataIndex: "99457",
+            dataIndex: "task_99457",
             key: "8",
             width: 25,
             className: "column-cpt-code",
             align: "center",
-            render: () => {
+            render: (dataIndex, record) => {
                 return (
-                    <ChartCPTCode />
+                    <ChartCPTCode code={CPT_CODE.CPT_99457} record={record} pid={record.pid} />
                 )
             }
         },
         {
             title: "99458",
-            dataIndex: "99458",
+            dataIndex: "task_99458",
             key: "9",
             width: 25,
             className: "column-cpt-code",
             align: "center",
-            render: () => {
+            render: (dataIndex, record) => {
                 return (
-                    <ChartCPTCode />
+                    <ChartCPTCode code={CPT_CODE.CPT_99458} record={record} pid={record.pid} />
                 )
             }
         },
         {
-            title: "99091",
+            title: "task_99091",
             dataIndex: "99091",
             key: "10",
             width: 25,
             className: "column-cpt-code",
             align: "center",
-            render: () => {
+            render: (dataIndex, record) => {
                 return (
-                    <ChartCPTCode />
+                    <ChartCPTCode code={CPT_CODE.CPT_99091} record={record} pid={record.pid} />
                 )
             }
         },
