@@ -273,7 +273,7 @@ export default function Procedure({ pid, setComponentSupportContent, setPadding,
 
     const columns = [
         {
-            title: "Date",
+            title: "Diagnosis date",
             dataIndex: "diagnosis_date",
             key: "diagnosis_date",
             width: 150,

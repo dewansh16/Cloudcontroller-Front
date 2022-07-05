@@ -104,7 +104,7 @@ function CreateGraphData(pid, graphType, numberOfRecords) {
                 let graphData = [];
 
                 const max =
-                    numberOfRecords > vitals.length ? vitals.length : numberOfRecords;
+                    numberOfRecords > vitals?.length ? vitals?.length : numberOfRecords;
                 for (let i = 0; i < max; i++) {
                     let date = getCurrentDate(vitals[i]["date"]);
                     let tempData = {};
@@ -663,7 +663,7 @@ export default function Vitals({
                         >
                             <Spin />
                         </div>
-                    ) : vitals.length > 0 ? (
+                    ) : vitals?.length > 0 ? (
                         <Collapse
                             className="vitals-list-collapse"
                             expandIconPosition="right"
@@ -681,7 +681,7 @@ export default function Vitals({
                                 })
                             }
                         >
-                            {vitals.map((vital, id) => {
+                            {vitals?.map((vital, id) => {
                                 return CollapsePanel(vital, id);
                             })}
                         </Collapse>
@@ -783,6 +783,19 @@ export default function Vitals({
                 };
             }, [currentGraphType, numberOfRecords, data]);
 
+            const getMinMaxLineChart = () => {
+                let max = 0;
+                if (data?.length > 0) {
+                    data.map(item => {
+                        const value = Number(item[currentGraphType]);
+                        if (value > max) {
+                            max = value;
+                        }
+                    })
+                }
+                return [0, max];
+            };
+
             return isLoading ? (
                 <div
                     style={{
@@ -813,7 +826,7 @@ export default function Vitals({
                         margin={{ top: 5, right: 30, left: 30, bottom: 5 }}
                     >
                         <XAxis dataKey="name" padding={{ left: 30, right: 30 }} />
-                        <YAxis dataKey={currentGraphType} />
+                        <YAxis dataKey={currentGraphType} domain={getMinMaxLineChart()} />
                         <Tooltip />
                         <Legend />
                         <Line
