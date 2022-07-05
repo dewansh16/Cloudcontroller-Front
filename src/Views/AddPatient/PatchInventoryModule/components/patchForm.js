@@ -685,6 +685,10 @@ const PatchForm = (props) => {
                                 name={`${props.type === 'bps' ? valueBpType : props.type}_device_serial`}
                                 rules={[
                                     {
+                                        pattern: new RegExp("^[A-Za-z0-9\:._-]+$"),
+                                        message: "Please recheck the serial number entered.",
+                                    },
+                                    {
                                         required: props.required,
                                         message: "serial number is required",
                                     },
@@ -766,6 +770,10 @@ const PatchForm = (props) => {
                                     placeholder="MAC address"
                                     name={`${props.type === 'bps' ? valueBpType : props.type}_mac_address`}
                                     rules={[
+                                        {
+                                            pattern: new RegExp("^[A-Za-z0-9\:._-]+$"),
+                                            message: "Please recheck the mac address entered.",
+                                        },
                                         {
                                             required: props.required,
                                             message: "mac address is required",
