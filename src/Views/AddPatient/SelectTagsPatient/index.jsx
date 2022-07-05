@@ -12,12 +12,12 @@ const SelectTagsPatient = (props) => {
     const [colorSelected, setColorSelected] = useState("#ff0000");
 
     const arrayColor = [
-        {color: "#ff0000", title: "Red" },
-        {color: "#ff00bf", title: "Pink" },
-        {color: "#4000ff", title: "Blue" },
-        {color: "#00ff00", title: "Green" },
-        {color: "#e5e515", title: "Yellow" },
-        {color: "#ff8000", title: "Orange" },
+        {color: "#ff0000bd", title: "Red" },
+        {color: "#ff00bfb5", title: "Pink" },
+        {color: "#4000ffd9", title: "Blue" },
+        {color: "#008000cf", title: "Green" },
+        {color: "#cfcf17", title: "Yellow" },
+        {color: "#ffa500", title: "Orange" },
     ];
 
     const renderColorsTags = () => {
@@ -134,7 +134,11 @@ const SelectTagsPatient = (props) => {
                             background: tag?.color,
                         }}>
                         </div>
-                        <div>{tag?.value}</div>
+                        <div style={{
+                            textOverflow: "ellipsis",
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                        }}>{tag?.value}</div>
                     </Option>
                 )
             })}

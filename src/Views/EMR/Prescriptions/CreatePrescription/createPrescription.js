@@ -405,6 +405,7 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
                             color: "#000000",
                         }}>Date:</p>
                         <DatePicker 
+                            disabled={true}
                             allowClear={true}
                             format="MMM DD YYYY" 
                             defaultValue={moment(calendarDate, "MMM DD YYYY")}

@@ -275,6 +275,11 @@ const PatchForm = (props) => {
                         name="serialNumber"
                         rules={[
                             {
+                                pattern: new RegExp("^[A-Za-z0-9\:._-]+$"),
+                                message: "Please recheck the serial number entered.",
+                            },
+                            {
+                                
                                 required: props.required,
                                 message: "Serial number is required",
                             },
@@ -288,6 +293,10 @@ const PatchForm = (props) => {
                         label="MAC address"
                         name="macAddress"
                         rules={[
+                            {
+                                pattern: new RegExp("^[A-Za-z0-9\:._-]+$"),
+                                message: "Please recheck the mac address entered.",
+                            },
                             {
                                 required: props.required,
                                 message: "Mac address is required",

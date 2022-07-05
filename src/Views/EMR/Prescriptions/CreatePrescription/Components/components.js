@@ -259,7 +259,8 @@ function MedicineListItem({
                                         message: `required`
                                     }]}
                                 >
-                                    <Input type="text" placeholder="NA" />
+                                    {/* <Input type="text" placeholder="NA" /> */}
+                                    <InputNumber min={1} placeholder="NA" />
                                 </Form.Item>
                             </Col>
                             <Col span={6}>
@@ -368,7 +369,6 @@ function MedicineListItem({
                                     <Input type="text" placeholder="Details" />
                                 </Form.Item>
                             </Col>
-
                         </Row>
                     </Col>
 
