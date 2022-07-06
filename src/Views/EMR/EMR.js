@@ -78,10 +78,10 @@ export function EmrView({ pid, setEmrView, setPadding, defaultState = "subgroup-
                     title: "Allergy",
                     disabled: false,
                 },
-                // {
-                //     title: "Lab Reports",
-                //     disabled: false,
-                // },
+                {
+                    title: "Lab Reports",
+                    disabled: false,
+                },
                 {
                     title: "Lifestyle",
                     disabled: true,

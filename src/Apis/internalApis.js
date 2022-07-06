@@ -21,7 +21,7 @@ const internalApi = {
                 method: "POST",
                 url: `/internal/report`,
                 data: data,
-                withCredentials: true,
+                // withCredentials: true,
             }
         ),
     saveReport: (data) =>
@@ -30,14 +30,14 @@ const internalApi = {
                 method: "POST",
                 url: `/internal/lab_report`,
                 data: data,
-                withCredentials: true,
+                // withCredentials: true,
             }
         ),
     getReports: () =>
         axiosInstance.request({
             method: "GET",
             url: `/internal/lab_report`,
-            withCredentials: true,
+            // withCredentials: true,
         }),
 }
 

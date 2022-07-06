@@ -3,69 +3,6 @@ import './menu.css'
 
 import Icons from '../../../../Utils/iconMap'
 
-
-// const tempMenuData = [
-//     {
-//         header: "Information",
-//         elements: [
-//             "First Element",
-//             "Second Element",
-//             "Third Element",
-//             "Fourth Element",
-//             "Fifth Element"
-//         ]
-//     },
-//     {
-//         header: null,
-//         elements: [
-//             "First Element",
-//             "Second Element",
-//             "Third Element",
-//         ]
-//     },
-//     {
-//         header: "Medication",
-//         elements: [
-//             "First Element",
-//             "Second Element",
-//             "Third Element",
-//         ]
-//     },
-//     {
-//         header: null,
-//         elements: [
-//             "First Element",
-//             "Second Element",
-//             "Third Element",
-//         ]
-//     },
-//     {
-//         header: "Medication",
-//         elements: [
-//             "First Element",
-//             "Second Element",
-//             "Third Element",
-//         ]
-//     },
-//     {
-//         header: null,
-//         elements: [
-//             "First Element",
-//             "Second Element",
-//             "Third Element",
-//         ]
-//     },
-//     {
-//         header: "Medication",
-//         elements: [
-//             "First Element",
-//             "Second Element",
-//             "Third Element",
-//         ]
-//     },
-// ]
-
-
 const createKey = (subgroupId, elementId = null) => {
     return elementId !== null ? `subgroup-${subgroupId + 1}-element-${elementId + 1}` : `subgroup-${subgroupId + 1}`
 }

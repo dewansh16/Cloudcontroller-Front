@@ -131,8 +131,7 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
     }, [])
 
     return (
-        <div style={{ height: '100%', width: '100%', position: 'relative' }}>
-
+        <div style={{ height: 'calc(100% - 30px)', width: '100%', position: 'relative' }}>
             {
                 reportInfoState
                     ?
@@ -161,7 +160,6 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
                     :
                     null
             }
-
 
             <div className="report-switch" >
                 <div
@@ -194,9 +192,9 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
                                     )
                                     :
                                     (
-                                        <div style={{ height: '80%' }} >
+                                        <div>
                                             <div className="report-uploader-container" >
-                                                <Dragger {...props} showUploadList={true} multiple={true} style={{ height: '80%' }} >
+                                                <Dragger {...props} showUploadList={true} multiple={true}>
                                                     <p className="ant-upload-drag-icon">
                                                         <InboxOutlined />
                                                     </p>
@@ -206,7 +204,7 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
                                                 </p> */}
                                                 </Dragger>
                                             </div>
-                                            {
+                                            {/* {
                                                 fileList.length !== 0
                                                     ?
                                                     (
@@ -218,7 +216,7 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
                                                     )
                                                     :
                                                     null
-                                            }
+                                            } */}
                                         </div>
                                     )
                             )

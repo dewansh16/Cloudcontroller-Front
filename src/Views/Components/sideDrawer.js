@@ -33,6 +33,9 @@ function MenuItem({
     setSideBarOpen,
     toggleOpen
 }) {
+    const [subActive, setSubActive] = useState("/patient/list");
+    const [subMenuOpen, setSubMenuOpen] = useState([]);
+
     const subMenuAnimationConfig = {
         hidden: {
             height: 0,
@@ -59,6 +62,7 @@ function MenuItem({
     const [isExpanded, setExpand] = useState(false);
 
     React.useEffect(() => { }, [isExpanded]);
+
     return (
         <li style={{ position: "relative" }}>
             <div
@@ -79,7 +83,6 @@ function MenuItem({
                 }}
                 onClick={() => {
                     setExpand(!isExpanded);
-                    console.log("called", isExpanded);
                 }}
             >
                 {Icon}
@@ -95,27 +98,91 @@ function MenuItem({
                     variants={subMenuAnimationConfig}
                     animate={isExpanded && isMenuOpen ? "show" : "hidden"}
                 >
-                    {subMenu.map((item) =>
-                        item.showOnMenu ? (
-                            <Link
-                                to={`${url}${item.path}`}
-                                key={item.path}
-                                className={`submenu-list ${active === item.path ? "sidedrawer-active" : ""
-                                    }`}
-                                onClick={() => {
-                                    setActive(item.path);
-                                    setSubMenuActive(Name);
-                                    setSideBarOpen(false);
-                                    toggleOpen(true)
-                                }}
-                            >
-                                <motion.li variants={subMenuItemsAnimationConfig}>
-                                    {item.icon}
-                                    {item.name}
-                                </motion.li>
-                            </Link>
-                        ) : null
-                    )}
+                    {subMenu.map((item, index) => {
+                        if (item?.showOnMenu) {
+                            return (
+                                <React.Fragment key={`${index}-${item.path}`}>
+                                    {item?.haveSubMenu ? (
+                                        <div
+                                            className={`submenu-list ${active === item.path ? "sidedrawer-active" : ""}`}
+                                            onClick={() => {
+                                                let newArr =[...subMenuOpen];
+                                                if (!newArr?.includes(item.path)) {
+                                                    newArr.push(item.path);
+                                                } else {
+                                                    newArr = newArr.filter(sub => sub !== item.path)
+                                                }
+                                                setSubMenuOpen(newArr)
+                                            }}
+                                        >
+                                            <motion.li variants={subMenuItemsAnimationConfig}>
+                                                {item.icon}
+                                                {item.name}
+                                                <Icons.UpArrowOutlined
+                                                    Style={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        fontSize: "0.85em"
+                                                    }}
+                                                    rotate={subMenuOpen?.includes(item.path) ? 180 : 90}
+                                                />
+                                            </motion.li>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {(!!item?.pathParent) ? (
+                                                <>
+                                                    {(subMenuOpen?.includes(item.pathParent)) && (
+                                                        <Link
+                                                            to={`${url}${item.path}`}
+                                                            key={item.path}
+                                                            className={`
+                                                                submenu-list 
+                                                                ${subActive === item.path ? "sidedrawer-active" : ""}
+                                                            `}
+                                                            onClick={() => {
+                                                                setActive(item?.pathParent);
+                                                                setSubMenuActive(Name);
+                                                                setSideBarOpen(false);
+                                                                toggleOpen(true);
+                                                                setSubActive(item?.path);
+                                                            }}
+                                                        >
+                                                            <motion.li variants={subMenuItemsAnimationConfig} style={{ paddingLeft: "1.5rem" }}>
+                                                                {item.icon}
+                                                                {item.name}
+                                                            </motion.li>
+                                                        </Link>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <Link
+                                                    to={`${url}${item.path}`}
+                                                    key={item.path}
+                                                    className={`
+                                                        submenu-list 
+                                                        ${active === item.path ? "sidedrawer-active" : ""}
+                                                        ${!!item?.pathParent && active !== item?.pathParent ? "hide" : ""}
+                                                    `}
+                                                    onClick={() => {
+                                                        setActive(!!item?.pathParent ? item?.pathParent : item?.path);
+                                                        setSubMenuActive(Name);
+                                                        setSideBarOpen(false);
+                                                        toggleOpen(true)
+                                                    }}
+                                                >
+                                                    <motion.li variants={subMenuItemsAnimationConfig}>
+                                                        {item.icon}
+                                                        {item.name}
+                                                    </motion.li>
+                                                </Link>
+                                            )}
+                                        </>
+                                    )}
+                                </React.Fragment>
+                            )
+                        }
+                    })}
                 </motion.ul>
             ) : null}
         </li>
@@ -125,11 +192,13 @@ function MenuItem({
 function SideDrawer(props) {
     let { url } = useRouteMatch();
     const user = UserStore.getUser();
-    const [active, setActive] = useState(user?.role?.toLowerCase() === "admin" ? "/patchInventory" : "/patient/list");
+    const [active, setActive] = useState(user?.role?.toLowerCase() === "admin" ? "/patchInventory" : "patient");
     const [isOpen, toggleOpen] = useCycle(false, true);
     const [sideBarOpen, setSideBarOpen] = useState(false);
     const [subMenuActive, setSubMenuActive] = useState(user?.role?.toLowerCase() === "admin" ? "Admin" : "Patient");
     const [logoutColor, setLogoutColor] = useState("#EB1348");
+
+
     const { ROLES } = Config;
     const iconStyle = {
         fontSize: "1.4em",
@@ -173,7 +242,7 @@ function SideDrawer(props) {
         localStorage.clear();
         UserStore.forgetUser();
         props.history.push("/");
-        
+
         // userApi
         //     .logout()
         //     .then((res) => {

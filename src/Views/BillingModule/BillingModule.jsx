@@ -4232,7 +4232,7 @@ function BillingModule() {
                                                     borderTop: "0",
                                                 }}
                                             >
-                                                {`Date: ${billDateString}`}
+                                                {`Date: ${moment(billDateString).format("MMM DD YYYY")}`}
                                             </div>
                                         </div>
                                         <div
@@ -4271,7 +4271,7 @@ function BillingModule() {
                                                     borderBottom: "0",
                                                 }}
                                             >
-                                                {`DOB: ${location.state.dob}`}
+                                                {`DOB: ${moment(location.state.dob).format("MMM DD YYYY")}`}
                                             </div>
                                         </div>
                                         <div

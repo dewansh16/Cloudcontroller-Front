@@ -44,6 +44,19 @@ function Dashboard() {
                             })
                             }
                             {(ROLES.SUPER_ADMIN.includes(user.role.toLowerCase()) || ROLES.MEDICS.includes(user.role.toLowerCase())) && patientRoutes?.map((route) => {
+                                if (!!route?.subMenu && route?.subMenu?.length > 0) {
+                                    route.subMenu.map(sub => {
+                                        return (
+                                            <AppRoute
+                                                key={sub.id}
+                                                path={url + sub.path}
+                                                exact={sub.exact}
+                                                isPrivate={sub.isPrivate}
+                                                component={sub.component}
+                                            />
+                                        )
+                                    })
+                                }
                                 return (
                                     <AppRoute
                                         key={route.id}
