@@ -641,7 +641,7 @@ function PatchInventory() {
                             </>
                         )}
 
-                        {(!!patient_data?.primary_consultant && patient_data?.primary_consultant?.length > 0) && (
+                        {(!!patient_data?.secondary_consultant && patient_data?.secondary_consultant?.length > 0) && (
                             <>
                                 <span className="wrapper-text-infor" style={{ display: "grid" }}>
                                     <span style={{ color: "#000000ad", fontWeight: "400" }}>
@@ -651,7 +651,7 @@ function PatchInventory() {
                                         className="wrapper-text-infor"
                                         style={{ flexDirection: "column", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
                                     >
-                                        {patient_data?.primary_consultant?.map((item, index) => {
+                                        {patient_data?.secondary_consultant?.map((item, index) => {
                                             if (openSecond) {
                                                 return (
                                                     <span key={item?.uuid} className="text-truncate item-consultant">
@@ -669,7 +669,7 @@ function PatchInventory() {
                                             }
                                         })}
 
-                                        {patient_data?.primary_consultant?.length > 2 && (
+                                        {patient_data?.secondary_consultant?.length > 2 && (
                                             <span style={{ cursor: "pointer" }} className="text-number-tag" onClick={() => onToggleDataMulti(record?.patch_uuid, "isFullSecond")}>
                                                 {openSecond ? (
                                                     <>
@@ -918,51 +918,51 @@ function PatchInventory() {
                                         </span>
                                     </span>
                                 )}
-                                {(!!tags && tags?.length > 0) && (
-                                    <>
-                                        <span className="wrapper-text-infor">
-                                            <span style={{ color: "#000000ad", fontWeight: "400", marginRight: "4px" }}>
-                                                Tags:
-                                            </span>
-                                            <span
-                                                className="wrapper-text-infor"
-                                                style={{ flexDirection: "column", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
-                                            >
-                                                {tags?.map((item, index) => {
-                                                    if (open) {
-                                                        return (
-                                                            <span key={index} className="text-truncate item-consultant">
-                                                                {item}
-                                                            </span>
-                                                        )
-                                                    } else {
-                                                        if (index < 2) {
-                                                            return (
-                                                                <span key={index} className="text-truncate item-consultant">
-                                                                    {item}
-                                                                </span>
-                                                            )
-                                                        }
-                                                    }
-                                                })}
-
-                                                {tags?.length > 2 && (
-                                                    <span className="text-number-tag" onClick={() => onToggleDataMulti(record?.patch_uuid, "isFullTags")}>
-                                                        {open ? (
-                                                            <>
-                                                                Less <CaretDownOutlined />
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                More <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
-                                                            </>
-                                                        )}
+                            </>
+                        )}
+                        {(!!tags && tags?.length > 0) && (
+                            <>
+                                <span className="wrapper-text-infor">
+                                    <span style={{ color: "#000000ad", fontWeight: "400", marginRight: "4px" }}>
+                                        Tags:
+                                    </span>
+                                    <span
+                                        className="wrapper-text-infor"
+                                        style={{ flexDirection: "column", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
+                                    >
+                                        {tags?.map((item, index) => {
+                                            if (open) {
+                                                return (
+                                                    <span key={index} className="text-truncate item-consultant">
+                                                        {item}
                                                     </span>
+                                                )
+                                            } else {
+                                                if (index < 2) {
+                                                    return (
+                                                        <span key={index} className="text-truncate item-consultant">
+                                                            {item}
+                                                        </span>
+                                                    )
+                                                }
+                                            }
+                                        })}
+
+                                        {tags?.length > 2 && (
+                                            <span className="text-number-tag" onClick={() => onToggleDataMulti(record?.patch_uuid, "isFullTags")}>
+                                                {open ? (
+                                                    <>
+                                                        Less <CaretDownOutlined />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        More <CaretRightOutlined style={{ transform: "rotate(180deg)" }} />
+                                                    </>
                                                 )}
                                             </span>
-                                        </span>
-                                    </>
-                                )}
+                                        )}
+                                    </span>
+                                </span>
                             </>
                         )}
                     </span>

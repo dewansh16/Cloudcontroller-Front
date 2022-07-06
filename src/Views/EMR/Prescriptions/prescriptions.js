@@ -101,7 +101,7 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
         setComponentSupportContent(
             <div style={{
                 height: "100%",
-                width: "100%",
+                width: "60%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "flex-end",
@@ -118,7 +118,7 @@ export default function Prescriptions({ pid, setComponentSupportContent, setEmrV
                 >
                     New Prescription
                 </Button>
-                <Button style={{ width: "55px", marginLeft: "10%" }} onClick={backToPatientDetails} type="utility" icon={Icons.CloseOutlined({ Style: { color: "#000000" } })} />
+                <Button style={{ width: "55px", marginLeft: "1rem" }} onClick={backToPatientDetails} type="utility" icon={Icons.CloseOutlined({ Style: { color: "#000000" } })} />
             </div>
         )
 

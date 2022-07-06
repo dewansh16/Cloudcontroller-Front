@@ -2,6 +2,7 @@
     display: flex;
     align-items: center;
     justify-content: space-around;
+    padding-left: 1rem;
 }
 
 .vitals-menu .vitals-menu-item {
@@ -184,6 +185,18 @@
     font-weight: normal;
     font-size: 18px;
     color: rgba(253, 252, 251, 1);
+}
+
+@media only screen and (max-width: 1200px) {
+    .record-type-selector {
+        max-width: 800px;
+    }
+}
+
+@media only screen and (max-width: 1400px) {
+    .record-type-selector {
+        max-width: 850px;
+    }
 }
 
 

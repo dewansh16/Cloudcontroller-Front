@@ -57,23 +57,23 @@ const BulbIcon = ({pid, billDate, onSaveNoteToDb}) => {
                                     )}
                                     {item?.status == 0 && (
                                         <Button 
-                                        type='primary' 
-                                        style={{ fontSize: "12px", marginLeft: "0.5rem" }}
-                                        onClick={() => {
-                                            const dataUpdate = {
-                                                note: item.note,
-                                                status: 1,
-                                                billing_id: item99453.id,
-                                                code: item99453.code,
-                                                bill_date: item99453.bill_date,
-                                                pid: pid,
-                                                task_id: item.task_id
-                                            }
-                                            onSaveNoteToDb(dataUpdate);
-                                        }}
-                                    >
-                                        Complete
-                                    </Button>
+                                            type='primary' 
+                                            style={{ fontSize: "12px", marginLeft: "0.5rem" }}
+                                            onClick={() => {
+                                                const dataUpdate = {
+                                                    note: item.note,
+                                                    status: 1,
+                                                    billing_id: item99453.id,
+                                                    code: item99453.code,
+                                                    bill_date: item99453.bill_date,
+                                                    pid: pid,
+                                                    task_id: item.task_id
+                                                }
+                                                onSaveNoteToDb(dataUpdate);
+                                            }}
+                                        >
+                                            Complete
+                                        </Button>
                                     )}
                                 </div>
                             </div>

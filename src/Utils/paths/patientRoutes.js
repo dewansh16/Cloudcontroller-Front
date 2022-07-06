@@ -31,23 +31,46 @@ const patientRoutes = [
     {
         id: "0021",
         name: "Dashboard",
+        path: "patient",
+        // component: PatientDashboard,
+        isPrivate: true,
+        exact: true,
+        showOnMenu: true,
+        icon: Icons.ledger({ Style: iconStyle }),
+        haveSubMenu: true
+    },
+    {
+        id: "0022-01",
+        name: "Patient",
         path: "/patient/list",
         component: PatientDashboard,
         isPrivate: true,
         exact: true,
         showOnMenu: true,
-        icon: Icons.ledger({ Style: iconStyle }),
+        icon: <AiOutlineAudit style={iconStyle} />,
+        pathParent: "patient"
     },
     {
-        id: "0022",
-        name: "Care Dashboard",
-        path: "/care-dashboard",
+        id: "0022-02",
+        name: "Care Team",
+        path: "/patient/care-team",
         component: CareDashboard,
         isPrivate: true,
         exact: true,
         showOnMenu: true,
         icon: <AiOutlineAudit style={iconStyle} />,
+        pathParent: "patient"
     },
+    // {
+    //     id: "0022",
+    //     name: "Care Dashboard",
+    //     path: "/care-dashboard",
+    //     component: CareDashboard,
+    //     isPrivate: true,
+    //     exact: true,
+    //     showOnMenu: true,
+    //     icon: <AiOutlineAudit style={iconStyle} />,
+    // },
     {
         id: "0023",
         name: "Add patient",
@@ -180,12 +203,35 @@ const patientRoutes = [
     {
         id: "00035",
         name: "Billing Summary",
-        path: "/bliing-summary",
+        path: "billing",
+        // component: BillingSummary,
+        isPrivate: true,
+        exact: true,
+        showOnMenu: true,
+        icon: <AiOutlineAudit style={iconStyle} />,
+        haveSubMenu: true
+    },
+    {
+        id: "00035-01",
+        name: "By Patient",
+        path: "/billing/patient",
         component: BillingSummary,
         isPrivate: true,
         exact: true,
         showOnMenu: true,
         icon: <AiOutlineAudit style={iconStyle} />,
+        pathParent: "billing"
+    },
+    {
+        id: "00035-02",
+        name: "By Practitioner",
+        path: "/billing/practitioner",
+        component: BillingSummary,
+        isPrivate: true,
+        exact: true,
+        showOnMenu: true,
+        icon: <AiOutlineAudit style={iconStyle} />,
+        pathParent: "billing"
     },
     {
         id: "00036",

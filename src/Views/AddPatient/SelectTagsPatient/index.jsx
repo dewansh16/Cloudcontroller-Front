@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import Select from 'antd/lib/select'
 import IconCheck from "../../../Assets/Images/check.svg";
+import IconCheckBlack from "../../../Assets/Images/checkBlack.svg";
 
 const { Option } = Select;
 
@@ -9,9 +10,10 @@ const SelectTagsPatient = (props) => {
     const { tagsSelected, setTagsSelected, arrayOptionTags, setArrOptionTags, onBlur } = props;
 
     const [valSelectSearch, setValSelectSearch] = useState("");
-    const [colorSelected, setColorSelected] = useState("#ff0000");
+    const [colorSelected, setColorSelected] = useState("#ffffff");
 
     const arrayColor = [
+        {color: "#ffffff", title: "White" },
         {color: "#ff0000bd", title: "Red" },
         {color: "#ff00bfb5", title: "Pink" },
         {color: "#4000ffd9", title: "Blue" },
@@ -34,9 +36,10 @@ const SelectTagsPatient = (props) => {
                         >
                             <div className="box-color" style={{
                                 background: item?.color,
+                                border: item?.color === "#ffffff" ? "1px solid #ddd" : ""
                             }}>
                                 {isActive && (
-                                    <img src={IconCheck} className="icon-check-color" />
+                                    <img src={item?.color === "#ffffff" ? IconCheckBlack : IconCheck} className="icon-check-color" />
                                 )}
                             </div>
                             <div className={`color-text ${isActive ? "text-active" : ""}`}>{item?.title}</div>
@@ -52,7 +55,11 @@ const SelectTagsPatient = (props) => {
         return (
             <div
                 className="item-tag-render"
-                style={{ background: tagFound?.color }}
+                style={{ 
+                    background: tagFound?.color,
+                    color: tagFound?.color === "#ffffff" ? "#000000" : "",
+                    border: tagFound?.color === "#ffffff" ? "1px solid #ddd" : ""
+                }}
             >
                 {props?.label}
             </div>
@@ -132,6 +139,7 @@ const SelectTagsPatient = (props) => {
                             borderRadius: "4px",
                             marginRight: "6px",
                             background: tag?.color,
+                            border: tag?.color === "#ffffff" ? "1px solid #ddd" : ""
                         }}>
                         </div>
                         <div style={{

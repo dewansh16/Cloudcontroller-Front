@@ -148,3 +148,7 @@ padding-top: 8px;
 .alerts-list-body .site-collapse-custom-collapse {
     min-width: 900px;
 }
+
+.alerts-list-body .site-collapse-custom-collapse .ant-collapse-header-text {
+    width: 70%;
+}

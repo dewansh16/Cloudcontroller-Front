@@ -37,6 +37,7 @@ const PatchForm = (props) => {
     const [tagList, setTagList] = useState([]);
     const [tagSelected, setTagSelected] = useState([]);
     const [valSelectSearch, setValSelectSearch] = useState("");
+    const [isErrorSerial, setIsErrorSerial] = useState(false);
 
     const refValSearch = useRef();
 
@@ -685,10 +686,6 @@ const PatchForm = (props) => {
                                 name={`${props.type === 'bps' ? valueBpType : props.type}_device_serial`}
                                 rules={[
                                     {
-                                        pattern: new RegExp("^[A-Za-z0-9\:._-]+$"),
-                                        message: "Please recheck the serial number entered.",
-                                    },
-                                    {
                                         required: props.required,
                                         message: "serial number is required",
                                     },
@@ -703,7 +700,20 @@ const PatchForm = (props) => {
                                     filterOption={true}
                                     className={isNewDevice ? "select-sensor-associate" : ""}
                                     onChange={(val) => setDeviceSelected(val)}
-                                    onSearch={(val) => setValSearch(val)}
+                                    onBlur={() => setIsErrorSerial(false)}
+                                    onSearch={(val) => { 
+                                        setValSearch(val);
+                                        if (!(val.match(new RegExp("^[A-Za-z0-9\:._-]+$")))) {
+                                            setIsErrorSerial(true);
+                                        } else {
+                                            setIsErrorSerial(false);
+                                        }
+                                    }}
+                                    notFoundContent={
+                                        isErrorSerial && (
+                                            <span style={{ color: "#FF2B2B"}}>Please recheck the serial number entered.</span>
+                                        )
+                                    }
                                 >
                                     {patchList?.map((item) => {
                                         if (!!item?.device_serial) {
@@ -717,7 +727,7 @@ const PatchForm = (props) => {
                                 </Select>
                             </Form.Item>
 
-                            {(deviceSelected === null && !props.disabled) && (
+                            {(deviceSelected === null && !props.disabled && !isErrorSerial) && (
                                 <div
                                     style={{
                                         position: "absolute", top: "50%", right: "8px", transform: "translateY(-50%)", color: "#ff7529", cursor: "pointer",

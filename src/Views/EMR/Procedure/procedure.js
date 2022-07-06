@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Row, Col, Drawer, Form, notification, Table } from '../../../Theme/antdComponents'
+import { Row, Col, Drawer, Form, notification, Table, Spin } from '../../../Theme/antdComponents'
 import { Button } from '../../../Theme/Components/Button/button'
 import { Input, GlobalTextArea as TextArea } from '../../../Theme/Components/Input/input'
 // import { Select, SelectOption as Option } from '../../../Theme/Components/Select/select'
@@ -13,7 +13,7 @@ import { UserStore } from "../../../Stores/userStore";
 import Select from 'antd/lib/select'
 const { Option } = Select;
 
-function AddProcedure(pid, data, successCallBack) {
+function AddProcedure(pid, data, successCallBack, setFormLoading) {
     // "pid": "patientc10c064c-fd5a-4ddc-85ca-1744d6104229",
     // "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
     // "code_type": "code_type02",
@@ -34,7 +34,8 @@ function AddProcedure(pid, data, successCallBack) {
             message: "Success",
             description: res.message
         })
-        successCallBack()
+        successCallBack();
+        setFormLoading(false);
     }).catch((err) => {
         console.log(err)
         if (err) {
@@ -42,17 +43,19 @@ function AddProcedure(pid, data, successCallBack) {
                 message: 'Error',
                 description: `${err.response?.data.result}` || ""
             })
+            setFormLoading(false);
         }
     })
 }
 
-function UpdateProcedure(pid, data, successCallBack) {
+function UpdateProcedure(pid, data, successCallBack, setFormLoading) {
     patientApi.updatePatientProcedure(pid, data).then((res) => {
         notification.success({
             message: "Success",
             description: res.message
         })
-        successCallBack()
+        successCallBack();
+        setFormLoading(false);
     }).catch((err) => {
         console.log(err)
         if (err) {
@@ -60,27 +63,32 @@ function UpdateProcedure(pid, data, successCallBack) {
                 message: 'Error',
                 description: `${err.response?.data.result}` || ""
             })
+            setFormLoading(false);
         }
     })
 }
 
 const AddProcedureForm = ({ visible, data, mode = modes.ADD_NEW, procedureForm, successCallBack, pid }) => {
     const reqd = mode === modes.ADD_NEW
-    const procedure_uuid = procedureForm.getFieldValue("procedure_uuid")
+    const procedure_uuid = procedureForm.getFieldValue("procedure_uuid");
+
+    const [formLoading, setFormLoading] = useState(false);
 
     const onFinish = (values) => {
+        setFormLoading(true);
         let formData = {}
         formData = { ...values }
         if (mode === modes.ADD_NEW) {
-            AddProcedure(pid, formData, successCallBack = successCallBack)
+            AddProcedure(pid, formData, successCallBack = successCallBack, setFormLoading)
         } else if (mode === modes.EDIT) {
             formData.procedure_uuid = procedure_uuid;
-            UpdateProcedure(pid, formData, successCallBack = successCallBack)
+            UpdateProcedure(pid, formData, successCallBack = successCallBack, setFormLoading)
         } else {
             notification.warning({
                 message: 'Unknown form mode',
                 description: `Unknown form mode is selected`
             })
+            setFormLoading(false);
         }
     }
 
@@ -102,120 +110,134 @@ const AddProcedureForm = ({ visible, data, mode = modes.ADD_NEW, procedureForm, 
         }
     }, [mode, visible])
     return (
-        <Form
-            form={procedureForm}
-            layout="vertical"
-            name="procedureForm"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-        >
-            <Row gutter={[0, 0]} justify="space-around">
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Date of diagnosis"
-                        name="diagnosis_date"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <DatePicker format="MMM DD YYYY" allowClear={false} />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Procedure Code Type"
-                        name="code_type"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Procedure Description"
-                        name="description"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <TextArea autoSize={{ minRows: 3 }} />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Result/Conclusion"
-                        name="result"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={false}
-                        label="Consulting Person"
-                        name="consulting_person"
-                        rules={[{
-                            required: false,
-                            message: "required"
-                        }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={12}>
-                    <Form.Item
-                        required={false}
-                        label="Procedure Status"
-                        name="status"
-                        rules={[{
-                            required: false,
-                            message: "required"
-                        }]}
-                    >
-                        <Select
-                            // onChange={(e) => { setNameType(e) }}
-                            bordered={false}
-                            suffixIcon={Icons.downArrowFilled({ style: { color: "#121215" } })}>
-                            <Option value="complete"><span style={{}}>Complete</span></Option>
-                            <Option value="incomplete"><span style={{}}>Incomplete</span></Option>
-                        </Select>
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={12}>
-                    <Form.Item
-                        required={false}
-                        label="Procedure Label"
-                        name="label"
-                        rules={[{
-                            required: false,
-                            message: "required"
-                        }]}
-                    >
-                        <Select
-                            // onChange={(e) => { setNameType(e) }}
-                            // defaultValue={"normal"}
-                            bordered={false}
-                            suffixIcon={Icons.downArrowFilled({ style: { color: "#121215" } })}>
-                            <Option value="normal"><span style={{}}>Normal</span></Option>
-                            <Option value="critical"><span style={{}}>Critical</span></Option>
-                        </Select>
-                    </Form.Item>
-                </Col>
-            </Row>
-        </Form>
+        <>
+            {formLoading && (
+                <div style={{ 
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%) scale(1.5)",
+                    zIndex: 20
+                }}>
+                    <Spin />
+                </div>
+            )}
+            <Form
+                form={procedureForm}
+                layout="vertical"
+                name="procedureForm"
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                style={formLoading ? { filter: "blur(2px)" } : { }}
+            >
+                <Row gutter={[0, 0]} justify="space-around">
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Date of diagnosis"
+                            name="diagnosis_date"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <DatePicker format="MMM DD YYYY" allowClear={false} />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Procedure Code Type"
+                            name="code_type"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Procedure Description"
+                            name="description"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <TextArea autoSize={{ minRows: 3 }} />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Result/Conclusion"
+                            name="result"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={false}
+                            label="Consulting Person"
+                            name="consulting_person"
+                            rules={[{
+                                required: false,
+                                message: "required"
+                            }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={12}>
+                        <Form.Item
+                            required={false}
+                            label="Procedure Status"
+                            name="status"
+                            rules={[{
+                                required: false,
+                                message: "required"
+                            }]}
+                        >
+                            <Select
+                                // onChange={(e) => { setNameType(e) }}
+                                bordered={false}
+                                suffixIcon={Icons.downArrowFilled({ style: { color: "#121215" } })}>
+                                <Option value="complete"><span style={{}}>Complete</span></Option>
+                                <Option value="incomplete"><span style={{}}>Incomplete</span></Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={12}>
+                        <Form.Item
+                            required={false}
+                            label="Procedure Label"
+                            name="label"
+                            rules={[{
+                                required: false,
+                                message: "required"
+                            }]}
+                        >
+                            <Select
+                                // onChange={(e) => { setNameType(e) }}
+                                // defaultValue={"normal"}
+                                bordered={false}
+                                suffixIcon={Icons.downArrowFilled({ style: { color: "#121215" } })}>
+                                <Option value="normal"><span style={{}}>Normal</span></Option>
+                                <Option value="critical"><span style={{}}>Critical</span></Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </Form>
+        </>
     )
 }
 
@@ -349,13 +371,13 @@ export default function Procedure({ pid, setComponentSupportContent, setPadding,
         setComponentSupportContent(
             <div style={{
                 height: "100%",
-                width: "100%",
+                width: "50%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "flex-end",
             }}>
                 <Button onClick={() => { showDrawer(); setFormMode(modes.ADD_NEW); procedureForm.resetFields() }} type="secondary-outlined">+ Add</Button>
-                <Button style={{ width: "55px", marginLeft: "10%" }} onClick={backToPatientDetails} type="utility" icon={Icons.CloseOutlined({ Style: { color: "#000000" } })} />
+                <Button style={{ width: "55px", marginLeft: "1rem" }} onClick={backToPatientDetails} type="utility" icon={Icons.CloseOutlined({ Style: { color: "#000000" } })} />
             </div>
         )
 

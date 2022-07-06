@@ -5,7 +5,7 @@
     background-color: #eaeaea;
     height: 65px;
     width: 25%;
-    margin-left: 2%;
+    margin: 0 2rem;
 }
 
 .report-switch-item{
@@ -21,9 +21,10 @@
 }
 
 .report-uploader-container{
-    height: 50%;
-    margin: 5%;
-    overflow-y: scroll;
+    /* height: 50%; */
+    margin: 2rem;
+    margin-bottom: 0rem;
+    /* overflow-y: scroll; */
 }
 
 .labreport-list-item{
@@ -47,4 +48,9 @@
     z-index: 300;
     box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
     padding: 2%;
+}
+
+.report-uploader-container .ant-upload-list.ant-upload-list-text {
+    height: calc(100vh - 375px);
+    overflow: auto;
 }

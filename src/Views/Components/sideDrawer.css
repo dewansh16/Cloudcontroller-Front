@@ -59,6 +59,7 @@
 .submenu-list {
   color: black;
   font-weight: 500;
+  cursor: pointer;
   /* border-radius: 6px; */
 }
 .submenu-list li {

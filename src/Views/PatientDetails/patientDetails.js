@@ -809,7 +809,7 @@ export default function PatientDetails(props) {
                                             }}
                                             type="text"
                                         >
-                                            Notes
+                                            Patient Detail
                                         </Buttons>
                                     </Col>
                                 </Row>
@@ -1002,7 +1002,7 @@ export default function PatientDetails(props) {
                                         position: "relative",
                                     }}
                                 >
-                                    <Drawer
+                                    {/* <Drawer
                                         placement="left"
                                         closable={true}
                                         visible={doctorDrawerVisible}
@@ -1018,7 +1018,7 @@ export default function PatientDetails(props) {
                                                 <h1 style={{ fontWeight: "600" }}>
                                                     Primary Consultants
                                                 </h1>
-                                                {patient.demographic_map?.practictioner_patient_map?.primary_consultant?.map(
+                                                {patient.demographic_map?.primary_consultant?.map(
                                                     (item) => {
                                                         return <p>{item.fname + " " + item.lname}</p>;
                                                     }
@@ -1029,7 +1029,7 @@ export default function PatientDetails(props) {
                                                 <h1 style={{ fontWeight: "600" }}>
                                                     Secondary Consultants
                                                 </h1>
-                                                {patient.demographic_map?.practictioner_patient_map?.secondary_consultant?.map(
+                                                {patient.demographic_map?.secondary_consultant?.map(
                                                     (item) => {
                                                         return <p>{item.fname + " " + item.lname}</p>;
                                                     }
@@ -1040,7 +1040,7 @@ export default function PatientDetails(props) {
                                                 <h1 style={{ fontWeight: "600" }}>Nurses</h1>
                                             </div>
                                         </div>
-                                    </Drawer>
+                                    </Drawer> */}
 
 
                                     <Col style={{ marginBottom: "6%" }} span={22}>

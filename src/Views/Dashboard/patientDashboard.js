@@ -158,7 +158,10 @@ export default function PatientDashboard(props) {
     });
     const [loading, setLoading] = useState(false);
 
-    const dataFilterHeader = props?.location?.state?.dataFilterHeader || null;
+    let dataFilterHeader = localStorage.getItem("patientFilter");
+    if (!!dataFilterHeader) {
+        dataFilterHeader = JSON.parse(dataFilterHeader);
+    }
 
     // const pageSize = 5;
     const [currentPageVal, setCurrentPageVal] = useState(dataFilterHeader?.currentPageVal || 1);
@@ -377,7 +380,7 @@ export default function PatientDashboard(props) {
     }
 
     const dataFilterOnHeader = useMemo(() => {
-        return {
+        const data = {
             currentPageVal,
             valuePageLength,
             valSearch,
@@ -385,6 +388,10 @@ export default function PatientDashboard(props) {
             sensorShow,
             patientType
         };
+
+        localStorage.setItem("patientFilter", JSON.stringify(data));
+
+        return data;
     }, [currentPageVal, valuePageLength, valSearch, valDuration, sensorShow, patientType]);
 
     const onSelectValDuration = (val) => {

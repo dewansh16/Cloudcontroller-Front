@@ -898,7 +898,8 @@ function AddPatient() {
     React.useEffect(() => { }, [isPatchTabDisabled]);
 
     const goBack = () => {
-        history.push("/dashboard/patient/list");
+        // history.push("/dashboard/patient/list");
+        history.push(`/dashboard/patient/details/${pid}`);
     };
 
     const confirmText = "Are you sure to deboard this Patient?";
