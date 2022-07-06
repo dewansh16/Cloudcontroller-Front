@@ -22,10 +22,14 @@
 }
 
 .emr-header {
-    grid-area: header;
+    /* grid-area: header;
     display: grid;
     grid-template-columns: 25% 75%;
-    grid-template-areas: "userinfo bodysupportcontent";
+    grid-template-areas: "userinfo bodysupportcontent"; */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* min-width: 760px; */
 }
 
 .emr-header .user-info {
@@ -34,6 +38,10 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 25%;
 }
 
 .emr-header .user-info h1 {
@@ -43,6 +51,10 @@
     text-align: center;
     color: #000000;
     margin: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
 }
 
 .emr-header .user-info span {
@@ -56,6 +68,10 @@
     
     color: #A8A8A8;
     text-transform: uppercase;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
 }
 
 .emr-header .body-support-content {
@@ -63,6 +79,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 85%;
 }
 
 .component-holder {

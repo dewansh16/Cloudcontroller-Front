@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Row, Col, Drawer, Form, notification, Table } from '../../../Theme/antdComponents'
+import { Row, Col, Drawer, Form, notification, Table, Spin } from '../../../Theme/antdComponents'
 import { Button } from '../../../Theme/Components/Button/button'
 import { Input, GlobalTextArea as TextArea } from '../../../Theme/Components/Input/input'
 import { Select, SelectOption as Option } from '../../../Theme/Components/Select/select'
@@ -12,7 +12,7 @@ import { useHistory } from 'react-router-dom'
 import moment from 'moment'
 import { UserStore } from "../../../Stores/userStore";
 
-function AddMedicalHistory(pid, data, successCallBack) {
+function AddMedicalHistory(pid, data, successCallBack, setFormLoading) {
     // "date_of_treatment": "2022-06-21T09:01:15.000Z",
     // "doctor_name": "Doctor Name",
     // "documents": "Your Note",
@@ -33,40 +33,49 @@ function AddMedicalHistory(pid, data, successCallBack) {
             message: "Success",
             description: res.message
         })
-        successCallBack()
+        successCallBack();
+        setFormLoading(false);
     }).catch((err) => {
         console.log(err)
         if (err) {
             notification.error({
                 message: 'Error',
                 description: `${err.response?.data.result}` || ""
-            })
+            });
+            setFormLoading(false);
         }
     })
 }
 
-function UpdateMedicalHistory(pid, data, successCallBack) {
+function UpdateMedicalHistory(pid, data, successCallBack, setFormLoading) {
     patientApi.updatePatientMedicalHistory(pid, data).then((res) => {
         notification.success({
             message: "Success",
             description: res.message
         })
-        successCallBack()
+        successCallBack();
+        setFormLoading(false);
     }).catch((err) => {
         console.log(err)
         if (err) {
             notification.error({
                 message: 'Error',
                 description: `${err.response?.data.result}` || ""
-            })
+            });
+            setFormLoading(false);
         }
     })
 }
 
 const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm, successCallBack, pid, visible }) => {
     const reqd = mode === modes.ADD_NEW
-    const medical_history_uuid = medicalHistoryForm.getFieldValue("medical_history_uuid")
+    const medical_history_uuid = medicalHistoryForm.getFieldValue("medical_history_uuid");
+
+    const [formLoading, setFormLoading] = useState(false);
+
     const onFinish = (values) => {
+        setFormLoading(true);
+
         let formData = {
             // "medical_history_uuid": "medicalhistory-XXXX",
             // "date_of_treatment": "2021-09-06T00:00:00.000Z",
@@ -77,15 +86,16 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
         }
         formData = { ...values }
         if (mode === modes.ADD_NEW) {
-            AddMedicalHistory(pid, formData, successCallBack = successCallBack)
+            AddMedicalHistory(pid, formData, successCallBack = successCallBack, setFormLoading)
         } else if (mode === modes.EDIT) {
             formData['medical_history_uuid'] = medical_history_uuid
-            UpdateMedicalHistory(pid, formData, successCallBack = successCallBack)
+            UpdateMedicalHistory(pid, formData, successCallBack = successCallBack, setFormLoading)
         } else {
             notification.warning({
                 message: 'Unknown form mode',
                 description: `Unknown form mode is selected`
             })
+            setFormLoading(false);
         }
     }
 
@@ -106,94 +116,108 @@ const AddMedicalHistoryForm = ({ data, mode = modes.ADD_NEW, medicalHistoryForm,
         }
     }, [mode, visible])
     return (
-        <Form
-            form={medicalHistoryForm}
-            layout="vertical"
-            name="medicalHistoryForm"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-        >
-            <Row gutter={[0, 0]} justify="space-around">
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Date of treatement"
-                        name="date_of_treatment"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <DatePicker format="MMM DD YYYY" allowClear={false} />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Treatment"
-                        name="treatment"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Hospital Name"
-                        name="hospital_name"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Doctor Name"
-                        name="doctor_name"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={false}
-                        label="Your Note"
-                        name="note"
-                        rules={[{
-                            required: false,
-                            message: "required"
-                        }]}
-                    >
-                        <TextArea autoSize={{ minRows: 3 }} />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={false}
-                        label="Other Documents"
-                        name="documents"
-                        rules={[{
-                            required: false,
-                            message: "required"
-                        }]}
-                    >
-                        <TextArea autoSize={{ minRows: 3 }} />
-                    </Form.Item>
-                </Col>
-            </Row>
-        </Form>
+        <>
+            {formLoading && (
+                <div style={{ 
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%) scale(1.5)",
+                    zIndex: 20
+                }}>
+                    <Spin />
+                </div>
+            )}
+            <Form
+                form={medicalHistoryForm}
+                layout="vertical"
+                name="medicalHistoryForm"
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                style={formLoading ? { filter: "blur(2px)" } : { }}
+            >
+                <Row gutter={[0, 0]} justify="space-around">
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Date of treatement"
+                            name="date_of_treatment"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <DatePicker format="MMM DD YYYY" allowClear={false} />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Treatment"
+                            name="treatment"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Hospital Name"
+                            name="hospital_name"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Doctor Name"
+                            name="doctor_name"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={false}
+                            label="Your Note"
+                            name="note"
+                            rules={[{
+                                required: false,
+                                message: "required"
+                            }]}
+                        >
+                            <TextArea autoSize={{ minRows: 3 }} />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={false}
+                            label="Other Documents"
+                            name="documents"
+                            rules={[{
+                                required: false,
+                                message: "required"
+                            }]}
+                        >
+                            <TextArea autoSize={{ minRows: 3 }} />
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </Form>
+        </>
     )
 }
 
@@ -317,13 +341,13 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
         setComponentSupportContent(
             <div style={{
                 height: "100%",
-                width: "100%",
+                width: "50%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "flex-end",
             }}>
                 <Button onClick={() => { showDrawer(); setFormMode(modes.ADD_NEW); medicalHistoryForm.resetFields() }} type="secondary-outlined">+ Add</Button>
-                <Button style={{ width: "55px", marginLeft: "10%" }} onClick={backToPatientDetails} type="utility" icon={Icons.CloseOutlined({ Style: { color: "#000000" } })} />
+                <Button style={{ width: "55px", marginLeft: "1rem" }} onClick={backToPatientDetails} type="utility" icon={Icons.CloseOutlined({ Style: { color: "#000000" } })} />
             </div>
         )
 

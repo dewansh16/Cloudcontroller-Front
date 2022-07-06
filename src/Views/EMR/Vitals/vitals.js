@@ -820,7 +820,7 @@ export default function Vitals({
                     }}
                 >
                     <LineChart
-                        width={900}
+                        width={800}
                         height={450}
                         data={data}
                         margin={{ top: 5, right: 30, left: 30, bottom: 5 }}
@@ -1265,15 +1265,16 @@ export default function Vitals({
 
     useEffect(() => {
         setComponentSupportContent(
-            <div
-                style={{
-                    height: "100%",
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                }}
-            >
+            // <div
+            //     style={{
+            //         height: "100%",
+            //         width: "100%",
+            //         display: "flex",
+            //         alignItems: "center",
+            //         justifyContent: "space-between",
+            //     }}
+            // >
+            <>
                 <ul className="vitals-menu">
                     {vitalsComponentsList.map((item, id) => {
                         return (
@@ -1295,12 +1296,12 @@ export default function Vitals({
                 </ul>
 
                 <Button
-                    style={{ width: "55px", marginLeft: "10%" }}
+                    style={{ width: "55px" }}
                     onClick={backToPatientDetails}
                     type="utility"
                     icon={Icons.CloseOutlined({ Style: { color: "#000000" } })}
                 />
-            </div>
+            </>
         );
 
         return () => {

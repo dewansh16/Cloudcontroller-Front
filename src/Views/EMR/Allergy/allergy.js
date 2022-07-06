@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Row, Col, Drawer, Form, notification, Table } from '../../../Theme/antdComponents'
+import { Row, Col, Drawer, Form, notification, Table, Spin } from '../../../Theme/antdComponents'
 import { Button } from '../../../Theme/Components/Button/button'
 import { Input, GlobalTextArea as TextArea } from '../../../Theme/Components/Input/input'
 // import { Select, SelectOption as Option } from '../../../Theme/Components/Select/select'
@@ -48,7 +48,7 @@ let allergyEdit = null;
 //     return [response, loading, dataSource]
 // }
 
-function AddMedicalHistory(pid, data, successCallBack) {
+function AddMedicalHistory(pid, data, successCallBack, setFormLoading) {
     // "pid": "patiente9c617e0-4242-4828-ba08-66e8d4aa9009",
     // "tenant_id": "tenant8ea56b12-ff44-4b5c-839c-f609363ba385",
     // "allergy_name": "Allergy Name",
@@ -70,7 +70,8 @@ function AddMedicalHistory(pid, data, successCallBack) {
             message: "Success",
             description: res.message || "allergy added"
         })
-        successCallBack()
+        successCallBack();
+        setFormLoading(false);
     }).catch((err) => {
         console.log(err)
         if (err) {
@@ -78,11 +79,12 @@ function AddMedicalHistory(pid, data, successCallBack) {
                 message: 'Error',
                 description: `${err.response?.data.result}` || ""
             })
+            setFormLoading(false);
         }
     })
 }
 
-function UpdateAllergy(pid, data, successCallBack) {
+function UpdateAllergy(pid, data, successCallBack, setFormLoading) {
     console.log(data);
     data.allergy_uuid = allergyEdit;
     data.date_from = data.date_from.toISOString();
@@ -93,7 +95,8 @@ function UpdateAllergy(pid, data, successCallBack) {
             description: res.message
         })
         allergyEdit = null;
-        successCallBack()
+        successCallBack();
+        setFormLoading(false);
     }).catch((err) => {
         console.log(err)
         allergyEdit = null;
@@ -102,6 +105,7 @@ function UpdateAllergy(pid, data, successCallBack) {
                 message: 'Error',
                 description: `${err.response?.data.result}` || ""
             })
+            setFormLoading(false);
         }
     })
 }
@@ -110,18 +114,22 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
     const reqd = mode === modes.ADD_NEW;
     const allergy_uuid = allergyForm.getFieldValue("allergy_uuid");
 
+    const [formLoading, setFormLoading] = useState(false);
+
     const onFinish = (values) => {
+        setFormLoading(true);
         let formData = { ...values };
         if (mode === modes.ADD_NEW) {
-            AddMedicalHistory(pid, formData, successCallBack = successCallBack)
+            AddMedicalHistory(pid, formData, successCallBack = successCallBack, setFormLoading)
         } else if (mode === modes.EDIT) {
             formData['allergy_uuid'] = allergy_uuid
-            UpdateAllergy(pid, formData, successCallBack = successCallBack)
+            UpdateAllergy(pid, formData, successCallBack = successCallBack, setFormLoading)
         } else {
             notification.warning({
                 message: 'Unknown form mode',
                 description: `Unknown form mode is selected`
             })
+            setFormLoading(false);
         }
     }
 
@@ -145,117 +153,131 @@ const AddAllergyForm = ({ data, mode = modes.ADD_NEW, allergyForm, successCallBa
     }, [visible, mode]);
 
     return (
-        <Form
-            form={allergyForm}
-            layout="vertical"
-            name="allergyForm"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-        >
-            <Row gutter={[0, 0]} justify="space-around">
-                <Col style={{}} span={8}>
-                    <Form.Item
-                        required={false}
-                        label="From"
-                        name="date_from"
-                        rules={[{
-                            required: false,
-                            message: "required"
-                        }]}
-                    >
-                        <DatePicker format="MMM DD YYYY" allowClear={false} />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={8}>
-                    <Form.Item
-                        required={false}
-                        label="To"
-                        name="date_to"
-                        rules={[{
-                            required: false,
-                            message: "required"
-                        }]}
-                    >
-                        <DatePicker format="MMM DD YYYY" allowClear={false} />
-                    </Form.Item>
-                </Col>
-                 <Col style={{}} span={8}>
-                    <Form.Item
-                        required={false}
-                        label="Status"
-                        name="status"
-                        rules={[{
-                            required: false,
-                            message: "required"
-                        }]}
-                    >
-                        <Select
-                            // onChange={(e) => { setNameType(e) }}
-                            // defaultValue={"active"}
-                            bordered={false}
-                            onChange={(value) => {
-                                status = value;
-                              }} 
-                            suffixIcon={Icons.downArrowFilled({ style: { color: "#121215" } })}>
-                            <Option value="active"><span style={{ color: "#08D000" }}>Active</span></Option>
-                            <Option value="inactive"><span style={{ color: "#EB1348" }}>Inactive</span></Option>
-                        </Select>
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Allergy Type"
-                        name="allergy_type"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Allergy Name"
-                        name="allergy_name"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={reqd}
-                        label="Reaction"
-                        name="reaction"
-                        rules={[{
-                            required: reqd,
-                            message: "required"
-                        }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                </Col>
-                <Col style={{}} span={24}>
-                    <Form.Item
-                        required={false}
-                        label="Your Note"
-                        name="note"
-                        rules={[{
-                            required: false,
-                            message: "required"
-                        }]}
-                    >
-                        <TextArea autoSize={{ minRows: 3 }} />
-                    </Form.Item>
-                </Col>
-            </Row>
-        </Form>
+        <>
+            {formLoading && (
+                <div style={{ 
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%) scale(1.5)",
+                    zIndex: 20
+                }}>
+                    <Spin />
+                </div>
+            )}
+            <Form
+                form={allergyForm}
+                layout="vertical"
+                name="allergyForm"
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                style={formLoading ? { filter: "blur(2px)" } : { }}
+            >
+                <Row gutter={[0, 0]} justify="space-around">
+                    <Col style={{}} span={8}>
+                        <Form.Item
+                            required={false}
+                            label="From"
+                            name="date_from"
+                            rules={[{
+                                required: false,
+                                message: "required"
+                            }]}
+                        >
+                            <DatePicker format="MMM DD YYYY" allowClear={false} />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={8}>
+                        <Form.Item
+                            required={false}
+                            label="To"
+                            name="date_to"
+                            rules={[{
+                                required: false,
+                                message: "required"
+                            }]}
+                        >
+                            <DatePicker format="MMM DD YYYY" allowClear={false} />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={8}>
+                        <Form.Item
+                            required={false}
+                            label="Status"
+                            name="status"
+                            rules={[{
+                                required: false,
+                                message: "required"
+                            }]}
+                        >
+                            <Select
+                                // onChange={(e) => { setNameType(e) }}
+                                // defaultValue={"active"}
+                                bordered={false}
+                                onChange={(value) => {
+                                    status = value;
+                                }} 
+                                suffixIcon={Icons.downArrowFilled({ style: { color: "#121215" } })}>
+                                <Option value="active"><span style={{ color: "#08D000" }}>Active</span></Option>
+                                <Option value="inactive"><span style={{ color: "#EB1348" }}>Inactive</span></Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Allergy Type"
+                            name="allergy_type"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Allergy Name"
+                            name="allergy_name"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={reqd}
+                            label="Reaction"
+                            name="reaction"
+                            rules={[{
+                                required: reqd,
+                                message: "required"
+                            }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </Col>
+                    <Col style={{}} span={24}>
+                        <Form.Item
+                            required={false}
+                            label="Your Note"
+                            name="note"
+                            rules={[{
+                                required: false,
+                                message: "required"
+                            }]}
+                        >
+                            <TextArea autoSize={{ minRows: 3 }} />
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </Form>
+        </>
     )
 }
 
@@ -382,13 +404,13 @@ export default function MedicalHistory({ pid, setComponentSupportContent, setPad
         setComponentSupportContent(
             <div style={{
                 height: "100%",
-                width: "100%",
+                width: "50%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "flex-end",
             }}>
                 <Button onClick={() => { showDrawer(); setFormMode(modes.ADD_NEW); allergyForm.resetFields() }} type="secondary-outlined">+ Add</Button>
-                <Button style={{ width: "55px", marginLeft: "10%" }} onClick={backToPatientDetails} type="utility" icon={Icons.CloseOutlined({ Style: { color: "#000000" } })} />
+                <Button style={{ width: "55px", marginLeft: "1rem" }} onClick={backToPatientDetails} type="utility" icon={Icons.CloseOutlined({ Style: { color: "#000000" } })} />
             </div>
         )
 

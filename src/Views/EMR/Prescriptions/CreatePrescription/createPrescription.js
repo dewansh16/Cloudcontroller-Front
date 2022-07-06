@@ -23,19 +23,21 @@ import moment from 'moment';
 
 const { Option } = Select;
 
-function AddPrescriptions(pid, data, successCallBack) {
+function AddPrescriptions(pid, data, successCallBack, setLoadingPage) {
     patientApi.addPrescriptions(pid, data).then((res) => {
         notification.success({
             message: "Success",
             description: res.message
         })
         successCallBack()
+        setLoadingPage(false);
     }).catch((err) => {
         if (err) {
             notification.error({
                 message: 'Error',
                 description: `${err.response?.data.result}` || ""
             })
+            setLoadingPage(false)
         }
     })
 }
@@ -282,7 +284,7 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
             return
         }
 
-        // setLoadingPage(true);
+        setLoadingPage(true);
 
         const user = UserStore.getUser()
 
@@ -328,8 +330,7 @@ export default function CreatePrescription({ pid, setComponentSupportContent, se
 
         if (flag) AddPrescriptions(pid, data, () => {
             setEmrView(<EmrView pid={pid} setPadding={setPadding} setEmrView={setEmrView} defaultState="subgroup-3-element-1" />)
-            // setLoadingPage(false);
-        })
+        }, setLoadingPage)
     }
 
     const [addMedicineToDatabaseModalVisibility, setAddMedicineToDatabaseModalVisibility] = useState(false)

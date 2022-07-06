@@ -217,7 +217,8 @@ export function EmrView({ pid, setEmrView, setPadding, defaultState = "subgroup-
                     {/* 
                         use this class to add content to the top
                     */}
-                    <div className="body-support-content">{componentSupportContent}</div>
+                    {/* <div className="body-support-content">{componentSupportContent}</div> */}
+                    {componentSupportContent}
                 </div>
 
                 <div className="emr-body" >
@@ -255,6 +256,7 @@ export default function EMR() {
             alignItems: "center",
             justifyContent: "center",
             background: "#fff",
+            minWidth: "1200px"
         }}>
             {emrView}
         </div>
