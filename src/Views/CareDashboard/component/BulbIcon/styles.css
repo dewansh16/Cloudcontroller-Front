@@ -1,0 +1,35 @@
+.popover-notes {
+    width: 30rem;
+    font-size: 13px;
+}
+.popover-notes .row-notes {
+    display: flex;
+    align-items: center;
+}
+.popover-notes .row-notes .col-date {
+    width: 20%;
+}
+.popover-notes .row-notes .col-note {
+    width: 74%;
+}
+.popover-notes .row-notes .col-status {
+    width: 6%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popover-notes .header-note {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 4px;
+}
+
+.popover-notes .body-notes {
+    border-bottom: 1px solid #ddd;
+    padding: 4px 0;
+}
+.popover-notes .body-notes:last-child {
+    border-bottom: none;
+    margin-bottom: 4px;
+}
+

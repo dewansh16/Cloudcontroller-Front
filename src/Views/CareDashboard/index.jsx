@@ -43,7 +43,7 @@ const CareDashboard = () => {
         billingApis.updateBillingTask(
             updateData
         ).then((res) => {
-            getListCareDashboard();
+            getListCareDashboard()
         }).catch(e =>{
             console.log(e)
         })

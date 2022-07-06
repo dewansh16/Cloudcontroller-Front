@@ -71,7 +71,7 @@ const PatchForm = (props) => {
             type = valueBpType;
         }
 
-        props.form.setFieldsValue({ 
+        props.form.setFieldsValue({
             [`${type}_device_serial`]: null,
             [`${type}_mac_address`]: null,
             [`${type}_duration`]: null,
@@ -380,6 +380,8 @@ const PatchForm = (props) => {
         });
         setIsNewDevice(true);
         setDeviceSelected(data.device_serial);
+        setTagList([]);
+        setTagSelected([]);
     };
 
     useEffect(() => {
@@ -400,7 +402,10 @@ const PatchForm = (props) => {
 
             props.form.setFieldsValue({
                 [`${type}_device_serial`]: deviceFound?.["patches.device_serial"],
-                [`${type}_duration`]: [firstDay, lastDate]
+                [`${type}_duration`]: [firstDay, lastDate],
+                [`tags_add`]: isJsonString(deviceFound?.["patches.tags"]) ? JSON.parse(deviceFound?.["patches.tags"]) : [],
+                [`gateway_sim_add`]: deviceFound?.["patches.sim"],
+                [`gateway_phone_number_add`]: deviceFound?.["patches.phone"],
             });
         }
 
@@ -680,6 +685,10 @@ const PatchForm = (props) => {
                                 name={`${props.type === 'bps' ? valueBpType : props.type}_device_serial`}
                                 rules={[
                                     {
+                                        pattern: new RegExp("^[A-Za-z0-9\:._-]+$"),
+                                        message: "Please recheck the serial number entered.",
+                                    },
+                                    {
                                         required: props.required,
                                         message: "serial number is required",
                                     },
@@ -762,6 +771,10 @@ const PatchForm = (props) => {
                                     name={`${props.type === 'bps' ? valueBpType : props.type}_mac_address`}
                                     rules={[
                                         {
+                                            pattern: new RegExp("^[A-Za-z0-9\:._-]+$"),
+                                            message: "Please recheck the mac address entered.",
+                                        },
+                                        {
                                             required: props.required,
                                             message: "mac address is required",
                                         },
@@ -797,78 +810,86 @@ const PatchForm = (props) => {
                             </Form.Item>
                         </Col>
 
-                        {isNewDevice && (
-                            <>
-                                <Col span={18}>
-                                    <Form.Item
-                                        required={!props.required}
-                                        label="Tags"
-                                        name="tags_add"
-                                        rules={[
-                                            {
-                                                required: !props.required,
-                                            },
-                                        ]}
-                                        className="addPatchFormItem"
+                        {/* {isNewDevice && (
+                            <> */}
+                        {(isNewDevice || (props.form.getFieldValue("tags_add")?.length > 0 && props?.disabled)) && (
+                            <Col span={18}>
+                                <Form.Item
+                                    required={!props.required}
+                                    label="Tags"
+                                    name="tags_add"
+                                    rules={[
+                                        {
+                                            required: !props.required,
+                                        },
+                                    ]}
+                                    className="addPatchFormItem"
+                                >
+                                    <Select
+                                        showSearch
+                                        mode="multiple"
+                                        disabled={props?.disabled}
+                                        placeholder="Select tags"
+                                        className="ant-select-tags"
+                                        filterOption={true}
+                                        onSearch={(val) => onChangeValInputTagsAdd(val)}
+                                        autoClearSearchValue={false}
+                                        searchValue={valSelectSearch}
+                                        onDeselect={(val) => {
+                                            const newArr = tagSelected.filter(tag => tag !== val);
+                                            setTagSelected(newArr);
+                                        }}
+                                        notFoundContent={
+                                            valSelectSearch && (
+                                                <span style={{ fontSize: "12px", color: "#ff7529" }}>
+                                                    Enter , or ; to create a new tag
+                                                </span>
+                                            )
+                                        }
                                     >
-                                        <Select
-                                            showSearch
-                                            mode="multiple"
-                                            placeholder="Select tags"
-                                            filterOption={true}
-                                            onSearch={(val) => onChangeValInputTagsAdd(val)}
-                                            autoClearSearchValue={false}
-                                            searchValue={valSelectSearch}
-                                            onDeselect={(val) => {
-                                                const newArr = tagSelected.filter(tag => tag !== val);
-                                                setTagSelected(newArr);
-                                            }}
-                                            notFoundContent={
-                                                valSelectSearch && (
-                                                    <span style={{ fontSize: "12px", color: "#ff7529" }}>
-                                                        Enter , or ; to create a new tag
-                                                    </span>
-                                                )
-                                            }
-                                        >
-                                            {tagList?.map(tag => {
-                                                return (
-                                                    <Option key={tag} value={tag}>{tag}</Option>
-                                                )
-                                            })}
-                                        </Select>
-                                    </Form.Item>
-                                </Col>
+                                        {tagList?.map(tag => {
+                                            return (
+                                                <Option key={tag} value={tag}>{tag}</Option>
+                                            )
+                                        })}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        )}
 
-                                {props.type === "gateway" && (
-                                    <>
-                                        <Col span={18}>
-                                            <Form.Item
-                                                required={!props.required}
-                                                label="Phone Number"
-                                                name="gateway_sim_add"
-                                                rules={[ { pattern: new RegExp("^[0-9]*$"), message: "Please recheck the sim entered." }]}
-                                                className="addPatientDetailsModal"
-                                            >
-                                                <Input type="tel" placeholder="Enter SIM Card Number" />
-                                            </Form.Item>
-                                        </Col>
-                                        
-                                        <Col span={18}>
-                                            <Form.Item
-                                                required={!props.required}
-                                                label="Phone Number"
-                                                name="gateway_phone_number_add"
-                                                rules={[ { pattern: new RegExp("^[0-9]{10}$"), message: "Please recheck the phone entered." } ]}
-                                                className="addPatientDetailsModal"
-                                            >
-                                                <Input type="tel" placeholder="Enter Phone Number" />
-                                            </Form.Item>
-                                        </Col>
-                                    </>
+                        {props.type === "gateway" && (
+                            <>
+                                {(isNewDevice || (!!props.form.getFieldValue("gateway_sim_add") && props?.disabled)) && (
+                                    <Col span={18}>
+                                        <Form.Item
+                                            required={!props.required}
+                                            label="Sim Number"
+                                            name="gateway_sim_add"
+                                            rules={[{ pattern: new RegExp("^[0-9]*$"), message: "Please recheck the sim entered." }]}
+                                            className="addPatientDetailsModal"
+                                        >
+                                            <Input disabled={props?.disabled} type="tel" placeholder="Enter SIM Card Number" />
+                                        </Form.Item>
+                                    </Col>
+                                )}
+
+                                {(isNewDevice || (!!props.form.getFieldValue("gateway_phone_number_add") && props?.disabled)) && (
+                                    <Col span={18}>
+                                        <Form.Item
+                                            required={!props.required}
+                                            label="Phone Number"
+                                            name="gateway_phone_number_add"
+                                            rules={[{ pattern: new RegExp("^[0-9]{10}$"), message: "Please recheck the phone entered." }]}
+                                            className="addPatientDetailsModal"
+                                        >
+                                            <Input disabled={props?.disabled} type="tel" placeholder="Enter Phone Number" />
+                                        </Form.Item>
+                                    </Col>
                                 )}
                             </>
                         )}
+                        {/* </>
+                        )} */}
                     </Row>
                     {/* <Form.Item>
                         <Button type="primary" htmlType="submit">

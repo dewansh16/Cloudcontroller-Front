@@ -36,7 +36,13 @@ import Steps from "../PatientJourney/stepspatientJourney/steps.patientJourney";
 import DetailBox from "./components/detailBox.patientDetails";
 
 import IconTag from "../../Assets/Images/tag.png";
+import IconEdit from "../../Assets/Images/icon-edit.svg";
 import { isJsonString } from "../../Utils/utils";
+
+import SelectTagsPatient from "../AddPatient/SelectTagsPatient";
+
+import Select from 'antd/lib/select'
+const { Option } = Select;
 
 export default function PatientDetails(props) {
     const { pid } = useParams();
@@ -113,6 +119,7 @@ export default function PatientDetails(props) {
     const [durationArray, setDurationArray] = useState([]);
     const [summaryModal, openSummaryModal] = useState(false);
 
+    const [isEditTag, setIsEditTag] = useState(false);
     const [tagsSelected, setTagsSelected] = useState([]);
     const [arrayOptionTags, setArrOptionTags] = useState([]);
 
@@ -434,6 +441,41 @@ export default function PatientDetails(props) {
         background: "transparent",
     };
 
+    const updatePatient = () => {
+        let userData = UserStore.getUser();
+        let tenantId = userData.tenant;
+
+        const payload = {
+            tenantId,
+            demographic_map: { ...patient?.demographic_map, tenant_id: tenantId, tags: tagsSelected }
+        };
+        patientApi
+            .addPatient(payload, patient?.demographic_map?.pid)
+            .then(res => {
+                const newData = { ...patient };
+                newData.demographic_map.tags = JSON.stringify(tagsSelected);
+                setPatient(newData);
+
+                notification.success({
+                    message: "Updated",
+                    description: "Update tags successfullty!",
+                });
+                setIsEditTag(false);
+            })
+            .catch(err => {
+                notification.error({
+                    message: "Updated",
+                    description: "Update tags failed!",
+                })
+                // const tags = isJsonString(patient?.demographic_map?.tags) ? JSON.parse(patient?.demographic_map?.tags) : [];
+                // setTagsSelected(tags);
+            })
+    }
+
+    const onBlurSelectTags = () => {
+        updatePatient();
+    };
+
     return (
         <>
             {" "}
@@ -476,7 +518,7 @@ export default function PatientDetails(props) {
                                                 style={{ border: "none", boxShadow: "none" }}
                                                 className="back-buttons utility"
                                                 onClick={() => {
-                                                    history.push({ 
+                                                    history.push({
                                                         pathname: '/dashboard/patient/list',
                                                         state: { dataFilterHeader: props?.location?.state?.dataFilterHeader || null }
                                                     });
@@ -555,21 +597,50 @@ export default function PatientDetails(props) {
                                         </div>
                                     </div>
                                     <div style={{ marginLeft: "15%" }}>
-                                        <div className="detail-tags-wrapper">
-                                            <div style={{ height: "25px", display: "flex", alignItems: "center" }}>
-                                                <img className="icon-tags" src={IconTag} />
+                                        {JSON.parse(patient?.demographic_map?.tags)?.length > 0 && (
+                                            <div className="detail-tags-wrapper">
+                                                {!isEditTag ? (
+                                                    <div
+                                                        style={{ height: "25px", display: "flex", alignItems: "center", cursor: "pointer" }}
+                                                        onClick={() => setIsEditTag(!isEditTag)}
+                                                    >
+                                                        <img className="icon-edit" src={IconEdit} />
+                                                        <img className="icon-tags" src={IconTag} />
+                                                    </div>
+                                                ) : (
+                                                    <div
+                                                        style={{ height: "25px", display: "flex", alignItems: "center", cursor: "pointer" }}
+                                                        onClick={() => setIsEditTag(!isEditTag)}
+                                                    >
+                                                        <img className="icon-edit edit-active" src={IconEdit} />
+                                                    </div>
+                                                )}
+
+                                                {isEditTag ? (
+                                                    <SelectTagsPatient
+                                                        tagsSelected={tagsSelected}
+                                                        setTagsSelected={setTagsSelected}
+                                                        arrayOptionTags={arrayOptionTags}
+                                                        setArrOptionTags={setArrOptionTags}
+                                                        onBlur={onBlurSelectTags}
+                                                    />
+                                                ) : (
+                                                    <div>
+                                                        {tagsSelected?.map((tag, index) => {
+                                                            return (
+                                                                <div key={`${tag?.value}-${index}`} className="tag-item" style={{ background: tag?.color }}>
+                                                                    <span style={{
+                                                                        textOverflow: "ellipsis",
+                                                                        overflow: "hidden",
+                                                                        whiteSpace: "nowrap",
+                                                                    }}>{tag?.value}</span>
+                                                                </div>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                )}
                                             </div>
-                                            
-                                            <div>
-                                                {tagsSelected?.map((tag, index) => {
-                                                    return (
-                                                        <div key={`${tag?.value}-${index}`} className="tag-item" style={{ background: tag?.color }}>
-                                                            {tag?.value}
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </div>
+                                        )}
                                     </div>
                                 </Col>
 
@@ -644,10 +715,10 @@ export default function PatientDetails(props) {
                                                             pid: pid,
                                                             name:
                                                                 `${patient.demographic_map.title === undefined
-                                                                ? ""
-                                                                : patient.demographic_map.title}` 
+                                                                    ? ""
+                                                                    : patient.demographic_map.title}`
                                                                 + " " +
-                                                                patient.demographic_map.fname 
+                                                                patient.demographic_map.fname
                                                                 + " " +
                                                                 patient.demographic_map.lname,
                                                             mr: patient.demographic_map.med_record,
@@ -1013,11 +1084,11 @@ export default function PatientDetails(props) {
                                 onCancel={closeQuickInfo}
                                 bodyStyle={{ backgroundColor: "white", padding: "2em 4em" }}
                             >
-                                <DeviceManagement 
-                                    pid={pid} 
+                                <DeviceManagement
+                                    pid={pid}
                                     patient={patient}
                                     setPatient={setPatient}
-                                    valDuration={props?.location?.state?.dataFilterHeader?.valDuration || "7d"} 
+                                    valDuration={props?.location?.state?.dataFilterHeader?.valDuration || "7d"}
                                 />
                             </Modal>
                         </Row>{" "}

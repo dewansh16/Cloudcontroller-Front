@@ -221,13 +221,14 @@ function AddPatient() {
                             demographic_map.admission_date !== undefined
                             ? moment(demographic_map.admission_date)
                             : null;
+
                     // console.log(demographic_map.discharge_date);
                     demographic_map.discharge_date =
                         demographic_map.discharge_date !== null &&
                             demographic_map.discharge_date !== undefined
                             ? moment(demographic_map.discharge_date)
                             : null;
-                    // console.log(demographic_map.discharge_date);
+                            
                     demographic_map.deceased_date =
                         demographic_map.deceased_date !== null &&
                             demographic_map.deceased_date !== undefined
@@ -850,11 +851,18 @@ function AddPatient() {
                 })
                 .catch((err) => {
                     setButtonLoading(false);
-                    setSummary({
-                        isVisible: true,
-                        status: "error",
-                        title: `Couldn't associate Sensor`,
-                    });
+                    // setSummary({
+                    //     isVisible: true,
+                    //     status: "error",
+                    //     title: `Couldn't associate Sensor`,
+                    // });
+                    if (err) {
+                        const error = "" + err?.response?.data?.message;
+                        notification.error({
+                            message: "Error",
+                            description: `${error}` || "",
+                        });
+                    }
                 });
         } else {
             handleAssociateDevice(dataBody);

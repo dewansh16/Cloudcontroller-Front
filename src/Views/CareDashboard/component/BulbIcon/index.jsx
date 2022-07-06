@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 
 import IconBulbOn from "../../../../Assets/Images/bulbOn.png"
 import IconBulbOff from "../../../../Assets/Images/bulbOff.png";
-import { Button, Input, Popover } from 'antd';
 import billingApi from '../../../../Apis/billingApis';
 import {CPT_CODE} from '../../../../Utils/utils';
 import {isObject, isArray} from 'lodash';
+import { Button, Checkbox, Input, Popover } from 'antd';
+
+import "./styles.css";
+import moment from 'moment';
 
 const BulbIcon = ({pid, billDate, onSaveNoteToDb}) => {
     const [isTurnOn, setIsTurnOn] = useState(false);

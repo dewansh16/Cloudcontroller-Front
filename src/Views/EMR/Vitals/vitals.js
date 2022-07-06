@@ -4,7 +4,7 @@ import { Button } from "../../../Theme/Components/Button/button";
 import Icons from "../../../Utils/iconMap";
 
 import { Input, InputNumber } from "../../../Theme/Components/Input/input";
-import { Select, SelectOption } from "../../../Theme/Components/Select/select";
+// import { Select, SelectOption } from "../../../Theme/Components/Select/select";
 import TertiaryMenu from "../../../Theme/Components/Menu/Tertiary/menu";
 import Toggle from "../../../Theme/Components/Toggle/toggle";
 import { Slider } from "../../../Theme/Components/Slider/slider";
@@ -36,7 +36,11 @@ import {
     ResponsiveContainer,
 } from "recharts";
 
+import Select from 'antd/lib/select'
 import "./vitals.css";
+import moment from "moment";
+
+const { Option } = Select;
 
 const createVitalName = (name) => {
     const changedName = name.replace("_", " ");
@@ -98,8 +102,9 @@ function CreateGraphData(pid, graphType, numberOfRecords) {
             .then((res) => {
                 const vitals = res.data.response.vitals;
                 let graphData = [];
+
                 const max =
-                    numberOfRecords > vitals.length ? vitals.length : numberOfRecords;
+                    numberOfRecords > vitals?.length ? vitals?.length : numberOfRecords;
                 for (let i = 0; i < max; i++) {
                     let date = getCurrentDate(vitals[i]["date"]);
                     let tempData = {};
@@ -107,6 +112,7 @@ function CreateGraphData(pid, graphType, numberOfRecords) {
                     tempData[graphType] = vitals[i][graphType];
                     graphData.push(tempData);
                 }
+
                 setData([...graphData.reverse()]);
                 setResponse(vitals);
                 setLoading(false);
@@ -244,17 +250,11 @@ export default function Vitals({
         const [form] = Form.useForm();
 
         const onFinish = (values) => {
-            // const data = {
-            //     height: 5.10,
-            //     weight: 81.0,
-            //     spo2: "99",
-            //     temperature: 99.0,
-            //     pulse: "74",
-            //     respiration: 3.5,
-            //     bpd: "70",
-            //     bps: "100",
-            // }
+            const { tenant } = UserStore.getUser();
+
             values["user"] = user.fname;
+            values["pid"] = pid;
+            values["tenant_id"] = tenant;
             AddVitals(pid, values);
         };
 
@@ -303,7 +303,7 @@ export default function Vitals({
                                 <Row gutter={[24, 24]} justify="space-between">
                                     <Col style={{}} span={12}>
                                         <Form.Item
-                                            required={false}
+                                            required={true}
                                             label="Height"
                                             name="height"
                                             rules={[
@@ -324,7 +324,7 @@ export default function Vitals({
                                     </Col>
                                     <Col style={{}} span={12}>
                                         <Form.Item
-                                            required={false}
+                                            required={true}
                                             label="Weight"
                                             name="weight"
                                             rules={[
@@ -346,7 +346,7 @@ export default function Vitals({
                                 <Row gutter={[24, 24]} justify="space-between">
                                     <Col style={{}} span={12}>
                                         <Form.Item
-                                            required={false}
+                                            required={true}
                                             label="SpO2"
                                             name="spo2"
                                             rules={[
@@ -356,23 +356,21 @@ export default function Vitals({
                                                 },
                                             ]}
                                         >
-                                            {
-                                                // <InputNumber
-                                                // placeholder="in %"
-                                                // formatter={value => `${value}%`}
-                                                // parser={value => value.replace('%', '')}
-                                                // />
-                                            }
-                                            <Input
+                                            <InputNumber
+                                                placeholder="in %"
+                                                formatter={value => `${value}%`}
+                                                parser={value => value.replace('%', '')}
+                                            />
+                                            {/* <Input
                                                 placeholder="in %"
                                                 formatter={(value) => `${value}%`}
                                                 parser={(value) => value.replace("%", "")}
-                                            />
+                                            /> */}
                                         </Form.Item>
                                     </Col>
                                     <Col style={{}} span={12}>
                                         <Form.Item
-                                            required={false}
+                                            required={true}
                                             label="Temperature"
                                             name="temperature"
                                             rules={[
@@ -393,7 +391,7 @@ export default function Vitals({
                                 <Row gutter={[24, 24]} justify="space-between">
                                     <Col style={{}} span={12}>
                                         <Form.Item
-                                            required={false}
+                                            required={true}
                                             label="Heart Rate"
                                             name="pulse"
                                             rules={[
@@ -412,7 +410,7 @@ export default function Vitals({
                                     </Col>
                                     <Col style={{}} span={12}>
                                         <Form.Item
-                                            required={false}
+                                            required={true}
                                             label="Respiration Rate"
                                             name="respiration"
                                             rules={[
@@ -433,7 +431,7 @@ export default function Vitals({
                                 <Row gutter={[24, 24]} justify="space-between">
                                     <Col style={{}} span={12}>
                                         <Form.Item
-                                            required={false}
+                                            required={true}
                                             label="Blood Pressure Diastolic (BPD)"
                                             name="bpd"
                                             rules={[
@@ -443,7 +441,7 @@ export default function Vitals({
                                                 },
                                             ]}
                                         >
-                                            <Input
+                                            <InputNumber
                                                 placeholder="in mmHg"
                                                 formatter={(value) => `${value}mmHg`}
                                                 parser={(value) => value.replace("mmHg", "")}
@@ -452,7 +450,7 @@ export default function Vitals({
                                     </Col>
                                     <Col style={{}} span={12}>
                                         <Form.Item
-                                            required={false}
+                                            required={true}
                                             label="Blood Pressure Systolic (BPS)"
                                             name="bps"
                                             rules={[
@@ -462,7 +460,7 @@ export default function Vitals({
                                                 },
                                             ]}
                                         >
-                                            <Input
+                                            <InputNumber
                                                 placeholder="in mmHg"
                                                 formatter={(value) => `${value}mmHg`}
                                                 parser={(value) => value.replace("mmHg", "")}
@@ -473,7 +471,7 @@ export default function Vitals({
                                 <Row gutter={[24, 24]} justify="space-between">
                                     <Col style={{}} span={12}>
                                         <Form.Item
-                                            required={false}
+                                            required={true}
                                             label="Pain Index"
                                             name="pain_index"
                                             rules={[
@@ -594,7 +592,8 @@ export default function Vitals({
                                 <div className="vital-info">
                                     <p>
                                         <span style={{ opacity: "0.5" }}>Recorded on: </span>
-                                        {`${vital.date.slice(0, 10)}`}
+                                        {/* {`${vital.date.slice(0, 10)}`} */}
+                                        {moment(vital.date).format("MMM DD YYYY")}
                                     </p>
                                     <p>
                                         <span style={{ opacity: "0.5" }}>By: </span>
@@ -664,14 +663,14 @@ export default function Vitals({
                         >
                             <Spin />
                         </div>
-                    ) : vitals.length > 0 ? (
+                    ) : vitals?.length > 0 ? (
                         <Collapse
                             className="vitals-list-collapse"
                             expandIconPosition="right"
                             style={{
                                 overflowY: "scroll",
-                                padding: "1rem",
-                                maxHeight: "calc(80vh - 12.7rem)",
+                                padding: "0 1rem",
+                                maxHeight: "calc(100vh - 14.7rem)",
                                 margin: "1rem 2rem 1rem 2rem",
                                 background: "#fff",
                             }}
@@ -682,7 +681,7 @@ export default function Vitals({
                                 })
                             }
                         >
-                            {vitals.map((vital, id) => {
+                            {vitals?.map((vital, id) => {
                                 return CollapsePanel(vital, id);
                             })}
                         </Collapse>
@@ -762,9 +761,9 @@ export default function Vitals({
                                 defaultValue={7}
                                 onChange={(e) => setNumberOfRecords(e)}
                             >
-                                <SelectOption value={7}>Last 7 Records</SelectOption>
-                                <SelectOption value={5}>Last 5 Records</SelectOption>
-                                <SelectOption value={3}>Last 3 Records</SelectOption>
+                                <Option value={7}>Last 7 Records</Option>
+                                <Option value={5}>Last 5 Records</Option>
+                                <Option value={3}>Last 3 Records</Option>
                             </Select>
                         </Col>
                         <Col
@@ -783,6 +782,19 @@ export default function Vitals({
                     setVitalsViewSupportContent(null);
                 };
             }, [currentGraphType, numberOfRecords, data]);
+
+            const getMinMaxLineChart = () => {
+                let max = 0;
+                if (data?.length > 0) {
+                    data.map(item => {
+                        const value = Number(item[currentGraphType]);
+                        if (value > max) {
+                            max = value;
+                        }
+                    })
+                }
+                return [0, max];
+            };
 
             return isLoading ? (
                 <div
@@ -814,7 +826,7 @@ export default function Vitals({
                         margin={{ top: 5, right: 30, left: 30, bottom: 5 }}
                     >
                         <XAxis dataKey="name" padding={{ left: 30, right: 30 }} />
-                        <YAxis dataKey={currentGraphType} />
+                        <YAxis dataKey={currentGraphType} domain={getMinMaxLineChart()} />
                         <Tooltip />
                         <Legend />
                         <Line
@@ -1111,7 +1123,8 @@ export default function Vitals({
                             <div className="vital-info">
                                 <p>
                                     <span style={{ opacity: "0.5" }}>Recorded on: </span>
-                                    {`${threshold.createdAt.slice(0, 10)}`}
+                                    {/* {`${threshold.createdAt.slice(0, 10)}`} */}
+                                    {moment(threshold.createdAt).format("MMM DD YYYY")}
                                 </p>
                                 {/* <p><span style={{ opacity: "0.5" }}>By: </span>{`${vitalthresholds.user}`}</p> */}
                             </div>
@@ -1185,7 +1198,7 @@ export default function Vitals({
                         style={{
                             overflowY: "scroll",
                             padding: "1rem",
-                            maxHeight: "calc(80vh - 8.7rem)",
+                            maxHeight: "calc(100vh - 15rem)",
                             margin: "0 2rem 0 2rem",
                             background: "#fff",
                         }}

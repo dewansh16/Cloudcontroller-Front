@@ -172,6 +172,69 @@ const PatientListItem = (props) => {
         associatedList = JSON.parse(props?.data?.demographic_map?.associated_list);
     }
 
+    // const processDataForSensor = (queryFilter) => {
+    //     const query = `from(bucket: "test-bucket")
+    //         |> range(start: -${props.dataFilterOnHeader.valDuration})
+    //         |> filter(fn: (r) => r["_measurement"] == "${props.pid}")
+    //         |> filter(fn: (r) => ${queryFilter})
+    //         |> yield(name: "mean")`
+
+    //     const arrayTotalData = [];
+        
+    //     queryApi.queryRows(query, {
+    //         next(row, tableMeta) {
+    //             const dataQueryInFlux = tableMeta?.toObject(row) || {};
+    //             arrayTotalData.push(dataQueryInFlux);
+    //         },
+    //         error(error) {
+    //             console.error(error)
+    //             console.log('nFinished ERROR')
+    //         },
+    //         complete() {
+    //             const newArrayDataChart = [...chartBlockData];
+    //             const lengthFor = arrayTotalData?.length;
+
+    //             newArrayDataChart.map(itemChart => {
+    //                 itemChart.trendData = [];
+
+    //                 for (let index = 0; index < lengthFor; index++) {
+    //                     const dataQuery = arrayTotalData[index];
+    //                     const { _field = "", _value = 0, _time = "" } = dataQuery;
+
+    //                     if (_field === itemChart?._key) {
+    //                         itemChart.trendData?.push({ value: _value, time: _time })
+    //                     } 
+                        
+    //                     if (itemChart?._key === "blood_pressuer") {
+    //                         if (_field === "alphamed_bps" || _field === "ihealth_bps") {
+    //                             itemChart.trendData?.push({ value: _value, time: _time })
+    //                         } else {
+    //                             itemChart.val_bpd = _value
+    //                         }
+    //                     }
+    //                 }
+
+    //                 const itemLastchild = itemChart?.trendData?.[itemChart?.trendData?.length - 1]
+    //                 itemChart.val = itemLastchild?.value || 0;
+    //                 itemChart.lastTime = itemLastchild?.time;
+    //             })
+
+    //             setChartBlockData([...newArrayDataChart]);
+    //         },
+    //     })
+    // }
+
+    const formatKeyCompare = (keySensor) => ({
+        "temp": "temperature",
+        "spo2": "spo2",
+        "ecg_hr": "ecg",
+        "ecg_rr": "ecg",
+        "weight": "digital",
+        "gateway_keep_alive_time": "gateway"
+    }[keySensor]);
+
+    const enableBloodPressure = associatedList?.includes("alphamed") || associatedList?.includes("ihealth");
+
     const processDataForSensor = (key, newArrChart, chart) => {
         const query = `from(bucket: "emr_dev")
                 |> range(start: -${props.dataFilterOnHeader.valDuration})
@@ -218,17 +281,6 @@ const PatientListItem = (props) => {
         })
     }
 
-    const formatKeyCompare = (keySensor) => ({
-        "temp": "temperature",
-        "spo2": "spo2",
-        "ecg_hr": "ecg",
-        "ecg_rr": "ecg",
-        "weight": "digital",
-        "gateway_keep_alive_time": "gateway"
-    }[keySensor]);
-
-    const enableBloodPressure = associatedList?.includes("alphamed") || associatedList?.includes("ihealth");
-
     const getDataSensorFromInfluxDB = () => {
         const newArrChart = [...arrDataChart];
         
@@ -261,16 +313,38 @@ const PatientListItem = (props) => {
         }
     };
 
+    // const getDataSensorFromInfluxDB = () => {
+    //     const newArrChart = [...arrDataChart];
+    //     let query = "";
+        
+    //     for (let index = 0; index < newArrChart.length; index++) {
+    //         const chart = newArrChart[index];
+    //         const key = chart?._key;
+
+    //         if (key !== "blood_pressuer") {
+    //             query += `${index > 0 ? ' or' : ''} r["_field"] == "${key}"`
+    //         } else {
+    //             let arrKeyChild = ["alphamed_bpd", "alphamed_bps"];
+
+    //             arrKeyChild.map(item => {
+    //                 query += `${query?.length > 10 ? ' or' : ''} r["_field"] == "${item}"`
+    //             })
+    //         }
+    //     }
+
+    //     processDataForSensor(query);
+    // };
+
     useEffect(() => {
         getDataSensorFromInfluxDB();
 
-        // const timeInterval = setInterval(() => {
-        //     getDataSensorFromInfluxDB();
-        // }, 10000);
+        const timeInterval = setInterval(() => {
+            getDataSensorFromInfluxDB();
+        }, 10000);
 
-        // return () => {
-        //     clearInterval(timeInterval);
-        // }
+        return () => {
+            clearInterval(timeInterval);
+        }
     }, [props?.pid, props?.dataFilterOnHeader?.valDuration, props?.patientListToShow]);
 
     const pushToPatientDetails = () => {

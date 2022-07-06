@@ -177,7 +177,7 @@ function MedicineListItem({
                                         notFoundContent={
                                             <div>Search for medicine or 
                                                 <span 
-                                                    style={{ cursor: "pointer", color: "red" }} 
+                                                    style={{ cursor: "pointer", color: "red", marginLeft: "4px" }} 
                                                     onClick={showAddMedicineToDatabaseModal}
                                                 >
                                                     Add new medicine to database
@@ -259,7 +259,8 @@ function MedicineListItem({
                                         message: `required`
                                     }]}
                                 >
-                                    <Input type="text" placeholder="NA" />
+                                    {/* <Input type="text" placeholder="NA" /> */}
+                                    <InputNumber min={1} placeholder="NA" />
                                 </Form.Item>
                             </Col>
                             <Col span={6}>
@@ -368,7 +369,6 @@ function MedicineListItem({
                                     <Input type="text" placeholder="Details" />
                                 </Form.Item>
                             </Col>
-
                         </Row>
                     </Col>
 

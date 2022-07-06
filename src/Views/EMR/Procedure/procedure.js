@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Row, Col, Drawer, Form, notification, Table } from '../../../Theme/antdComponents'
 import { Button } from '../../../Theme/Components/Button/button'
 import { Input, GlobalTextArea as TextArea } from '../../../Theme/Components/Input/input'
-import { Select, SelectOption as Option } from '../../../Theme/Components/Select/select'
+// import { Select, SelectOption as Option } from '../../../Theme/Components/Select/select'
 import { DatePicker } from '../../../Theme/Components/DateTimePicker/dateTimePicker'
 import Icons from '../../../Utils/iconMap'
 import { modes } from './mode'
@@ -10,36 +10,8 @@ import patientApi from '../../../Apis/patientApis'
 import { useHistory } from 'react-router-dom'
 import moment from 'moment'
 import { UserStore } from "../../../Stores/userStore";
-
-function FetchProcedure(pid, limit) {
-    const [response, setResponse] = useState(null)
-    const [loading, setLoading] = useState(true)
-    const [dataSource, setDataSource] = useState([])
-
-    useEffect(() => {
-        patientApi.getPatientProcedure(pid, limit).then((res) => {
-            res.data.response['procedure_list'].map((procedure, idx) => {
-                dataSource.push({
-                    key: idx,
-                    ...procedure
-                })
-            })
-            setDataSource([...dataSource])
-            setResponse(res.data.response)
-            setLoading(false);
-        }).catch((err) => {
-            console.log(err)
-            if (err) {
-                notification.error({
-                    message: 'Error',
-                    description: `${err.response?.data.result}` || ""
-                })
-                setLoading(false);
-            }
-        })
-    }, [pid])
-    return [response, loading, dataSource]
-}
+import Select from 'antd/lib/select'
+const { Option } = Select;
 
 function AddProcedure(pid, data, successCallBack) {
     // "pid": "patientc10c064c-fd5a-4ddc-85ca-1744d6104229",
@@ -54,6 +26,7 @@ function AddProcedure(pid, data, successCallBack) {
     // "label": "normal"
     let userData = UserStore.getUser();
     let tenantId = userData.tenant;
+
     data.pid = pid;
     data.tenant_id = tenantId;
     patientApi.createPatientProcedure(pid, data).then((res) => {
@@ -91,18 +64,17 @@ function UpdateProcedure(pid, data, successCallBack) {
     })
 }
 
-const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCallBack, pid }) => {
+const AddProcedureForm = ({ visible, data, mode = modes.ADD_NEW, procedureForm, successCallBack, pid }) => {
     const reqd = mode === modes.ADD_NEW
     const procedure_uuid = procedureForm.getFieldValue("procedure_uuid")
+
     const onFinish = (values) => {
         let formData = {}
         formData = { ...values }
         if (mode === modes.ADD_NEW) {
-            console.log(pid, formData)
             AddProcedure(pid, formData, successCallBack = successCallBack)
         } else if (mode === modes.EDIT) {
-            formData['procedure_uuid'] = procedure_uuid
-            console.log(pid, formData)
+            formData.procedure_uuid = procedure_uuid;
             UpdateProcedure(pid, formData, successCallBack = successCallBack)
         } else {
             notification.warning({
@@ -110,7 +82,6 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
                 description: `Unknown form mode is selected`
             })
         }
-        console.log("the form mode is", mode)
     }
 
     const onFinishFailed = (values) => {
@@ -122,14 +93,14 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
     }
 
     useEffect(() => {
-        if (!data) {
+        if (mode === modes.ADD_NEW && visible) {
             procedureForm.setFieldsValue({
                 "diagnosis_date": moment(),
                 "label": "normal",
                 "status": "complete"
             })
         }
-    }, [data])
+    }, [mode, visible])
     return (
         <Form
             form={procedureForm}
@@ -141,7 +112,7 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
             <Row gutter={[0, 0]} justify="space-around">
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Date of diagnosis"
                         name="diagnosis_date"
                         rules={[{
@@ -149,12 +120,12 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
                             message: "required"
                         }]}
                     >
-                        <DatePicker format="MMM DD YYYY" />
+                        <DatePicker format="MMM DD YYYY" allowClear={false} />
                     </Form.Item>
                 </Col>
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Procedure Code Type"
                         name="code_type"
                         rules={[{
@@ -167,7 +138,7 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
                 </Col>
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Procedure Description"
                         name="description"
                         rules={[{
@@ -180,7 +151,7 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
                 </Col>
                 <Col style={{}} span={24}>
                     <Form.Item
-                        required={false}
+                        required={reqd}
                         label="Result/Conclusion"
                         name="result"
                         rules={[{
@@ -216,7 +187,6 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
                     >
                         <Select
                             // onChange={(e) => { setNameType(e) }}
-                            defaultValue={"complete"}
                             bordered={false}
                             suffixIcon={Icons.downArrowFilled({ style: { color: "#121215" } })}>
                             <Option value="complete"><span style={{}}>Complete</span></Option>
@@ -236,7 +206,7 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
                     >
                         <Select
                             // onChange={(e) => { setNameType(e) }}
-                            defaultValue={"normal"}
+                            // defaultValue={"normal"}
                             bordered={false}
                             suffixIcon={Icons.downArrowFilled({ style: { color: "#121215" } })}>
                             <Option value="normal"><span style={{}}>Normal</span></Option>
@@ -251,10 +221,49 @@ const AddProcedureForm = ({ data, mode = modes.ADD_NEW, procedureForm, successCa
 
 export default function Procedure({ pid, setComponentSupportContent, setPadding, setEmrView }) {
     let history = useHistory();
-    const [medicalHistory, isLoading, dataSource] = FetchProcedure(pid, 20)
-    const [procedureForm] = Form.useForm()
+    const [procedureForm] = Form.useForm();
+
     const [visible, setVisible] = useState(false);
-    const [formMode, setFormMode] = useState(modes.ADD_NEW)
+    const [formMode, setFormMode] = useState(modes.ADD_NEW);
+    const [procedur, setProcedure]= useState({
+        isLoading: false,
+        dataSource: []
+    })
+
+    function FetchProcedure() {
+        patientApi.getPatientProcedure(pid, 20).then((res) => {
+            const dataSource = [];
+            res.data.response['procedure_list'].map((procedure, idx) => {
+                dataSource.push({
+                    key: idx,
+                    ...procedure
+                })
+            })
+            setProcedure({
+                isLoading: false,
+                dataSource: dataSource
+            })
+        }).catch((err) => {
+            console.log(err)
+            if (err) {
+                notification.error({
+                    message: 'Error',
+                    description: `${err.response?.data.result}` || ""
+                })
+                setProcedure({
+                    isLoading: false,
+                    dataSource: []
+                })
+            }
+        })
+    }
+
+    useEffect(() => {
+        if (pid) {
+            FetchProcedure();
+        }
+    }, [pid]);
+
     const showDrawer = () => {
         setVisible(true);
     };
@@ -262,36 +271,56 @@ export default function Procedure({ pid, setComponentSupportContent, setPadding,
         setVisible(false);
     };
 
-
     const columns = [
         {
-            title: "Date",
+            title: "Diagnosis date",
             dataIndex: "diagnosis_date",
             key: "diagnosis_date",
+            width: 150,
+            render: data => moment(data).format("MMM DD YYYY")
         },
         {
-            title: "Procedure Code",
+            title: "Code type",
             dataIndex: "code_type",
-            key: "treatment"
+            key: "code_type"
         },
         {
-            title: "Procedure",
+            title: "Description",
             dataIndex: "description",
             key: "description"
         },
         {
+            title: "Result/Conclusion",
+            dataIndex: "result",
+            key: "result"
+        },
+        {
+            title: "Consulting Person",
+            dataIndex: "consulting_person",
+            key: "consulting_person"
+        },
+        {
             title: "Status",
             dataIndex: "status",
-            key: "status"
+            key: "status",
+            width: 130,
+            render: (dataIndex) => (
+                <span style={{ textTransform: "capitalize" }}>{dataIndex}</span>
+            )
         },
         {
             title: "Labels",
             dataIndex: "label",
-            key: "label"
+            key: "label",
+            width: 130,
+            render: (dataIndex) => (
+                <span style={{ textTransform: "capitalize" }}>{dataIndex}</span>
+            )
         },
         {
             title: "",
             key: "data",
+            width: 60,
             render: data => Icons.edit({
                 onClick: () => {
                     showDrawer();
@@ -304,8 +333,10 @@ export default function Procedure({ pid, setComponentSupportContent, setPadding,
     ]
 
     const successCallBack = () => {
-        console.log(`/dashboard/patient/EMR/${pid}`)
-        window.location.reload(false)
+        // console.log(`/dashboard/patient/EMR/${pid}`)
+        // window.location.reload(false)
+        FetchProcedure();
+        onClose();
     }
 
     const backToPatientDetails = () => {
@@ -347,12 +378,12 @@ export default function Procedure({ pid, setComponentSupportContent, setPadding,
                 visible={visible}
                 width={720}
             >
-                <AddProcedureForm pid={pid} procedureForm={procedureForm} mode={formMode} successCallBack={successCallBack} />
+                <AddProcedureForm visible={visible} pid={pid} procedureForm={procedureForm} mode={formMode} successCallBack={successCallBack} />
             </Drawer>
 
             <Row gutter={[0, 0]}>
                 <Col span={24}>
-                    <Table dataSource={dataSource} columns={columns} scroll={{ y: 360 }} pagination={{ position: ["bottomCenter"] }} />
+                    <Table dataSource={procedur?.dataSource} columns={columns} scroll={{ y: 360 }} pagination={{ position: ["bottomCenter"] }} />
                 </Col>
             </Row>
         </div >

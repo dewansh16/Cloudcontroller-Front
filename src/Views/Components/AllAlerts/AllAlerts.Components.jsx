@@ -14,7 +14,6 @@ function FetchAlertData(isAttended) {
     useEffect(() => {
         setLoading(true);
         patientApi.getAlerts().then((res) => {
-            console.log('xxxxx', res.data?.response)
 
             let alerts = res.data?.response.alerts[0].alerts;
             if (isAttended === "attended") {
@@ -97,9 +96,6 @@ const AllAlerts = (props) => {
     const goBack = () => {
         props.history.goBack();
     }
-
-
-    console.log(data, isLoading, userType, isAttended)
 
     return (
         <div style={{ width: '100%', margin: '0 auto', position: 'relative' }}>
