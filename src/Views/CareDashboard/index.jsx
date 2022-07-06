@@ -21,6 +21,7 @@ import TotalReading from './component/TotalReading';
 import "./styles.css";
 import moment from 'moment';
 import {CPT_CODE} from '../../Utils/utils';
+import billingApis from '../../Apis/billingApis';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -35,8 +36,18 @@ const CareDashboard = () => {
 
     const [careDashboard, setCareDashboard] = useState({
         loading: false,
-        dataSource: [{ name: "1"}]
+        dataSource: [{}]
     });
+
+    const onSaveNoteToDb = (updateData) => {
+        billingApis.updateBillingTask(
+            updateData
+        ).then((res) => {
+            getListCareDashboard()
+        }).catch(e =>{
+            console.log(e)
+        })
+    }
 
     const getListCareDashboard = () => {
         setCareDashboard({
@@ -63,7 +74,7 @@ const CareDashboard = () => {
     };
 
     useEffect(() => {
-        // getListCareDashboard();
+        getListCareDashboard();
     }, []);
 
     const columns = [
@@ -72,11 +83,11 @@ const CareDashboard = () => {
             dataIndex: "patient_datum",
             key: "patient_datum",
             width: 50,
-            render: (dataIndex) => {
+            render: (dataIndex, record) => {
                 return (
                     <div style={{ display: "flex", alignItems: "center" }}>
                         <div style={{ marginLeft: "2px", marginRight: "2px" }}>
-                            <BulbIcon />
+                            <BulbIcon pid={record?.pid} billDate={valueDate} onSaveNoteToDb={onSaveNoteToDb} />
                         </div>
                         <div style={{ marginLeft: "0.25rem", textAlign: "start" }}>
                             <div style={{
@@ -108,7 +119,7 @@ const CareDashboard = () => {
                 let secondDoctor = '';
                 try {
                     const firstDoctorDb = record?.patient_datum?.primary_consultant;
-                    firstDoctorDb.map(item => {
+                    firstDoctorDb?.map(item => {
                         primaryDoctor += `${item?.fname} ${item?.lname}, `
                     })
                     primaryDoctor = primaryDoctor.slice(0, -2);
@@ -117,7 +128,7 @@ const CareDashboard = () => {
                 }
                 try {
                     const secondDoctorDb = record?.patient_datum?.secondary_consultant;
-                    secondDoctorDb.map(item => {
+                    secondDoctorDb?.map(item => {
                         secondDoctor += `${item?.fname} ${item?.lname},`
                     })
                     secondDoctor = secondDoctor.slice(0, -1);
@@ -215,7 +226,7 @@ const CareDashboard = () => {
             }
         },
         {
-            title: "task_99091",
+            title: "99091",
             dataIndex: "99091",
             key: "10",
             width: 25,
@@ -238,8 +249,6 @@ const CareDashboard = () => {
     const handleMonthChange = (date) => {
         setValueDate(date);
     }
-
-    console.log("careDashboard", careDashboard);
 
     return (
         <div>
