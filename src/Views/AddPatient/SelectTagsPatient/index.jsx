@@ -124,7 +124,6 @@ const SelectTagsPatient = (props) => {
                     </>
                 )
             }
-            open={true}
             tagRender={(props) => tagRender(props)}
         >
             {arrayOptionTags?.map(tag => {

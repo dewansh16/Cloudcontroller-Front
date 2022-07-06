@@ -1,0 +1,31 @@
+.patient-information {
+    padding: 0!important;
+}
+.patient-information .info-title {
+    font-weight: 500;
+    color: rgb(255, 117, 41);
+}
+
+.patient-information .info-content {
+    padding-left: 1rem;
+}
+
+.patient-information .info-content .content-label {
+    color: #000000ad;
+    font-weight: 400;
+}
+
+.patient-information .info-content .content-value {
+}
+
+.patient-information .box-item-info {
+    border-bottom: 1px solid #ddd;
+    padding: 1rem;
+}
+
+.patient-information .box-item-info:last-child {
+    border-bottom: none;
+}
+
+
+
