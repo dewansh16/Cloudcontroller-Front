@@ -25,7 +25,7 @@ const PatientInfo = ({ patient }) => {
     }
 
     return (
-        <div className='gv-bottom-left-container patient-information'>
+        <div className='gv-bottom-left-container patient-information' style={{ height: "100%" }}>
             <div className='box-item-info'>
                 <div className="info-title">- Demographics</div>
                 <div className="info-content">
