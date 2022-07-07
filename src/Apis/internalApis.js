@@ -15,11 +15,11 @@ const internalApi = {
             url: `/internal/upload?limit=100&offset=0${uid ? `&template_uuid=${uid}` : ``}${pid ? `&pid=${pid}` : ``}`,
             withCredentials: true,
         }),
-    addReport: (data) =>
+    addReport: (data, pid, tenant_id) =>
         axiosInstance.request(
             {
                 method: "POST",
-                url: `/internal/report`,
+                url: `/internal/lab_report?pid=${pid}&tenant_id=${tenant_id}`,
                 data: data,
                 // withCredentials: true,
             }

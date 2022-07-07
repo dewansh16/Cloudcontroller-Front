@@ -69,7 +69,7 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
                 formData.append("data", item);
 
                 internalApi
-                    .addReport(formData)
+                    .addReport(formData, pid, pdata.demographic_map.tenant_id)
                     .then((res) => {
                         setReportData(res.data.response.Report)
                         setReportDataLoading(false)
