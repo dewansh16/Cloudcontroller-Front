@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { io } from "socket.io-client";
+import { ipAddress } from '../Utils/utils';
 
 import { Input, Select } from "antd";
 const { TextArea } = Input;
@@ -10,7 +11,7 @@ const Logger = () => {
     let typeLog = localStorage.getItem("typeLog");
 
     useEffect(() => {
-        var socket = io('http://20.230.234.202:7124', { transports: ['websocket', 'polling', 'flashsocket'] });
+        var socket = io(`http://${ipAddress}:7124`, { transports: ['websocket', 'polling', 'flashsocket'] });
 
         if (typeLog === null || typeLog === undefined) {
             typeLog = "SENSOR_LOG_DATA";

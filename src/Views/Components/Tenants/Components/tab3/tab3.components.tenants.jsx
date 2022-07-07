@@ -207,8 +207,8 @@ const Tab3 = ({ selectedTenant }) => {
                         {" "}
                         {activeFloor === i ? <span>Floor &nbsp;</span> : <></>}
                         {i}
-                        {wardsInFloor[`floor_${i}`]["wards"][`ward_count`] ===
-                            null ? null : (
+                        {(wardsInFloor[`floor_${i}`]["wards"][`ward_count`] ===
+                            null || activeFloor === i) ? null : (
                             <span style={chooseCheckIconStyleFloors(i)}>
                                 <div>
                                     <GreenTick />

@@ -1,3 +1,5 @@
+export const ipAddress = "20.230.234.202";
+
 export const CPT_CODE = {
     CPT_99453: 99453,
     CPT_99454: 99454,

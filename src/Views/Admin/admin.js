@@ -1,19 +1,23 @@
-import React, { useState, useRef } from "react";
-import Icons from "../../Utils/iconMap";
-import { Spin, Dropdown, Menu, notification, Input, Select } from "antd";
-import "./admin.css";
-import { LeftOutlined } from "@ant-design/icons";
-import { useEffect } from "react";
-import Tab3 from "../Components/Tenants/Components/tab3/tab3.components.tenants";
-import DropdownIcon from "../../Assets/Icons/dropdownIcon";
-import { Button } from "../../Theme/Components/Button/button";
-import tenantApi from "../../Apis/tenantApis";
-import NewTenant from "./NewTenantComponent/NewTenant";
-
+import React, { useState, useEffect, useRef } from "react";
 import countryList from "country-region-data";
-import RoleAndPermission from "./RoleAndPermission/roleAndPermission";
-import Roles from "./Roles/roles.Admin";
+
+import tenantApi from "../../Apis/tenantApis";
 import { UserStore } from "../../Stores/userStore";
+
+import { Spin, Menu, notification, Select } from "antd";
+import { Button } from "../../Theme/Components/Button/button";
+
+import Tab3 from "../Components/Tenants/Components/tab3/tab3.components.tenants";
+import NewTenant from "./NewTenantComponent/NewTenant";
+// import RoleAndPermission from "./RoleAndPermission/roleAndPermission";
+import Roles from "./Roles/roles.Admin";
+
+import { LeftOutlined } from "@ant-design/icons";
+import Icons from "../../Utils/iconMap";
+// import DropdownIcon from "../../Assets/Icons/dropdownIcon";
+
+import "./admin.css";
+
 const { Option } = Select;
 
 export default function Admin() {
@@ -143,14 +147,7 @@ export default function Admin() {
     //   },
     // ];
 
-    const showtenantModal = () => {
-        setChangeui(true);
-        setNewTenant(true);
-        setIsPermissionPage(false);
-        setIsInfoPage(true);
-        setcurrentTenant({});
-    };
-
+    
     const [tenants, setTenants] = useState([]);
 
     const [location, setLocation] = useState({});
@@ -231,44 +228,6 @@ export default function Admin() {
     //         });
     // }
 
-    function getLocation(tenantuuid) {
-        setLocation({});
-        tenantApi
-            .getLocation(tenantuuid)
-            .then((res) => {
-                var tempFacility = {};
-                var tempLocation = res.data?.response?.facilities || {};
-                console.log("FACILITY RESPONSE--", tempLocation);
-
-                if (tempLocation?.hasOwnProperty("name")) {
-                    console.log("------------ vo ------------", countryList);
-                    newTenantRef.current.value = tempLocation.name;
-                    newStreetRef.current.value = tempLocation.street;
-                    newCityRef.current.value = tempLocation.city;
-                    newPinCodeRef.current.value = tempLocation.postal_code;
-
-                    setSelectedState(tempLocation.state);
-
-                    var tempVarCountry = countryList.find(
-                        (country) => country.countryName === tempLocation.country_code
-                    );
-                    // setSelectedCountry(tempVarCountry);
-                    // setSelectedCountryString(tempVarCountry[0].countryName);
-                }
-
-                setLocation(tempLocation);
-                setFacilityMap(tempFacility);
-                setLoadingTable(false);
-            })
-            .catch((err) => {
-                console.log(err);
-                notification.warning({
-                    message: "Name Change",
-                });
-                setLoadingTable(false);
-            });
-    }
-
     function dropdownMenu() {
         const menu = (
             <Menu>
@@ -334,6 +293,17 @@ export default function Admin() {
     const [loadingTable, setLoadingTable] = useState(true);
 
     const [facilityMap, setFacilityMap] = useState({});
+
+    const [selectedCountry, setSelectedCountry] = useState({});
+    const [selectedState, setSelectedState] = useState("");
+    const [selectedCountryString, setSelectedCountryString] = useState("");
+
+    // const [currentActiveTenantName, setCurrentActiveTenantName] = useState("");
+    // const [currentActiveTenantStreet, setCurrentActiveTenantStreet] =
+    //     useState("");
+    // const [currentActiveTenantCity, setCurrentActiveTenantCity] = useState("");
+    // const [currentActiveTenantPinCode, setCurrentActiveTenantPinCode] =
+    //     useState("");
 
     // const [permissions, setPermissions] = useState([
     //   "Patients",
@@ -463,6 +433,14 @@ export default function Admin() {
     const newPinCodeRef = useRef();
     const newCountryRef = useRef();
 
+    const showtenantModal = () => {
+        setChangeui(true);
+        setNewTenant(true);
+        setIsPermissionPage(false);
+        setIsInfoPage(true);
+        setcurrentTenant({});
+    };
+
     function cancelTenant() {
         setNewTenant(false);
         setIsInfoPage(false);
@@ -486,7 +464,70 @@ export default function Admin() {
     //     setTenantsLoading(true)
     // }
 
-    const tab3Ref = useRef();
+    // const tab3Ref = useRef();
+
+    function getLocation(tenantuuid) {
+        setLocation({});
+        tenantApi
+            .getLocation(tenantuuid)
+            .then((res) => {
+                const wardsInFloor = {
+                    "floor_1": {
+                        "wards": {
+                            "ward_count": null
+                        }
+                    },
+                    "floor_2": {
+                        "wards": {
+                            "ward_1": {
+                                "bed_count": null
+                            },
+                            "ward_2": {
+                                "bed_count": 1
+                            }
+                        },
+                        "ward_count": 2
+                    }
+                }
+                var tempFacility = {
+                    floor_count: Object.keys(wardsInFloor).length,
+                    floors: wardsInFloor,
+                };
+                var tempLocation = res.data?.response?.facilities || {};
+                console.log("FACILITY RESPONSE--", tempLocation);
+
+                if (tempLocation?.hasOwnProperty("name")) {
+                    newTenantRef.current.value = tempLocation.name;
+                    newStreetRef.current.value = tempLocation.street;
+                    newCityRef.current.value = tempLocation.city;
+                    newPinCodeRef.current.value = tempLocation.postal_code;
+
+                    setSelectedState(tempLocation.state);
+
+                    var tempVarCountry = countryList.filter(
+                        (country) => country.countryName === tempLocation.country_code
+                    );
+                    if (!!tempVarCountry) {
+                        setSelectedCountry(tempVarCountry);
+                        setSelectedCountryString(tempVarCountry[0].countryName);
+                    }
+                }
+
+                setLocation(tempLocation);
+                setFacilityMap(tempFacility);
+                setLoadingTable(false);
+            })
+            .catch((err) => {
+                if (err) {
+                    const error = "" + err?.response?.data?.message;
+                        notification.error({
+                            message: "Error",
+                            description: `${error}` || "",
+                        });
+                    setLoadingTable(false);
+                }
+            });
+    }
 
     function resetInputFields() {
         newTenantRef.current.value = location.name;
@@ -631,17 +672,6 @@ export default function Admin() {
         setIsPermissionPage(false);
     }
 
-    const [selectedCountry, setSelectedCountry] = useState({});
-    const [selectedState, setSelectedState] = useState("");
-    const [selectedCountryString, setSelectedCountryString] = useState("");
-
-    const [currentActiveTenantName, setCurrentActiveTenantName] = useState("");
-    const [currentActiveTenantStreet, setCurrentActiveTenantStreet] =
-        useState("");
-    const [currentActiveTenantCity, setCurrentActiveTenantCity] = useState("");
-    const [currentActiveTenantPinCode, setCurrentActiveTenantPinCode] =
-        useState("");
-
     function changeCountryEditedState(value) {
         var country = countryList.filter(
             (country) => country.countryName === value
@@ -703,10 +733,10 @@ export default function Admin() {
                                 // width: "12%",
                             }}
                         >
-                            <LeftOutlined
+                            {/* <LeftOutlined
                                 onClick={tenantBack}
                                 style={{ fontSize: "20px", cursor: "pointer" }}
-                            />
+                            /> */}
                             <p
                                 style={{
                                     fontWeight: "600",
@@ -1042,7 +1072,7 @@ export default function Admin() {
                                 </div>
                             ) : (
                                 <div className="tenant-info-table">
-                                    <Tab3 selectedTenant={facilityMap} ref={tab3Ref}></Tab3>
+                                    <Tab3 selectedTenant={facilityMap}></Tab3>
                                 </div>
                             )}
                         </div>

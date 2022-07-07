@@ -5,7 +5,6 @@ import getAge from '../../../../Utils/getAge';
 import "./styles.css";
 
 const PatientInfo = ({ patient }) => {
-    console.log("patient", patient);
     const demographic_map = patient?.demographic_map || {};
     const { 
         DOB = "", sex = "", admission_date = "", discharge_date = "", phone_contact = "",
