@@ -38,7 +38,6 @@ const CareDashboard = () => {
         loading: false,
         dataSource: [{}]
     });
-
     const onSaveNoteToDb = (updateData) => {
         billingApis.updateBillingTask(
             updateData
@@ -57,9 +56,16 @@ const CareDashboard = () => {
 
         caredashboardApi.getListDashboard(
             moment(valueDate).format("YYYY-MM-DD"),
-            valuePageLength, 10 * (currentPageVal - 1)
+            valuePageLength, valuePageLength * (currentPageVal - 1),
+            valSearch
         ).then(res => {
             const billingData = res?.data?.response?.billingData || [];
+            const totalItemCount = res?.data?.response?.count;
+            let totalPagesCal = Math.floor(totalItemCount / valuePageLength);
+            if(totalItemCount % valuePageLength != 0){
+                totalPagesCal = totalPagesCal + 1;
+            }
+            setTotalPages(totalPagesCal);
             setCareDashboard({
                 loading: false,
                 dataSource: billingData
@@ -76,6 +82,10 @@ const CareDashboard = () => {
     useEffect(() => {
         getListCareDashboard();
     }, []);
+
+    useEffect(() => {
+        getListCareDashboard();
+    }, [valueDate, currentPageVal, valSearch, valuePageLength]);
 
     const columns = [
         {
