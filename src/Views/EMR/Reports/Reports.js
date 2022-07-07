@@ -42,13 +42,18 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
                 fileList,
             };
         },
+        onChange: (file) => {
+            console.log("file", file);
+            setFileList(file?.fileList || []);
+            return false;
+        },
         beforeUpload: (file) => {
-            const id = file.uid;
-            setUploadTypeList({
-                ...uploadTypeList,
-                [file.uid]: ["Note"],
-            });
-            setFileList([...fileList, file]);
+            // const id = file.uid;
+            // setUploadTypeList({
+            //     ...uploadTypeList,
+            //     [file.uid]: ["Note"],
+            // });
+            // setFileList([...fileList, file]);
             message.success(`${file.name} File Uploaded Successfully`);
             return false;
         },
@@ -66,7 +71,6 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
                 internalApi
                     .addReport(formData)
                     .then((res) => {
-                        console.log(res.data.response);
                         setReportData(res.data.response.Report)
                         setReportDataLoading(false)
                         setReviewState(true)
@@ -98,7 +102,11 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
 
     function handleViewClick() {
         internalApi.getReports()
-            .then(res => { console.log(res.data.response); setViewData(res.data.response.Lab_Report.reverse()); setViewDataLoading(false) })
+            .then(res => { 
+                console.log(res.data.response); 
+                setViewData(res.data.response.Lab_Report.reverse()); 
+                setViewDataLoading(false) 
+            })
             .catch(err => { console.log(err) })
     }
 
@@ -204,19 +212,26 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
                                                 </p> */}
                                                 </Dragger>
                                             </div>
-                                            {/* {
+                                            {
                                                 fileList.length !== 0
                                                     ?
                                                     (
                                                         <div style={{ textAlign: 'center' }} >
-                                                            <Button onClick={() => { setReportDataLoading(true); handleUpload() }} className="primary" >
+                                                            <Button 
+                                                                style={{
+                                                                    padding: "0.3rem 1rem",
+                                                                    marginTop: "6px"
+                                                                }}
+                                                                onClick={() => { setReportDataLoading(true); handleUpload() }} 
+                                                                className="primary"
+                                                            >
                                                                 Review
                                                             </Button>
                                                         </div>
                                                     )
                                                     :
                                                     null
-                                            } */}
+                                            }
                                         </div>
                                     )
                             )

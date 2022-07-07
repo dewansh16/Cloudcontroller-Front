@@ -51,6 +51,6 @@
 }
 
 .report-uploader-container .ant-upload-list.ant-upload-list-text {
-    height: calc(100vh - 375px);
+    max-height: calc(100vh - 425px);
     overflow: auto;
 }

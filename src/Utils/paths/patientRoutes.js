@@ -14,6 +14,7 @@ import BillingModule from "../../Views/BillingModule/BillingModule";
 import AuditPage from "../../Views/AuditPage/AuditPage";
 import PatientJourney from "../../Views/PatientJourney/patientJourney";
 import BillingSummary from "../../Views/BillingModule/BillingSummary";
+import BillingByPratitioner from "../../Views/BillingModule/BillingByPratitioner";
 import Logger from "../../Views/logger";
 import UploadLogger from "../../Views/UploadLogger";
 import CareDashboard from "../../Views/CareDashboard";
@@ -226,7 +227,7 @@ const patientRoutes = [
         id: "00035-02",
         name: "By Practitioner",
         path: "/billing/practitioner",
-        component: BillingSummary,
+        component: BillingByPratitioner,
         isPrivate: true,
         exact: true,
         showOnMenu: true,
