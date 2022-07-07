@@ -1563,6 +1563,7 @@ function BillingModule() {
                         pid: location.state.pid,
                         billing_id: billingId,
                         task_date: item.task_date,
+                        date: date_string,
                         task_id: item.task_id,
                         staff_name: item.staff_name,
                         task_note: item.task_note,
@@ -1570,13 +1571,13 @@ function BillingModule() {
                     }
                 } else {
                     valiSuccess = validateFormAddTask(taskNameVal, taskNoteVal);
-
                     updateData = {
                         code: cptCode,
                         bill_date: date_string,
                         pid: location.state.pid,
                         billing_id: billingId,
                         task_date: taskDateVal,
+                        date: date_string,
                         staff_name: taskNameVal,
                         task_note: taskNoteVal,
                         task_time_spend: item.task_time_spend
