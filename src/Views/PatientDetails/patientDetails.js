@@ -628,7 +628,7 @@ export default function PatientDetails(props) {
                                                     <div>
                                                         {tagsSelected?.map((tag, index) => {
                                                             return (
-                                                                <div key={`${tag?.value}-${index}`} className="tag-item" style={{ background: tag?.color }}>
+                                                                <div key={`${tag?.value}-${index}`} className="tag-item" style={{ background: tag?.color, color: tag?.color === "#ffffff" ? "#000" : "#fff" }}>
                                                                     <span style={{
                                                                         textOverflow: "ellipsis",
                                                                         overflow: "hidden",

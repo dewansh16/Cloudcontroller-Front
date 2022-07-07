@@ -1826,8 +1826,7 @@ function BillingModule() {
         tenantApi
             .getLocation(tenantId)
             .then((res) => {
-                console.log("TENANT DATA : ", res.data.response.facilities[0][0]);
-                setTenantData(res.data.response.facilities[0][0]);
+                setTenantData(res?.data?.response?.facilities || {});
                 setBillProcessedLoading(false);
             })
             .catch((err) => {
@@ -4165,10 +4164,10 @@ function BillingModule() {
                                 >
                                     <div style={{ width: "30%", fontSize: "1rem", marginBottom: '3%' }}>
                                         From : <br />
-                                        {`${tenantData ? tenantData.name : ""}`}
+                                        {`${!!tenantData.name ? tenantData.name : ""}`}
                                         <br />
                                         {`${tenantData
-                                            ? `${tenantData.street} ${tenantData.city} ${tenantData.state} ${tenantData.country_code} ${tenantData.postal_code}`
+                                            ? `${tenantData?.street || ""} ${tenantData?.city || ""} ${tenantData?.state || ""} ${tenantData?.country_code || ""} ${tenantData?.postal_code || ""}`
                                             : ""
                                             }`}
                                     </div>
@@ -4311,7 +4310,7 @@ function BillingModule() {
                                                     borderBottom: "0",
                                                 }}
                                             >
-                                                {`Provider Name: ${tenantData ? tenantData.name : ""}`}
+                                                {`Provider Name: ${!!tenantData?.name ? tenantData.name : ""}`}
                                             </div>
                                         </div>
                                         <div
@@ -4348,7 +4347,7 @@ function BillingModule() {
                                                     borderRight: "0",
                                                 }}
                                             >
-                                                {`Provider Email: ${tenantData ? tenantData.email : ""
+                                                {`Provider Email: ${!!tenantData?.email ? tenantData.email : ""
                                                     }`}
                                             </div>
                                         </div>
@@ -4362,7 +4361,7 @@ function BillingModule() {
                                                 padding: "0% 2%",
                                             }}
                                         >
-                                            {`Address: ${patientData ? (patientData.street || '') : ""}`}
+                                            {`Address: ${!!patientData?.street ? (patientData.street || '') : ""}`}
                                         </div>
                                     </div>
                                 </div>

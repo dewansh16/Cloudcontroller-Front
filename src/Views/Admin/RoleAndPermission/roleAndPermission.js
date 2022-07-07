@@ -613,8 +613,6 @@ function RoleAndPermission({
             });
     };
 
-    console.log(roles[activeRole], activeRole, roleStatusList, permissedArray);
-
     return (
         <Row
             style={{
@@ -649,7 +647,7 @@ function RoleAndPermission({
                     <Row className="roles-action-btn">
                         <Col offset={6} span={6} className="center-in-col">
                             <Button
-                                onClick={deleteRole}
+                                // onClick={deleteRole}
                                 style={{ fontSize: "20px" }}
                                 className="secondary"
                             >
@@ -659,26 +657,26 @@ function RoleAndPermission({
                         <Col span={6} className="center-in-col">
                             <Button
                                 style={{ fontSize: "20px" }}
-                                onClick={() => {
-                                    setPermissedArray([]);
-                                    permissionForm.setFieldsValue({
-                                        createPatient: [],
-                                        viewPatient: [],
-                                        deletePatient: [],
-                                        createTenant: [],
-                                        deleteTenant: [],
-                                        viewTenant: [],
-                                        createUser: [],
-                                        deleteUser: [],
-                                        viewUser: [],
-                                        deletePatch: [],
-                                        createPatch: [],
-                                        viewPatch: [],
-                                        createPrescription: [],
-                                        deletePrescription: [],
-                                        viewPrescription: [],
-                                    });
-                                }}
+                                // onClick={() => {
+                                //     setPermissedArray([]);
+                                //     permissionForm.setFieldsValue({
+                                //         createPatient: [],
+                                //         viewPatient: [],
+                                //         deletePatient: [],
+                                //         createTenant: [],
+                                //         deleteTenant: [],
+                                //         viewTenant: [],
+                                //         createUser: [],
+                                //         deleteUser: [],
+                                //         viewUser: [],
+                                //         deletePatch: [],
+                                //         createPatch: [],
+                                //         viewPatch: [],
+                                //         createPrescription: [],
+                                //         deletePrescription: [],
+                                //         viewPrescription: [],
+                                //     });
+                                // }}
                                 className="secondary"
                             >
                                 Clear All
@@ -686,11 +684,11 @@ function RoleAndPermission({
                         </Col>
                         <Col span={6} className="center-in-col">
                             <Button
-                                onClick={
-                                    roleStatusList[activeRole]?.completed
-                                        ? updateRole
-                                        : addNewRole
-                                }
+                                // onClick={
+                                //     roleStatusList[activeRole]?.completed
+                                //         ? updateRole
+                                //         : addNewRole
+                                // }
                                 // disabled={currentTenant.uuid === undefined ? true : false}
                                 style={{ fontSize: "20px" }}
                                 className="primary"
