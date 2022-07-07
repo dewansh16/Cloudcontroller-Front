@@ -1,1 +1,1 @@
-export const buildNumber = 2022070601;
+export const buildNumber = 2022070701;

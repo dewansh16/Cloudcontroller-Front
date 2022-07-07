@@ -375,6 +375,11 @@ const PatchForm = (props) => {
             isNewDevice: true
         };
 
+        if (type !== 'gateway') {
+            const deviceFound = listDeviceAssociated?.find(device => device?.["patches.patch_type"] === "gateway");
+            payload[type].gateway = deviceFound?.["patches.device_serial"];
+        }
+
         props.savePatchDetails(payload);
         props.form.setFieldsValue({
             [`${type}_device_serial`]: data.device_serial,
@@ -388,6 +393,11 @@ const PatchForm = (props) => {
     useEffect(() => {
         if (!!valSearch) {
             refValSearch.current = valSearch;
+            if (!(valSearch.match(new RegExp("^[A-Za-z0-9\:._-]+$")))) {
+                setIsErrorSerial(true);
+            } else {
+                setIsErrorSerial(false);
+            }
         }
     }, [valSearch]);
 
@@ -700,14 +710,13 @@ const PatchForm = (props) => {
                                     filterOption={true}
                                     className={isNewDevice ? "select-sensor-associate" : ""}
                                     onChange={(val) => setDeviceSelected(val)}
-                                    onBlur={() => setIsErrorSerial(false)}
+                                    // onBlur={() => {
+                                    //     if (isErrorSerial) {
+                                    //         setIsErrorSerial(false);
+                                    //     }
+                                    // }}
                                     onSearch={(val) => { 
                                         setValSearch(val);
-                                        if (!(val.match(new RegExp("^[A-Za-z0-9\:._-]+$")))) {
-                                            setIsErrorSerial(true);
-                                        } else {
-                                            setIsErrorSerial(false);
-                                        }
                                     }}
                                     notFoundContent={
                                         isErrorSerial && (
