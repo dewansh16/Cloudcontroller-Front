@@ -20,6 +20,8 @@ const SelectTagsPatient = (props) => {
         {color: "#008000cf", title: "Green" },
         {color: "#cfcf17", title: "Yellow" },
         {color: "#ffa500", title: "Orange" },
+        {color: "#000000c7", title: "Black" },
+        {color: "#800080d1", title: "Purple" },
     ];
 
     const renderColorsTags = () => {
