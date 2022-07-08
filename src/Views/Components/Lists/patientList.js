@@ -250,21 +250,21 @@ const PatientListItem = (props) => {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
                 let value = dataQueryInFlux?._value || 0;
 
-                if (key === "gateway_keep_alive_time") {
-                    chart.valueGateway = new Date(value);
-                } else if (key === "alphamed_bpd" || key === "ihealth_bpd") {
-                    val_bpd = value;
-                } else {
-                    if (value !== 0) {
+                if (value !== 0) {
+                    if (key === "gateway_keep_alive_time") {
+                        chart.valueGateway = new Date(value);
+                    } else if (key === "alphamed_bpd" || key === "ihealth_bpd") {
+                        val_bpd = value;
+                    } else {
                         arrayRes.push({ value, time: dataQueryInFlux?._time });
                     }
-                }
-
-                let time = new Date(dataQueryInFlux._time);
-                time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
-                    
-                if (!arrayTime.includes(time) && value !== 0) {
-                    arrayTime.push(time);
+    
+                    let time = new Date(dataQueryInFlux._time);
+                    time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
+                        
+                    if (!arrayTime.includes(time)) {
+                        arrayTime.push(time);
+                    }
                 }
             },
             error(error) {

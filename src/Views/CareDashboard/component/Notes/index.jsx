@@ -61,8 +61,12 @@ const Notes = ({ pid, billDate }) => {
     }
 
     useEffect(() => {
-        setLoading(true);
-        getArrNoteData();
+        let mounted = true;
+        if (mounted) {
+            setLoading(true);
+            getArrNoteData();
+        }
+        return () => { mounted = false; }
     }, [pid]);
 
     return (
