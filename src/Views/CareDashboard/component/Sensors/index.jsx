@@ -5,13 +5,13 @@ import { queryApi } from '../../../../Utils/influx';
 import "./styles.css";
 
 const Sensors = ({ pid, associateList, valueDate, patientList }) => {
-    // console.log("associateList", associateList, pid);
-    // const [tempEffect, setTempEffect] = useState(0);
+    const maxValue99454 = 16;
 
     const [sensors, setSensors] = useState({
         loading: false,
         dataSource: []
-    })
+    });
+    const [daysActive, setTotalDaysActive] = useState(maxValue99454);
 
 
     const shortTypeQueryOfSensor = (patchType) => {
@@ -134,23 +134,21 @@ const Sensors = ({ pid, associateList, valueDate, patientList }) => {
 
             associateList.map(patch => {
                 const totalInMonth = patch?.totalInMonth || [];
-                // if (pid === "patient63c37627-4c56-4122-b832-ed597b451951") {
-                //     console.log("totalInMonth", patch);
-                // }
                 arrayDate = [...arrayDate, ...totalInMonth];
             })
 
             arrayDate = [...new Set(arrayDate)];
             patientFound.arrTotalValue = arrayDate;
+            
+            const total = arrayDate?.length < maxValue99454 ? maxValue99454 - arrayDate?.length : 0;
+            setTotalDaysActive(total);
         }
 
         setSensors({
             loading: false,
             dataSource: associateList
-        })
+        });
     }
-
-    console.log("patientList", patientList);
 
     useEffect(() => {
         if (associateList?.length > 0) {
@@ -213,7 +211,7 @@ const Sensors = ({ pid, associateList, valueDate, patientList }) => {
             ) : (
                 <div className="sensor-list">
                     <div className="sensor-list-thead">
-                        <div className='column first-column sensor-column'>Device serial</div>
+                        <div className='column first-column'></div>
                         {sensors?.dataSource?.map(patchItem => {
                             if (patchItem["patches.patch_type"] === "gateway") return null; 
 
@@ -221,9 +219,9 @@ const Sensors = ({ pid, associateList, valueDate, patientList }) => {
                                 <div 
                                     key={patchItem["patches.patch_uuid"]}
                                     style={{ width: `calc((100% - 150px) / ${widthLength})` }}
-                                    className="column"
+                                    className="column col-type-sensor"
                                 >
-                                    {patchItem["patches.device_serial"]}
+                                    <span>{patchItem["patches.patch_type"]}</span>
                                 </div>
                             )
                         })}
@@ -234,6 +232,14 @@ const Sensors = ({ pid, associateList, valueDate, patientList }) => {
                         {renderItemReadingOfSensor({ label: "Reading yesterday", keyValue: "yesterday" })}
                         {renderItemReadingOfSensor({ label: "Reading month", keyValue: "totalInMonth" })}
                         {renderItemReadingOfSensor({ label: "Days monitored", keyValue: "" })}
+                        {daysActive !== 0 && (
+                            <div style={{ paddingLeft: "150px", marginTop: "4px" }}>
+                                Total days pending for 99454 to activate: 
+                                <span style={{ color: "#ff7529", marginLeft: "4px" }}>
+                                    {`${daysActive} ${daysActive > 1 ? "days" : "day"}`}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
