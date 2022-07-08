@@ -168,7 +168,8 @@ function MenuItem({
                                                         setActive(!!item?.pathParent ? item?.pathParent : item?.path);
                                                         setSubMenuActive(Name);
                                                         setSideBarOpen(false);
-                                                        toggleOpen(true)
+                                                        toggleOpen(true);
+                                                        setSubActive("");
                                                     }}
                                                 >
                                                     <motion.li variants={subMenuItemsAnimationConfig}>
