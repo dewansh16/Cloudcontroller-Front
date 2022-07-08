@@ -2117,9 +2117,9 @@ function BillingModule() {
                         let temp = 0;
                         res.data.response.patchData?.forEach((patch) => {
                             const startDate = getFirstDateMonitored(patch) || "";
+                            temp += 1;
                             // const endDate = getLastDateMonitored(patch) || "";
                             if (!!startDate && !!patch["patches.patch_type"]) {
-                                temp += 1;
                                 checkDateFromInflux(startDate, patch["patches.patch_type"], patch, temp, res.data.response.patchData);
                                 // checkTotalNumberDateHaveDataFromInflux(startDate, patch["patches.patch_type"], patch);
                             }
@@ -2452,8 +2452,8 @@ function BillingModule() {
         let temp = 0;
         patchArray?.forEach((patch) => {
             const startDate = getFirstDateMonitored(patch) || "";
+            temp += 1;
             if (!!startDate && !!patch["patches.patch_type"]) {
-                temp += 1;
                 checkDateFromInflux(startDate, patch["patches.patch_type"], patch, temp, patchArray);
             }
         })
