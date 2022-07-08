@@ -261,9 +261,9 @@ function PatientParticular(props) {
         const value = takeDecimalNumber(val);
         switch (_key) {
             case "temp":
-                let celsius = 0;
-                if (value !== 0) { celsius = 5 / 9 * (value - 32); }
-                return `${value}°F / ${takeDecimalNumber(celsius)}°C`
+                let fahrenheit = 0;
+                if (value !== 0) { fahrenheit = value * 1.8 + 32 }
+                return `${takeDecimalNumber(value)}°C / ${takeDecimalNumber(fahrenheit)}°F`
             case "spo2": 
                 return `${value}`;
             case "ecg_hr": 

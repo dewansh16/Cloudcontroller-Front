@@ -248,18 +248,22 @@ const PatientListItem = (props) => {
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQueryInFlux = tableMeta?.toObject(row) || {};
+                let value = dataQueryInFlux?._value || 0;
+
                 if (key === "gateway_keep_alive_time") {
-                    chart.valueGateway = new Date(dataQueryInFlux?._value);
+                    chart.valueGateway = new Date(value);
                 } else if (key === "alphamed_bpd" || key === "ihealth_bpd") {
-                    val_bpd = dataQueryInFlux?._value;
+                    val_bpd = value;
                 } else {
-                    let value = dataQueryInFlux?._value || 0;
-                    arrayRes.push({ value, time: dataQueryInFlux?._time });
+                    if (value > 0) {
+                        arrayRes.push({ value, time: dataQueryInFlux?._time });
+                    }
                 }
 
                 let time = new Date(dataQueryInFlux._time);
                 time = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
-                if (!arrayTime.includes(time)) {
+                    
+                if (!arrayTime.includes(time) && value > 0) {
                     arrayTime.push(time);
                 }
             },

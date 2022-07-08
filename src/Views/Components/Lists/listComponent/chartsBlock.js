@@ -34,8 +34,9 @@ export default function ChartsBlock({
     const renderValueByKey = (key) => {
         switch (key) {
             case "temp":
-                let celsius = 0;
-                if (value !== 0) { celsius = 5 / 9 * (value - 32); }
+                // let celsius = 0;
+                let fahrenheit = 0;
+                if (value !== 0) { fahrenheit = value * 1.8 + 32 }
                 return (
                     <div>
                         <div
@@ -49,9 +50,10 @@ export default function ChartsBlock({
                                 ...styleTitle
                             }}>{takeDecimalNumber(value)}</h3>
                             <h5 style={{
-                                ...styleTitle,
+                                marginBottom: "0px",
+                                color: strokeColor,
                                 fontWeight: "400"
-                            }}>°F</h5>
+                            }}>°C</h5>
                         </div>
                         <Divider style={{ margin: "0px" }} />
                         <div
@@ -63,12 +65,11 @@ export default function ChartsBlock({
                         >
                             <h3 style={{
                                 ...styleTitle
-                            }}>{takeDecimalNumber(celsius)}</h3>
+                            }}>{takeDecimalNumber(fahrenheit)}</h3>
                             <h5 style={{
-                                marginBottom: "0px",
-                                color: strokeColor,
+                                ...styleTitle,
                                 fontWeight: "400"
-                            }}>°C</h5>
+                            }}>°F</h5>
                         </div>
                     </div>
                 )

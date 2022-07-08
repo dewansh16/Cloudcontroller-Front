@@ -536,7 +536,7 @@ function PatchInventory() {
             dataIndex: "patch_type",
             key: "sensorsImage",
             // ellipsis: true,
-            width: 60,
+            width: 50,
             render: (dataIndex, record) => (
                 <div style={{ display: "flex", alignItems: "center" }}>
                     <Checkbox
@@ -554,14 +554,16 @@ function PatchInventory() {
                         checked={arrayChecked?.includes(record.patch_uuid)}
                         style={{ marginLeft: "6px", marginRight: "2px", borderSpacing: "0" }}
                     />
-                    <div style={{ width: "80px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Tooltip title={renderLabelPatchType(record?.patch_type)}>
-                            <img
-                                alt="someimage"
-                                src={handleImg(record)}
-                                width={checkWidthForImgSensor(record.patch_type)}
-                            ></img>
-                        </Tooltip>
+                    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+                        <div style={{ width: "80px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <Tooltip title={renderLabelPatchType(record?.patch_type)}>
+                                <img
+                                    alt="someimage"
+                                    src={handleImg(record)}
+                                    width={checkWidthForImgSensor(record.patch_type)}
+                                ></img>
+                            </Tooltip>
+                        </div>
                     </div>
                 </div>
             )
@@ -747,120 +749,166 @@ function PatchInventory() {
             width: 75,
             render: (dataIndex, record) => {
                 return (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <div
-                            style={{
-                                position: "relative",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flexDirection: "column",
-                                minHeight: "40px"
-                            }}
-                        >
-                            {(dataIndex === "Active") && (
-                                <Tag
-                                    icon={<CheckOutlined />}
-                                    style={{
-                                        // marginRight: "10px",
-                                        width: "fit-content",
-                                        color: "#06A400",
-                                        background: "transparent",
-                                        fontSize: "15px",
-                                        // border: "2px solid #06A00020",
-                                        border: "none",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        fontWeight: "500",
-                                        height: "40px",
-                                        padding: "0px 0px",
-                                    }}
-                                    color="#06A000"
-                                >
-                                    Active
-                                </Tag>
-                            )}
-                            {(dataIndex === "Inactive") && (
+                    <>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            {record?.patchMap === null ? (
                                 <Tag
                                     icon={<CloseCircleOutlined />}
                                     style={{
-                                        // marginRight: "10px", 
                                         width: "fit-content",
                                         color: "#DD4A34",
                                         background: "transparent",
                                         fontSize: "16px",
-                                        // border: "2px solid #FFBEB4",
-                                        border: "none",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        // fontWeight: "500",
-                                        // height: "40px",
+                                        height: "40px",
                                         padding: "0px 0px",
+                                        border: "none",
                                         margin: "0px"
                                     }}
-                                    color="#FFBEB4"
+                                    color="#FD505C"
                                 >
-                                    Inactive
+                                    Unregistered
                                 </Tag>
-                            )}
-                            {dataIndex === "Under Sterilization" && (
+                            ) : (
                                 <Tag
+                                    icon={<CheckOutlined />}
                                     style={{
-                                        // marginRight: "10px",
                                         width: "fit-content",
-                                        color: "#1479FF",
+                                        color: "#06A400",
                                         background: "transparent",
                                         fontSize: "16px",
-                                        // border: "2px solid #1479FF",
-                                        border: "none",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        fontWeight: "500",
-                                        // height: "40px",
-                                        // padding: "0px 16px",
-                                        // marginLeft: "-24px",
+                                        height: "40px",
                                         padding: "0px 0px",
+                                        border: "none",
                                         margin: "0px"
                                     }}
-                                    color="#FFBEB4"
+                                    color="#06A400"
                                 >
-                                    Under Sterilization
+                                    Registered
                                 </Tag>
                             )}
-                            {record === activekey ? (
-                                <Popover
-                                    overlayClassName={"device-status-popup"}
-                                    trigger="click"
-                                    visible={editActiveRow === record ? true : false}
-                                    placement="bottom"
-                                    content={content}
-                                    overlayStyle={{ paddingTop: "30px" }}
-                                    overlayInnerStyle={{ background: "white" }}
-                                >
-                                    {editActiveRow !== record ? (
-                                        <Button
-                                            type="text"
-                                            onClick={(e) => {
-                                                openPopover(record);
-                                                e.stopPropagation();
-                                            }}
-                                            style={editBtnStyle}
-                                        >
-                                            {" "}
-                                            Edit
-                                        </Button>
-                                    ) : (
-                                        ""
-                                    )}
-                                </Popover>
-                            ) : (
-                                ""
-                            )}
                         </div>
-                    </div>
+
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <div
+                                style={{
+                                    position: "relative",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    flexDirection: "column",
+                                    minHeight: "40px"
+                                }}
+                            >
+                                {(dataIndex === "Active") && (
+                                    <Tag
+                                        icon={<CheckOutlined />}
+                                        style={{
+                                            // marginRight: "10px",
+                                            width: "fit-content",
+                                            color: "#06A400",
+                                            background: "transparent",
+                                            fontSize: "16px",
+                                            // border: "2px solid #06A00020",
+                                            border: "none",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            fontWeight: "500",
+                                            height: "40px",
+                                            padding: "0px 0px",
+                                        }}
+                                        color="#06A000"
+                                    >
+                                        Active
+                                    </Tag>
+                                )}
+                                {(dataIndex === "Inactive") && (
+                                    <Tag
+                                        icon={<CloseCircleOutlined />}
+                                        style={{
+                                            // marginRight: "10px", 
+                                            width: "fit-content",
+                                            color: "#DD4A34",
+                                            background: "transparent",
+                                            fontSize: "16px",
+                                            // border: "2px solid #FFBEB4",
+                                            border: "none",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            // fontWeight: "500",
+                                            // height: "40px",
+                                            padding: "0px 0px",
+                                            margin: "0px"
+                                        }}
+                                        color="#FFBEB4"
+                                    >
+                                        Inactive
+                                    </Tag>
+                                )}
+                                {dataIndex === "Under Sterilization" && (
+                                    <Tag
+                                        style={{
+                                            // marginRight: "10px",
+                                            width: "fit-content",
+                                            color: "#1479FF",
+                                            background: "transparent",
+                                            fontSize: "16px",
+                                            // border: "2px solid #1479FF",
+                                            border: "none",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            fontWeight: "500",
+                                            // height: "40px",
+                                            // padding: "0px 16px",
+                                            // marginLeft: "-24px",
+                                            padding: "0px 0px",
+                                            margin: "0px"
+                                        }}
+                                        color="#FFBEB4"
+                                    >
+                                        Under Sterilization
+                                    </Tag>
+                                )}
+                                {record === activekey ? (
+                                    <Popover
+                                        overlayClassName={"device-status-popup"}
+                                        trigger="click"
+                                        visible={editActiveRow === record ? true : false}
+                                        placement="bottom"
+                                        content={content}
+                                        overlayStyle={{ paddingTop: "30px" }}
+                                        overlayInnerStyle={{ background: "white" }}
+                                    >
+                                        {editActiveRow !== record ? (
+                                            <Button
+                                                type="text"
+                                                onClick={(e) => {
+                                                    openPopover(record);
+                                                    e.stopPropagation();
+                                                }}
+                                                style={editBtnStyle}
+                                            >
+                                                {" "}
+                                                Edit
+                                            </Button>
+                                        ) : (
+                                            ""
+                                        )}
+                                    </Popover>
+                                ) : (
+                                    ""
+                                )}
+                            </div>
+                        </div>
+                    </>
                 )
             },
             // filters: [
@@ -992,92 +1040,92 @@ function PatchInventory() {
             // ],
             // onFilter: (value, record) => record.patch_type === value
         },
-        {
-            title: "In Use",
-            dataIndex: "patch_patient_map",
-            key: "patchMap",
-            ellipsis: true,
-            align: "center",
-            width: 30,
-            render: (dataIndex, record) => (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {dataIndex === null ? (
-                        // <Tag
-                        //     icon={<CloseCircleOutlined />}
-                        //     style={{
-                        //         // marginRight: "16px",
-                        //         width: "fit-content",
-                        //         color: "#DD4A34",
-                        //         background: "transparent",
-                        //         fontSize: "16px",
-                        //         // border: "2px solid #FFBEB4",
-                        //         display: "flex",
-                        //         alignItems: "center",
-                        //         justifyContent: "center",
-                        //         // fontWeight: "500",
-                        //         height: "40px",
-                        //         //     padding: "0px 16px",
-                        //         padding: "0px 0px",
-                        //         border: "none",
-                        //         margin: "0px"
-                        //     }}
-                        //     color="#FD505C"
-                        // >
-                        //     {/* Unregistered */}
-                        // </Tag>
-                        <Tooltip title="Unregistered">
-                            <CloseCircleOutlined style={{ color: "#FD505C", fontSize: "20px" }} />
-                        </Tooltip>
-                    ) : (
-                        <Tooltip title="Registered">
-                            <CheckOutlined style={{ color: "#06A400", fontSize: "20px" }} />
-                        </Tooltip>
-                        // <Tag
-                        //     icon={<CheckOutlined />}
-                        //     style={{
-                        //         // marginRight: "5px",
-                        //         // marginLeft: "5px",
-                        //         width: "fit-content",
-                        //         color: "#06A400",
-                        //         background: "transparent",
-                        //         fontSize: "16px",
-                        //         // border: "2px solid #06A00020",
-                        //         display: "flex",
-                        //         alignItems: "center",
-                        //         justifyContent: "center",
-                        //         // fontWeight: "500",
-                        //         height: "40px",
-                        //         // padding: "0px 16px",
-                        //         padding: "0px 0px",
-                        //         border: "none",
-                        //         margin: "0px"
-                        //     }}
-                        //     color="#06A400"
-                        // >
-                        //     {/* Registered */}
-                        // </Tag>
-                    )}
-                </div>
-            ),
-            // filters: [
-            //     {
-            //         text: "Registered",
-            //         value: 1,
-            //     },
-            //     {
-            //         text: "Unregistered",
-            //         value: null,
-            //     },
-            // ],
-            // onFilter: (value, record) => {
-            //     if (value === null) {
-            //         return record.patch_patient_map === null;
-            //     }
-            //     if (value === 1) {
-            //         return record.patch_patient_map !== null;
-            //     }
-            // },
-        },
+        // {
+        //     title: "In Use",
+        //     dataIndex: "patch_patient_map",
+        //     key: "patchMap",
+        //     ellipsis: true,
+        //     align: "center",
+        //     width: 30,
+        //     render: (dataIndex, record) => (
+        //         <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        //             {dataIndex === null ? (
+        //                 // <Tag
+        //                 //     icon={<CloseCircleOutlined />}
+        //                 //     style={{
+        //                 //         // marginRight: "16px",
+        //                 //         width: "fit-content",
+        //                 //         color: "#DD4A34",
+        //                 //         background: "transparent",
+        //                 //         fontSize: "16px",
+        //                 //         // border: "2px solid #FFBEB4",
+        //                 //         display: "flex",
+        //                 //         alignItems: "center",
+        //                 //         justifyContent: "center",
+        //                 //         // fontWeight: "500",
+        //                 //         height: "40px",
+        //                 //         //     padding: "0px 16px",
+        //                 //         padding: "0px 0px",
+        //                 //         border: "none",
+        //                 //         margin: "0px"
+        //                 //     }}
+        //                 //     color="#FD505C"
+        //                 // >
+        //                 //     {/* Unregistered */}
+        //                 // </Tag>
+        //                 <Tooltip title="Unregistered">
+        //                     <CloseCircleOutlined style={{ color: "#FD505C", fontSize: "20px" }} />
+        //                 </Tooltip>
+        //             ) : (
+        //                 <Tooltip title="Registered">
+        //                     <CheckOutlined style={{ color: "#06A400", fontSize: "20px" }} />
+        //                 </Tooltip>
+        //                 // <Tag
+        //                 //     icon={<CheckOutlined />}
+        //                 //     style={{
+        //                 //         // marginRight: "5px",
+        //                 //         // marginLeft: "5px",
+        //                 //         width: "fit-content",
+        //                 //         color: "#06A400",
+        //                 //         background: "transparent",
+        //                 //         fontSize: "16px",
+        //                 //         // border: "2px solid #06A00020",
+        //                 //         display: "flex",
+        //                 //         alignItems: "center",
+        //                 //         justifyContent: "center",
+        //                 //         // fontWeight: "500",
+        //                 //         height: "40px",
+        //                 //         // padding: "0px 16px",
+        //                 //         padding: "0px 0px",
+        //                 //         border: "none",
+        //                 //         margin: "0px"
+        //                 //     }}
+        //                 //     color="#06A400"
+        //                 // >
+        //                 //     {/* Registered */}
+        //                 // </Tag>
+        //             )}
+        //         </div>
+        //     ),
+        //     // filters: [
+        //     //     {
+        //     //         text: "Registered",
+        //     //         value: 1,
+        //     //     },
+        //     //     {
+        //     //         text: "Unregistered",
+        //     //         value: null,
+        //     //     },
+        //     // ],
+        //     // onFilter: (value, record) => {
+        //     //     if (value === null) {
+        //     //         return record.patch_patient_map === null;
+        //     //     }
+        //     //     if (value === 1) {
+        //     //         return record.patch_patient_map !== null;
+        //     //     }
+        //     // },
+        // },
 
         {
             title: "",
