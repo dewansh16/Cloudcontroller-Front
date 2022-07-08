@@ -2115,13 +2115,21 @@ function BillingModule() {
 
                     if (res.data.response.patchData) {
                         let temp = 0;
-                        res.data.response.patchData?.forEach((patch) => {
+                        const patchData = res.data.response.patchData;
+                        patchData?.forEach((patch) => {
                             const startDate = getFirstDateMonitored(patch) || "";
                             temp += 1;
                             // const endDate = getLastDateMonitored(patch) || "";
                             if (!!startDate && !!patch["patches.patch_type"]) {
-                                checkDateFromInflux(startDate, patch["patches.patch_type"], patch, temp, res.data.response.patchData);
+                                console.log("--------------temp", temp);
+                                checkDateFromInflux(startDate, patch["patches.patch_type"], patch, temp, patchData);
                                 // checkTotalNumberDateHaveDataFromInflux(startDate, patch["patches.patch_type"], patch);
+                            } else {
+                                console.log("temp temp", temp);
+                                if (temp === patchData?.length) {
+                                    setPatchArray([...patchData]);
+                                    setPatchLoading(false);
+                                }
                             }
                         })
                     }
@@ -2310,7 +2318,7 @@ function BillingModule() {
         firstDayOfMonth.setHours(0, 0, 1);
 
         const typeQuery = shortTypeQueryOfSensor(sensorType, true);
-        if (start.getTime() > end.getTime()) return;
+        console.log("start.getTime() > end.getTime()", start.getTime() > end.getTime(), start.getTime(), start, end, sensorType);
 
         if (start?.getTime() < firstDayOfMonth?.getTime()) {
             start = firstDayOfMonth;
@@ -2339,13 +2347,18 @@ function BillingModule() {
                 }
             },
             error(error) {
-                console.log('ERROR', patch)
+                console.log('ERROR', patch);
+                if (temp === patchArrayData?.length) {
+                    setPatchArray([...patchArrayData]);
+                    setPatchLoading(false);
+                }
             },
             complete() {
                 patch.totalDay = arrDateQuery?.length;
                 patch.datesInflux = arrDateQuery?.sort(sortDate);
 
                 if (temp === patchArrayData?.length) {
+                    console.log("set ar", temp);
                     setPatchArray([...patchArrayData]);
                     setPatchLoading(false);
                 }
@@ -2455,6 +2468,11 @@ function BillingModule() {
             temp += 1;
             if (!!startDate && !!patch["patches.patch_type"]) {
                 checkDateFromInflux(startDate, patch["patches.patch_type"], patch, temp, patchArray);
+            } else {
+                if (temp === patchArray?.length) {
+                    setPatchArray([...patchArray]);
+                    setPatchLoading(false);
+                }
             }
         })
     }

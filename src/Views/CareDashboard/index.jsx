@@ -28,7 +28,7 @@ const { Option } = Select;
 
 const CareDashboard = () => {
     const [currentPageVal, setCurrentPageVal] = useState(1);
-    const [valuePageLength, setValuePageLength] = useState(1);
+    const [valuePageLength, setValuePageLength] = useState(10);
     const [patientType, setPatientType] = useState("remote");
     const [valSearch, setValSearch] = useState("");
     const [totalPages, setTotalPages] = useState(1);
@@ -171,7 +171,12 @@ const CareDashboard = () => {
                     console.log(e)
                 }
                 return (
-                    <Sensors pid={record?.pid} associateList={associateList} valueDate={valueDate} />
+                    <Sensors 
+                        pid={record?.pid} 
+                        associateList={associateList} 
+                        valueDate={valueDate}
+                        patientList={careDashboard?.dataSource}
+                    />
                 )
             }
         },
@@ -347,11 +352,11 @@ const CareDashboard = () => {
                 </div>
             ) : (
                 <Row
-                    className="table-body care-dashboard-table"
+                    className="billing-summary-table"
                     justify="start"
                     style={{ padding: "0", backgroundColor: "white", marginTop: "-12px" }}
                 >
-                    <div style={{ margin: "30px 2%", width: "100%" }}>
+                    <div style={{ margin: "0 2%", width: "100%" }}>
                         <Table
                             style={{ backgroundColor: "white" }}
                             columns={columns}
@@ -359,12 +364,6 @@ const CareDashboard = () => {
                             pagination={false}
                             scroll={{ y: "calc(100vh - 237px)" }}
                             dataSource={careDashboard?.dataSource}
-                        // expandable={{
-                        //     expandedRowRender: (record) => {
-                        //         console.log(record);
-                        //     },
-                        //     expandIcon: (props) => customExpandIcon(props)
-                        // }}
                         />
                     </div>
                 </Row>

@@ -495,7 +495,7 @@ function Vitals({ activeStep, wardArray, patient, pid, valDuration }) {
                     data.data = arrayRes;
                     const { min = 0, max = 0 } = findMinAndMax(arrayRes);
                     data.max = max > 0 ? max + 20 : 0;
-                    data.min = min > 0 ? min - 20 : 0;
+                    data.min = min !== 0 ? min - 20 : 0;
                     newArrayData.push(data);
                     setActiveTrendsArray(newArrayData);
                 }

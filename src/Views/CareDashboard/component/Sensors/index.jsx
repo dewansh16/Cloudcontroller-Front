@@ -1,11 +1,18 @@
+import { Spin } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { queryApi } from '../../../../Utils/influx';
 
-const Sensors = ({ pid, associateList, valueDate }) => {
-    console.log("associateList", associateList, pid);
-    const [tempEffect, setTempEffect] = useState(0);
+import "./styles.css";
 
-    
+const Sensors = ({ pid, associateList, valueDate, patientList }) => {
+    // console.log("associateList", associateList, pid);
+    // const [tempEffect, setTempEffect] = useState(0);
+
+    const [sensors, setSensors] = useState({
+        loading: false,
+        dataSource: []
+    })
+
 
     const shortTypeQueryOfSensor = (patchType) => {
         switch (patchType) {
@@ -44,15 +51,13 @@ const Sensors = ({ pid, associateList, valueDate }) => {
         return result;
     }
 
-    const checkTotalNumberDateHaveDataFromInflux = (startDate = "", sensorType = "", patch) => {
+    const checkTotalNumberDateHaveDataFromInflux = (startDate = "", sensorType = "", patch, temp) => {
         const date = new Date(valueDate);
         const firstDayOfMonth = new Date(date.setDate(1));
         firstDayOfMonth.setHours(0, 0, 1);
 
         let start = new Date(startDate);
         const end = new Date();     
-
-        if (start.getTime() > end.getTime()) return;
 
         if (start?.getTime() < firstDayOfMonth?.getTime()) {
             start = firstDayOfMonth;
@@ -70,49 +75,101 @@ const Sensors = ({ pid, associateList, valueDate }) => {
         queryApi.queryRows(query, {
             next(row, tableMeta) {
                 const dataQuery = tableMeta.toObject(row);
-                const value = dataQuery?._value;
-                const time = dataQuery?._time;
-
                 // console.log("dataQuery", dataQuery);
 
-                // check data query today
-                const timeLocal = new Date(time);
-                if (timeLocal.getDate() === date.getDate()) {
-                    arrayValueToday.push({ value, time })
-                }
+                // const value = dataQuery?._value;
+                // const time = dataQuery?._time;
 
-                // check data query yesterday
-                const yesterday = new Date(date.getDate() - 1);
-                if (timeLocal.getDate() === yesterday.getDate()) {
-                    arrayValueYesterday.push({ value, time })
-                }
+                let valueTimestamp = new Date(dataQuery._value);
 
-                // push data for the month
-                arrTotalValue.push({ value, time });
+                if (
+                    Number(valueTimestamp.getFullYear()) === Number(date.getFullYear())
+                    && Number(valueTimestamp.getMonth()) === Number(date.getMonth())
+                ) {
+                    const timeFormat = `${valueTimestamp.getFullYear()}-${valueTimestamp.getMonth() + 1}-${valueTimestamp.getDate()}`;
+
+                     // check data query today
+                    if (valueTimestamp.getDate() === date.getDate()) {
+                        if (!arrayValueToday.includes(timeFormat)) {
+                            arrayValueToday.push(timeFormat);
+                        }
+                    }
+                    
+                    // check data query yesterday
+                    const yesterday = new Date(date.getDate() - 1);
+                    if (valueTimestamp.getDate() === yesterday.getDate()) {
+                        if (!arrayValueYesterday.includes(timeFormat)) {
+                            arrayValueYesterday.push(timeFormat);
+                        }
+                    }
+
+                    // push data for the month
+                    if (!arrTotalValue.includes(timeFormat)) {
+                        arrTotalValue.push(timeFormat);
+                    }
+                }
             },
             error(error) {
-                console.log('ERROR')
+                console.log('ERROR');
+                if (temp === associateList?.length) {
+                    onUpdateDataSensor();
+                }
             },
             complete() {
-               
-                // patch.todays = arrayValueToday;
-                // patch.yesterday = arrayValueYesterday;
-                patch.totalValueInfux = arrTotalValue;
+                patch.todays = arrayValueToday;
+                patch.yesterday = arrayValueYesterday;
+                patch.totalInMonth = arrTotalValue;
 
-                let temp = tempEffect;
-                temp += 1;
-                setTempEffect(temp);
+                if (temp === associateList?.length) {
+                    onUpdateDataSensor();
+                }
             },
         })
     };
 
+    const onUpdateDataSensor = () => {
+        const patientFound = patientList?.find(patient => patient?.pid === pid);
+        if (!!patientFound) {
+            let arrayDate = [];
+
+            associateList.map(patch => {
+                const totalInMonth = patch?.totalInMonth || [];
+                // if (pid === "patient63c37627-4c56-4122-b832-ed597b451951") {
+                //     console.log("totalInMonth", patch);
+                // }
+                arrayDate = [...arrayDate, ...totalInMonth];
+            })
+
+            arrayDate = [...new Set(arrayDate)];
+            patientFound.arrTotalValue = arrayDate;
+        }
+
+        setSensors({
+            loading: false,
+            dataSource: associateList
+        })
+    }
+
+    console.log("patientList", patientList);
+
     useEffect(() => {
         if (associateList?.length > 0) {
+            setSensors({
+                ...sensors,
+                loading: true,
+            })
+
+            let temp = 0;
             associateList.map(patchItem => {
                 const startDate = getFirstDateMonitored(patchItem);
                 const typeQuery = shortTypeQueryOfSensor(patchItem["patches.patch_type"]);
+                temp += 1;
                 if (!!startDate && !!typeQuery) {
-                    checkTotalNumberDateHaveDataFromInflux(startDate, typeQuery, patchItem);
+                    checkTotalNumberDateHaveDataFromInflux(startDate, typeQuery, patchItem, temp);
+                } else {
+                    if (temp === associateList?.length) {
+                        onUpdateDataSensor();
+                    }
                 }
             });
         }
@@ -120,34 +177,67 @@ const Sensors = ({ pid, associateList, valueDate }) => {
         return () => { };
     }, [associateList, pid]);
 
-    useEffect(() => {
-        let mounted = true;
+    const isGateway = sensors?.dataSource?.some(patch => patch["patches.patch_type"] === "gateway");
+    const widthLength = isGateway ? sensors?.dataSource?.length - 1 : sensors?.dataSource?.length;
 
-        if (tempEffect === associateList?.length && mounted) {
-            let arrayDate = [];
+    const renderItemReadingOfSensor = (propsRender) => {
+        const { label = "", keyValue = 0 } = propsRender;
 
-            associateList.map(patch => {
-                const totalValueInfux = patch?.totalValueInfux || [];
-                totalValueInfux.map(item => {
-                    let timer = new Date(item?.time);
-                    timer = `${timer.getFullYear()}-${timer.getMonth() + 1}-${timer.getDate()}`;
-                    arrayDate.push(timer);
-                })
-            })
+        return (
+            <div className='body-item'>
+                <div className='column first-column sensor-column'>{label}</div>
 
-            arrayDate = [...new Set(arrayDate)];
-            // patientList[0].totalValueInfux = arrayDate;
-            console.log("arrayDate", arrayDate);
-        }
+                {sensors?.dataSource?.map(patchItem => {
+                    if (patchItem["patches.patch_type"] === "gateway") return null;
 
-
-        return () => { mounted = false; };
-    }, [tempEffect, associateList]);
+                    return (
+                        <div 
+                            key={`today-${patchItem["patches.patch_uuid"]}`}
+                            style={{ width: `calc((100% - 150px) / ${widthLength})` }}
+                            className="column sensor-column"
+                        >
+                            {patchItem?.[keyValue]?.length || 0}
+                        </div>
+                    )
+                })}
+            </div>
+        )
+    };
 
     return (
-        <div>
-            a
-        </div>
+        <>
+            {sensors?.loading ? (
+                <>
+                    <Spin />
+                </>
+            ) : (
+                <div className="sensor-list">
+                    <div className="sensor-list-thead">
+                        <div className='column first-column sensor-column'>Device serial</div>
+                        {sensors?.dataSource?.map(patchItem => {
+                            if (patchItem["patches.patch_type"] === "gateway") return null; 
+
+                            return (
+                                <div 
+                                    key={patchItem["patches.patch_uuid"]}
+                                    style={{ width: `calc((100% - 150px) / ${widthLength})` }}
+                                    className="column"
+                                >
+                                    {patchItem["patches.device_serial"]}
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    <div className="sensor-list-tbody">
+                        {renderItemReadingOfSensor({ label: "Reading today", keyValue: "todays" })}
+                        {renderItemReadingOfSensor({ label: "Reading yesterday", keyValue: "yesterday" })}
+                        {renderItemReadingOfSensor({ label: "Reading month", keyValue: "totalInMonth" })}
+                        {renderItemReadingOfSensor({ label: "Days monitored", keyValue: "" })}
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
 

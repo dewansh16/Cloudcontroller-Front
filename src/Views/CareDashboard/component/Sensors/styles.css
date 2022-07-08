@@ -1,0 +1,29 @@
+.sensor-list .sensor-list-thead {
+    display: flex;
+    align-items: center;
+}
+
+.sensor-list .first-column {
+    width: 150px;
+    color: #000000ad;
+    font-weight: 400;
+    text-align: left;
+}
+
+.sensor-list .sensor-column {
+    border-right: 1px solid #ddd;
+}
+
+.sensor-list .column {
+    padding: 0px 4px;
+}
+
+.sensor-list .sensor-list-tbody .body-item {
+    display: flex;
+    align-items: center;
+    padding: 3px 0;
+}
+
+.sensor-list .sensor-list-tbody .body-item .sensor-column:last-child {
+    border-right: none;
+}
