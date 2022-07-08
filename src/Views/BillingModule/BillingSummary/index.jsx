@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import moment from "moment";
 
 import { isArray } from 'lodash';
-import { isJsonString, CPT_CODE, CPT } from "../../../Utils/utils";
+import { isJsonString, CPT_CODE, CPT, getCPTPriceByCode } from "../../../Utils/utils";
 import { useHistory } from "react-router-dom";
 import { InfluxDB } from "@influxdata/influxdb-client";
 
@@ -42,6 +42,9 @@ const BillingModule = () => {
     const [isEditRow, setIsEditRow] = useState(false);
     const itemPerPage = 10;
 
+    const maxValue99457 = 20;
+    const maxValue99458 = 40;
+    const maxValue99091 = 30;
 
     const history = useHistory();
     let val99457 = 0;
@@ -357,6 +360,27 @@ const BillingModule = () => {
         return timeDs;
     };
 
+    const getReimbursement = (record) => {
+        let totalMoney = 0;
+        if(record.task_99453 == 1){
+            totalMoney += getCPTPriceByCode(CPT_CODE.CPT_99453);
+        }
+        // ToDo: 99454
+        if(Math.floor(record.task_99457 / 60 ) >= maxValue99457){
+            totalMoney += getCPTPriceByCode(CPT_CODE.CPT_99457);
+        }
+        if(Math.floor(record.task_99458 / 60) >= (maxValue99458/2) && Math.floor(record.task_99458 / 60) < maxValue99458){
+            totalMoney += getCPTPriceByCode(CPT_CODE.CPT_99458);
+        }
+        if(Math.floor(record.task_99458 / 60) >= maxValue99458){
+            totalMoney += 2*getCPTPriceByCode(CPT_CODE.CPT_99458);
+        }
+        if(Math.floor(record.task_99091 / 60) >= maxValue99091){
+            totalMoney += getCPTPriceByCode(CPT_CODE.CPT_99091);
+        }
+        return totalMoney;
+    }
+
     const onOpenModalSummary = (pid) => {
         setPidModal(pid);
     };
@@ -553,6 +577,18 @@ const BillingModule = () => {
                 if(aTime > bTime) { return -1; }
             },
         },
+        {
+            title: 'Amount',
+            dataIndex: "amount",
+            key: "amount",
+            align: "center",
+            render: (dataIndex, record) => {
+                let totalMoney = getReimbursement(record);
+                return (
+                <div>${`${totalMoney}`}</div>
+                )
+            },
+        },       
         {
             title: 'Edit',
             key: 'edit',

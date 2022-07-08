@@ -8,6 +8,22 @@ export const CPT_CODE = {
     CPT_99091: 99091
 }
 
+export const getCPTPriceByCode = (cptCode) => {
+    switch(cptCode){
+        case CPT_CODE.CPT_99453:
+            return 19;
+        case CPT_CODE.CPT_99454:
+            return 56;
+        case CPT_CODE.CPT_99457:
+            return 50;
+        case CPT_CODE.CPT_99458:
+            return 41;
+        case CPT_CODE.CPT_99091:
+            return 56;
+        default:
+            return 0;        
+    }
+}
 export const CPT = "CPT";
 
 export const isJsonString = (str) => {
