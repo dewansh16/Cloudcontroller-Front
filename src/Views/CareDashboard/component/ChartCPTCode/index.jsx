@@ -41,16 +41,6 @@ const ChartCPTCode = ({ pid, record, code }) => {
                 i++;
                 if (!!record?.totalValueInfux) {
                     const arrayData = record?.totalValueInfux;
-                    // let arrayDate = [];
-
-                    // arrayData.map(item => {
-                    //     let timer = new Date(item?.time);
-                    //     timer = `${timer.getFullYear()}-${timer.getMonth() + 1}-${timer.getDate()}`;
-                    //     arrayDate.push(timer);
-                    // });
-
-                    // arrayDate = [...new Set(arrayDate)];
-
                     setDataChart({
                         loading: false,
                         data: [{ value: 16 }, { value: arrayData?.length }]
@@ -67,12 +57,13 @@ const ChartCPTCode = ({ pid, record, code }) => {
                 }
             }, 1000);
         } 
+
         if(code == CPT_CODE.CPT_99457){
             let chartValue = Math.floor(record.task_99457 / 60) < maxValue99457 ?  Math.floor(record.task_99457 / 60) / maxValue99457 : 100;
             chartValue = chartValue * 100;
             setDataChart({
                 loading: false,
-                data: [{ value: chartValue }, { value: maxValue99457 }]
+                data: [{ value: maxValue99457 }, { value: chartValue }]
             });
         }
 
@@ -81,7 +72,7 @@ const ChartCPTCode = ({ pid, record, code }) => {
             chartValue = chartValue * 100;
             setDataChart({
                 loading: false,
-                data: [{ value: chartValue }, { value: maxValue99458 }]
+                data: [{ value: maxValue99458 }, { value: chartValue }]
             });
         }
 
@@ -90,7 +81,7 @@ const ChartCPTCode = ({ pid, record, code }) => {
             chartValue = chartValue * 100
             setDataChart({
                 loading: false,
-                data: [{ value: chartValue }, { value: maxValue99091 }]
+                data: [{ value: maxValue99091 }, { value: chartValue }]
             });
         }
 
@@ -102,15 +93,15 @@ const ChartCPTCode = ({ pid, record, code }) => {
             {dataChart?.loading ? (
                 <Spin />
             ) : (
-                <PieChart width={90} height={90}>
+                <PieChart width={60} height={60}>
                     <Pie
                         data={dataChart?.data}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={renderCustomizedLabel}
+                        // label={renderCustomizedLabel}
                         startAngle={-270}
-                        outerRadius={40}
+                        outerRadius={30}
                         fill="#fff"
                         dataKey="value"
                     >

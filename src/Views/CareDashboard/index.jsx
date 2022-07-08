@@ -1,34 +1,34 @@
 import React, { useState, useEffect } from 'react';
+import moment from 'moment';
 
 import caredashboardApi from "../../Apis/caredashboardApis"
+import billingApis from '../../Apis/billingApis';
+import { CPT_CODE } from '../../Utils/utils';
 
 import { Button, Col, DatePicker, Input, Row, Select, Spin, Table } from 'antd';
-
 import {
     CaretRightOutlined,
     CaretDownOutlined,
 } from "@ant-design/icons";
 
-import Navbar from '../../Theme/Components/Navbar/navbar';
+// import Navbar from '../../Theme/Components/Navbar/navbar';
 import { PaginationBox } from '../Components/PaginationBox/pagination';
 
 import Icons from '../../Utils/iconMap';
 
 import ChartCPTCode from "./component/ChartCPTCode";
-import BulbIcon from "./component/BulbIcon";
+import Notes from "./component/Notes";
 import TotalReading from './component/TotalReading';
+import Sensors from "./component/Sensors";
 
 import "./styles.css";
-import moment from 'moment';
-import {CPT_CODE} from '../../Utils/utils';
-import billingApis from '../../Apis/billingApis';
 
 const { Search } = Input;
 const { Option } = Select;
 
 const CareDashboard = () => {
     const [currentPageVal, setCurrentPageVal] = useState(1);
-    const [valuePageLength, setValuePageLength] = useState(10);
+    const [valuePageLength, setValuePageLength] = useState(1);
     const [patientType, setPatientType] = useState("remote");
     const [valSearch, setValSearch] = useState("");
     const [totalPages, setTotalPages] = useState(1);
@@ -38,15 +38,8 @@ const CareDashboard = () => {
         loading: false,
         dataSource: [{}]
     });
-    const onSaveNoteToDb = (updateData) => {
-        billingApis.updateBillingTask(
-            updateData
-        ).then((res) => {
-            getListCareDashboard()
-        }).catch(e =>{
-            console.log(e)
-        })
-    }
+    const [patchData, setPatchData] = useState([]);
+
 
     const getListCareDashboard = () => {
         setCareDashboard({
@@ -62,21 +55,22 @@ const CareDashboard = () => {
             const billingData = res?.data?.response?.billingData || [];
             const totalItemCount = res?.data?.response?.count;
             let totalPagesCal = Math.floor(totalItemCount / valuePageLength);
-            if(totalItemCount % valuePageLength != 0){
+            if (totalItemCount % valuePageLength != 0) {
                 totalPagesCal = totalPagesCal + 1;
             }
             setTotalPages(totalPagesCal);
             setCareDashboard({
                 loading: false,
                 dataSource: billingData
-            })
+            });
+            setPatchData(res?.data?.response?.patchData || []);
         })
-        .catch(err => {
-            setCareDashboard({
-                loading: false,
-                dataSource: []
+            .catch(err => {
+                setCareDashboard({
+                    loading: false,
+                    dataSource: []
+                })
             })
-        })
     };
 
     useEffect(() => {
@@ -92,12 +86,12 @@ const CareDashboard = () => {
             title: "Patient",
             dataIndex: "patient_datum",
             key: "patient_datum",
-            width: 50,
+            width: 80,
             render: (dataIndex, record) => {
                 return (
                     <div style={{ display: "flex", alignItems: "center" }}>
                         <div style={{ marginLeft: "2px", marginRight: "2px" }}>
-                            <BulbIcon pid={record?.pid} billDate={valueDate} onSaveNoteToDb={onSaveNoteToDb} />
+                            <Notes pid={record?.pid} billDate={valueDate} />
                         </div>
                         <div style={{ marginLeft: "0.25rem", textAlign: "start" }}>
                             <div style={{
@@ -133,7 +127,7 @@ const CareDashboard = () => {
                         primaryDoctor += `${item?.fname} ${item?.lname}, `
                     })
                     primaryDoctor = primaryDoctor.slice(0, -2);
-                } catch(e){
+                } catch (e) {
                     console.log(e)
                 }
                 try {
@@ -142,13 +136,23 @@ const CareDashboard = () => {
                         secondDoctor += `${item?.fname} ${item?.lname},`
                     })
                     secondDoctor = secondDoctor.slice(0, -1);
-                } catch(e){
+                } catch (e) {
                     console.log(e)
                 }
                 return (
                     <>
-                    <div style={{textAlign: 'left'}}>Primary: {primaryDoctor}</div>
-                <div style={{textAlign: 'left'}}>Secondary: {secondDoctor}</div>
+                        {!!primaryDoctor && (
+                            <div style={{ textAlign: 'left' }}>
+                                <span style={{ color: "#000000ad", fontWeight: "400", marginRight: "4px" }}>Primary:</span>
+                                {primaryDoctor}
+                            </div>
+                        )}
+                        {!!secondDoctor && (
+                            <div style={{ textAlign: 'left' }}>
+                                <span style={{ color: "#000000ad", fontWeight: "400", marginRight: "4px" }}>Secondary:</span>
+                                {secondDoctor}
+                            </div>
+                        )}
                     </>
                 )
             }
@@ -159,30 +163,35 @@ const CareDashboard = () => {
             dataIndex: "Sensor",
             key: "Sensor",
             width: 300,
-            render: () => {
-                return (
-                    <span>1 device</span>
-                )
-            }
-        },
-
-        {
-            title: "Total reading",
-            dataIndex: "total",
-            key: "5",
-            width: 30,
-            align: "center",
             render: (dataIndex, record) => {
+                let associateList = [];
+                try {
+                    associateList = patchData?.filter(patch => patch?.pid === record?.pid);
+                } catch (e) {
+                    console.log(e)
+                }
                 return (
-                    <TotalReading
-                        pid={record?.pid}
-                        associateList={record?.associateList}
-                        patientList={careDashboard?.dataSource}
-                        valueDate={valueDate}
-                    />
+                    <Sensors pid={record?.pid} associateList={associateList} valueDate={valueDate} />
                 )
             }
         },
+        // {
+        //     title: "Total reading",
+        //     dataIndex: "total",
+        //     key: "5",
+        //     width: 30,
+        //     align: "center",
+        //     render: (dataIndex, record) => {
+        //         return (
+        //             <TotalReading
+        //                 pid={record?.pid}
+        //                 associateList={record?.associateList}
+        //                 patientList={careDashboard?.dataSource}
+        //                 valueDate={valueDate}
+        //             />
+        //         )
+        //     }
+        // },
         {
             title: "99453",
             dataIndex: "task_99453",
@@ -261,62 +270,56 @@ const CareDashboard = () => {
     }
 
     return (
-        <div>
-            <Navbar
-                startChildren={
-                    <Button type="secondary" className="ant-btn-default global-btn secondary">
-                        Refresh {Icons.sync({ Style: { fontSize: "1.257rem" } })}
-                    </Button>
-                }
-                centerChildren={
-                    <>
-                        <div
-                            style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                marginLeft: "2rem"
-                            }}
-                        >
-                            <h3 style={{ marginRight: "1rem", marginBottom: "0" }}>Search: </h3>
-                            <Search
-                                placeholder="input search text"
-                                onSearch={setValSearch}
-                                enterButton
-                                allowClear
-                                defaultValue={valSearch}
-                            />
-                        </div>
-                        <div
-                            style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                marginLeft: "2rem"
-                            }}
-                        >
-                            <h3 style={{ marginRight: "1rem", marginBottom: "0" }}>Date: </h3>
-                            <DatePicker
-                                onChange={handleMonthChange}
-                                allowClear={false}
-                                picker="month"
-                                defaultValue={moment(valueDate, "YYYY-MM-DD")}
-                                style={{ minWidth: "10rem" }}
-                            />
-                        </div>
-                    </>
-
-                }
-                endChildren={
-                    <>
-                        <PaginationBox
-                            totalPages={totalPages}
-                            currentPageVal={currentPageVal}
-                            setCurrentPageVal={setCurrentPageVal}
-                            valuePageLength={valuePageLength}
-                            setValuePageLength={setValuePageLength}
-                        />
-                    </>
-                }
-            />
+        <div style={{ minWidth: "1300px" }}>
+            <div className="care-nav">
+                <Button 
+                    type="secondary" 
+                    className="ant-btn-default global-btn secondary"
+                    onClick={() => getListCareDashboard()}
+                >
+                    Refresh {Icons.sync({ Style: { fontSize: "1.257rem" } })}
+                </Button>
+                <div
+                    style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        marginLeft: "2rem"
+                    }}
+                >
+                    <h3 style={{ marginRight: "1rem", marginBottom: "0" }}>Search: </h3>
+                    <Search
+                        placeholder="input search text"
+                        onSearch={setValSearch}
+                        enterButton
+                        allowClear
+                        defaultValue={valSearch}
+                    />
+                </div>
+                <div
+                    style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        marginLeft: "2rem"
+                    }}
+                >
+                    <h3 style={{ marginRight: "1rem", marginBottom: "0" }}>Date: </h3>
+                    <DatePicker
+                        onChange={handleMonthChange}
+                        allowClear={false}
+                        picker="month"
+                        defaultValue={moment(valueDate, "YYYY-MM-DD")}
+                        style={{ minWidth: "10rem" }}
+                    />
+                </div>
+                <PaginationBox
+                    totalPages={totalPages}
+                    currentPageVal={currentPageVal}
+                    setCurrentPageVal={setCurrentPageVal}
+                    // valuePageLength={valuePageLength}
+                    // setValuePageLength={setValuePageLength}
+                />
+            </div>
+            
             <div style={{ height: "55px", backgroundColor: "white" }}>
                 <div
                     style={{
@@ -354,7 +357,7 @@ const CareDashboard = () => {
                             columns={columns}
                             size="middle"
                             pagination={false}
-                            // scroll={{ y: "calc(100vh - 237px)" }}
+                            scroll={{ y: "calc(100vh - 237px)" }}
                             dataSource={careDashboard?.dataSource}
                         // expandable={{
                         //     expandedRowRender: (record) => {

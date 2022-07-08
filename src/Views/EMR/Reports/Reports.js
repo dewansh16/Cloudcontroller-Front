@@ -66,8 +66,8 @@ function Reports({ pid, pdata, setComponentSupportContent }) {
         if (fileList.length > 0) {
             fileList.map((item, index) => {
                 const formData = new FormData();
-                formData.append("data", item);
-
+                formData.append("file", item);
+                
                 internalApi
                     .addReport(formData, pid, pdata.demographic_map.tenant_id)
                     .then((res) => {
