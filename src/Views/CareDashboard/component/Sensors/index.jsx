@@ -231,7 +231,7 @@ const Sensors = ({ pid, associateList, valueDate, patientList }) => {
                         {renderItemReadingOfSensor({ label: "Reading today", keyValue: "todays" })}
                         {renderItemReadingOfSensor({ label: "Reading yesterday", keyValue: "yesterday" })}
                         {renderItemReadingOfSensor({ label: "Reading month", keyValue: "totalInMonth" })}
-                        {renderItemReadingOfSensor({ label: "Days monitored", keyValue: "" })}
+                        {renderItemReadingOfSensor({ label: "Days monitored", keyValue: "totalInMonth" })}
                         {daysActive !== 0 && (
                             <div style={{ paddingLeft: "150px", marginTop: "4px" }}>
                                 Total days pending for 99454 to activate: 
