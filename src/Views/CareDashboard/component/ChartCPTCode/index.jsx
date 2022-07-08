@@ -8,6 +8,8 @@ const ChartCPTCode = ({ pid, record, code }) => {
         loading: true,
         data: []
     });
+    
+    const maxValue99454 = 16;
     const maxValue99457 = 20;
     const maxValue99458 = 40;
     const maxValue99091 = 30;
@@ -39,22 +41,22 @@ const ChartCPTCode = ({ pid, record, code }) => {
             let i = 0;
             timeInterval.current = setInterval(() => {
                 i++;
-                if (!!record?.totalValueInfux) {
-                    const arrayData = record?.totalValueInfux;
+                if (!!record?.arrTotalValue) {
+                    const totalValue = record?.arrTotalValue?.length || 0;
                     setDataChart({
                         loading: false,
-                        data: [{ value: 16 }, { value: arrayData?.length }]
+                        data: [{ value: totalValue < maxValue99454 ? maxValue99454 : 0 }, { value: totalValue }]
                     });
                     clearInterval(timeInterval.current);
                 }
     
-                if (i === 5) {
-                    clearInterval(timeInterval.current);
-                    setDataChart({
-                        loading: false,
-                        data: [{ value: 1 }]
-                    });
-                }
+                // if (i === 5) {
+                //     clearInterval(timeInterval.current);
+                //     setDataChart({
+                //         loading: false,
+                //         data: [{ value: 1 }]
+                //     });
+                // }
             }, 1000);
         } 
 

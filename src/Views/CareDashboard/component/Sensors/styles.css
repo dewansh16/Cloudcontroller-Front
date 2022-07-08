@@ -18,6 +18,14 @@
     padding: 0px 4px;
 }
 
+.sensor-list .column.col-type-sensor {
+    text-transform: uppercase;
+    background: #ddd;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .sensor-list .sensor-list-tbody .body-item {
     display: flex;
     align-items: center;
