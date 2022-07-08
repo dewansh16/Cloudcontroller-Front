@@ -4,7 +4,7 @@ import html2canvas from "html2canvas";
 
 import { jsPDF } from "jspdf";
 import { Modal, Table, Button } from "antd";
-import { CPT_CODE } from "../../../../Utils/utils";
+import { CPT_CODE, getCPTPriceByCode } from "../../../../Utils/utils";
 import { queryApi } from "../../../../Utils/influx";
 
 import billingApi from "../../../../Apis/billingApis"
@@ -85,7 +85,7 @@ const ModalSummary = ({ pid, onClose, currentDate, billingSummary }) => {
 
     const getReportDes = (item) => {
         if (item.code == CPT_CODE.CPT_99453) {
-            return '1 billed';
+            return '1';
         }
 
         if (item.code == CPT_CODE.CPT_99457) {
@@ -96,7 +96,7 @@ const ModalSummary = ({ pid, onClose, currentDate, billingSummary }) => {
             })
             tempTotal = Math.floor(tempTotal / 60);
             if (tempTotal >= 20) {
-                return '1 billed';
+                return '1';
             } else {
                 return '';
             }
@@ -110,7 +110,7 @@ const ModalSummary = ({ pid, onClose, currentDate, billingSummary }) => {
             })
             tempTotal = Math.floor(tempTotal / 60);
             if (tempTotal >= TOTAL_HOURS_FOR_EACH_99458_BILLED) {
-                return `${Math.floor(tempTotal / TOTAL_HOURS_FOR_EACH_99458_BILLED)} billed`;
+                return `${Math.floor(tempTotal / TOTAL_HOURS_FOR_EACH_99458_BILLED)}`;
             } else {
                 return '';
             }
@@ -122,8 +122,8 @@ const ModalSummary = ({ pid, onClose, currentDate, billingSummary }) => {
             taskData.map(item => {
                 tempTotal += Number(item.task_time_spend)
             })
-            if (tempTotal >= TOTAL_HOURS_FOR_EACH_99091_BILLED) {
-                return `1 billed`;
+            if (Math.floor(tempTotal / 60) >= TOTAL_HOURS_FOR_EACH_99091_BILLED) {
+                return `1`;
             } else {
                 return '';
             }
@@ -145,8 +145,9 @@ const ModalSummary = ({ pid, onClose, currentDate, billingSummary }) => {
                                     item.bill_date
                                 )}`,
                                 code: item.code,
-                                desc: getReportDes(item),
+                                desc: `${Number(getReportDes(item)) > 0 ? `${getReportDes(item)} billed` : '' }`,
                                 duration: getReportTotalDuration(item),
+                                amount: `${Number(getReportDes(item)) > 0 ? `$${Number(getReportDes(item)) * getCPTPriceByCode(Number(item.code))}` : ''}`
                             });
                         }
                     );
@@ -186,6 +187,11 @@ const ModalSummary = ({ pid, onClose, currentDate, billingSummary }) => {
             title: "Duration",
             dataIndex: "duration",
             key: "duration",
+        },
+        {
+            title: "Amount",
+            dataIndex: "amount",
+            key: "amount",
         },
     ];
 
