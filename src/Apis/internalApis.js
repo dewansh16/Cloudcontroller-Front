@@ -21,6 +21,9 @@ const internalApi = {
                 method: "POST",
                 url: `/internal/lab_report?pid=${pid}&tenant_id=${tenant_id}`,
                 data: data,
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
                 // withCredentials: true,
             }
         ),

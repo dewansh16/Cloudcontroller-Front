@@ -15,6 +15,7 @@ const TotalReading = ({ pid = "patient66750671-aadf-4012-bbf0-8db8c83fcf29", sen
         associatedList.map(patch => {
             queryDataFromInflux(patch.key, patch)
         })
+        return () => {};
     }, [pid]);
 
     const queryDataFromInflux = (sensorType = "", patch) => {
@@ -37,7 +38,7 @@ const TotalReading = ({ pid = "patient66750671-aadf-4012-bbf0-8db8c83fcf29", sen
                 const value = dataQuery?._value;
                 const time = dataQuery?._time;
 
-                console.log("dataQuery", dataQuery);
+                // console.log("dataQuery", dataQuery);
 
                 // check data query today
                 const timeLocal = new Date(time);

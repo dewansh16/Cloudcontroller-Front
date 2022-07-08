@@ -2114,21 +2114,16 @@ function BillingModule() {
 
 
                     if (res.data.response.patchData) {
+                        let temp = 0;
                         res.data.response.patchData?.forEach((patch) => {
                             const startDate = getFirstDateMonitored(patch) || "";
+                            temp += 1;
                             // const endDate = getLastDateMonitored(patch) || "";
-
                             if (!!startDate && !!patch["patches.patch_type"]) {
-                                checkDateFromInflux(startDate, patch["patches.patch_type"], patch);
+                                checkDateFromInflux(startDate, patch["patches.patch_type"], patch, temp, res.data.response.patchData);
                                 // checkTotalNumberDateHaveDataFromInflux(startDate, patch["patches.patch_type"], patch);
                             }
                         })
-
-                        setTimeout(() => {
-                            setPatchArray(
-                                res.data.response.patchData
-                            );
-                        }, 1000);
                     }
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
@@ -2306,7 +2301,7 @@ function BillingModule() {
         ]
     }
 
-    const checkDateFromInflux = (startDate, sensorType, patch) => {
+    const checkDateFromInflux = (startDate, sensorType, patch, temp, patchArrayData) => {
         let start = new Date(startDate);
         const end = new Date();
         const timeFilter = currentDateApi ? new Date(currentDateApi) : new Date();
@@ -2326,7 +2321,7 @@ function BillingModule() {
                 |> filter(fn: (r) => r["_measurement"] == "${location.state.pid}_${typeQuery}_timestamp")
                 |> yield(name: "mean")
             `
-        
+
         const arrDateQuery = [];
         queryApi.queryRows(query, {
             next(row, tableMeta) {
@@ -2348,10 +2343,12 @@ function BillingModule() {
             },
             complete() {
                 patch.totalDay = arrDateQuery?.length;
-                patch.datesInflux = arrDateQuery?.sort(sortDate);;
-                let temp = effect;
-                temp += 1;
-                setEffect(temp);
+                patch.datesInflux = arrDateQuery?.sort(sortDate);
+
+                if (temp === patchArrayData?.length) {
+                    setPatchArray([...patchArrayData]);
+                    setPatchLoading(false);
+                }
             },
         })
     }
@@ -2437,24 +2434,29 @@ function BillingModule() {
     const timerPatchLoading = useRef(null); 
     useEffect(() => {
         if (patchLoading) {
-            timerPatchLoading.current = setTimeout(() => {
-                setPatchLoading(false)
+            let i = 0;
+            timerPatchLoading.current = setInterval(() => {
+                i++;
+                if (i === 10 && patchLoading) {
+                    setPatchLoading(false);
+                    clearInterval(timerPatchLoading.current);
+                }
             }, 1000);
+        } else {
+            clearInterval(timerPatchLoading.current);
         }
-        return () => { clearTimeout(timerPatchLoading.current) }
+        return () => { clearInterval(timerPatchLoading.current) }
     }, [patchLoading]);
 
     const getDataForSensor99454 = () => {
-        const newArr = [...patchArray];
-        newArr?.forEach((patch) => {
+        let temp = 0;
+        patchArray?.forEach((patch) => {
             const startDate = getFirstDateMonitored(patch) || "";
-
+            temp += 1;
             if (!!startDate && !!patch["patches.patch_type"]) {
-                checkDateFromInflux(startDate, patch["patches.patch_type"], patch);
+                checkDateFromInflux(startDate, patch["patches.patch_type"], patch, temp, patchArray);
             }
         })
-
-        setPatchArray(newArr);
     }
 
     const formatDataSummary = () => {
@@ -2525,6 +2527,7 @@ function BillingModule() {
                                         setTaskDeleteArray([]);
                                         timeCount = 0;
                                         stopCountTimer();
+                                        setPatchLoading(false);
                                     }}
                                     className={
                                         initialSetupState ? "bm-selected-active" : "bm-selected"
@@ -2558,6 +2561,7 @@ function BillingModule() {
                             {enrolledState ? (
                                 <div
                                     onClick={() => {
+                                        setEffect(0);
                                         getDataForSensor99454();
                                         setAssociatedSensorsState(true);
                                         setInitialSetupState(false);
@@ -2623,7 +2627,8 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
-                                        setTaskCodeActive(CPT_CODE.CPT_99457)
+                                        setTaskCodeActive(CPT_CODE.CPT_99457);
+                                        setPatchLoading(false);
                                     }}
                                     className={
                                         firstTwentyState ? "bm-selected-active" : "bm-selected"
@@ -2677,7 +2682,8 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
-                                        setTaskCodeActive(CPT_CODE.CPT_99458)
+                                        setTaskCodeActive(CPT_CODE.CPT_99458);
+                                        setPatchLoading(false);
                                     }}
                                     className={
                                         secondTwentyState ? "bm-selected-active" : "bm-selected"
@@ -2740,7 +2746,8 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
-                                        setTaskCodeActive(CPT_CODE.CPT_99091)
+                                        setTaskCodeActive(CPT_CODE.CPT_99091);
+                                        setPatchLoading(false);
                                     }}
                                     className={
                                         lastBillingState ? "bm-selected-active" : "bm-selected"
@@ -2796,6 +2803,7 @@ function BillingModule() {
                                         // setBillProcessedLoading(true);
                                         setSummaryState(false);
                                         setTaskDeleteArray([]);
+                                        setPatchLoading(false);
                                     }}
                                     className={
                                         billProcessedState ? "bm-selected-active" : "bm-selected"
@@ -2834,6 +2842,7 @@ function BillingModule() {
                                         setBillProcessedState(false);
                                         setSummaryState(true);
                                         setTaskDeleteArray([]);
+                                        setPatchLoading(false);
                                     }}
                                     className={
                                         summaryState ? "bm-selected-active" : "bm-selected"

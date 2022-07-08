@@ -2,6 +2,7 @@
     width: 30rem;
     font-size: 13px;
 }
+
 .popover-notes .row-notes {
     display: flex;
     align-items: center;
@@ -24,6 +25,10 @@
     padding-bottom: 4px;
 }
 
+.popover-notes .header-note .title {
+    color: #ff7529;
+}
+
 .popover-notes .body-notes {
     border-bottom: 1px solid #ddd;
     padding: 4px 0;
@@ -33,3 +38,16 @@
     margin-bottom: 4px;
 }
 
+.popover-notes .spin-loading-notes {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50% -50%);
+    z-index: 10;
+    margin-top: -10px;
+}
+
+.popover-notes .note-list {
+    max-height: 153px;
+    overflow: auto;
+}
