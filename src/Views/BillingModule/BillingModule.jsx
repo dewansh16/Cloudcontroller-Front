@@ -198,6 +198,8 @@ function BillingModule() {
     const [requiredAddTask, setRequiredAddTask] = useState([]);
     const [effect, setEffect] = useState(0);
 
+    const [loadingSidebar99454, setLoadingSidear99454] = useState(true);
+
     function handleMonthChange(date, dateString) {
         setInitialSetupState(false);
         setEnrolledState(false)
@@ -2116,22 +2118,24 @@ function BillingModule() {
                     if (res.data.response.patchData) {
                         let temp = 0;
                         const patchData = res.data.response.patchData;
-                        patchData?.forEach((patch) => {
-                            const startDate = getFirstDateMonitored(patch) || "";
-                            temp += 1;
-                            // const endDate = getLastDateMonitored(patch) || "";
-                            if (!!startDate && !!patch["patches.patch_type"]) {
-                                console.log("--------------temp", temp);
-                                checkDateFromInflux(startDate, patch["patches.patch_type"], patch, temp, patchData);
-                                // checkTotalNumberDateHaveDataFromInflux(startDate, patch["patches.patch_type"], patch);
-                            } else {
-                                console.log("temp temp", temp);
-                                if (temp === patchData?.length) {
-                                    setPatchArray([...patchData]);
-                                    setPatchLoading(false);
+                        if (patchData?.length > 0) {
+                            setLoadingSidear99454(true);
+                            patchData?.forEach((patch) => {
+                                const startDate = getFirstDateMonitored(patch) || "";
+                                temp += 1;
+                                // const endDate = getLastDateMonitored(patch) || "";
+                                if (!!startDate && !!patch["patches.patch_type"]) {
+                                    checkDateFromInflux(startDate, patch["patches.patch_type"], patch, temp, patchData);
+                                    // checkTotalNumberDateHaveDataFromInflux(startDate, patch["patches.patch_type"], patch);
+                                } else {
+                                    if (temp === patchData?.length) {
+                                        setPatchArray([...patchData]);
+                                        setPatchLoading(false);
+                                        setLoadingSidear99454(false);
+                                    }
                                 }
-                            }
-                        })
+                            })
+                        }
                     }
 
                     setFirstTwentyTasks(tempFirstTwentyTasks);
@@ -2318,7 +2322,6 @@ function BillingModule() {
         firstDayOfMonth.setHours(0, 0, 1);
 
         const typeQuery = shortTypeQueryOfSensor(sensorType, true);
-        console.log("start.getTime() > end.getTime()", start.getTime() > end.getTime(), start.getTime(), start, end, sensorType);
 
         if (start?.getTime() < firstDayOfMonth?.getTime()) {
             start = firstDayOfMonth;
@@ -2351,6 +2354,7 @@ function BillingModule() {
                 if (temp === patchArrayData?.length) {
                     setPatchArray([...patchArrayData]);
                     setPatchLoading(false);
+                    setLoadingSidear99454(false);
                 }
             },
             complete() {
@@ -2358,9 +2362,9 @@ function BillingModule() {
                 patch.datesInflux = arrDateQuery?.sort(sortDate);
 
                 if (temp === patchArrayData?.length) {
-                    console.log("set ar", temp);
                     setPatchArray([...patchArrayData]);
                     setPatchLoading(false);
+                    setLoadingSidear99454(false);
                 }
             },
         })
@@ -2383,66 +2387,66 @@ function BillingModule() {
     }
 
     const filterDeviceAssociatedByDate = useMemo(() => {
-        const newArr = [];
-        let totalDayMonitored = 0;
-        let result = 0;
-
-        let minDate = null;
-        let maxDate = null;
-        const timeFilter = new Date(currentDateApi);
-
-        let arrayTotalDate = [];
-
-        for (let index = 0; index < patchArray.length; index++) {
-            const patch = patchArray[index];
-            patch?.datesInflux?.sort(sortDate);
-
-            if (patch?.datesInflux?.length > 0) {
-                arrayTotalDate = arrayTotalDate?.concat(patch?.datesInflux);
-
-                const firstDateMonitored = new Date(patch?.datesInflux[0]);
-                const lastDateMonitored = new Date(patch?.datesInflux[patch?.datesInflux?.length - 1]);
-
-                if (
-                    Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear())
-                    && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
-                ) {
-                    if (minDate === null || minDate > firstDateMonitored) {
-                        minDate = firstDateMonitored;
+            const newArr = [];
+            let totalDayMonitored = 0;
+            let result = 0;
+    
+            let minDate = null;
+            let maxDate = null;
+            const timeFilter = new Date(currentDateApi);
+    
+            let arrayTotalDate = [];
+    
+            for (let index = 0; index < patchArray.length; index++) {
+                const patch = patchArray[index];
+                patch?.datesInflux?.sort(sortDate);
+    
+                if (patch?.datesInflux?.length > 0) {
+                    arrayTotalDate = arrayTotalDate?.concat(patch?.datesInflux);
+    
+                    const firstDateMonitored = new Date(patch?.datesInflux[0]);
+                    const lastDateMonitored = new Date(patch?.datesInflux[patch?.datesInflux?.length - 1]);
+    
+                    if (
+                        Number(firstDateMonitored.getFullYear()) === Number(timeFilter.getFullYear())
+                        && Number(firstDateMonitored.getMonth()) === Number(timeFilter.getMonth())
+                    ) {
+                        if (minDate === null || minDate > firstDateMonitored) {
+                            minDate = firstDateMonitored;
+                        }
+    
+                        if (maxDate === null || maxDate < lastDateMonitored) {
+                            maxDate = lastDateMonitored;
+                        }
+    
+                        newArr.push(patch);
                     }
-
-                    if (maxDate === null || maxDate < lastDateMonitored) {
-                        maxDate = lastDateMonitored;
-                    }
-
-                    newArr.push(patch);
                 }
             }
-        }
-
-        arrayTotalDate = [...new Set(arrayTotalDate)];
-
-        if (minDate !== null && maxDate !== null) {
-            totalDayMonitored = arrayTotalDate?.length || 0;
-        }
-
-        if (totalDayMonitored >= TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
-            // result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
-            // totalDayMonitored = totalDayMonitored - (TOTAL_HOURS_FOR_EACH_SENSOR_BILLED * result);
-            result = 1;
-            totalDayMonitored = 16;
-        }
-
-        if (result > 0
-            && Number(new Date().getFullYear()) === Number(timeFilter.getFullYear())
-            && Number(new Date().getMonth()) === Number(timeFilter.getMonth())
-            && !activeCode99454
-        ) {
-            setActiveCode99454(true);
-        }
-
-        return { list: newArr, totalDayMonitored, billedUnit: result, minDate, maxDate };
-    }, [patchArray, currentDateApi]);
+    
+            arrayTotalDate = [...new Set(arrayTotalDate)];
+    
+            if (minDate !== null && maxDate !== null) {
+                totalDayMonitored = arrayTotalDate?.length || 0;
+            }
+    
+            if (totalDayMonitored >= TOTAL_HOURS_FOR_EACH_SENSOR_BILLED) {
+                // result = Math.floor(totalDayMonitored / TOTAL_HOURS_FOR_EACH_SENSOR_BILLED);
+                // totalDayMonitored = totalDayMonitored - (TOTAL_HOURS_FOR_EACH_SENSOR_BILLED * result);
+                result = 1;
+                totalDayMonitored = 16;
+            }
+    
+            if (result > 0
+                && Number(new Date().getFullYear()) === Number(timeFilter.getFullYear())
+                && Number(new Date().getMonth()) === Number(timeFilter.getMonth())
+                && !activeCode99454
+            ) {
+                setActiveCode99454(true);
+            }
+    
+            return { list: newArr, totalDayMonitored, billedUnit: result, minDate, maxDate };
+    }, [patchArray, currentDateApi, rightSideLoading]);
 
     const timerPatchLoading = useRef(null); 
     useEffect(() => {
@@ -2523,6 +2527,7 @@ function BillingModule() {
                                 history.push(
                                     `/dashboard/patient/details/${location.state.pid}`
                                 );
+                                setLoadingSidear99454(true);
                             }}
                             className="secondary"
                         >
@@ -2575,30 +2580,42 @@ function BillingModule() {
                                 <div className="bm-header-below">Initial Setup</div>
                             </div>
                         </div>
-                        <div className="bm-cptcode-container">
+                        <div className="bm-cptcode-container" style={{ position: "relative" }}>
                             {enrolledState ? (
-                                <div
-                                    onClick={() => {
-                                        setEffect(0);
-                                        getDataForSensor99454();
-                                        setAssociatedSensorsState(true);
-                                        setInitialSetupState(false);
-                                        setFirstTwentyState(false);
-                                        setSecondTwentyState(false);
-                                        setAddTaskState(false);
-                                        setLastBillingState(false);
-                                        setBillProcessedState(false);
-                                        setSummaryState(false);
-                                        setTaskDeleteArray([]);
-                                        setTaskCodeActive(CPT_CODE.CPT_99454)
-                                        setPatchLoading(true);
-                                    }}
-                                    className={
-                                        associatedSensorsState
-                                            ? "bm-selected-active"
-                                            : "bm-selected"
-                                    }
-                                ></div>
+                                <>
+                                    <div
+                                        onClick={() => {
+                                            setEffect(0);
+                                            getDataForSensor99454();
+                                            setAssociatedSensorsState(true);
+                                            setInitialSetupState(false);
+                                            setFirstTwentyState(false);
+                                            setSecondTwentyState(false);
+                                            setAddTaskState(false);
+                                            setLastBillingState(false);
+                                            setBillProcessedState(false);
+                                            setSummaryState(false);
+                                            setTaskDeleteArray([]);
+                                            setTaskCodeActive(CPT_CODE.CPT_99454)
+                                            setPatchLoading(true);
+                                        }}
+                                        className={
+                                            associatedSensorsState
+                                                ? "bm-selected-active"
+                                                : "bm-selected"
+                                        }
+                                    ></div>
+                                    {loadingSidebar99454 && (
+                                        <div style={{
+                                            position: "absolute",
+                                            right: "0",
+                                            top: "7px",
+                                            zIndex: "10"
+                                        }}>
+                                            <Spin />
+                                        </div>
+                                    )}
+                                </>
                             ) : null}
                             <div className="bm-cptcode-header">
                                 <div
