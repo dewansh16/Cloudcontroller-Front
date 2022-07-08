@@ -2,7 +2,7 @@ import { ipAddress } from "../Utils/utils";
 // config for environment variables 
 const Config = {
     PRODUCTION_API_URL: `http://${ipAddress}:7124` /* process.env.REACT_APP_PRODUCTION_API_URL */,
-    DEV_API_URL: `http://${ipAddress}:7124`  /* process.env.REACT_APP_DEV_API_URL */,
+    DEV_API_URL: "http://20.83.211.88:7124"  /* process.env.REACT_APP_DEV_API_URL */,
 
     // timezone: process.env.REACT_APP_TIMEZONE,
 
